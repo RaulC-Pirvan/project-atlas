@@ -1,10 +1,12 @@
 # AI CONTEXT — PROJECT ATLAS
 
 ## Project Overview
+
 Project Atlas is a **habit-tracking web application** built with a **production-grade, corporate-quality stack**.
 The goal is not a toy app, but a clean, scalable, well-tested system with strong engineering discipline.
 
 Target users:
+
 - Individuals tracking daily/weekly habits
 - Emphasis on consistency, streaks, and visual feedback
 
@@ -13,6 +15,7 @@ The app is currently **pre-MVP**, focusing on infrastructure, quality, and archi
 ---
 
 ## Core Product Concept (CRITICAL)
+
 A **habit is defined independently of dates**.
 
 - A habit has:
@@ -25,17 +28,20 @@ A **habit is defined independently of dates**.
 - Daily completion is tracked separately per habit per date.
 
 Example:
+
 > Habit: "Read 10 pages"  
 > Active days: Mon–Sun  
-→ Appears on **every day of the calendar**  
-→ Each day can be checked independently
+> → Appears on **every day of the calendar**  
+> → Each day can be checked independently
 
 This mental model must never be violated.
 
 ---
 
 ## Functional Scope (Planned)
+
 ### Authentication
+
 - Email/password account creation
 - Email verification (Resend planned)
 - Account update (basic profile info)
@@ -44,12 +50,14 @@ This mental model must never be violated.
 - No user-uploaded avatars (use default placeholder icon)
 
 ### Habit Tracking
+
 - Unlimited habits per user
 - Habits active on selected weekdays
 - No per-date habit creation
 - Completion tracked per habit per date
 
 ### Calendar & UX
+
 - Monthly calendar view
 - Clicking a day shows all habits active that day
 - Users check off completed habits
@@ -60,6 +68,7 @@ This mental model must never be violated.
 ---
 
 ## Tech Stack (LOCKED IN)
+
 - **Next.js** (App Router)
 - **TypeScript**
 - **Tailwind CSS**
@@ -73,6 +82,7 @@ This mental model must never be violated.
 ---
 
 ## Quality & Engineering Standards
+
 This project follows **corporate-level discipline**:
 
 - ESLint (strict)
@@ -85,6 +95,7 @@ This project follows **corporate-level discipline**:
 
 Local git hooks were intentionally **removed** due to Windows PATH issues.
 Enforcement happens via:
+
 - `npm run ci`
 - GitHub Actions
 - Branch protection rules
@@ -94,6 +105,7 @@ No time should be wasted fighting local hooks again unless absolutely necessary.
 ---
 
 ## Repository State (as of last session)
+
 - Next.js project scaffolded
 - ESLint + Prettier configured
 - Vitest + Playwright set up with smoke tests
@@ -109,6 +121,7 @@ No time should be wasted fighting local hooks again unless absolutely necessary.
 ---
 
 ## Important Decisions & Lessons Learned
+
 - **No pnpm** — npm only
 - **No Husky / Lefthook / hooks** — CI-only enforcement
 - Windows PATH + Git hook tooling is unreliable → avoid
@@ -118,7 +131,9 @@ No time should be wasted fighting local hooks again unless absolutely necessary.
 ---
 
 ## Expectations From the AI (YOU)
+
 When responding:
+
 - Think like a **senior software architect**
 - Prefer clear mental models over premature code
 - Be opinionated, but justified
@@ -129,6 +144,7 @@ When responding:
 - Do NOT suggest shortcuts that undermine quality
 
 Tone:
+
 - Direct
 - Pragmatic
 - Slightly aggressive if needed
@@ -137,7 +153,9 @@ Tone:
 ---
 
 ## Immediate Next Logical Steps
+
 When resuming work, likely next areas:
+
 1. Prisma schema design (User, Habit, HabitSchedule, HabitCompletion, Streaks)
 2. Auth architecture decision (custom vs library)
 3. Calendar domain logic (date ↔ weekday mapping)
@@ -147,6 +165,7 @@ When resuming work, likely next areas:
 ---
 
 ## Non-Goals (for now)
+
 - Social features
 - Sharing
 - Mobile app (web only, responsive)
@@ -156,6 +175,7 @@ When resuming work, likely next areas:
 ---
 
 ## Reminder
+
 This project values **clarity, correctness, and long-term maintainability** over speed.
 If a decision feels “hacky”, it’s probably wrong.
 

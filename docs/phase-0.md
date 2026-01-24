@@ -73,7 +73,7 @@ No product features are implemented in this phase.
   - e2e tests
 - CI must run from clean checkout.
 
-### Deployment  [DONE]
+### Deployment [DONE]
 
 - Connect repository to Vercel.
 - Enable:

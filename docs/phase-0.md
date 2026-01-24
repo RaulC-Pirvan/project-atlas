@@ -62,7 +62,7 @@ No product features are implemented in this phase.
 - Configure DB connection.
 - Run initial empty migration.
 
-### CI/CD
+### CI/CD [DONE]
 
 - Configure GitHub Actions:
   - install dependencies

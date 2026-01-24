@@ -1,11 +1,13 @@
 # Phase 4 — Habit Completion & Daily Progress
 
 ## Goal
+
 Allow users to mark habits as completed per day and show daily progress.
 
 ---
 
 ## Features
+
 - Mark habit complete / incomplete
 - Persist daily completion
 - Daily progress indicator
@@ -17,6 +19,7 @@ Allow users to mark habits as completed per day and show daily progress.
 ## Tasks
 
 ### Data Model
+
 - HabitCompletion:
   - habit_id
   - date (YYYY-MM-DD)
@@ -24,10 +27,12 @@ Allow users to mark habits as completed per day and show daily progress.
   - unique constraint (habit_id, date)
 
 ### Backend
+
 - Toggle completion endpoint.
 - Idempotent operations.
 
 ### Frontend
+
 - Completion checkbox UI.
 - Daily completion percentage.
 - Golden day animation.
@@ -36,6 +41,7 @@ Allow users to mark habits as completed per day and show daily progress.
 ---
 
 ## Testing Requirements
+
 - Unit tests:
   - completion toggle logic
   - daily completion calculation
@@ -48,6 +54,7 @@ Allow users to mark habits as completed per day and show daily progress.
 ---
 
 ## Definition of Done
+
 - No duplicate completion records.
 - Daily completion logic correct.
 - CI green.

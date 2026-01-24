@@ -1,12 +1,14 @@
 # Phase 2 — Habit Definitions
 
 ## Goal
+
 Allow users to create and manage habit rules.
 No calendar or completion tracking in this phase.
 
 ---
 
 ## Features
+
 - Create habit
 - Edit habit
 - Delete habit
@@ -18,6 +20,7 @@ No calendar or completion tracking in this phase.
 ## Tasks
 
 ### Data Model
+
 - Habit:
   - title (required)
   - description (optional)
@@ -27,10 +30,12 @@ No calendar or completion tracking in this phase.
   - user ownership
 
 ### Backend
+
 - CRUD APIs (server actions or route handlers).
 - Validation using Zod.
 
 ### Frontend
+
 - Habit list view.
 - Create / edit / delete UI.
 - Responsive layout (mobile + desktop).
@@ -39,6 +44,7 @@ No calendar or completion tracking in this phase.
 ---
 
 ## Testing Requirements
+
 - Unit tests:
   - weekday encoding/decoding
   - validators
@@ -52,6 +58,7 @@ No calendar or completion tracking in this phase.
 ---
 
 ## Definition of Done
+
 - Habit rules persist correctly.
 - No per-day habit instances stored.
 - CI green.

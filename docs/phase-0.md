@@ -1,6 +1,7 @@
 # Phase 0 — Repository, Tooling & Deployment Baseline
 
 ## Goal
+
 Establish a production-ready foundation: repository, tooling, CI/CD, testing, and deployment.
 No product features are implemented in this phase.
 
@@ -9,6 +10,7 @@ No product features are implemented in this phase.
 ## Tasks
 
 ### Repository & Local Setup [DONE]
+
 - Create GitHub repository (temporary name is fine).
 - Clone repository locally.
 - Add:
@@ -18,6 +20,7 @@ No product features are implemented in this phase.
   - Initial `README.md`
 
 ### Next.js Project [DONE]
+
 - Initialize Next.js project:
   - App Router
   - TypeScript
@@ -25,6 +28,7 @@ No product features are implemented in this phase.
 - Confirm local dev server runs.
 
 ### Code Quality [DONE]
+
 - Configure ESLint (strict).
 - Configure Prettier.
 - Add scripts:
@@ -34,6 +38,7 @@ No product features are implemented in this phase.
   - `build`
 
 ### Pre-commit Hooks [DONE]
+
 - Install Husky + lint-staged.
 - Pre-commit must run:
   - ESLint
@@ -43,19 +48,22 @@ No product features are implemented in this phase.
   - Prettier check
 
 ### Testing Setup [DONE]
+
 - Unit testing: Vitest
 - E2E testing: Playwright
 - Add:
   - One unit smoke test
   - One e2e smoke test
 
-### Database
+### Database [DONE]
+
 - Create Neon project + database.
 - Add Prisma.
 - Configure DB connection.
 - Run initial empty migration.
 
 ### CI/CD
+
 - Configure GitHub Actions:
   - install dependencies
   - lint
@@ -66,6 +74,7 @@ No product features are implemented in this phase.
 - CI must run from clean checkout.
 
 ### Deployment
+
 - Connect repository to Vercel.
 - Enable:
   - Preview deployments (PRs)
@@ -74,6 +83,7 @@ No product features are implemented in this phase.
 ---
 
 ## Definition of Done
+
 - `npm/pnpm build` works locally.
 - Pre-commit blocks failing commits.
 - CI pipeline is green.

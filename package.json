@@ -17,7 +17,9 @@
     "lint:next": "next lint",
     "typecheck": "tsc --noEmit",
     "format": "prettier . --write",
-    "format:check": "prettier . --check"
+    "format:check": "prettier . --check",
+    "ci": "npm run lint && npm run typecheck && npm test && npm run format:check && npm run build",
+    "ci:full": "npm run ci && npm run e2e"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [

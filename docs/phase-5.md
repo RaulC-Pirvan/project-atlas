@@ -1,11 +1,13 @@
 # Phase 5 — Streak System
 
 ## Goal
+
 Implement streak tracking based on consecutive fully completed days.
 
 ---
 
 ## Features
+
 - Current streak
 - Longest streak
 - Streak break handling
@@ -13,6 +15,7 @@ Implement streak tracking based on consecutive fully completed days.
 ---
 
 ## Tasks
+
 - Define streak rules.
 - Implement streak calculation service.
 - Handle timezone correctness.
@@ -22,6 +25,7 @@ Implement streak tracking based on consecutive fully completed days.
 ---
 
 ## Testing Requirements
+
 - Unit tests:
   - streak edge cases
 - Integration tests:
@@ -33,6 +37,7 @@ Implement streak tracking based on consecutive fully completed days.
 ---
 
 ## Definition of Done
+
 - Streak logic is correct and predictable.
 - No off-by-one errors.
 - CI green.

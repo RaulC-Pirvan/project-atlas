@@ -18,15 +18,13 @@ export default defineConfig({
 
   projects: [
     { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
-    { name: 'firefox', use: { ...devices['Desktop Firefox'] } }
+    { name: 'firefox', use: { ...devices['Desktop Firefox'] } },
   ],
-  
-  webServer: process.env.CI
-    ? {
-        command: 'npm run dev',
-        url: 'http://localhost:3000',
-        reuseExistingServer: false,
-        timeout: 120_000,
-      }
-    : undefined,
+
+  webServer: {
+    command: 'npm run dev',
+    url: 'http://localhost:3000',
+    reuseExistingServer: true,
+    timeout: 30_000,
+  },
 });

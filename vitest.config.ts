@@ -5,6 +5,14 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: ['./vitest.setup.ts'],
+    exclude: [
+      '**/node_modules/**',
+      '**/.next/**',
+      '**/out/**',
+      '**/e2e/**',
+      '**/playwright-report/**',
+      '**/test-results/**',
+    ],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'html', 'lcov'],
@@ -13,6 +21,7 @@ export default defineConfig({
         '**/.next/**',
         '**/out/**',
         '**/coverage/**',
+        '**/e2e/**',
         '**/playwright-report/**',
         '**/test-results/**',
       ],

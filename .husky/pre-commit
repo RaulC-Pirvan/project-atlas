@@ -1,0 +1,4 @@
+#!/bin/sh
+echo "HUSKY pre-commit running..."
+
+cmd.exe /c npx lint-staged

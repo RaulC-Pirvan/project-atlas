@@ -2,3 +2,4 @@
 echo "HUSKY pre-push running..."
 
 cmd.exe /c npm run ci
+

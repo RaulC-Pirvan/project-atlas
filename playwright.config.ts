@@ -21,10 +21,17 @@ export default defineConfig({
     { name: 'firefox', use: { ...devices['Desktop Firefox'] } },
   ],
 
-  webServer: {
-    command: 'npm run dev',
-    url: 'http://localhost:3000',
-    reuseExistingServer: true,
-    timeout: 30_000,
-  },
+  webServer: process.env.CI
+    ? {
+        command: 'npm run start:test',
+        url: 'http://localhost:3000',
+        reuseExistingServer: false,
+        timeout: 120_000,
+      }
+    : {
+        command: 'npm run dev',
+        url: 'http://localhost:3000',
+        reuseExistingServer: true,
+        timeout: 30_000,
+      },
 });

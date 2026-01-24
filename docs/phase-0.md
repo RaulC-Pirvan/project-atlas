@@ -8,7 +8,7 @@ No product features are implemented in this phase.
 
 ## Tasks
 
-### Repository & Local Setup
+### Repository & Local Setup [DONE]
 - Create GitHub repository (temporary name is fine).
 - Clone repository locally.
 - Add:
@@ -17,7 +17,7 @@ No product features are implemented in this phase.
   - `.editorconfig`
   - Initial `README.md`
 
-### Next.js Project
+### Next.js Project [DONE]
 - Initialize Next.js project:
   - App Router
   - TypeScript

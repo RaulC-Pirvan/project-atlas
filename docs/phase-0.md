@@ -33,7 +33,7 @@ No product features are implemented in this phase.
   - `format`
   - `build`
 
-### Pre-commit Hooks
+### Pre-commit Hooks [DONE]
 - Install Husky + lint-staged.
 - Pre-commit must run:
   - ESLint

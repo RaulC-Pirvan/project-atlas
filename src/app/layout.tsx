@@ -1,5 +1,6 @@
 import './globals.css';
 
+import { UserArgs } from '@prisma/client/runtime/client';
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import { useState } from 'react';

@@ -24,7 +24,7 @@ No product features are implemented in this phase.
 - Install and configure Tailwind CSS.
 - Confirm local dev server runs.
 
-### Code Quality
+### Code Quality [DONE]
 - Configure ESLint (strict).
 - Configure Prettier.
 - Add scripts:

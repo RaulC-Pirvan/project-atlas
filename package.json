@@ -29,6 +29,7 @@
     ]
   },
   "dependencies": {
+    "@prisma/client": "^7.3.0",
     "next": "16.1.4",
     "react": "19.2.3",
     "react-dom": "19.2.3"
@@ -52,6 +53,7 @@
     "jsdom": "^27.4.0",
     "lint-staged": "^16.2.7",
     "prettier": "^3.8.1",
+    "prisma": "^7.3.0",
     "tailwindcss": "^4",
     "typescript": "^5",
     "vitest": "^4.0.18"

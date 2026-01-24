@@ -42,7 +42,7 @@ No product features are implemented in this phase.
   - Build
   - Prettier check
 
-### Testing Setup
+### Testing Setup [DONE]
 - Unit testing: Vitest
 - E2E testing: Playwright
 - Add:

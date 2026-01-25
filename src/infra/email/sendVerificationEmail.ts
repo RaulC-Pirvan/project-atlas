@@ -28,10 +28,18 @@ export async function sendVerificationEmail(args: SendVerificationEmailArgs): Pr
     return;
   }
 
-  await sendEmail({
-    from,
-    to: args.to,
-    subject: 'Verify your email',
-    html: `<p>Verify your email by clicking this link:</p><p><a href="${verifyUrl}">${verifyUrl}</a></p>`,
-  });
+  try {
+    await sendEmail({
+      from,
+      to: args.to,
+      subject: 'Verify your email',
+      html: `<p>Verify your email by clicking this link:</p><p><a href="${verifyUrl}">${verifyUrl}</a></p>`,
+    });
+  } catch (error) {
+    if (process.env.NODE_ENV === 'production') {
+      throw error;
+    }
+
+    console.warn('[email] Verification email failed in non-production.', error);
+  }
 }

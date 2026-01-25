@@ -4,6 +4,11 @@ import CredentialsProvider from 'next-auth/providers/credentials';
 import { prisma } from '../db/prisma';
 import { authorizeCredentials } from './credentials';
 
+const shouldUseSecureCookies =
+  process.env.ENABLE_TEST_ENDPOINTS !== 'true' &&
+  process.env.NODE_ENV === 'production' &&
+  !!process.env.NEXTAUTH_URL?.startsWith('https://');
+
 export const authOptions: NextAuthOptions = {
   session: {
     strategy: 'jwt',
@@ -44,6 +49,6 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
   },
-  useSecureCookies: process.env.NODE_ENV === 'production',
+  useSecureCookies: shouldUseSecureCookies,
   secret: process.env.NEXTAUTH_SECRET,
 };

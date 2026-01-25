@@ -4,6 +4,8 @@ export type ApiErrorCode =
   | 'rate_limited'
   | 'token_invalid'
   | 'token_expired'
+  | 'not_found'
+  | 'unauthorized'
   | 'internal_error';
 
 export class ApiError extends Error {

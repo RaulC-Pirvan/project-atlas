@@ -10,6 +10,15 @@ export const signInSchema = z.object({
   password: z.string().min(8).max(72),
 });
 
+export const updateAccountSchema = z
+  .object({
+    email: z.string().email().optional(),
+    password: z.string().min(8).max(72).optional(),
+  })
+  .refine((data) => data.email || data.password, {
+    message: 'Provide an email or password.',
+  });
+
 export const resendVerificationSchema = z.object({
   email: z.string().email(),
 });

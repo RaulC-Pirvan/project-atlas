@@ -197,14 +197,14 @@ Minimum:
 
 ### Tasks (8)
 
-- [ ] **Task 4.1**: Create `e2e/auth.spec.ts`
-- [ ] **Task 4.2**: E2E: signup creates unverified account
-- [ ] **Task 4.3**: E2E: verify link marks account verified
-- [ ] **Task 4.4**: E2E: login works after verification
-- [ ] **Task 4.5**: E2E: wrong password fails
-- [ ] **Task 4.6**: E2E: logout ends session
-- [ ] **Task 4.7**: E2E: resend verification works (dev/test friendly mode)
-- [ ] **Task 4.8**: CI stability check (no flakes)
+- [x] **Task 4.1**: Create `e2e/auth.spec.ts`
+- [x] **Task 4.2**: E2E: signup creates unverified account
+- [x] **Task 4.3**: E2E: verify link marks account verified
+- [x] **Task 4.4**: E2E: login works after verification
+- [x] **Task 4.5**: E2E: wrong password fails
+- [x] **Task 4.6**: E2E: logout ends session
+- [x] **Task 4.7**: E2E: resend verification works (dev/test friendly mode)
+- [x] **Task 4.8**: CI stability check (no flakes)
 
 ---
 

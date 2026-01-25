@@ -8,6 +8,7 @@ import { FormField } from '../ui/FormField';
 import { Input } from '../ui/Input';
 import { Notice } from '../ui/Notice';
 import { AvatarPlaceholder } from './AvatarPlaceholder';
+import { SignOutButton } from './SignOutButton';
 
 type AccountPanelProps = {
   email: string;
@@ -109,12 +110,15 @@ export function AccountPanel({ email, emailVerifiedAt }: AccountPanelProps) {
 
   return (
     <div className="space-y-10">
-      <div className="flex items-center gap-4">
-        <AvatarPlaceholder />
-        <div>
-          <p className="text-sm font-semibold">{email}</p>
-          <p className="text-xs text-black/50">{emailVerifiedAt ? 'Verified' : 'Unverified'}</p>
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <AvatarPlaceholder />
+          <div>
+            <p className="text-sm font-semibold">{email}</p>
+            <p className="text-xs text-black/50">{emailVerifiedAt ? 'Verified' : 'Unverified'}</p>
+          </div>
         </div>
+        <SignOutButton />
       </div>
 
       <form className="space-y-6" onSubmit={handleUpdate}>

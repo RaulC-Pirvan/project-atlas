@@ -53,7 +53,13 @@ export async function resendVerification(args: ResendArgs): Promise<{ status: 's
     select: { createdAt: true },
   });
 
-  if (latest && now.getTime() - latest.createdAt.getTime() < RESEND_RATE_LIMIT_MS) {
+  const bypassRateLimit = process.env.ENABLE_TEST_ENDPOINTS === 'true';
+
+  if (
+    !bypassRateLimit &&
+    latest &&
+    now.getTime() - latest.createdAt.getTime() < RESEND_RATE_LIMIT_MS
+  ) {
     throw new ApiError('rate_limited', 'Too many requests. Try again later.', 429);
   }
 

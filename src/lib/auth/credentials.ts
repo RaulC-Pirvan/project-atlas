@@ -1,7 +1,6 @@
 import { signInSchema } from '../api/auth/validation';
 import { clearLoginAttempts, isLoginRateLimited, recordFailedLogin } from './loginRateLimit';
 import { verifyPassword } from './password';
-import { canLogin } from './policy';
 
 type PrismaClientLike = {
   user: {
@@ -76,9 +75,18 @@ export async function authorizeCredentials({
   }
 
   const passwordOk = await verifyPassword(parsed.data.password, user.passwordHash);
-  if (!passwordOk || !canLogin(user)) {
+  if (!passwordOk) {
     recordFailedLogin(key, timestamp);
     return null;
+  }
+
+  if (user.deletedAt) {
+    recordFailedLogin(key, timestamp);
+    return null;
+  }
+
+  if (!user.emailVerified) {
+    throw new Error('EMAIL_NOT_VERIFIED');
   }
 
   clearLoginAttempts(key);

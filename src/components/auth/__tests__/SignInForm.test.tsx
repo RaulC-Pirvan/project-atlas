@@ -33,4 +33,23 @@ describe('SignInForm', () => {
 
     expect(await screen.findByText('Invalid email or password.')).toBeInTheDocument();
   });
+
+  it('shows an error for unverified accounts', async () => {
+    signInMock.mockResolvedValueOnce({ ok: false, error: 'EMAIL_NOT_VERIFIED' });
+
+    render(<SignInForm />);
+
+    fireEvent.change(screen.getByLabelText(/email/i), {
+      target: { value: 'user@example.com' },
+    });
+    fireEvent.change(screen.getByLabelText(/password/i), {
+      target: { value: 'password123' },
+    });
+
+    fireEvent.submit(screen.getByRole('button', { name: /sign in/i }));
+
+    expect(
+      await screen.findByText('Account not verified. Check your email for the verification link.'),
+    ).toBeInTheDocument();
+  });
 });

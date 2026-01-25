@@ -73,12 +73,12 @@ describe('authorizeCredentials', () => {
       },
     };
 
-    const result = await authorizeCredentials({
-      prisma,
-      credentials: { email: 'user@example.com', password: 'password123' },
-      rateLimitKey: 'user@example.com',
-    });
-
-    expect(result).toBeNull();
+    await expect(
+      authorizeCredentials({
+        prisma,
+        credentials: { email: 'user@example.com', password: 'password123' },
+        rateLimitKey: 'user@example.com',
+      }),
+    ).rejects.toThrow('EMAIL_NOT_VERIFIED');
   });
 });

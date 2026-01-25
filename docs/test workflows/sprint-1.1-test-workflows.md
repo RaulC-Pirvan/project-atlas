@@ -85,8 +85,7 @@ return NextResponse.redirect(signInUrl);
 **Debug Token Endpoint Guard** (`src/app/api/auth/debug/verification-token/route.ts`):
 
 ```typescript
-const allow =
-  process.env.NODE_ENV !== 'production' || process.env.ENABLE_TEST_ENDPOINTS === 'true';
+const allow = process.env.NODE_ENV !== 'production' || process.env.ENABLE_TEST_ENDPOINTS === 'true';
 if (!allow) {
   throw new ApiError('not_found', 'Not found.', 404);
 }
@@ -113,7 +112,7 @@ if (!allow) {
 
 1. Sign up a new account.
 2. Attempt to sign in before verifying.
-3. Confirm the UI shows the invalid credentials message.
+3. Confirm the UI shows the account not verified message.
 
 **Expected**: Unverified users cannot log in.
 

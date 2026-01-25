@@ -41,7 +41,9 @@ test('signup creates unverified account', async ({ page }) => {
   await signUp(page, email);
   await signIn(page, email, password);
 
-  await expect(page.getByText('Invalid email or password.')).toBeVisible();
+  await expect(
+    page.getByText('Account not verified. Check your email for the verification link.'),
+  ).toBeVisible();
 });
 
 test('verify link marks account verified and login works', async ({ page, request }) => {

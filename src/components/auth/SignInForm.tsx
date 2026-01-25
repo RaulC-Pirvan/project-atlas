@@ -42,7 +42,11 @@ export function SignInForm() {
       })) as SignInResponse | undefined;
 
       if (!result || !result.ok) {
-        setError('Invalid email or password.');
+        if (result?.error === 'EMAIL_NOT_VERIFIED') {
+          setError('Account not verified. Check your email for the verification link.');
+        } else {
+          setError('Invalid email or password.');
+        }
         return;
       }
 

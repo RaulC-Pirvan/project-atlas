@@ -139,16 +139,16 @@ Minimum:
 
 #### NextAuth Credentials + Session (8)
 
-- [ ] **Task 2.9**: Implement NextAuth Credentials provider `authorize()`
-- [ ] **Task 2.10**: Enforce verified email in `authorize()` (reject if unverified)
-- [ ] **Task 2.11**: Configure session strategy (JWT vs DB) and lock it
-- [ ] **Task 2.12**: Add NextAuth callbacks:
+- [x] **Task 2.9**: Implement NextAuth Credentials provider `authorize()`
+- [x] **Task 2.10**: Enforce verified email in `authorize()` (reject if unverified)
+- [x] **Task 2.11**: Configure session strategy (JWT vs DB) and lock it
+- [x] **Task 2.12**: Add NextAuth callbacks:
   - include `userId` in session
   - include `emailVerifiedAt` in session (optional)
-- [ ] **Task 2.13**: Add `getServerSession()` wrapper helper
-- [ ] **Task 2.14**: API tests for Credentials auth (happy path + reject path)
-- [ ] **Task 2.15**: Add basic rate limiting to login attempts (recommended)
-- [ ] **Task 2.16**: Confirm secure cookie settings in production
+- [x] **Task 2.13**: Add `getServerSession()` wrapper helper
+- [x] **Task 2.14**: API tests for Credentials auth (happy path + reject path)
+- [x] **Task 2.15**: Add basic rate limiting to login attempts (recommended)
+- [x] **Task 2.16**: Confirm secure cookie settings in production
 
 ---
 

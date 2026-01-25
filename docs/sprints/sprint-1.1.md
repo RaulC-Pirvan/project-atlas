@@ -178,10 +178,10 @@ Minimum:
 
 #### Middleware Protection (4)
 
-- [ ] **Task 3.11**: Add middleware to protect private routes
-- [ ] **Task 3.12**: Define public allowlist (sign-in/up/verify and NextAuth endpoints)
-- [ ] **Task 3.13**: Redirect unauth → `/sign-in`
-- [ ] **Task 3.14**: Add middleware tests where feasible (or integration tests)
+- [x] **Task 3.11**: Add middleware to protect private routes
+- [x] **Task 3.12**: Define public allowlist (sign-in/up/verify and NextAuth endpoints)
+- [x] **Task 3.13**: Redirect unauth → `/sign-in`
+- [x] **Task 3.14**: Add middleware tests where feasible (or integration tests)
 
 ---
 

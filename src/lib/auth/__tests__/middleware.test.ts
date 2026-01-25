@@ -1,0 +1,17 @@
+import { describe, expect, it } from 'vitest';
+
+import { isPublicPath } from '../middleware';
+
+describe('isPublicPath', () => {
+  it('allows auth routes and public pages', () => {
+    expect(isPublicPath('/sign-in')).toBe(true);
+    expect(isPublicPath('/sign-up')).toBe(true);
+    expect(isPublicPath('/verify-email')).toBe(true);
+    expect(isPublicPath('/api/auth/signin')).toBe(true);
+  });
+
+  it('blocks private pages', () => {
+    expect(isPublicPath('/account')).toBe(false);
+    expect(isPublicPath('/api/account')).toBe(false);
+  });
+});

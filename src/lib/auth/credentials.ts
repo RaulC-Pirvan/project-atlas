@@ -1,13 +1,7 @@
-import { z } from 'zod';
-
+import { signInSchema } from '../api/auth/validation';
 import { clearLoginAttempts, isLoginRateLimited, recordFailedLogin } from './loginRateLimit';
 import { verifyPassword } from './password';
 import { canLogin } from './policy';
-
-const credentialsSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(8).max(72),
-});
 
 type PrismaClientLike = {
   user: {
@@ -57,7 +51,7 @@ export async function authorizeCredentials({
 
   if (isLoginRateLimited(key, timestamp)) return null;
 
-  const parsed = credentialsSchema.safeParse(credentials);
+  const parsed = signInSchema.safeParse(credentials);
   if (!parsed.success) {
     recordFailedLogin(key, timestamp);
     return null;

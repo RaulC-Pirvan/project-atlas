@@ -13,7 +13,7 @@ function getBaseUrl(explicit?: string): string {
 
 export async function sendVerificationEmail(args: SendVerificationEmailArgs): Promise<void> {
   const baseUrl = getBaseUrl(args.baseUrl);
-  const verifyUrl = `${baseUrl}/api/auth/verify-email?token=${encodeURIComponent(args.token)}`;
+  const verifyUrl = `${baseUrl}/verify-email?token=${encodeURIComponent(args.token)}`;
   const from = process.env.RESEND_FROM_EMAIL ?? 'Project Atlas <noreply@projectatlas.dev>';
 
   await sendEmail({

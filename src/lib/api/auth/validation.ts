@@ -5,6 +5,11 @@ export const signupSchema = z.object({
   password: z.string().min(8).max(72),
 });
 
+export const signInSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8).max(72),
+});
+
 export const resendVerificationSchema = z.object({
   email: z.string().email(),
 });

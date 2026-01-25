@@ -165,16 +165,16 @@ Minimum:
 
 #### Auth UI (10)
 
-- [ ] **Task 3.1**: Build sign-up form (email, password, confirm)
-- [ ] **Task 3.2**: Build sign-in form (uses NextAuth signIn)
-- [ ] **Task 3.3**: Build verify-email page (instructions)
-- [ ] **Task 3.4**: Add resend verification UI
-- [ ] **Task 3.5**: Loading + error states (no raw stack traces)
-- [ ] **Task 3.6**: Align client/server validation errors
-- [ ] **Task 3.7**: Add default avatar/icon component (placeholder)
-- [ ] **Task 3.8**: Build account page (update email/password)
-- [ ] **Task 3.9**: Build delete request UI (type-confirm or modal confirm)
-- [ ] **Task 3.10**: Component unit tests (forms + error states)
+- [x] **Task 3.1**: Build sign-up form (email, password, confirm)
+- [x] **Task 3.2**: Build sign-in form (uses NextAuth signIn)
+- [x] **Task 3.3**: Build verify-email page (instructions)
+- [x] **Task 3.4**: Add resend verification UI
+- [x] **Task 3.5**: Loading + error states (no raw stack traces)
+- [x] **Task 3.6**: Align client/server validation errors
+- [x] **Task 3.7**: Add default avatar/icon component (placeholder)
+- [x] **Task 3.8**: Build account page (update email/password)
+- [x] **Task 3.9**: Build delete request UI (type-confirm or modal confirm)
+- [x] **Task 3.10**: Component unit tests (forms + error states)
 
 #### Middleware Protection (4)
 

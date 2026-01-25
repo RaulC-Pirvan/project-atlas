@@ -22,7 +22,7 @@ A habit is defined independently of dates.
 - NextAuth Credentials provider with JWT sessions and callbacks.
 - Domain-level auth helpers exist in `src/lib/auth` and are unit tested.
 - Email verification uses Resend client stub (skips in non-prod without API key).
-- Auth UI pages and shared UI components are not built yet.
+- Auth UI pages and shared UI components are built with reusable primitives.
 
 ## UI Direction (authoritative)
 
@@ -44,8 +44,9 @@ A habit is defined independently of dates.
 - `prisma/schema.prisma` - DB models; migrations in `prisma/migrations`.
 - `src/app/api/auth/__tests__` - API auth tests.
 - `src/lib/auth/__tests__` - Auth unit tests (password, tokens, policy, credentials).
-- `src/components` - Shared UI components (to be introduced for auth UI).
-- `src/app/(auth)` - Auth pages (to be introduced).
+- `src/components` - Shared UI components (auth forms + primitives).
+- `src/app/(auth)` - Auth pages (sign-in, sign-up, verify-email).
+- `src/app/account/page.tsx` - Account management page.
 
 ## Engineering Standards
 

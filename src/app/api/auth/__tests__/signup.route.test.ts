@@ -21,6 +21,7 @@ describe('signupUser', () => {
       prisma,
       email: 'User@Example.com',
       password: 'password123',
+      displayName: 'User Example',
       now: new Date('2026-01-01T00:00:00.000Z'),
       generateRawToken: () => 'raw-token',
       sendEmail: vi.fn(),
@@ -54,6 +55,7 @@ describe('signupUser', () => {
         prisma,
         email: 'user@example.com',
         password: 'password123',
+        displayName: 'User Example',
         sendEmail: vi.fn(),
       }),
     ).rejects.toBeInstanceOf(ApiError);

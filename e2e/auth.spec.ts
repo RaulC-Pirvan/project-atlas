@@ -10,13 +10,12 @@ function uniqueEmail(prefix: string) {
 
 async function signUp(page: Page, email: string) {
   await page.goto('/sign-up');
+  await page.getByLabel(/display name/i).fill('Atlas Tester');
   await page.getByLabel('Email').fill(email);
   await page.getByLabel(/^password$/i).fill(password);
   await page.getByLabel(/confirm password/i).fill(password);
   await page.getByRole('button', { name: /create account/i }).click();
-  await expect(
-    page.getByText('Account created. Check your email for a verification link.'),
-  ).toBeVisible();
+  await expect(page.getByRole('heading', { name: /you're in\./i })).toBeVisible();
 }
 
 async function signIn(page: Page, email: string, pass: string) {
@@ -53,7 +52,7 @@ test('verify link marks account verified and login works', async ({ page, reques
   const token = await fetchVerificationToken(request, email);
 
   await page.goto(`/verify-email?token=${encodeURIComponent(token)}`);
-  await expect(page.getByText('Email verified. You can sign in.')).toBeVisible();
+  await expect(page.getByRole('heading', { name: /email verified\./i })).toBeVisible();
 
   await signIn(page, email, password);
   await expect(page).toHaveURL(/\/account/);
@@ -66,7 +65,7 @@ test('wrong password fails', async ({ page, request }) => {
   await signUp(page, email);
   const token = await fetchVerificationToken(request, email);
   await page.goto(`/verify-email?token=${encodeURIComponent(token)}`);
-  await expect(page.getByText('Email verified. You can sign in.')).toBeVisible();
+  await expect(page.getByRole('heading', { name: /email verified\./i })).toBeVisible();
 
   await signIn(page, email, 'WrongPassword!');
   await expect(page.getByText('Invalid email or password.')).toBeVisible();
@@ -78,7 +77,7 @@ test('logout ends session', async ({ page, request }) => {
   await signUp(page, email);
   const token = await fetchVerificationToken(request, email);
   await page.goto(`/verify-email?token=${encodeURIComponent(token)}`);
-  await expect(page.getByText('Email verified. You can sign in.')).toBeVisible();
+  await expect(page.getByRole('heading', { name: /email verified\./i })).toBeVisible();
 
   await signIn(page, email, password);
   await expect(page).toHaveURL(/\/account/);
@@ -111,19 +110,85 @@ test('account update works', async ({ page, request }) => {
   await signUp(page, email);
   const token = await fetchVerificationToken(request, email);
   await page.goto(`/verify-email?token=${encodeURIComponent(token)}`);
-  await expect(page.getByText('Email verified. You can sign in.')).toBeVisible();
+  await expect(page.getByRole('heading', { name: /email verified\./i })).toBeVisible();
 
   await signIn(page, email, password);
   await expect(page).toHaveURL(/\/account/);
 
   await page.getByLabel(/^new password$/i).fill(newPassword);
   await page.getByLabel(/confirm new password/i).fill(newPassword);
-  await page.getByRole('button', { name: /update account/i }).click();
-  await expect(page.getByText('Account updated.')).toBeVisible();
+  await page.getByRole('button', { name: /update password/i }).click();
+  await expect(page.getByText('Password updated.')).toBeVisible();
 
   await page.getByRole('button', { name: /sign out/i }).click();
   await expect(page).toHaveURL(/\/sign-in/);
 
   await signIn(page, email, newPassword);
   await expect(page).toHaveURL(/\/account/);
+});
+
+test('display name update works', async ({ page, request }) => {
+  const email = uniqueEmail('display');
+
+  await signUp(page, email);
+  const token = await fetchVerificationToken(request, email);
+  await page.goto(`/verify-email?token=${encodeURIComponent(token)}`);
+  await expect(page.getByRole('heading', { name: /email verified\./i })).toBeVisible();
+
+  await signIn(page, email, password);
+  await expect(page).toHaveURL(/\/account/);
+
+  await page.getByLabel(/^display name$/i).fill('Atlas Prime');
+  await page.getByRole('button', { name: /update display name/i }).click();
+  await expect(page.getByText('Display name updated.')).toBeVisible();
+  await expect(page.getByText('Atlas Prime')).toBeVisible();
+});
+
+test('email update requires re-verification', async ({ page, request }) => {
+  const email = uniqueEmail('email');
+  const newEmail = uniqueEmail('email-updated');
+
+  await signUp(page, email);
+  const token = await fetchVerificationToken(request, email);
+  await page.goto(`/verify-email?token=${encodeURIComponent(token)}`);
+  await expect(page.getByRole('heading', { name: /email verified\./i })).toBeVisible();
+
+  await signIn(page, email, password);
+  await expect(page).toHaveURL(/\/account/);
+
+  await page.getByLabel(/^email$/i).fill(newEmail);
+  await page.getByLabel(/confirm password for email/i).fill(password);
+  await page.getByRole('button', { name: /update email/i }).click();
+  await expect(page.getByRole('heading', { name: /email updated/i })).toBeVisible();
+  await page.getByRole('button', { name: /sign in again/i }).click();
+  await expect(page).toHaveURL(/\/sign-in/);
+
+  const updatedToken = await fetchVerificationToken(request, newEmail);
+  await page.goto(`/verify-email?token=${encodeURIComponent(updatedToken)}`);
+  await expect(page.getByRole('heading', { name: /email verified\./i })).toBeVisible();
+
+  await signIn(page, newEmail, password);
+  await expect(page).toHaveURL(/\/account/);
+  await expect(page.getByText(newEmail)).toBeVisible();
+});
+
+test('account delete removes access', async ({ page, request }) => {
+  const email = uniqueEmail('delete');
+
+  await signUp(page, email);
+  const token = await fetchVerificationToken(request, email);
+  await page.goto(`/verify-email?token=${encodeURIComponent(token)}`);
+  await expect(page.getByRole('heading', { name: /email verified\./i })).toBeVisible();
+
+  await signIn(page, email, password);
+  await expect(page).toHaveURL(/\/account/);
+
+  await page.getByLabel(/^confirm$/i).fill('delete');
+  await page.getByRole('button', { name: /request delete/i }).click();
+  await expect(page.getByRole('heading', { name: /account deleted/i })).toBeVisible();
+  await page.getByRole('button', { name: /create a new account/i }).click();
+  await expect(page).toHaveURL(/\/sign-up/);
+
+  await signIn(page, email, password);
+  await expect(page.getByText('Invalid email or password.')).toBeVisible();
 });

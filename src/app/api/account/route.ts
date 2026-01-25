@@ -5,7 +5,7 @@ import { updateAccountSchema } from '../../../lib/api/auth/validation';
 import { ApiError, asApiError } from '../../../lib/api/errors';
 import { jsonError, jsonOk } from '../../../lib/api/response';
 import { authOptions } from '../../../lib/auth/nextauth';
-import { hashPassword } from '../../../lib/auth/password';
+import { hashPassword, verifyPassword } from '../../../lib/auth/password';
 import { generateToken, hashToken } from '../../../lib/auth/tokens';
 import { prisma } from '../../../lib/db/prisma';
 
@@ -28,15 +28,33 @@ export async function PUT(request: Request) {
 
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
-      select: { id: true, email: true },
+      select: { id: true, email: true, passwordHash: true, displayName: true },
     });
     if (!user) {
       throw new ApiError('not_found', 'User not found.', 404);
     }
 
-    const updates: { email?: string; passwordHash?: string; emailVerified?: Date | null } = {};
+    const updates: {
+      email?: string;
+      passwordHash?: string;
+      emailVerified?: Date | null;
+      displayName?: string;
+    } = {};
 
     if (parsed.data.email && parsed.data.email !== user.email) {
+      if (!parsed.data.currentPassword) {
+        throw new ApiError(
+          'invalid_request',
+          'Password confirmation required to change email.',
+          400,
+        );
+      }
+
+      const passwordOk = await verifyPassword(parsed.data.currentPassword, user.passwordHash);
+      if (!passwordOk) {
+        throw new ApiError('invalid_request', 'Password confirmation does not match.', 400);
+      }
+
       const existing = await prisma.user.findUnique({
         where: { email: parsed.data.email.toLowerCase() },
         select: { id: true },
@@ -51,6 +69,14 @@ export async function PUT(request: Request) {
 
     if (parsed.data.password) {
       updates.passwordHash = await hashPassword(parsed.data.password);
+    }
+
+    if (parsed.data.displayName !== undefined) {
+      const normalizedDisplayName = parsed.data.displayName.trim();
+      if (!normalizedDisplayName) {
+        throw new ApiError('invalid_request', 'Display name is required.', 400);
+      }
+      updates.displayName = normalizedDisplayName;
     }
 
     await prisma.user.update({

@@ -15,7 +15,7 @@ export default async function AccountPage() {
     <AuthShell title="Account" subtitle="Manage your profile and security.">
       <AccountPanel
         email={session.user.email ?? ''}
-        emailVerifiedAt={session.user.emailVerifiedAt ?? null}
+        displayName={session.user.name ?? session.user.email ?? 'User'}
       />
     </AuthShell>
   );

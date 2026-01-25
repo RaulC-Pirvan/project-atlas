@@ -34,14 +34,14 @@ const adapter = new PrismaPg(pool);
  *   - This is safe because production processes do not hot-reload
  *
  * Logging:
- * - Development: query + warn + error (debug-friendly)
+ * - Development: warn + error (avoid noisy query logs)
  * - Production: error only (avoid noisy logs)
  */
 export const prisma =
   globalForPrisma.prisma ??
   new PrismaClient({
     adapter,
-    log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+    log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
   });
 
 /**

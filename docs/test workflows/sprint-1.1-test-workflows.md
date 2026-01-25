@@ -95,9 +95,9 @@ if (!allow) {
 
 ## Test Workflows
 
-### Workflow 1: Signup and verify (happy path)
+### Workflow 1: Signup and verify (happy path) [x]
 
-1. Visit `/sign-up` and submit a new email and password.
+1. Visit `/sign-up` and submit a display name, email, and password.
 2. Confirm UI shows the success message.
 3. Fetch the verification token via `/api/auth/debug/verification-token?email=...` (dev/test only).
 4. Visit `/verify-email?token=...`.
@@ -108,7 +108,7 @@ if (!allow) {
 
 ---
 
-### Workflow 2: Login blocked for unverified account
+### Workflow 2: Login blocked for unverified account [x]
 
 1. Sign up a new account.
 2. Attempt to sign in before verifying.
@@ -118,7 +118,7 @@ if (!allow) {
 
 ---
 
-### Workflow 3: Resend verification
+### Workflow 3: Resend verification [x]
 
 1. Sign up a new account.
 2. Visit `/verify-email?email=...`.
@@ -129,7 +129,7 @@ if (!allow) {
 
 ---
 
-### Workflow 4: Logout ends session
+### Workflow 4: Logout ends session [x]
 
 1. Sign in to a verified account.
 2. Click **Sign out** on the account page.
@@ -140,7 +140,7 @@ if (!allow) {
 
 ---
 
-### Workflow 5: Account update (password)
+### Workflow 5: Account update (password) [x]
 
 1. Sign in to a verified account.
 2. Update the password on `/account`.
@@ -151,27 +151,30 @@ if (!allow) {
 
 ---
 
-### Workflow 6: Account update (email)
+### Workflow 6: Account update (email) [x]
 
 1. Sign in to a verified account.
-2. Update the email on `/account`.
-3. Confirm success message.
-4. Fetch the verification token for the new email and verify it.
+2. Update the email on `/account` and enter your current password.
+3. Confirm the email update modal explains you will be signed out and must re-verify.
+4. Continue to sign in again (logout happens automatically).
+5. Fetch the verification token for the new email and verify it.
 
-**Expected**: Email changes are stored and require re-verification.
+**Expected**: Email changes are stored, the user is logged out, and re-verification is required.
 
 ---
 
-### Workflow 7: Delete request flow
+### Workflow 7: Delete request flow [x]
 
 1. Sign in to a verified account.
 2. Enter `DELETE` in the delete form on `/account` and submit.
+3. Confirm the account deleted modal is shown.
+4. Continue to sign up again (logout happens automatically).
 
-**Expected**: UI confirms the request was submitted.
+**Expected**: Account is hard-deleted and the user is signed out.
 
 ---
 
-### Workflow 8: Middleware protection
+### Workflow 8: Middleware protection [x]
 
 1. Open `/account` in a new session (signed out).
 

@@ -7,6 +7,9 @@ describe('SignUpForm', () => {
   it('shows an error when passwords do not match', () => {
     render(<SignUpForm />);
 
+    fireEvent.change(screen.getByLabelText(/display name/i), {
+      target: { value: 'Test User' },
+    });
     fireEvent.change(screen.getByLabelText(/email/i), {
       target: { value: 'user@example.com' },
     });

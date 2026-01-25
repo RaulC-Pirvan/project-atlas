@@ -18,6 +18,7 @@ export async function POST(request: Request) {
       prisma,
       email: parsed.data.email,
       password: parsed.data.password,
+      displayName: parsed.data.displayName,
     });
 
     return jsonOk(result, 201);

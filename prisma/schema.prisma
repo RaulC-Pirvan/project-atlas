@@ -38,7 +38,6 @@ model AppMeta {
  * - Soft deletion is supported via `deletedAt`.
  *
  * Notes:
- * - No uploaded avatars: `image` may be null; UI uses placeholder.
  * - For NextAuth compatibility, keep `emailVerified` naming.
  */
 model User {
@@ -46,8 +45,7 @@ model User {
   email         String    @unique
   emailVerified DateTime?
   passwordHash  String
-  displayName   String?
-  image         String?
+  displayName   String
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   deletedAt     DateTime?

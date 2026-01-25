@@ -1,85 +1,231 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 import { getApiErrorMessage, parseJson } from '../../lib/api/client';
 import { Button } from '../ui/Button';
 import { FormField } from '../ui/FormField';
 import { Input } from '../ui/Input';
-import { Notice } from '../ui/Notice';
-import { AvatarPlaceholder } from './AvatarPlaceholder';
+import { Modal } from '../ui/Modal';
+import { type ToastItem, ToastStack } from '../ui/Toast';
 import { SignOutButton } from './SignOutButton';
 
 type AccountPanelProps = {
   email: string;
-  emailVerifiedAt?: string | null;
+  displayName: string;
 };
 
 type AccountResponse = {
   ok: boolean;
 };
 
-export function AccountPanel({ email, emailVerifiedAt }: AccountPanelProps) {
+export function AccountPanel({ email, displayName }: AccountPanelProps) {
   const [nextEmail, setNextEmail] = useState(email);
+  const [displayNameInput, setDisplayNameInput] = useState(displayName);
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
+  const [currentPassword, setCurrentPassword] = useState('');
   const [deleteConfirm, setDeleteConfirm] = useState('');
-  const [updateError, setUpdateError] = useState<string | null>(null);
-  const [updateMessage, setUpdateMessage] = useState<string | null>(null);
-  const [deleteError, setDeleteError] = useState<string | null>(null);
-  const [deleteMessage, setDeleteMessage] = useState<string | null>(null);
-  const [updating, setUpdating] = useState(false);
+  const [toasts, setToasts] = useState<ToastItem[]>([]);
+  const [updatingName, setUpdatingName] = useState(false);
+  const [updatingEmail, setUpdatingEmail] = useState(false);
+  const [updatingPassword, setUpdatingPassword] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [showEmailChangeModal, setShowEmailChangeModal] = useState(false);
+  const [pendingEmail, setPendingEmail] = useState<string | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteConfirmError, setDeleteConfirmError] = useState(false);
+  const [currentPasswordError, setCurrentPasswordError] = useState(false);
+  const [baselineDisplayName, setBaselineDisplayName] = useState(displayName);
 
-  const handleUpdate = async (event: React.FormEvent<HTMLFormElement>) => {
+  const deleteConfirmInvalid = deleteConfirmError;
+  const toastIdRef = useRef(0);
+
+  const pushToast = (message: string, tone: ToastItem['tone'] = 'neutral') => {
+    const id = toastIdRef.current + 1;
+    toastIdRef.current = id;
+    setToasts((prev) => [...prev, { id, tone, message, state: 'entering' }]);
+
+    window.requestAnimationFrame(() => {
+      setToasts((prev) =>
+        prev.map((toast) => (toast.id === id ? { ...toast, state: 'open' } : toast)),
+      );
+    });
+
+    window.setTimeout(() => {
+      setToasts((prev) => prev.filter((toast) => toast.id !== id));
+    }, 4800);
+
+    window.setTimeout(() => {
+      setToasts((prev) =>
+        prev.map((toast) => (toast.id === id ? { ...toast, state: 'closing' } : toast)),
+      );
+    }, 4500);
+  };
+
+  const handleDisplayNameUpdate = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setUpdateError(null);
-    setUpdateMessage(null);
 
-    if (!nextEmail && !password) {
-      setUpdateError('Provide a new email or password.');
+    const normalizedDisplayName = displayNameInput.trim();
+    if (normalizedDisplayName.length < 2) {
+      pushToast('Display name is required.', 'error');
       return;
     }
 
-    if (password && password !== confirm) {
-      setUpdateError('Passwords do not match.');
+    if (normalizedDisplayName === baselineDisplayName.trim()) {
+      pushToast('No changes to update.', 'neutral');
       return;
     }
 
-    setUpdating(true);
+    setUpdatingName(true);
 
     try {
       const response = await fetch('/api/account', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: nextEmail || undefined, password: password || undefined }),
+        body: JSON.stringify({
+          displayName: normalizedDisplayName,
+        }),
       });
       const body = await parseJson<AccountResponse>(response);
 
       if (!response.ok || !body?.ok) {
         if (response.status === 404) {
-          setUpdateError('Account updates are not available yet.');
+          pushToast('Display name updates are not available yet.', 'error');
           return;
         }
-        setUpdateError(getApiErrorMessage(response, body));
+        pushToast(getApiErrorMessage(response, body), 'error');
         return;
       }
 
-      setUpdateMessage('Account updated.');
+      setBaselineDisplayName(normalizedDisplayName);
+      setDisplayNameInput(normalizedDisplayName);
+      pushToast('Display name updated.', 'success');
     } catch {
-      setUpdateError('Account update is not available yet.');
+      pushToast('Display name update is not available yet.', 'error');
     } finally {
-      setUpdating(false);
+      setUpdatingName(false);
+    }
+  };
+
+  const handleEmailUpdate = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setCurrentPasswordError(false);
+
+    const normalizedEmail = nextEmail.trim().toLowerCase();
+    if (!normalizedEmail) {
+      pushToast('Email is required.', 'error');
+      return;
+    }
+
+    if (normalizedEmail === email.toLowerCase()) {
+      pushToast('No changes to update.', 'neutral');
+      return;
+    }
+
+    if (!currentPassword) {
+      setCurrentPasswordError(true);
+      pushToast('Confirm your password to change email.', 'error');
+      return;
+    }
+
+    setUpdatingEmail(true);
+
+    try {
+      const response = await fetch('/api/account', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: normalizedEmail,
+          currentPassword,
+        }),
+      });
+      const body = await parseJson<AccountResponse>(response);
+
+      if (!response.ok || !body?.ok) {
+        if (response.status === 404) {
+          pushToast('Email updates are not available yet.', 'error');
+          return;
+        }
+        pushToast(getApiErrorMessage(response, body), 'error');
+        return;
+      }
+
+      setCurrentPassword('');
+      setNextEmail(normalizedEmail);
+      setPendingEmail(normalizedEmail);
+      setShowEmailChangeModal(true);
+    } catch {
+      pushToast('Email update is not available yet.', 'error');
+    } finally {
+      setUpdatingEmail(false);
+    }
+  };
+
+  const handlePasswordUpdate = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (!password) {
+      pushToast('Enter a new password.', 'neutral');
+      return;
+    }
+
+    if (password.length < 8) {
+      pushToast('Password must be at least 8 characters.', 'error');
+      return;
+    }
+
+    if (password !== confirm) {
+      pushToast('Passwords do not match.', 'error');
+      return;
+    }
+
+    setUpdatingPassword(true);
+
+    try {
+      const response = await fetch('/api/account', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          password,
+        }),
+      });
+      const body = await parseJson<AccountResponse>(response);
+
+      if (!response.ok || !body?.ok) {
+        if (response.status === 404) {
+          pushToast('Password updates are not available yet.', 'error');
+          return;
+        }
+        pushToast(getApiErrorMessage(response, body), 'error');
+        return;
+      }
+
+      setPassword('');
+      setConfirm('');
+      pushToast('Password updated.', 'success');
+    } catch {
+      pushToast('Password update is not available yet.', 'error');
+    } finally {
+      setUpdatingPassword(false);
+    }
+  };
+
+  const handleEmailChangeAcknowledge = async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+    } finally {
+      window.location.href = '/sign-in';
     }
   };
 
   const handleDelete = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setDeleteError(null);
-    setDeleteMessage(null);
+    setDeleteConfirmError(false);
 
-    if (deleteConfirm !== 'DELETE') {
-      setDeleteError('Type DELETE to confirm.');
+    if (deleteConfirm.trim().toUpperCase() !== 'DELETE') {
+      setDeleteConfirmError(true);
+      pushToast('Type DELETE to confirm.', 'error');
       return;
     }
 
@@ -93,18 +239,26 @@ export function AccountPanel({ email, emailVerifiedAt }: AccountPanelProps) {
 
       if (!response.ok || !body?.ok) {
         if (response.status === 404) {
-          setDeleteError('Delete requests are not available yet.');
+          pushToast('Delete requests are not available yet.', 'error');
           return;
         }
-        setDeleteError(getApiErrorMessage(response, body));
+        pushToast(getApiErrorMessage(response, body), 'error');
         return;
       }
 
-      setDeleteMessage('Delete request submitted.');
+      setShowDeleteModal(true);
     } catch {
-      setDeleteError('Delete request is not available yet.');
+      pushToast('Delete request is not available yet.', 'error');
     } finally {
       setDeleting(false);
+    }
+  };
+
+  const handleDeleteAcknowledge = async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+    } finally {
+      window.location.href = '/sign-up';
     }
   };
 
@@ -112,19 +266,40 @@ export function AccountPanel({ email, emailVerifiedAt }: AccountPanelProps) {
     <div className="space-y-10">
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <AvatarPlaceholder />
           <div>
-            <p className="text-sm font-semibold">{email}</p>
-            <p className="text-xs text-black/50">{emailVerifiedAt ? 'Verified' : 'Unverified'}</p>
+            <p className="text-sm font-semibold">{baselineDisplayName}</p>
+            <p className="text-xs text-black/50">{email}</p>
           </div>
         </div>
         <SignOutButton />
       </div>
 
-      <form className="space-y-6" onSubmit={handleUpdate}>
+      <form className="space-y-6" onSubmit={handleDisplayNameUpdate}>
         <div className="space-y-1">
-          <p className="text-xs uppercase tracking-[0.3em] text-black/60">Update account</p>
-          <p className="text-sm text-black/60">Change email or password.</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-black/80">
+            Display name
+          </p>
+          <p className="text-sm text-black/60">Update how your name appears.</p>
+        </div>
+        <FormField id="account-display-name" label="Display name" error={null}>
+          <Input
+            id="account-display-name"
+            name="displayName"
+            type="text"
+            autoComplete="name"
+            value={displayNameInput}
+            onChange={(event) => setDisplayNameInput(event.target.value)}
+          />
+        </FormField>
+        <Button type="submit" variant="outline" className="w-full" disabled={updatingName}>
+          {updatingName ? 'Updating...' : 'Update display name'}
+        </Button>
+      </form>
+
+      <form className="space-y-6 border-t border-black/10 pt-6" onSubmit={handleEmailUpdate}>
+        <div className="space-y-1">
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-black/80">Email</p>
+          <p className="text-sm text-black/60">Changing email requires confirmation.</p>
         </div>
         <FormField id="account-email" label="Email" error={null}>
           <Input
@@ -133,9 +308,44 @@ export function AccountPanel({ email, emailVerifiedAt }: AccountPanelProps) {
             type="email"
             autoComplete="email"
             value={nextEmail}
-            onChange={(event) => setNextEmail(event.target.value)}
+            onChange={(event) => {
+              const value = event.target.value;
+              setNextEmail(value);
+              if (value.trim().toLowerCase() === email.toLowerCase()) {
+                setCurrentPasswordError(false);
+              }
+            }}
           />
         </FormField>
+        <FormField
+          id="account-current-password"
+          label="Confirm password for email"
+          hint="Required to change email."
+          error={null}
+        >
+          <Input
+            id="account-current-password"
+            name="current-password"
+            type="password"
+            autoComplete="current-password"
+            value={currentPassword}
+            className={currentPasswordError ? 'border-rose-400 focus-visible:ring-rose-400/30' : ''}
+            onChange={(event) => {
+              setCurrentPassword(event.target.value);
+              if (currentPasswordError) setCurrentPasswordError(false);
+            }}
+          />
+        </FormField>
+        <Button type="submit" variant="outline" className="w-full" disabled={updatingEmail}>
+          {updatingEmail ? 'Updating...' : 'Update email'}
+        </Button>
+      </form>
+
+      <form className="space-y-6 border-t border-black/10 pt-6" onSubmit={handlePasswordUpdate}>
+        <div className="space-y-1">
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-black/80">Password</p>
+          <p className="text-sm text-black/60">Choose a new password.</p>
+        </div>
         <FormField id="account-password" label="New password" error={null}>
           <Input
             id="account-password"
@@ -156,16 +366,16 @@ export function AccountPanel({ email, emailVerifiedAt }: AccountPanelProps) {
             onChange={(event) => setConfirm(event.target.value)}
           />
         </FormField>
-        {updateError ? <Notice tone="error">{updateError}</Notice> : null}
-        {updateMessage ? <Notice tone="success">{updateMessage}</Notice> : null}
-        <Button type="submit" variant="outline" className="w-full" disabled={updating}>
-          {updating ? 'Updating...' : 'Update account'}
+        <Button type="submit" variant="outline" className="w-full" disabled={updatingPassword}>
+          {updatingPassword ? 'Updating...' : 'Update password'}
         </Button>
       </form>
 
       <form className="space-y-6" onSubmit={handleDelete}>
         <div className="space-y-1">
-          <p className="text-xs uppercase tracking-[0.3em] text-black/60">Delete request</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-black/80">
+            Delete request
+          </p>
           <p className="text-sm text-black/60">Type DELETE to request account removal.</p>
         </div>
         <FormField id="delete-confirm" label="Confirm" error={null}>
@@ -174,15 +384,50 @@ export function AccountPanel({ email, emailVerifiedAt }: AccountPanelProps) {
             name="confirm"
             type="text"
             value={deleteConfirm}
-            onChange={(event) => setDeleteConfirm(event.target.value)}
+            className={deleteConfirmInvalid ? 'border-red-500 focus-visible:ring-red-500/30' : ''}
+            onChange={(event) => {
+              setDeleteConfirm(event.target.value);
+              if (deleteConfirmError) setDeleteConfirmError(false);
+            }}
           />
         </FormField>
-        {deleteError ? <Notice tone="error">{deleteError}</Notice> : null}
-        {deleteMessage ? <Notice tone="success">{deleteMessage}</Notice> : null}
-        <Button type="submit" variant="ghost" className="w-full" disabled={deleting}>
+        <Button type="submit" variant="danger" className="w-full" disabled={deleting}>
           {deleting ? 'Submitting...' : 'Request delete'}
         </Button>
       </form>
+
+      <Modal
+        open={showDeleteModal}
+        title="Account deleted"
+        footer={
+          <Button type="button" size="lg" onClick={handleDeleteAcknowledge}>
+            Create a new account
+          </Button>
+        }
+      >
+        <p>
+          Your account has been permanently deleted. You have been signed out and will need to
+          create a new account to continue.
+        </p>
+      </Modal>
+
+      <Modal
+        open={showEmailChangeModal}
+        title="Email updated"
+        footer={
+          <Button type="button" size="lg" onClick={handleEmailChangeAcknowledge}>
+            Sign in again
+          </Button>
+        }
+      >
+        <p>
+          Your email has been changed{pendingEmail ? ` to ${pendingEmail}` : ''}. We sent a new
+          verification link. You will be signed out now and must verify the new email before
+          accessing your account.
+        </p>
+      </Modal>
+
+      <ToastStack toasts={toasts} />
     </div>
   );
 }

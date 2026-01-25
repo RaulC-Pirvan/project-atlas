@@ -1,14 +1,15 @@
 'use client';
 
+import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { resendVerificationSchema, verifyEmailSchema } from '../../lib/api/auth/validation';
 import { getApiErrorMessage, parseJson } from '../../lib/api/client';
 import { Button } from '../ui/Button';
 import { FormField } from '../ui/FormField';
 import { Input } from '../ui/Input';
-import { Notice } from '../ui/Notice';
+import { type ToastItem, ToastStack } from '../ui/Toast';
 
 type VerifyResponse = {
   userId: string;
@@ -23,10 +24,32 @@ export function VerifyEmailPanel() {
   const token = searchParams.get('token') ?? '';
   const [email, setEmail] = useState(searchParams.get('email') ?? '');
   const [verifyState, setVerifyState] = useState<'idle' | 'verifying' | 'done' | 'error'>('idle');
-  const [verifyMessage, setVerifyMessage] = useState<string | null>(null);
-  const [resendMessage, setResendMessage] = useState<string | null>(null);
-  const [resendError, setResendError] = useState<string | null>(null);
   const [resending, setResending] = useState(false);
+  const [emailError, setEmailError] = useState(false);
+  const [toasts, setToasts] = useState<ToastItem[]>([]);
+  const toastIdRef = useRef(0);
+
+  const pushToast = (message: string, tone: ToastItem['tone'] = 'neutral') => {
+    const id = toastIdRef.current + 1;
+    toastIdRef.current = id;
+    setToasts((prev) => [...prev, { id, tone, message, state: 'entering' }]);
+
+    window.requestAnimationFrame(() => {
+      setToasts((prev) =>
+        prev.map((toast) => (toast.id === id ? { ...toast, state: 'open' } : toast)),
+      );
+    });
+
+    window.setTimeout(() => {
+      setToasts((prev) =>
+        prev.map((toast) => (toast.id === id ? { ...toast, state: 'closing' } : toast)),
+      );
+    }, 4500);
+
+    window.setTimeout(() => {
+      setToasts((prev) => prev.filter((toast) => toast.id !== id));
+    }, 4800);
+  };
 
   useEffect(() => {
     if (!token) return;
@@ -34,12 +57,11 @@ export function VerifyEmailPanel() {
     const parsed = verifyEmailSchema.safeParse({ token });
     if (!parsed.success) {
       setVerifyState('error');
-      setVerifyMessage('Verification token is missing or invalid.');
+      pushToast('Verification token is missing or invalid.', 'error');
       return;
     }
 
     setVerifyState('verifying');
-    setVerifyMessage(null);
 
     const verify = async () => {
       const response = await fetch(`/api/auth/verify-email?token=${encodeURIComponent(token)}`);
@@ -47,12 +69,13 @@ export function VerifyEmailPanel() {
 
       if (!response.ok || !body?.ok) {
         setVerifyState('error');
-        setVerifyMessage(getApiErrorMessage(response, body));
+        const message = getApiErrorMessage(response, body);
+        pushToast(message, 'error');
         return;
       }
 
       setVerifyState('done');
-      setVerifyMessage('Email verified. You can sign in.');
+      pushToast('Email verified. You can sign in.', 'success');
     };
 
     void verify();
@@ -60,12 +83,12 @@ export function VerifyEmailPanel() {
 
   const handleResend = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setResendError(null);
-    setResendMessage(null);
+    setEmailError(false);
 
     const parsed = resendVerificationSchema.safeParse({ email });
     if (!parsed.success) {
-      setResendError('Enter a valid email.');
+      setEmailError(true);
+      pushToast('Enter a valid email.', 'error');
       return;
     }
 
@@ -80,51 +103,74 @@ export function VerifyEmailPanel() {
       const body = await parseJson<ResendResponse>(response);
 
       if (!response.ok || !body?.ok) {
-        setResendError(getApiErrorMessage(response, body));
+        const message = getApiErrorMessage(response, body);
+        pushToast(message, 'error');
         return;
       }
 
-      setResendMessage(
+      const message =
         body.data.status === 'sent'
           ? 'Verification email resent.'
-          : 'If the account exists and is unverified, a link will be sent.',
-      );
+          : 'If the account exists and is unverified, a link will be sent.';
+      pushToast(message, 'success');
     } catch {
-      setResendError('Unable to resend. Try again later.');
+      pushToast('Unable to resend. Try again later.', 'error');
     } finally {
       setResending(false);
     }
   };
 
   return (
-    <div className="space-y-8">
-      {verifyState === 'verifying' ? <Notice>Verifying your email...</Notice> : null}
-      {verifyMessage ? (
-        <Notice tone={verifyState === 'error' ? 'error' : 'success'}>{verifyMessage}</Notice>
-      ) : null}
+    <div className="space-y-10">
+      <div className="space-y-3">
+        <p className="text-xs uppercase tracking-[0.4em] text-black/60">Verification</p>
+        <h2 className="text-2xl font-semibold tracking-tight">
+          {verifyState === 'done' ? 'Email verified.' : 'Verify your email.'}
+        </h2>
+        <p className="text-sm text-black/60">
+          {verifyState === 'verifying'
+            ? 'We are verifying your link now.'
+            : verifyState === 'done'
+              ? 'You can sign in once you are ready.'
+              : 'Open the verification link from your inbox to continue.'}
+        </p>
+        {verifyState === 'done' ? (
+          <Link
+            className="inline-flex h-11 items-center justify-center rounded-full border border-black bg-black px-5 text-sm font-medium text-white transition hover:bg-black/90"
+            href="/sign-in"
+          >
+            Continue to sign in
+          </Link>
+        ) : null}
+      </div>
 
-      <form className="space-y-6" onSubmit={handleResend}>
-        <FormField
-          id="email"
-          label="Resend verification"
-          hint="We send only if unverified."
-          error={null}
-        >
+      <form className="space-y-6 border-t border-black/10 pt-6" onSubmit={handleResend}>
+        <div className="space-y-1">
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-black/80">
+            Resend verification
+          </p>
+          <p className="text-sm text-black/60">We only send if the account is unverified.</p>
+        </div>
+        <FormField id="email" label="Email" error={null}>
           <Input
             id="email"
             name="email"
             type="email"
             autoComplete="email"
             value={email}
-            onChange={(event) => setEmail(event.target.value)}
+            className={emailError ? 'border-rose-400 focus-visible:ring-rose-400/30' : ''}
+            onChange={(event) => {
+              setEmail(event.target.value);
+              if (emailError) setEmailError(false);
+            }}
           />
         </FormField>
-        {resendError ? <Notice tone="error">{resendError}</Notice> : null}
-        {resendMessage ? <Notice tone="success">{resendMessage}</Notice> : null}
         <Button type="submit" variant="outline" className="w-full" disabled={resending}>
           {resending ? 'Sending...' : 'Resend verification email'}
         </Button>
       </form>
+
+      <ToastStack toasts={toasts} />
     </div>
   );
 }

@@ -12,7 +12,7 @@ type PrismaClientLike = {
       select: { id: true };
     }) => Promise<{ id: string } | null>;
     create: (args: {
-      data: { email: string; passwordHash: string };
+      data: { email: string; passwordHash: string; displayName: string };
       select: { id: true; email: true };
     }) => Promise<{ id: string; email: string }>;
   };
@@ -28,6 +28,7 @@ type SignupArgs = {
   prisma: PrismaClientLike;
   email: string;
   password: string;
+  displayName: string;
   now?: Date;
   baseUrl?: string;
   generateRawToken?: () => string;
@@ -48,8 +49,10 @@ export async function signupUser(args: SignupArgs): Promise<{ userId: string }> 
   }
 
   const passwordHash = await hashPassword(args.password);
+  const normalizedDisplayName = args.displayName.trim();
+
   const user = await args.prisma.user.create({
-    data: { email, passwordHash },
+    data: { email, passwordHash, displayName: normalizedDisplayName },
     select: { id: true, email: true },
   });
 

@@ -38,6 +38,7 @@ export const authOptions: NextAuthOptions = {
         const emailVerified = 'emailVerified' in user ? (user.emailVerified as Date | null) : null;
         token.userId = user.id;
         token.emailVerifiedAt = emailVerified ? emailVerified.toISOString() : null;
+        token.name = typeof user.name === 'string' ? user.name : null;
       }
       return token;
     },
@@ -45,6 +46,7 @@ export const authOptions: NextAuthOptions = {
       if (session.user) {
         session.user.id = token.userId as string;
         session.user.emailVerifiedAt = (token.emailVerifiedAt as string | null) ?? null;
+        session.user.name = (token.name as string | null) ?? session.user.name ?? null;
       }
       return session;
     },

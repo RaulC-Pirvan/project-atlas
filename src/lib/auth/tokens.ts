@@ -1,6 +1,13 @@
 import crypto from 'node:crypto';
 
 /**
+ * Generates a cryptographically strong random token.
+ */
+export function generateToken(bytes: number = 32): string {
+  return crypto.randomBytes(bytes).toString('hex');
+}
+
+/**
  * Hash a token for storage (raw token never stored).
  * SHA-256 is correct here because tokens are high-entropy random values.
  */

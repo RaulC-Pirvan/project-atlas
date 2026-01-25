@@ -128,14 +128,14 @@ Minimum:
 
 #### Signup + Verification (8)
 
-- [ ] **Task 2.1**: Implement signup route (validate → hash → create user unverified)
-- [ ] **Task 2.2**: Generate + store verification token (store hashed token)
-- [ ] **Task 2.3**: Send verification email with Resend
-- [ ] **Task 2.4**: Implement verify endpoint (validate token → set `emailVerifiedAt`)
-- [ ] **Task 2.5**: Implement resend endpoint (rate limited)
-- [ ] **Task 2.6**: Zod validation for all auth inputs (signup/resend/update)
-- [ ] **Task 2.7**: Standardise API error format (`code`, `message`)
-- [ ] **Task 2.8**: API tests for signup + verify + resend
+- [x] **Task 2.1**: Implement signup route (validate → hash → create user unverified)
+- [x] **Task 2.2**: Generate + store verification token (store hashed token)
+- [x] **Task 2.3**: Send verification email with Resend
+- [x] **Task 2.4**: Implement verify endpoint (validate token → set `emailVerifiedAt`)
+- [x] **Task 2.5**: Implement resend endpoint (rate limited)
+- [x] **Task 2.6**: Zod validation for all auth inputs (signup/resend/update)
+- [x] **Task 2.7**: Standardise API error format (`code`, `message`)
+- [x] **Task 2.8**: API tests for signup + verify + resend
 
 #### NextAuth Credentials + Session (8)
 

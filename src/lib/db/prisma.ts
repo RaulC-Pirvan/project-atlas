@@ -1,4 +1,6 @@
-import { PrismaClient } from '@prisma/client/extension';
+import { PrismaPg } from '@prisma/adapter-pg';
+import { PrismaClient } from '@prisma/client';
+import { Pool } from 'pg';
 
 /**
  * Global cache for PrismaClient in non-production environments.
@@ -10,7 +12,15 @@ import { PrismaClient } from '@prisma/client/extension';
  *
  * We attach PrismaClient to globalThis in development only.
  */
-const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
+const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient; prismaPool?: Pool };
+
+const connectionString = process.env.DATABASE_URL;
+if (!connectionString) {
+  throw new Error('DATABASE_URL is not set.');
+}
+
+const pool = globalForPrisma.prismaPool ?? new Pool({ connectionString });
+const adapter = new PrismaPg(pool);
 
 /**
  * Singleton PrismaClient instance.
@@ -30,6 +40,7 @@ const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
 export const prisma =
   globalForPrisma.prisma ??
   new PrismaClient({
+    adapter,
     log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
   });
 
@@ -44,4 +55,7 @@ export const prisma =
  * - Dev: cache PrismaClient across reloads
  * - Prod: PrismaClient lifecycle is process-scoped
  */
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
+if (process.env.NODE_ENV !== 'production') {
+  globalForPrisma.prisma = prisma;
+  globalForPrisma.prismaPool = pool;
+}

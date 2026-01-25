@@ -44,8 +44,8 @@ This mental model must never be violated.
 
 - Email/password account creation
 - Email verification (Resend planned)
+- Login / logout
 - Account update (basic profile info)
-- Optional future 2FA
 - Account deletion request
 - No user-uploaded avatars (use default placeholder icon)
 
@@ -85,10 +85,10 @@ This mental model must never be violated.
 
 This project follows **corporate-level discipline**:
 
-- ESLint (strict)
+- ESLint (strict, no `any`)
 - Prettier (enforced)
 - TypeScript `strict`
-- Unit tests for core logic
+- Unit tests for core domain logic
 - E2E smoke tests
 - CI runs from clean checkout
 - CI gates merges (lint, typecheck, tests, build, e2e)
@@ -104,29 +104,61 @@ No time should be wasted fighting local hooks again unless absolutely necessary.
 
 ---
 
-## Repository State (as of last session)
+## Repository State (Current)
 
-- Next.js project scaffolded
-- ESLint + Prettier configured
+### Infrastructure
+
+- Next.js project scaffolded (App Router)
+- ESLint + Prettier configured and enforced
 - Vitest + Playwright set up with smoke tests
-- Prisma installed and configured for Neon (no models yet)
-- CI pipeline exists and runs:
+- CI pipeline configured and green:
   - lint
   - typecheck
   - unit tests
   - prettier check
   - build
-  - e2e tests (with Playwright webServer)
+  - e2e tests
+
+### Database & Auth Foundation (Sprint 1.1 — Phase 1 ✅ COMPLETED)
+
+- Prisma configured for Neon
+- Auth-related Prisma models implemented:
+  - User
+  - Account
+  - Session
+  - VerificationToken (NextAuth)
+  - EmailVerificationToken (custom, hashed)
+  - PasswordResetToken
+- Prisma client singleton pattern implemented (Next.js-safe)
+- Database migration created and applied (`auth_baseline`)
+- Seed script implemented:
+  - 1 verified user
+  - 1 unverified user
+- Domain-level auth logic implemented and unit tested:
+  - Password hashing & verification (bcrypt)
+  - Token hashing & expiry handling
+  - Email verification flow (pure service + mocked Prisma)
+  - Login policy (verified + not soft-deleted)
+- ESLint clean (no `any`, no rule suppression)
+- Domain tests pass deterministically (no DB dependency)
 
 ---
 
 ## Important Decisions & Lessons Learned
 
+- **Habits are intent, not instances** — dates belong only to completions
 - **No pnpm** — npm only
 - **No Husky / Lefthook / hooks** — CI-only enforcement
 - Windows PATH + Git hook tooling is unreliable → avoid
 - Editor warnings ≠ CLI truth; CLI is the source of truth
-- Build infrastructure first, features second
+- Domain logic must be:
+  - pure
+  - testable
+  - decoupled from Prisma
+- Migrations are code:
+  - `migrate dev` = authoring
+  - `migrate deploy` = CI / prod
+- Auth logic is tested **before** wiring NextAuth callbacks
 
 ---
 
@@ -154,13 +186,22 @@ Tone:
 
 ## Immediate Next Logical Steps
 
-When resuming work, likely next areas:
+### Sprint 1.1 — Phase 2 (Next)
 
-1. Prisma schema design (User, Habit, HabitSchedule, HabitCompletion, Streaks)
-2. Auth architecture decision (custom vs library)
-3. Calendar domain logic (date ↔ weekday mapping)
-4. Habit completion & streak calculation logic
-5. UX state management for calendar/day view
+1. Wire **NextAuth Credentials provider** to domain logic:
+   - `verifyPassword`
+   - `canLogin` (reject unverified / soft-deleted)
+2. Enforce email verification in auth flow
+3. Implement email verification API route (Resend integration)
+4. Add auth middleware for route protection
+5. Add E2E auth flow tests
+
+### After Auth
+
+6. Habit domain schema (Habit, HabitSchedule, HabitCompletion)
+7. Calendar domain logic (date ↔ weekday mapping)
+8. Habit completion & streak calculation
+9. Calendar/day UX state management
 
 ---
 

@@ -22,9 +22,7 @@ export function VerifyEmailPanel() {
   const searchParams = useSearchParams();
   const token = searchParams.get('token') ?? '';
   const [email, setEmail] = useState(searchParams.get('email') ?? '');
-  const [verifyState, setVerifyState] = useState<'idle' | 'verifying' | 'done' | 'error'>(
-    'idle',
-  );
+  const [verifyState, setVerifyState] = useState<'idle' | 'verifying' | 'done' | 'error'>('idle');
   const [verifyMessage, setVerifyMessage] = useState<string | null>(null);
   const [resendMessage, setResendMessage] = useState<string | null>(null);
   const [resendError, setResendError] = useState<string | null>(null);
@@ -106,7 +104,12 @@ export function VerifyEmailPanel() {
       ) : null}
 
       <form className="space-y-6" onSubmit={handleResend}>
-        <FormField id="email" label="Resend verification" hint="We send only if unverified." error={null}>
+        <FormField
+          id="email"
+          label="Resend verification"
+          hint="We send only if unverified."
+          error={null}
+        >
           <Input
             id="email"
             name="email"

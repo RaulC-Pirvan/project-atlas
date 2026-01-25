@@ -113,9 +113,7 @@ export function AccountPanel({ email, emailVerifiedAt }: AccountPanelProps) {
         <AvatarPlaceholder />
         <div>
           <p className="text-sm font-semibold">{email}</p>
-          <p className="text-xs text-black/50">
-            {emailVerifiedAt ? 'Verified' : 'Unverified'}
-          </p>
+          <p className="text-xs text-black/50">{emailVerifiedAt ? 'Verified' : 'Unverified'}</p>
         </div>
       </div>
 
@@ -164,9 +162,7 @@ export function AccountPanel({ email, emailVerifiedAt }: AccountPanelProps) {
       <form className="space-y-6" onSubmit={handleDelete}>
         <div className="space-y-1">
           <p className="text-xs uppercase tracking-[0.3em] text-black/60">Delete request</p>
-          <p className="text-sm text-black/60">
-            Type DELETE to request account removal.
-          </p>
+          <p className="text-sm text-black/60">Type DELETE to request account removal.</p>
         </div>
         <FormField id="delete-confirm" label="Confirm" error={null}>
           <Input

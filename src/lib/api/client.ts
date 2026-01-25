@@ -3,9 +3,7 @@ export type ApiErrorPayload = {
   message: string;
 };
 
-export type ApiResponse<T> =
-  | { ok: true; data: T }
-  | { ok: false; error: ApiErrorPayload };
+export type ApiResponse<T> = { ok: true; data: T } | { ok: false; error: ApiErrorPayload };
 
 export async function parseJson<T>(response: Response): Promise<ApiResponse<T> | null> {
   try {

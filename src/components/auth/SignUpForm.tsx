@@ -64,9 +64,7 @@ export function SignUpForm() {
   if (success) {
     return (
       <div className="space-y-6">
-        <Notice tone="success">
-          Account created. Check your email for a verification link.
-        </Notice>
+        <Notice tone="success">Account created. Check your email for a verification link.</Notice>
         <Link
           className="inline-flex text-sm font-medium text-black underline underline-offset-4"
           href={`/verify-email?email=${encodeURIComponent(email)}`}

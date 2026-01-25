@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { Suspense } from 'react';
 
 import { AuthShell } from '../../../components/auth/AuthShell';
 import { VerifyEmailPanel } from '../../../components/auth/VerifyEmailPanel';
@@ -17,7 +18,9 @@ export default function VerifyEmailPage() {
         </p>
       }
     >
-      <VerifyEmailPanel />
+      <Suspense fallback={<p className="text-sm text-black/60">Loading...</p>}>
+        <VerifyEmailPanel />
+      </Suspense>
     </AuthShell>
   );
 }

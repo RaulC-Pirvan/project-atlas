@@ -14,6 +14,9 @@ jobs:
     name: Lint / Typecheck / Unit / Format / Build
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL || vars.DATABASE_URL }}
+      DIRECT_URL: ${{ secrets.DIRECT_URL || vars.DIRECT_URL }}
 
     steps:
       - name: Checkout
@@ -36,6 +39,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     needs: ci
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL || vars.DATABASE_URL }}
+      DIRECT_URL: ${{ secrets.DIRECT_URL || vars.DIRECT_URL }}
 
     steps:
       - name: Checkout

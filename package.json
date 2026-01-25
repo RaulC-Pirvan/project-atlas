@@ -19,6 +19,9 @@
     "format": "prettier . --write",
     "format:check": "prettier . --check",
     "ci": "npm run lint && npm run typecheck && npm test && npm run format:check && npm run build",
+    "prebuild": "npm run prisma:generate",
+    "pretypecheck": "npm run prisma:generate",
+    "prisma:generate": "prisma generate",
     "ci:full": "npm run ci && npm run e2e",
     "prisma:seed": "ts-node prisma/seed.ts"
   },

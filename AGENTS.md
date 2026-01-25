@@ -16,21 +16,36 @@ A habit is defined independently of dates.
 ## Current State (high-level)
 
 - Next.js App Router + TypeScript + Tailwind CSS.
-- PostgreSQL (Neon) + Prisma.
+- PostgreSQL (Neon) + Prisma with `@prisma/adapter-pg` and `pg` pool.
 - Auth foundation: Prisma models for User/Account/Session/VerificationToken/EmailVerificationToken/PasswordResetToken.
+- Auth API routes implemented: signup, verify-email, resend-verification.
+- NextAuth Credentials provider with JWT sessions and callbacks.
 - Domain-level auth helpers exist in `src/lib/auth` and are unit tested.
-- Several files are placeholders (0-length) for upcoming domain/infra/API work.
+- Email verification uses Resend client stub (skips in non-prod without API key).
+- Auth UI pages and shared UI components are not built yet.
+
+## UI Direction (authoritative)
+
+- Visual style: clean, minimalist, black and white only.
+- Layout: generous whitespace, clear typographic hierarchy.
+- Components: build reusable primitives so styling changes are centralized.
+- Avoid heavy decoration, gradients, or bright accent colors.
 
 ## Codebase Map
 
 - `src/app` - App Router UI and API routes.
-- `src/app/api/auth/*/route.ts` - Auth API routes (currently placeholders).
-- `src/lib/auth` - Pure auth utilities (hashing, token logic, policy).
-- `src/lib/db/prisma.ts` - Prisma singleton (Next.js safe).
-- `src/infra/*` - External integrations (email, persistence) - placeholders.
+- `src/app/api/auth/*/route.ts` - Auth API routes.
+- `src/app/api/auth/[...nextauth]/route.ts` - NextAuth handler.
+- `src/lib/auth` - Auth utilities (hashing, policy, credentials, rate limit, nextauth).
+- `src/lib/api` - Shared API error/response helpers and auth logic.
+- `src/lib/db/prisma.ts` - Prisma singleton using adapter-pg + pg pool.
+- `src/infra/email` - Resend client and verification email sender.
+- `src/types/next-auth.d.ts` - NextAuth session/JWT type extensions.
 - `prisma/schema.prisma` - DB models; migrations in `prisma/migrations`.
-- `tests` - Placeholder API/domain tests.
-- `src/lib/auth/__tests__` - Real unit tests for auth helpers.
+- `src/app/api/auth/__tests__` - API auth tests.
+- `src/lib/auth/__tests__` - Auth unit tests (password, tokens, policy, credentials).
+- `src/components` - Shared UI components (to be introduced for auth UI).
+- `src/app/(auth)` - Auth pages (to be introduced).
 
 ## Engineering Standards
 
@@ -49,6 +64,8 @@ A habit is defined independently of dates.
 
 - Login requires verified email and not soft-deleted (see `src/lib/auth/policy.ts`).
 - Email verification uses hashed tokens (see `src/lib/auth/emailVerification.ts`).
+- Login rate limiting is in-memory and per-process (see `src/lib/auth/loginRateLimit.ts`).
+- NextAuth uses JWT sessions and requires `NEXTAUTH_SECRET` in production.
 
 ## Expectations for AI Assistance
 

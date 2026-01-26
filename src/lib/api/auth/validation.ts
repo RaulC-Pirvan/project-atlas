@@ -1,0 +1,31 @@
+import { z } from 'zod';
+
+export const signupSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8).max(72),
+  displayName: z.string().min(2).max(80),
+});
+
+export const signInSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8).max(72),
+});
+
+export const updateAccountSchema = z
+  .object({
+    email: z.string().email().optional(),
+    password: z.string().min(8).max(72).optional(),
+    currentPassword: z.string().min(8).max(72).optional(),
+    displayName: z.string().min(2).max(80).optional(),
+  })
+  .refine((data) => data.email || data.password || data.displayName !== undefined, {
+    message: 'Provide an email or password.',
+  });
+
+export const resendVerificationSchema = z.object({
+  email: z.string().email(),
+});
+
+export const verifyEmailSchema = z.object({
+  token: z.string().min(1),
+});

@@ -1,5 +1,12 @@
 import { defineConfig, devices } from '@playwright/test';
 
+const webServerEnv = {
+  ...process.env,
+  ENABLE_TEST_ENDPOINTS: 'true',
+  NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET ?? 'test-secret',
+  NEXTAUTH_URL: process.env.NEXTAUTH_URL ?? 'http://localhost:3000',
+};
+
 export default defineConfig({
   testDir: './e2e',
   fullyParallel: true,
@@ -25,12 +32,14 @@ export default defineConfig({
     ? {
         command: 'npm run start:test',
         url: 'http://localhost:3000',
+        env: webServerEnv,
         reuseExistingServer: false,
         timeout: 120_000,
       }
     : {
         command: 'npm run dev',
         url: 'http://localhost:3000',
+        env: webServerEnv,
         reuseExistingServer: true,
         timeout: 30_000,
       },

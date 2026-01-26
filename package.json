@@ -19,23 +19,22 @@
     "format": "prettier . --write",
     "format:check": "prettier . --check",
     "ci": "npm run lint && npm run typecheck && npm test && npm run format:check && npm run build",
-    "ci:full": "npm run ci && npm run e2e"
-  },
-  "lint-staged": {
-    "*.{js,jsx,ts,tsx}": [
-      "eslint --fix",
-      "eslint",
-      "prettier --write"
-    ],
-    "*.{json,md,css,scss,yml,yaml}": [
-      "prettier --write"
-    ]
+    "prebuild": "npm run prisma:generate",
+    "pretypecheck": "npm run prisma:generate",
+    "prisma:generate": "prisma generate",
+    "ci:full": "npm run ci && npm run e2e",
+    "prisma:seed": "ts-node prisma/seed.ts"
   },
   "dependencies": {
+    "@prisma/adapter-pg": "^7.3.0",
     "@prisma/client": "^7.3.0",
+    "bcryptjs": "^3.0.3",
     "next": "16.1.4",
+    "next-auth": "^4.24.13",
+    "pg": "^8.17.2",
     "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "react-dom": "19.2.3",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@playwright/test": "^1.58.0",
@@ -43,6 +42,7 @@
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@types/node": "^20",
+    "@types/pg": "^8.16.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@vitest/coverage-v8": "^4.0.18",
@@ -53,10 +53,10 @@
     "eslint-plugin-simple-import-sort": "^12.1.1",
     "eslint-plugin-unused-imports": "^4.3.0",
     "jsdom": "^27.4.0",
-    "lint-staged": "^16.2.7",
     "prettier": "^3.8.1",
     "prisma": "^7.3.0",
     "tailwindcss": "^4",
+    "ts-node": "^10.9.2",
     "typescript": "^5",
     "vitest": "^4.0.18"
   }

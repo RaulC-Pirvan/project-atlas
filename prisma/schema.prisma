@@ -1,14 +1,176 @@
+/// Prisma Client generator
+/// This produces the typed Prisma Client used throghout the app.
 generator client {
   provider = "prisma-client-js"
 }
 
+/// Database connection
 datasource db {
   provider = "postgresql"
 }
 
+/**
+ * AppMeta stores small pieces of application metadata and runtime flags.
+ *
+ * Use cases:
+ * - Feature flags (e.g. "maintenance_mode" = "true")
+ * - Versioning / migrations markers
+ * - Operational toggles ("resend_enabled" = "true")
+ *
+ * Notes:
+ * - Keep values as strings; parse in code.
+ * - This is NOT user-specific; it's app-global.
+ */
 model AppMeta {
   id          String    @id @default(cuid())
   createdAt   DateTime  @default(now())
   key         String    @unique
   value       String
+}
+
+/**
+ * User represents an authenticated account in Project Atlas.
+ *
+ * Key invariants:
+ * - `email` is unique per user.
+ * - `passwordHash` is always stored (Credentials auth).
+ * - `emailVerified` is null until verification completes.
+ * - Soft deletion is supported via `deletedAt`.
+ *
+ * Notes:
+ * - For NextAuth compatibility, keep `emailVerified` naming.
+ */
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  emailVerified DateTime?
+  passwordHash  String
+  displayName   String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
+
+  accounts Account[]
+  sessions Session[]
+  emailVerificationTokens EmailVerificationToken[]
+  passwordResetTokens PasswordResetToken[]
+
+  @@index([email])
+}
+
+/**
+ * Account is a NextAuth model used to link a user to an auth provider.
+ *
+ * In Project Atlas we primarily use Credentials, so this will be mostly empty,
+ * BUT the Prisma Adapter expects this model to exist.
+ *
+ * If OAuth is added later, this becomes critical.
+ */
+model Account {
+  id                  String @id @default(cuid())
+  userId              String
+  type                String
+  provider            String
+  providerAccountId   String
+  refresh_token       String?
+  access_token        String?
+  expires_at          Int?
+  token_type          String?
+  scope               String?
+  id_token            String?
+  session_state       String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+/**
+ * Session is a NextAuth model used for DB-backed sessions.
+ *
+ * Why DB sessions?
+ * - Easy revocation (logout everywhere)
+ * - Password change can invalidate sessions
+ * - Good auditing and production control
+ */
+model Session {
+  id            String @id @default(cuid())
+  sessionToken  String @unique
+  userId        String
+  expires       DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expires])
+}
+
+/**
+ * VerificationToken is a NextAuth model used for email sign-in flows.
+ *
+ * Even if you're not using magic links right now, the Prisma Adapter
+ * expects this model to exist.
+ *
+ * IMPORTANT:
+ * This is NOT your account email-verification token.
+ */
+model VerificationToken {
+  identifier  String
+  token       String @unique
+  expires     DateTime
+
+  @@unique([identifier, token])
+  @@index([expires])
+}
+
+/**
+ * EmailVerificationToken is Project Atlas' account verification token.
+ *
+ * Flow:
+ * - Generate a random token
+ * - Store ONLY its hash in DB (`tokenHash`)
+ * - Email the raw token in a link
+ * - On verify: hash incoming token, compare, set user.emailVerified
+ *
+ * Security:
+ * - Hashing avoids raw token exposure via logs/backups.
+ * - Expiry prevents replay.
+ */
+model EmailVerificationToken {
+  id          String @id @default(cuid())
+  userId      String
+  tokenHash   String @unique
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+/**
+ * PasswordResetToken supports "forgot password" flows.
+ *
+ * Flow:
+ * - Generate random reset token
+ * - Store hash only
+ * - Email reset link
+ * - On use: verify hash, rotate password hash, delete/reset tokens
+ *
+ * Note:
+ * Even if "optional", this is cheap now and painful later. Keep it.
+ */
+model PasswordResetToken {
+  id          String @id @default(cuid())
+  userId      String
+  tokenHash   String @unique
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
 }

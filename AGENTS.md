@@ -23,7 +23,7 @@ A habit is defined independently of dates.
 - Tests in place: Vitest unit/API tests, auth component tests, Playwright auth E2E, habit domain unit tests.
 - Habit domain models implemented (Habit, HabitSchedule, HabitCompletion) with migrations and seed data.
 - Habit domain helpers exist in `src/lib/habits` (dates, schedules, completions, streaks).
-- Habit CRUD API implemented (list/create/update/delete); UI not implemented yet.
+- Habit CRUD API implemented (list/create/update/delete) with a basic habits UI.
 
 ## UI Direction (authoritative)
 
@@ -40,11 +40,13 @@ A habit is defined independently of dates.
 - `src/app/api/account/delete-request/route.ts` - Account deletion request (hard delete).
 - `src/app/api/habits/route.ts` - Habit list/create API.
 - `src/app/api/habits/[id]/route.ts` - Habit update/archive API.
+- `src/app/habits/page.tsx` - Habits page (list/create/edit/delete).
 - `src/app/api/auth/[...nextauth]/route.ts` - NextAuth handler.
 - `src/lib/auth` - Auth utilities (hashing, policy, credentials, rate limit, nextauth).
 - `src/lib/api` - Shared API error/response helpers, auth services, validation.
 - `src/lib/api/habits` - Habit API services and validation.
 - `src/lib/api/habits/__tests__` - Habit API service tests.
+- `src/components/habits` - Habit UI components and tests.
 - `src/lib/db/prisma.ts` - Prisma singleton using adapter-pg + pg pool.
 - `src/lib/habits` - Habit domain helpers (date normalization, schedules, completions, streaks).
 - `src/lib/habits/__tests__` - Habit domain unit tests.

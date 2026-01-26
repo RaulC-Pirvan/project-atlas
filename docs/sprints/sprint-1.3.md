@@ -70,16 +70,16 @@ CI must remain green.
 
 ### Tasks (10)
 
-- [ ] **Task 2.1**: Build habits list page (empty + loading states)
-- [ ] **Task 2.2**: Build create habit form
-- [ ] **Task 2.3**: Add weekday selector component (Mon-Sun)
-- [ ] **Task 2.4**: Build edit habit form (pre-filled)
-- [ ] **Task 2.5**: Add delete flow (confirm intent)
-- [ ] **Task 2.6**: Hook forms to API routes
-- [ ] **Task 2.7**: Normalize error handling and messaging
-- [ ] **Task 2.8**: Ensure UI respects `weekStart` preference
-- [ ] **Task 2.9**: Add component tests for habit forms
-- [ ] **Task 2.10**: Ensure styling uses existing UI primitives
+- [x] **Task 2.1**: Build habits list page (empty + loading states)
+- [x] **Task 2.2**: Build create habit form
+- [x] **Task 2.3**: Add weekday selector component (Mon-Sun)
+- [x] **Task 2.4**: Build edit habit form (pre-filled)
+- [x] **Task 2.5**: Add delete flow (confirm intent)
+- [x] **Task 2.6**: Hook forms to API routes
+- [x] **Task 2.7**: Normalize error handling and messaging
+- [x] **Task 2.8**: Ensure UI respects `weekStart` preference
+- [x] **Task 2.9**: Add component tests for habit forms
+- [x] **Task 2.10**: Ensure styling uses existing UI primitives
 
 ---
 

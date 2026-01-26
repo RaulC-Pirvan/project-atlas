@@ -8,11 +8,12 @@ import { Card } from './Card';
 type ModalProps = {
   open: boolean;
   title: string;
+  eyebrow?: string;
   children: ReactNode;
   footer?: ReactNode;
 };
 
-export function Modal({ open, title, children, footer }: ModalProps) {
+export function Modal({ open, title, eyebrow = 'Account update', children, footer }: ModalProps) {
   const titleId = useId();
 
   if (!open) return null;
@@ -22,7 +23,7 @@ export function Modal({ open, title, children, footer }: ModalProps) {
       <div role="dialog" aria-modal="true" aria-labelledby={titleId} className="w-full max-w-md">
         <Card className="space-y-6">
           <div className="space-y-2">
-            <p className="text-xs uppercase tracking-[0.3em] text-black/60">Account update</p>
+            <p className="text-xs uppercase tracking-[0.3em] text-black/60">{eyebrow}</p>
             <h2 id={titleId} className="text-lg font-semibold">
               {title}
             </h2>

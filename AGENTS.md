@@ -20,8 +20,10 @@ A habit is defined independently of dates.
 - Auth foundation implemented: signup, verify-email, resend-verification, logout, NextAuth Credentials (JWT sessions), middleware protection.
 - Account management API + UI: update email/password/display name; delete account.
 - Email verification uses Resend client; debug token capture plus `/api/auth/debug/verification-token` for tests.
-- Tests in place: Vitest unit/API tests, auth component tests, Playwright auth E2E.
-- Habit domain models and UI are not implemented yet (auth-first groundwork).
+- Tests in place: Vitest unit/API tests, auth component tests, Playwright auth E2E, habit domain unit tests.
+- Habit domain models implemented (Habit, HabitSchedule, HabitCompletion) with migrations and seed data.
+- Habit domain helpers exist in `src/lib/habits` (dates, schedules, completions, streaks).
+- Habit CRUD API implemented (list/create/update/delete); UI not implemented yet.
 
 ## UI Direction (authoritative)
 
@@ -36,10 +38,16 @@ A habit is defined independently of dates.
 - `src/app/api/auth/*/route.ts` - Auth API routes (signup, verify, resend, logout, debug, NextAuth).
 - `src/app/api/account/route.ts` - Account update (email/password/display name).
 - `src/app/api/account/delete-request/route.ts` - Account deletion request (hard delete).
+- `src/app/api/habits/route.ts` - Habit list/create API.
+- `src/app/api/habits/[id]/route.ts` - Habit update/archive API.
 - `src/app/api/auth/[...nextauth]/route.ts` - NextAuth handler.
 - `src/lib/auth` - Auth utilities (hashing, policy, credentials, rate limit, nextauth).
 - `src/lib/api` - Shared API error/response helpers, auth services, validation.
+- `src/lib/api/habits` - Habit API services and validation.
+- `src/lib/api/habits/__tests__` - Habit API service tests.
 - `src/lib/db/prisma.ts` - Prisma singleton using adapter-pg + pg pool.
+- `src/lib/habits` - Habit domain helpers (date normalization, schedules, completions, streaks).
+- `src/lib/habits/__tests__` - Habit domain unit tests.
 - `src/infra/email` - Resend client, verification email sender, debug token store.
 - `src/types/next-auth.d.ts` - NextAuth session/JWT type extensions.
 - `prisma/schema.prisma` - DB models; migrations in `prisma/migrations`; seed in `prisma/seed.ts`.

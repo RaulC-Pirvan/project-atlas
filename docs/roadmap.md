@@ -49,17 +49,17 @@
 
 ### Sprint 1.2: Core Data Model (Prisma)
 
-- [ ] Design Prisma schema:
+- [x] Design Prisma schema:
   - User
   - Habit
   - HabitSchedule (weekday-based)
   - HabitCompletion (habit + date)
   - Streak (derived or stored)
-- [ ] Define indices & constraints
-- [ ] Run initial migration
-- [ ] Seed database with sample users & habits
-- [ ] Unit tests for domain logic (no UI)
-- [ ] Validate weekday → date mapping logic
+- [x] Define indices & constraints
+- [x] Run initial migration
+- [x] Seed database with sample users & habits
+- [x] Unit tests for domain logic (no UI)
+- [x] Validate weekday → date mapping logic
 
 ---
 

@@ -20,7 +20,7 @@ A habit is defined independently of dates.
 - Auth foundation implemented: signup, verify-email, resend-verification, logout, NextAuth Credentials (JWT sessions), middleware protection.
 - Account management API + UI: update email/password/display name; delete account.
 - Email verification uses Resend client; debug token capture plus `/api/auth/debug/verification-token` for tests.
-- Tests in place: Vitest unit/API tests, auth component tests, Playwright auth E2E, habit domain unit tests.
+- Tests in place: Vitest unit/API tests, auth component tests, habit component tests, Playwright auth + habits E2E.
 - Habit domain models implemented (Habit, HabitSchedule, HabitCompletion) with migrations and seed data.
 - Habit domain helpers exist in `src/lib/habits` (dates, schedules, completions, streaks).
 - Habit CRUD API implemented (list/create/update/delete) with a basic habits UI.
@@ -60,7 +60,7 @@ A habit is defined independently of dates.
 - `src/app/(auth)` - Auth pages (sign-in, sign-up, verify-email).
 - `src/app/account/page.tsx` - Account management page.
 - `middleware.ts` - Route protection using NextAuth JWT.
-- `e2e` - Playwright auth E2E tests.
+- `e2e` - Playwright auth + habits E2E tests.
 
 ## Engineering Standards
 

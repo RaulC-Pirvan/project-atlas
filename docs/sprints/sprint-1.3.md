@@ -87,12 +87,12 @@ CI must remain green.
 
 ### Tasks (6)
 
-- [ ] **Task 3.1**: Add `e2e/habits.spec.ts`
-- [ ] **Task 3.2**: E2E: create habit with weekdays
-- [ ] **Task 3.3**: E2E: edit habit title and weekdays
-- [ ] **Task 3.4**: E2E: delete habit removes it from list
-- [ ] **Task 3.5**: E2E: validation blocks empty weekday selection
-- [ ] **Task 3.6**: CI stability check (no flakes)
+- [x] **Task 3.1**: Add `e2e/habits.spec.ts`
+- [x] **Task 3.2**: E2E: create habit with weekdays
+- [x] **Task 3.3**: E2E: edit habit title and weekdays
+- [x] **Task 3.4**: E2E: delete habit removes it from list
+- [x] **Task 3.5**: E2E: validation blocks empty weekday selection
+- [x] **Task 3.6**: CI stability check (no flakes)
 
 ---
 

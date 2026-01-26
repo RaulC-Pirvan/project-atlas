@@ -34,16 +34,16 @@
 
 ### Sprint 1.1: Authentication Foundation
 
-- [ ] Decide auth strategy (custom vs library)
-- [ ] Implement email/password signup
-- [ ] Implement email verification flow (Resend)
-- [ ] Implement login & logout
-- [ ] Implement basic account management (update email/password)
-- [ ] Add account deletion request flow
-- [ ] Add default user avatar (placeholder icon)
-- [ ] Protect authenticated routes (middleware)
-- [ ] Unit tests for auth logic
-- [ ] E2E tests for signup/login/logout
+- [x] Decide auth strategy (custom vs library)
+- [x] Implement email/password signup
+- [x] Implement email verification flow (Resend)
+- [x] Implement login & logout
+- [x] Implement basic account management (update email/password)
+- [x] Add account deletion request flow
+- [x] Add default user avatar (placeholder icon)
+- [x] Protect authenticated routes (middleware)
+- [x] Unit tests for auth logic
+- [x] E2E tests for signup/login/logout
 
 ---
 

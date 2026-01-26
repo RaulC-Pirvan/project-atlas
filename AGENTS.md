@@ -15,14 +15,13 @@ A habit is defined independently of dates.
 
 ## Current State (high-level)
 
-- Next.js App Router + TypeScript + Tailwind CSS.
+- Next.js App Router + TypeScript + Tailwind CSS (v4).
 - PostgreSQL (Neon) + Prisma with `@prisma/adapter-pg` and `pg` pool.
-- Auth foundation: Prisma models for User/Account/Session/VerificationToken/EmailVerificationToken/PasswordResetToken.
-- Auth API routes implemented: signup, verify-email, resend-verification.
-- NextAuth Credentials provider with JWT sessions and callbacks.
-- Domain-level auth helpers exist in `src/lib/auth` and are unit tested.
-- Email verification uses Resend client stub (skips in non-prod without API key).
-- Auth UI pages and shared UI components are built with reusable primitives.
+- Auth foundation implemented: signup, verify-email, resend-verification, logout, NextAuth Credentials (JWT sessions), middleware protection.
+- Account management API + UI: update email/password/display name; delete account.
+- Email verification uses Resend client; debug token capture plus `/api/auth/debug/verification-token` for tests.
+- Tests in place: Vitest unit/API tests, auth component tests, Playwright auth E2E.
+- Habit domain models and UI are not implemented yet (auth-first groundwork).
 
 ## UI Direction (authoritative)
 
@@ -34,19 +33,24 @@ A habit is defined independently of dates.
 ## Codebase Map
 
 - `src/app` - App Router UI and API routes.
-- `src/app/api/auth/*/route.ts` - Auth API routes.
+- `src/app/api/auth/*/route.ts` - Auth API routes (signup, verify, resend, logout, debug, NextAuth).
+- `src/app/api/account/route.ts` - Account update (email/password/display name).
+- `src/app/api/account/delete-request/route.ts` - Account deletion request (hard delete).
 - `src/app/api/auth/[...nextauth]/route.ts` - NextAuth handler.
 - `src/lib/auth` - Auth utilities (hashing, policy, credentials, rate limit, nextauth).
-- `src/lib/api` - Shared API error/response helpers and auth logic.
+- `src/lib/api` - Shared API error/response helpers, auth services, validation.
 - `src/lib/db/prisma.ts` - Prisma singleton using adapter-pg + pg pool.
-- `src/infra/email` - Resend client and verification email sender.
+- `src/infra/email` - Resend client, verification email sender, debug token store.
 - `src/types/next-auth.d.ts` - NextAuth session/JWT type extensions.
-- `prisma/schema.prisma` - DB models; migrations in `prisma/migrations`.
+- `prisma/schema.prisma` - DB models; migrations in `prisma/migrations`; seed in `prisma/seed.ts`.
 - `src/app/api/auth/__tests__` - API auth tests.
 - `src/lib/auth/__tests__` - Auth unit tests (password, tokens, policy, credentials).
-- `src/components` - Shared UI components (auth forms + primitives).
+- `src/components/auth` - Auth/account UI panels and tests.
+- `src/components/ui` - Shared UI primitives.
 - `src/app/(auth)` - Auth pages (sign-in, sign-up, verify-email).
 - `src/app/account/page.tsx` - Account management page.
+- `middleware.ts` - Route protection using NextAuth JWT.
+- `e2e` - Playwright auth E2E tests.
 
 ## Engineering Standards
 
@@ -58,14 +62,20 @@ A habit is defined independently of dates.
 ## Tooling and Commands
 
 - Use `npm` only (no pnpm).
-- Scripts in `package.json`: `npm run lint`, `npm run typecheck`, `npm test`, `npm run format:check`, `npm run build`, `npm run e2e`.
+- Common scripts: `npm run dev`, `npm run lint`, `npm run typecheck`, `npm test`, `npm run e2e`, `npm run format:check`, `npm run build`.
+- Extra scripts: `npm run test:watch`, `npm run test:coverage`, `npm run e2e:ui`, `npm run format`, `npm run lint:fix`, `npm run ci`, `npm run ci:full`.
+- Prisma scripts: `npm run prisma:generate`, `npm run prisma:seed`.
 - Prisma: `migrate dev` for authoring, `migrate deploy` for CI/prod.
 
 ## Auth Policy Notes
 
 - Login requires verified email and not soft-deleted (see `src/lib/auth/policy.ts`).
 - Email verification uses hashed tokens (see `src/lib/auth/emailVerification.ts`).
+- Resend verification rotates tokens; email updates reset `emailVerified` and trigger a new link.
 - Login rate limiting is in-memory and per-process (see `src/lib/auth/loginRateLimit.ts`).
+- Debug verification tokens are stored in-memory and exposed via `/api/auth/debug/verification-token` in non-prod or when `ENABLE_TEST_ENDPOINTS=true`.
+- `ENABLE_TEST_ENDPOINTS=true` skips sending real emails.
+- `/api/auth/logout` clears NextAuth cookies.
 - NextAuth uses JWT sessions and requires `NEXTAUTH_SECRET` in production.
 
 ## Expectations for AI Assistance

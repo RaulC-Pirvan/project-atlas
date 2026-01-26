@@ -1,6 +1,8 @@
+import 'dotenv/config';
+
 import bcrypt from 'bcryptjs';
 
-import { prisma } from '@/lib/db/prisma';
+import { prisma } from '../src/lib/db/prisma';
 
 /**
  * Seed script for Project Atlas.
@@ -50,7 +52,7 @@ async function main() {
    * - upsert makes the script idempotent:
    *   running it multiple times will not create duplicates
    */
-  await prisma.user.upsert({
+  const verifiedUser = await prisma.user.upsert({
     where: { email: 'verified@example.com' },
     update: {},
     create: {
@@ -58,6 +60,8 @@ async function main() {
       passwordHash: verifiedHash,
       emailVerified: new Date(),
       displayName: 'Verified User',
+      timezone: 'America/Los_Angeles',
+      weekStart: 'sun',
     },
   });
 
@@ -69,7 +73,7 @@ async function main() {
    *   - blocked login
    *   - resend verification email
    */
-  await prisma.user.upsert({
+  const unverifiedUser = await prisma.user.upsert({
     where: { email: 'unverified@example.com' },
     update: {},
     create: {
@@ -77,7 +81,69 @@ async function main() {
       passwordHash: unverifiedHash,
       emailVerified: null,
       displayName: 'Unverified User',
+      timezone: 'UTC',
+      weekStart: 'mon',
     },
+  });
+
+  await prisma.habit.deleteMany({
+    where: { userId: { in: [verifiedUser.id, unverifiedUser.id] } },
+  });
+
+  const dateOnlyUtc = (year: number, month: number, day: number) =>
+    new Date(Date.UTC(year, month, day));
+
+  const readHabit = await prisma.habit.create({
+    data: {
+      userId: verifiedUser.id,
+      title: 'Read 10 pages',
+      description: 'Read at least 10 pages of any book.',
+      schedule: {
+        create: [{ weekday: 1 }, { weekday: 3 }, { weekday: 5 }],
+      },
+    },
+  });
+
+  const waterHabit = await prisma.habit.create({
+    data: {
+      userId: verifiedUser.id,
+      title: 'Drink water',
+      description: '8 cups a day.',
+      schedule: {
+        create: [
+          { weekday: 1 },
+          { weekday: 2 },
+          { weekday: 3 },
+          { weekday: 4 },
+          { weekday: 5 },
+          { weekday: 6 },
+          { weekday: 7 },
+        ],
+      },
+    },
+  });
+
+  const workoutHabit = await prisma.habit.create({
+    data: {
+      userId: verifiedUser.id,
+      title: 'Workout',
+      description: 'Strength or cardio session.',
+      schedule: {
+        create: [{ weekday: 2 }, { weekday: 4 }, { weekday: 6 }],
+      },
+    },
+  });
+
+  await prisma.habitCompletion.createMany({
+    data: [
+      { habitId: readHabit.id, date: dateOnlyUtc(2026, 0, 13), completedAt: new Date() },
+      { habitId: readHabit.id, date: dateOnlyUtc(2026, 0, 15), completedAt: new Date() },
+      { habitId: waterHabit.id, date: dateOnlyUtc(2026, 0, 13), completedAt: new Date() },
+      { habitId: waterHabit.id, date: dateOnlyUtc(2026, 0, 14), completedAt: new Date() },
+      { habitId: waterHabit.id, date: dateOnlyUtc(2026, 0, 15), completedAt: new Date() },
+      { habitId: workoutHabit.id, date: dateOnlyUtc(2026, 0, 14), completedAt: new Date() },
+    ],
+    skipDuplicates: true,
   });
 }
 

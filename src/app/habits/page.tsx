@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 
-import { AuthShell } from '../../components/auth/AuthShell';
 import { HabitsPanel } from '../../components/habits/HabitsPanel';
+import { AppShell } from '../../components/layout/AppShell';
 import { listHabits } from '../../lib/api/habits/habits';
 import { getServerAuthSession } from '../../lib/auth/session';
 import { prisma } from '../../lib/db/prisma';
@@ -29,8 +29,8 @@ export default async function HabitsPage() {
   });
 
   return (
-    <AuthShell title="Habits" subtitle="Build routines that stay with you.">
+    <AppShell title="Habits" subtitle="Build routines that stay with you.">
       <HabitsPanel initialHabits={habits} weekStart={user.weekStart} />
-    </AuthShell>
+    </AppShell>
   );
 }

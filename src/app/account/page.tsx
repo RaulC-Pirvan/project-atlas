@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 
 import { AccountPanel } from '../../components/auth/AccountPanel';
-import { AuthShell } from '../../components/auth/AuthShell';
+import { AppShell } from '../../components/layout/AppShell';
 import { getServerAuthSession } from '../../lib/auth/session';
 
 export default async function AccountPage() {
@@ -12,11 +12,11 @@ export default async function AccountPage() {
   }
 
   return (
-    <AuthShell title="Account" subtitle="Manage your profile and security.">
+    <AppShell title="Account" subtitle="Manage your profile and security.">
       <AccountPanel
         email={session.user.email ?? ''}
         displayName={session.user.name ?? session.user.email ?? 'User'}
       />
-    </AuthShell>
+    </AppShell>
   );
 }

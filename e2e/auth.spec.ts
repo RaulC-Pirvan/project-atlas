@@ -82,7 +82,10 @@ test('logout ends session', async ({ page, request }) => {
   await signIn(page, email, password);
   await expect(page).toHaveURL(/\/account/);
 
-  await page.getByRole('button', { name: /sign out/i }).click();
+  await page
+    .getByRole('navigation')
+    .getByRole('button', { name: /sign out/i })
+    .click();
   await expect(page).toHaveURL(/\/sign-in/);
 
   await page.goto('/account');
@@ -120,7 +123,10 @@ test('account update works', async ({ page, request }) => {
   await page.getByRole('button', { name: /update password/i }).click();
   await expect(page.getByText('Password updated.')).toBeVisible();
 
-  await page.getByRole('button', { name: /sign out/i }).click();
+  await page
+    .getByRole('navigation')
+    .getByRole('button', { name: /sign out/i })
+    .click();
   await expect(page).toHaveURL(/\/sign-in/);
 
   await signIn(page, email, newPassword);

@@ -1,11 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 import { Button } from '../ui/Button';
 import { FormField } from '../ui/FormField';
 import { Input } from '../ui/Input';
-import { Notice } from '../ui/Notice';
+import { type ToastItem, ToastStack } from '../ui/Toast';
 import { normalizeWeekdays, type WeekStart } from './weekdays';
 import { WeekdaySelector } from './WeekdaySelector';
 
@@ -39,23 +39,45 @@ export function HabitForm({
   const [weekdays, setWeekdays] = useState(
     initialValues?.weekdays ? normalizeWeekdays(initialValues.weekdays) : DEFAULT_WEEKDAYS,
   );
-  const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [toasts, setToasts] = useState<ToastItem[]>([]);
+  const toastIdRef = useRef(0);
+
+  const pushToast = (message: string, tone: ToastItem['tone'] = 'neutral') => {
+    const id = toastIdRef.current + 1;
+    toastIdRef.current = id;
+    setToasts((prev) => [...prev, { id, tone, message, state: 'entering' }]);
+
+    window.requestAnimationFrame(() => {
+      setToasts((prev) =>
+        prev.map((toast) => (toast.id === id ? { ...toast, state: 'open' } : toast)),
+      );
+    });
+
+    window.setTimeout(() => {
+      setToasts((prev) =>
+        prev.map((toast) => (toast.id === id ? { ...toast, state: 'closing' } : toast)),
+      );
+    }, 4500);
+
+    window.setTimeout(() => {
+      setToasts((prev) => prev.filter((toast) => toast.id !== id));
+    }, 4800);
+  };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setError(null);
 
     const normalizedTitle = title.trim();
     const normalizedWeekdays = normalizeWeekdays(weekdays);
 
     if (!normalizedTitle) {
-      setError('Title is required.');
+      pushToast('Title is required.', 'error');
       return;
     }
 
     if (normalizedWeekdays.length === 0) {
-      setError('Select at least one weekday.');
+      pushToast('Select at least one weekday.', 'error');
       return;
     }
 
@@ -76,7 +98,7 @@ export function HabitForm({
         setWeekdays(DEFAULT_WEEKDAYS);
       }
     } catch {
-      setError('Something went wrong. Try again.');
+      pushToast('Something went wrong. Try again.', 'error');
     } finally {
       setSubmitting(false);
     }
@@ -94,8 +116,6 @@ export function HabitForm({
             : 'Update the habit details and schedule.'}
         </p>
       </div>
-
-      {error ? <Notice tone="error">{error}</Notice> : null}
 
       <FormField id={`${mode}-habit-title`} label="Title" error={null}>
         <Input
@@ -137,6 +157,8 @@ export function HabitForm({
           </Button>
         ) : null}
       </div>
+
+      <ToastStack toasts={toasts} />
     </form>
   );
 }

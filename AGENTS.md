@@ -93,3 +93,4 @@ A habit is defined independently of dates.
 - Think like a senior engineer and catch architectural mistakes early.
 - Prefer phased, test-driven implementation.
 - Do not suggest shortcuts that undermine quality.
+- For form validation, do not display inline error messages; use toast notifications for user-facing errors.

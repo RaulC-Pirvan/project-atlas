@@ -137,18 +137,18 @@ CI must remain green.
 
 ### Tasks (12)
 
-- [ ] **Task 3.1**: Implement weekday -> date matching helper
-- [ ] **Task 3.2**: Implement "habits for a day" query helper
-- [ ] **Task 3.3**: Implement completion create/update rules
-- [ ] **Task 3.4**: Implement completion idempotency (no duplicates)
-- [ ] **Task 3.5**: Implement streak calculation (derived or stored)
-- [ ] **Task 3.6**: Unit tests for weekday mapping logic
-- [ ] **Task 3.7**: Unit tests for completion uniqueness
-- [ ] **Task 3.8**: Unit tests for streak logic
-- [ ] **Task 3.9**: Unit tests for schedule edge cases
-- [ ] **Task 3.10**: Verify timezone/date boundary behavior
-- [ ] **Task 3.11**: Add fixtures or factories for habit domain tests
-- [ ] **Task 3.12**: Confirm no Prisma types leak into pure domain helpers
+- [x] **Task 3.1**: Implement weekday -> date matching helper
+- [x] **Task 3.2**: Implement "habits for a day" query helper
+- [x] **Task 3.3**: Implement completion create/update rules
+- [x] **Task 3.4**: Implement completion idempotency (no duplicates)
+- [x] **Task 3.5**: Implement streak calculation (derived or stored)
+- [x] **Task 3.6**: Unit tests for weekday mapping logic
+- [x] **Task 3.7**: Unit tests for completion uniqueness
+- [x] **Task 3.8**: Unit tests for streak logic
+- [x] **Task 3.9**: Unit tests for schedule edge cases
+- [x] **Task 3.10**: Verify timezone/date boundary behavior
+- [x] **Task 3.11**: Add fixtures or factories for habit domain tests
+- [x] **Task 3.12**: Confirm no Prisma types leak into pure domain helpers
 
 ---
 

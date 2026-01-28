@@ -23,7 +23,7 @@ with correct weekday logic and test coverage.
 - [ ] Monthly calendar view
 - [ ] Correct date <-> weekday mapping
 - [ ] Display which days have active habits
-- [ ] Click day -> open daily view
+- [ ] Click day -> open daily panel
 - [ ] Responsive layout (desktop-first, mobile-safe)
 - [ ] Unit tests for calendar date logic
 - [ ] E2E tests for calendar navigation
@@ -65,7 +65,7 @@ CI must remain green.
 
 - [x] **Task 2.1**: Monthly calendar view
 - [x] **Task 2.2**: Display which days have active habits
-- [x] **Task 2.3**: Click day -> open daily view
+- [x] **Task 2.3**: Click day -> open daily panel
 - [x] **Task 2.4**: Responsive layout (desktop-first, mobile-safe)
 
 ---

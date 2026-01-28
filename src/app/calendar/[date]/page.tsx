@@ -1,10 +1,7 @@
-import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 
-import { AppShell } from '../../../components/layout/AppShell';
 import { getServerAuthSession } from '../../../lib/auth/session';
 import { prisma } from '../../../lib/db/prisma';
-import { toUtcDateFromParts } from '../../../lib/habits/dates';
 
 type RouteParams = {
   date: string;
@@ -34,6 +31,10 @@ function formatMonthParam(year: number, month: number): string {
   return `${year}-${String(month).padStart(2, '0')}`;
 }
 
+function formatDateParam(year: number, month: number, day: number): string {
+  return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+}
+
 export default async function CalendarDayPage({
   params,
 }: {
@@ -61,27 +62,7 @@ export default async function CalendarDayPage({
     notFound();
   }
 
-  const date = toUtcDateFromParts(parts);
-  const label = new Intl.DateTimeFormat('en-US', {
-    timeZone: 'UTC',
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric',
-  }).format(date);
-
-  const monthHref = `/calendar?month=${formatMonthParam(parts.year, parts.month)}`;
-
-  return (
-    <AppShell title="Daily View" subtitle={label}>
-      <div className="space-y-4 text-sm text-black/60">
-        <p>Daily habit completion lands in Sprint 2.2.</p>
-        <Link
-          href={monthHref}
-          className="inline-flex text-xs font-semibold uppercase tracking-[0.3em] text-black"
-        >
-          Back to calendar
-        </Link>
-      </div>
-    </AppShell>
-  );
+  const monthParam = formatMonthParam(parts.year, parts.month);
+  const dateParam = formatDateParam(parts.year, parts.month, parts.day);
+  redirect(`/calendar?month=${monthParam}&date=${dateParam}`);
 }

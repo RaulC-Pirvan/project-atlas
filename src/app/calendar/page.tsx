@@ -8,6 +8,7 @@ import { getServerAuthSession } from '../../lib/auth/session';
 import { prisma } from '../../lib/db/prisma';
 import { getMonthGrid } from '../../lib/habits/calendar';
 import {
+  getIsoWeekdayFromUtcDate,
   getLocalDateParts,
   normalizeToUtcDate,
   toUtcDateFromParts,
@@ -16,6 +17,7 @@ import {
 
 type SearchParams = {
   month?: string | string[];
+  date?: string | string[];
 };
 
 function parseMonthParam(value: string | string[] | undefined): { year: number; month: number } | null {
@@ -38,6 +40,30 @@ function formatMonthParam(year: number, month: number): string {
 function shiftMonth(year: number, month: number, delta: number): { year: number; month: number } {
   const date = new Date(Date.UTC(year, month - 1 + delta, 1));
   return { year: date.getUTCFullYear(), month: date.getUTCMonth() + 1 };
+}
+
+function parseDateParam(
+  value: string | string[] | undefined,
+): { year: number; month: number; day: number } | null {
+  const raw = Array.isArray(value) ? value[0] : value;
+  if (!raw) return null;
+  const match = /^\d{4}-\d{2}-\d{2}$/.exec(raw);
+  if (!match) return null;
+  const [yearPart, monthPart, dayPart] = raw.split('-');
+  const year = Number(yearPart);
+  const month = Number(monthPart);
+  const day = Number(dayPart);
+  if (!Number.isFinite(year) || !Number.isFinite(month) || !Number.isFinite(day)) return null;
+  if (year < 1 || month < 1 || month > 12 || day < 1 || day > 31) return null;
+  const date = new Date(Date.UTC(year, month - 1, day));
+  if (
+    date.getUTCFullYear() !== year ||
+    date.getUTCMonth() !== month - 1 ||
+    date.getUTCDate() !== day
+  ) {
+    return null;
+  }
+  return { year, month, day };
 }
 
 export default async function CalendarPage({
@@ -68,8 +94,9 @@ export default async function CalendarPage({
   const localParts = getLocalDateParts(now, timeZone);
   const resolvedSearchParams = await searchParams;
   const requested = parseMonthParam(resolvedSearchParams?.month);
-  const year = requested?.year ?? localParts.year;
-  const month = requested?.month ?? localParts.month;
+  const requestedDate = parseDateParam(resolvedSearchParams?.date);
+  const year = requested?.year ?? requestedDate?.year ?? localParts.year;
+  const month = requested?.month ?? requestedDate?.month ?? localParts.month;
 
   const monthGrid = getMonthGrid({ year, month, weekStart: user.weekStart });
   const habits = await listHabits({ prisma, userId: session.user.id, includeArchived: false });
@@ -81,6 +108,22 @@ export default async function CalendarPage({
     }
   }
 
+  const selectedDate = requestedDate ? toUtcDateFromParts(requestedDate) : null;
+  const selectedKey = selectedDate ? toUtcDateKey(selectedDate) : null;
+  const selectedLabel = selectedDate
+    ? new Intl.DateTimeFormat('en-US', {
+        timeZone: 'UTC',
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric',
+      }).format(selectedDate)
+    : null;
+  const selectedHabits = selectedDate
+    ? habits.filter((habit) =>
+        habit.weekdays.some((weekday) => weekday === getIsoWeekdayFromUtcDate(selectedDate)),
+      )
+    : [];
+
   const dateFormatter = new Intl.DateTimeFormat('en-US', {
     timeZone: 'UTC',
     month: 'long',
@@ -88,14 +131,17 @@ export default async function CalendarPage({
     year: 'numeric',
   });
 
+  const monthParam = formatMonthParam(year, month);
   const weeks = monthGrid.weeks.map((week) =>
     week.map((day) => ({
       key: day.key,
       day: day.day,
       inMonth: day.inMonth,
       isToday: day.key === todayKey,
+      isSelected: !!selectedKey && day.key === selectedKey,
       hasHabits: day.inMonth && activeWeekdays.has(day.isoWeekday),
       label: dateFormatter.format(day.date),
+      href: `/calendar?month=${monthParam}&date=${day.key}`,
     })),
   );
 
@@ -124,23 +170,73 @@ export default async function CalendarPage({
           </div>
         ) : null}
 
-        <CalendarMonth
-          monthLabel={monthLabel}
-          weekStart={user.weekStart}
-          weeks={weeks}
-          prevHref={prevHref}
-          nextHref={nextHref}
-        />
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
+          <div className="space-y-6 lg:flex-1">
+            <CalendarMonth
+              monthLabel={monthLabel}
+              weekStart={user.weekStart}
+              weeks={weeks}
+              prevHref={prevHref}
+              nextHref={nextHref}
+            />
 
-        <div className="flex flex-wrap items-center gap-4 text-xs uppercase tracking-[0.25em] text-black/50">
-          <span className="inline-flex items-center gap-2">
-            <span className="h-1.5 w-1.5 rounded-full bg-black" aria-hidden="true" />
-            Active habit day
-          </span>
-          <span className="inline-flex items-center gap-2">
-            <span className="h-3 w-3 rounded border border-black" aria-hidden="true" />
-            Today
-          </span>
+            <div className="flex flex-wrap items-center gap-4 text-xs uppercase tracking-[0.25em] text-black/50">
+              <span className="inline-flex items-center gap-2">
+                <span className="h-1.5 w-1.5 rounded-full bg-black" aria-hidden="true" />
+                Active habit day
+              </span>
+              <span className="inline-flex items-center gap-2">
+                <span className="h-3 w-3 rounded border border-black" aria-hidden="true" />
+                Today
+              </span>
+              <span className="inline-flex items-center gap-2">
+                <span className="h-3 w-3 rounded-full border border-black" aria-hidden="true" />
+                Selected day
+              </span>
+            </div>
+          </div>
+
+          <aside className="lg:w-80">
+            <div className="rounded-2xl border border-black/10 px-6 py-6">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.3em] text-black/60">
+                    Selected day
+                  </p>
+                  <h3 className="text-lg font-semibold">
+                    {selectedLabel ?? 'Pick a day'}
+                  </h3>
+                </div>
+                {selectedKey ? (
+                  <Link
+                    href={`/calendar?month=${monthParam}`}
+                    className="text-xs font-semibold uppercase tracking-[0.3em] text-black/60"
+                  >
+                    Clear
+                  </Link>
+                ) : null}
+              </div>
+
+              <div className="mt-5 space-y-3 text-sm text-black/70">
+                {!selectedKey ? (
+                  <p>Select a day to see scheduled habits.</p>
+                ) : selectedHabits.length === 0 ? (
+                  <p>No habits scheduled for this day.</p>
+                ) : (
+                  <ul className="space-y-3">
+                    {selectedHabits.map((habit) => (
+                      <li key={habit.id} className="rounded-xl border border-black/10 px-4 py-3">
+                        <p className="text-sm font-semibold text-black">{habit.title}</p>
+                        {habit.description ? (
+                          <p className="text-xs text-black/60">{habit.description}</p>
+                        ) : null}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </div>
+          </aside>
         </div>
       </div>
     </AppShell>

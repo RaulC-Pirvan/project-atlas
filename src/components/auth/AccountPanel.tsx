@@ -8,26 +8,30 @@ import { FormField } from '../ui/FormField';
 import { Input } from '../ui/Input';
 import { Modal } from '../ui/Modal';
 import { type ToastItem, ToastStack } from '../ui/Toast';
+import type { WeekStart } from '../habits/weekdays';
 import { SignOutButton } from './SignOutButton';
 
 type AccountPanelProps = {
   email: string;
   displayName: string;
+  weekStart: WeekStart;
 };
 
 type AccountResponse = {
   ok: boolean;
 };
 
-export function AccountPanel({ email, displayName }: AccountPanelProps) {
+export function AccountPanel({ email, displayName, weekStart }: AccountPanelProps) {
   const [nextEmail, setNextEmail] = useState(email);
   const [displayNameInput, setDisplayNameInput] = useState(displayName);
+  const [weekStartInput, setWeekStartInput] = useState<WeekStart>(weekStart);
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [currentPassword, setCurrentPassword] = useState('');
   const [deleteConfirm, setDeleteConfirm] = useState('');
   const [toasts, setToasts] = useState<ToastItem[]>([]);
   const [updatingName, setUpdatingName] = useState(false);
+  const [updatingWeekStart, setUpdatingWeekStart] = useState(false);
   const [updatingEmail, setUpdatingEmail] = useState(false);
   const [updatingPassword, setUpdatingPassword] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -37,6 +41,7 @@ export function AccountPanel({ email, displayName }: AccountPanelProps) {
   const [deleteConfirmError, setDeleteConfirmError] = useState(false);
   const [currentPasswordError, setCurrentPasswordError] = useState(false);
   const [baselineDisplayName, setBaselineDisplayName] = useState(displayName);
+  const [baselineWeekStart, setBaselineWeekStart] = useState<WeekStart>(weekStart);
 
   const deleteConfirmInvalid = deleteConfirmError;
   const toastIdRef = useRef(0);
@@ -159,6 +164,44 @@ export function AccountPanel({ email, displayName }: AccountPanelProps) {
       pushToast('Email update is not available yet.', 'error');
     } finally {
       setUpdatingEmail(false);
+    }
+  };
+
+  const handleWeekStartUpdate = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (weekStartInput === baselineWeekStart) {
+      pushToast('No changes to update.', 'neutral');
+      return;
+    }
+
+    setUpdatingWeekStart(true);
+
+    try {
+      const response = await fetch('/api/account', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          weekStart: weekStartInput,
+        }),
+      });
+      const body = await parseJson<AccountResponse>(response);
+
+      if (!response.ok || !body?.ok) {
+        if (response.status === 404) {
+          pushToast('Week start updates are not available yet.', 'error');
+          return;
+        }
+        pushToast(getApiErrorMessage(response, body), 'error');
+        return;
+      }
+
+      setBaselineWeekStart(weekStartInput);
+      pushToast('Week start updated.', 'success');
+    } catch {
+      pushToast('Week start update is not available yet.', 'error');
+    } finally {
+      setUpdatingWeekStart(false);
     }
   };
 
@@ -293,6 +336,38 @@ export function AccountPanel({ email, displayName }: AccountPanelProps) {
         </FormField>
         <Button type="submit" variant="outline" className="w-full" disabled={updatingName}>
           {updatingName ? 'Updating...' : 'Update display name'}
+        </Button>
+      </form>
+
+      <form className="space-y-6 border-t border-black/10 pt-6" onSubmit={handleWeekStartUpdate}>
+        <div className="space-y-1">
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-black/80">
+            Week start
+          </p>
+          <p className="text-sm text-black/60">Choose how the calendar week begins.</p>
+        </div>
+        <FormField id="account-week-start" label="Week starts on" error={null}>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              type="button"
+              size="sm"
+              variant={weekStartInput === 'mon' ? 'primary' : 'outline'}
+              onClick={() => setWeekStartInput('mon')}
+            >
+              Monday
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant={weekStartInput === 'sun' ? 'primary' : 'outline'}
+              onClick={() => setWeekStartInput('sun')}
+            >
+              Sunday
+            </Button>
+          </div>
+        </FormField>
+        <Button type="submit" variant="outline" className="w-full" disabled={updatingWeekStart}>
+          {updatingWeekStart ? 'Updating...' : 'Update week start'}
         </Button>
       </form>
 

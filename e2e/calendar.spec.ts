@@ -45,7 +45,7 @@ async function createVerifiedUser(page: Page, request: APIRequestContext, prefix
   return email;
 }
 
-test('calendar navigation opens daily view', async ({ page, request }) => {
+test('calendar navigation opens day panel', async ({ page, request }) => {
   await createVerifiedUser(page, request, 'calendar-nav');
 
   await page.goto('/calendar?month=2026-01');
@@ -60,6 +60,6 @@ test('calendar navigation opens daily view', async ({ page, request }) => {
   });
   await expect(febLink).toBeVisible({ timeout: 15_000 });
   await febLink.click();
-  await expect(page.getByRole('heading', { name: /daily view/i })).toBeVisible();
-  await expect(page.getByText('February 5, 2026')).toBeVisible();
+  await expect(page).toHaveURL(/calendar\?month=2026-02&date=2026-02-05/);
+  await expect(page.getByRole('heading', { name: 'February 5, 2026' })).toBeVisible();
 });

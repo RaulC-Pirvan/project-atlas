@@ -10,8 +10,10 @@ function makeDay(day: number, hasHabits: boolean) {
     day,
     inMonth: true,
     isToday: false,
+    isSelected: false,
     hasHabits,
     label: `February ${day}, 2026`,
+    href: `/calendar?month=2026-02&date=2026-02-${padded}`,
   };
 }
 

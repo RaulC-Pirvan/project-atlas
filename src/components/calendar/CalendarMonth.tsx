@@ -7,8 +7,10 @@ export type CalendarDayView = {
   day: number;
   inMonth: boolean;
   isToday: boolean;
+  isSelected: boolean;
   hasHabits: boolean;
   label: string;
+  href: string;
 };
 
 export type CalendarWeekView = CalendarDayView[];
@@ -68,11 +70,15 @@ export function CalendarMonth({
               const mutedClasses = day.inMonth ? 'text-black' : 'text-black/30';
               const hoverClasses = day.inMonth ? 'hover:bg-black/5 focus-visible:bg-black/5' : '';
               const todayClasses = day.isToday ? 'ring-1 ring-black ring-inset' : '';
+              const selectedClasses = day.isSelected
+                ? 'ring-2 ring-black ring-inset bg-black/5'
+                : '';
               const cellClasses = [
                 baseCellClasses,
                 mutedClasses,
                 hoverClasses,
                 todayClasses,
+                selectedClasses,
                 'focus-visible:outline-none',
                 'focus-visible:ring-2',
                 'focus-visible:ring-black/20',
@@ -104,7 +110,7 @@ export function CalendarMonth({
               return (
                 <Link
                   key={day.key}
-                  href={`/calendar/${day.key}`}
+                  href={day.href}
                   className={cellClasses}
                   aria-label={`Open daily view for ${day.label}`}
                 >

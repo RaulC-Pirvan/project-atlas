@@ -17,10 +17,14 @@ export const updateAccountSchema = z
     password: z.string().min(8).max(72).optional(),
     currentPassword: z.string().min(8).max(72).optional(),
     displayName: z.string().min(2).max(80).optional(),
+    weekStart: z.enum(['sun', 'mon']).optional(),
   })
-  .refine((data) => data.email || data.password || data.displayName !== undefined, {
-    message: 'Provide an email or password.',
-  });
+  .refine(
+    (data) => data.email || data.password || data.displayName !== undefined || data.weekStart,
+    {
+      message: 'Provide an email, password, display name, or week start.',
+    },
+  );
 
 export const resendVerificationSchema = z.object({
   email: z.string().email(),

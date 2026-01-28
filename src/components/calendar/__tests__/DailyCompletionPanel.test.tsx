@@ -3,13 +3,16 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { DailyCompletionPanel } from '../DailyCompletionPanel';
 
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({ refresh: vi.fn() }),
+}));
+
 describe('DailyCompletionPanel', () => {
   it('renders a prompt when no day is selected', () => {
     render(
       <DailyCompletionPanel
         selectedDateKey={null}
         selectedLabel={null}
-        clearHref="/calendar?month=2026-02"
         habits={[]}
         initialCompletedHabitIds={[]}
         isFuture={false}
@@ -33,7 +36,6 @@ describe('DailyCompletionPanel', () => {
       <DailyCompletionPanel
         selectedDateKey="2026-02-05"
         selectedLabel="February 5, 2026"
-        clearHref="/calendar?month=2026-02"
         habits={[{ id: 'h1', title: 'Read', description: 'Read daily' }]}
         initialCompletedHabitIds={[]}
         isFuture={false}
@@ -56,7 +58,6 @@ describe('DailyCompletionPanel', () => {
       <DailyCompletionPanel
         selectedDateKey="2026-02-10"
         selectedLabel="February 10, 2026"
-        clearHref="/calendar?month=2026-02"
         habits={[{ id: 'h1', title: 'Read', description: null }]}
         initialCompletedHabitIds={[]}
         isFuture={true}

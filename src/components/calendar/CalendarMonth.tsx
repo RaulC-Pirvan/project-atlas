@@ -54,7 +54,7 @@ export function CalendarMonth({
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-2xl border border-black/10">
+      <div className="overflow-hidden border border-black/10">
         <div className="grid grid-cols-7 gap-px bg-black/10">
           {weekdayOrder.map((weekday) => (
             <div
@@ -71,31 +71,26 @@ export function CalendarMonth({
               const progressPercent =
                 day.totalCount > 0 ? Math.min(100, (day.completedCount / day.totalCount) * 100) : 0;
               const baseCellClasses =
-                'group flex min-h-[86px] flex-col justify-between bg-white px-3 py-2 text-left text-sm transition';
+                'group flex min-h-[86px] flex-col justify-between px-3 py-2 text-left text-sm motion-safe:transition-colors motion-safe:duration-200 motion-safe:ease-out motion-reduce:transition-none';
               const mutedClasses = day.inMonth ? 'text-black' : 'text-black/30';
-              const completeClasses = isComplete ? 'bg-black text-white' : '';
+              const backgroundClasses = isComplete ? 'bg-[#FAB95B] text-white' : 'bg-white';
               const hoverClasses = day.inMonth
                 ? isComplete
-                  ? 'hover:bg-black/90 focus-visible:bg-black/90'
+                  ? 'hover:bg-[#E9A543] focus-visible:bg-[#E9A543]'
                   : 'hover:bg-black/5 focus-visible:bg-black/5'
                 : '';
-              const todayClasses = day.isToday
-                ? isComplete
-                  ? 'ring-1 ring-white/60 ring-inset'
-                  : 'ring-1 ring-black ring-inset'
-                : '';
+              const todayClasses = day.isToday ? 'ring-1 ring-black ring-inset' : '';
               const selectedClasses = day.isSelected
                 ? isComplete
-                  ? 'ring-2 ring-white ring-inset'
+                  ? 'ring-2 ring-black ring-inset'
                   : 'ring-2 ring-black ring-inset bg-black/5'
                 : '';
-              const focusClasses = isComplete
-                ? 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60'
-                : 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20';
+              const focusClasses =
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20';
               const cellClasses = [
                 baseCellClasses,
                 mutedClasses,
-                completeClasses,
+                backgroundClasses,
                 hoverClasses,
                 todayClasses,
                 selectedClasses,
@@ -122,7 +117,7 @@ export function CalendarMonth({
                           <div
                             className={`h-full rounded-full ${
                               isComplete ? 'bg-white' : 'bg-black'
-                            }`}
+                            } motion-safe:transition-[width] motion-safe:duration-300 motion-safe:ease-out motion-reduce:transition-none`}
                             style={{ width: `${progressPercent}%` }}
                           />
                         </div>

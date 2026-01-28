@@ -62,9 +62,9 @@ CI must remain green.
 
 ### Tasks (3)
 
-- [ ] **Task 2.1**: Add subtle completion sound (toggleable)
-- [ ] **Task 2.2**: Add smooth transitions for check/uncheck and tile state
-- [ ] **Task 2.3**: Ensure motion respects reduced-motion preferences
+- [x] **Task 2.1**: Add subtle completion sound (toggleable)
+- [x] **Task 2.2**: Add smooth transitions for check/uncheck and tile state
+- [x] **Task 2.3**: Ensure motion respects reduced-motion preferences
 
 ---
 
@@ -72,9 +72,9 @@ CI must remain green.
 
 ### Tasks (3)
 
-- [ ] **Task 3.1**: Accessibility audit for contrast + focus states
-- [ ] **Task 3.2**: Add Playwright visual regression coverage
-- [ ] **Task 3.3**: Stabilize snapshots across browsers
+- [x] **Task 3.1**: Accessibility audit for contrast + focus states
+- [x] **Task 3.2**: Add Playwright visual regression coverage
+- [x] **Task 3.3**: Stabilize snapshots across browsers
 
 ---
 

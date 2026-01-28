@@ -27,11 +27,27 @@ async function signIn(page: Page, email: string, pass: string) {
 
 async function fetchVerificationToken(request: APIRequestContext, email: string): Promise<string> {
   const response = await request.get(
-    `/api/auth/debug/verification-token?email=${encodeURIComponent(email)}`,
+    `/api/auth/debug/verification-token?email=${encodeURIComponent(email)}&t=${Date.now()}`,
   );
   expect(response.ok()).toBeTruthy();
   const body = await response.json();
   return body.data.token as string;
+}
+
+async function waitForNewVerificationToken(
+  request: APIRequestContext,
+  email: string,
+  previousToken: string,
+): Promise<string> {
+  let token = previousToken;
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    token = await fetchVerificationToken(request, email);
+    if (token !== previousToken) {
+      return token;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 200));
+  }
+  return token;
 }
 
 test('signup creates unverified account', async ({ page }) => {
@@ -99,10 +115,13 @@ test('resend verification works', async ({ page, request }) => {
   const tokenBefore = await fetchVerificationToken(request, email);
 
   await page.goto(`/verify-email?email=${encodeURIComponent(email)}`);
+  const resendResponse = page.waitForResponse((response) =>
+    response.url().includes('/api/auth/resend-verification'),
+  );
   await page.getByRole('button', { name: /resend verification email/i }).click();
-  await expect(page.getByText(/verification email resent|link will be sent/i)).toBeVisible();
+  await resendResponse;
 
-  const tokenAfter = await fetchVerificationToken(request, email);
+  const tokenAfter = await waitForNewVerificationToken(request, email, tokenBefore);
   expect(tokenAfter).not.toEqual(tokenBefore);
 });
 

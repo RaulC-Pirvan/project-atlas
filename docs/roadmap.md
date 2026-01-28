@@ -103,12 +103,12 @@
 
 ### Sprint 2.3: Visual Feedback & Delight
 
-- [ ] Day tile progress indicator
-- [ ] Fully completed day → golden state
-- [ ] Completion sound (configurable / subtle)
-- [ ] Smooth UI transitions
-- [ ] Accessibility considerations
-- [ ] Visual regression tests (Playwright)
+- [x] Day tile progress indicator
+- [x] Fully completed day → golden state
+- [x] Completion sound (configurable / subtle)
+- [x] Smooth UI transitions
+- [x] Accessibility considerations
+- [x] Visual regression tests (Playwright)
 
 ---
 

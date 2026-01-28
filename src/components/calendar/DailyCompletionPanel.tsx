@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 
 import { getApiErrorMessage, parseJson } from '../../lib/api/client';
@@ -25,7 +25,6 @@ type CompletionResponse = {
 type DailyCompletionPanelProps = {
   selectedDateKey: string | null;
   selectedLabel: string | null;
-  clearHref: string;
   habits: HabitSummary[];
   initialCompletedHabitIds: string[];
   isFuture: boolean;
@@ -34,11 +33,11 @@ type DailyCompletionPanelProps = {
 export function DailyCompletionPanel({
   selectedDateKey,
   selectedLabel,
-  clearHref,
   habits,
   initialCompletedHabitIds,
   isFuture,
 }: DailyCompletionPanelProps) {
+  const router = useRouter();
   const [completedIds, setCompletedIds] = useState<string[]>(initialCompletedHabitIds);
   const [pendingIds, setPendingIds] = useState<string[]>([]);
   const [toasts, setToasts] = useState<ToastItem[]>([]);
@@ -72,6 +71,45 @@ export function DailyCompletionPanel({
     }, 4800);
   };
 
+  const playDing = (tone: 'habit' | 'day') => {
+    if (typeof window === 'undefined') return;
+    type WebkitWindow = typeof window & { webkitAudioContext?: typeof AudioContext };
+    const AudioContextCtor = window.AudioContext || (window as WebkitWindow).webkitAudioContext;
+    if (!AudioContextCtor) return;
+
+    const context = new AudioContextCtor();
+    const now = context.currentTime;
+
+    const createTone = (frequency: number, duration: number, gainPeak: number, start: number) => {
+      const oscillator = context.createOscillator();
+      const gain = context.createGain();
+      oscillator.type = 'sine';
+      oscillator.frequency.setValueAtTime(frequency, start);
+      gain.gain.setValueAtTime(0.0001, start);
+      gain.gain.linearRampToValueAtTime(gainPeak, start + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+      oscillator.connect(gain);
+      gain.connect(context.destination);
+      oscillator.start(start);
+      oscillator.stop(start + duration);
+      oscillator.onended = () => {
+        oscillator.disconnect();
+        gain.disconnect();
+      };
+    };
+
+    if (tone === 'habit') {
+      createTone(760, 0.12, 0.09, now);
+    } else {
+      createTone(520, 0.18, 0.1, now);
+      createTone(780, 0.2, 0.09, now + 0.06);
+    }
+
+    window.setTimeout(() => {
+      void context.close();
+    }, 350);
+  };
+
   const handleToggle = async (habitId: string) => {
     if (!selectedDateKey) return;
     if (isFuture) {
@@ -101,9 +139,19 @@ export function DailyCompletionPanel({
 
       const result = body.data.result;
       if (result.status === 'created') {
-        setCompletedIds((prev) => (prev.includes(habitId) ? prev : [...prev, habitId]));
+        const nextCompletedIds = completedIds.includes(habitId)
+          ? completedIds
+          : [...completedIds, habitId];
+        setCompletedIds(nextCompletedIds);
+        router.refresh();
+        if (nextCompletedIds.length >= habits.length && habits.length > 0) {
+          playDing('day');
+        } else {
+          playDing('habit');
+        }
       } else if (result.status === 'deleted') {
         setCompletedIds((prev) => prev.filter((id) => id !== habitId));
+        router.refresh();
       }
     } catch {
       pushToast('Unable to update completion.', 'error');
@@ -127,6 +175,10 @@ export function DailyCompletionPanel({
           const isCompleted = completedIds.includes(habit.id);
           const isPending = pendingIds.includes(habit.id);
           const isDisabled = isFuture || isPending;
+          const focusClasses = isCompleted
+            ? 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60'
+            : 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20';
+          const hoverClasses = isCompleted ? 'hover:bg-black/90' : 'hover:bg-black/5';
 
           return (
             <li key={habit.id}>
@@ -136,9 +188,9 @@ export function DailyCompletionPanel({
                 aria-checked={isCompleted}
                 disabled={isDisabled}
                 onClick={() => handleToggle(habit.id)}
-                className={`flex w-full items-start justify-between gap-4 rounded-xl border px-4 py-3 text-left transition ${
+                className={`flex w-full items-start justify-between gap-4 rounded-xl border px-4 py-3 text-left motion-safe:transition-colors motion-safe:duration-200 motion-safe:ease-out motion-reduce:transition-none ${focusClasses} ${
                   isCompleted ? 'border-black bg-black text-white' : 'border-black/10 text-black'
-                } ${isDisabled ? 'opacity-60' : 'hover:bg-black/5'} `.trim()}
+                } ${isDisabled ? 'opacity-60' : hoverClasses} `.trim()}
               >
                 <div>
                   <p
@@ -177,14 +229,6 @@ export function DailyCompletionPanel({
           </p>
           <h3 className="text-lg font-semibold">{selectedLabel ?? 'Pick a day'}</h3>
         </div>
-        {selectedDateKey ? (
-          <Link
-            href={clearHref}
-            className="text-xs font-semibold uppercase tracking-[0.3em] text-black/60"
-          >
-            Clear
-          </Link>
-        ) : null}
       </div>
 
       <div className="mt-5 space-y-3 text-sm text-black/70">

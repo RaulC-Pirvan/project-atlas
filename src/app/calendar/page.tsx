@@ -10,12 +10,12 @@ import { getServerAuthSession } from '../../lib/auth/session';
 import { prisma } from '../../lib/db/prisma';
 import { getMonthGrid } from '../../lib/habits/calendar';
 import {
-  getIsoWeekdayFromUtcDate,
   getLocalDateParts,
   normalizeToUtcDate,
   toUtcDateFromParts,
   toUtcDateKey,
 } from '../../lib/habits/dates';
+import { isHabitActiveOnDate } from '../../lib/habits/schedule';
 
 type SearchParams = {
   month?: string | string[];
@@ -104,17 +104,10 @@ export default async function CalendarPage({
 
   const monthGrid = getMonthGrid({ year, month, weekStart: user.weekStart });
   const habits = await listHabits({ prisma, userId: session.user.id, includeArchived: false });
-  const activeWeekdays = new Set<number>();
-  const habitsByWeekday = new Map<number, Set<string>>();
-
-  for (const habit of habits) {
-    for (const weekday of habit.weekdays) {
-      activeWeekdays.add(weekday);
-      const entry = habitsByWeekday.get(weekday) ?? new Set<string>();
-      entry.add(habit.id);
-      habitsByWeekday.set(weekday, entry);
-    }
-  }
+  const habitSchedules = habits.map((habit) => ({
+    habit,
+    schedule: habit.weekdays.map((weekday) => ({ weekday })),
+  }));
 
   const firstWeek = monthGrid.weeks[0];
   const lastWeek = monthGrid.weeks[monthGrid.weeks.length - 1];
@@ -149,7 +142,11 @@ export default async function CalendarPage({
     : null;
   const selectedHabits = selectedDate
     ? habits.filter((habit) =>
-        habit.weekdays.some((weekday) => weekday === getIsoWeekdayFromUtcDate(selectedDate)),
+        isHabitActiveOnDate(
+          habit.weekdays.map((weekday) => ({ weekday })),
+          selectedDate,
+          timeZone,
+        ),
       )
     : [];
   const selectedCompletions = selectedDate
@@ -167,31 +164,49 @@ export default async function CalendarPage({
 
   const monthParam = formatMonthParam(year, month);
   const weeks = monthGrid.weeks.map((week) =>
-    week.map((day) => ({
-      key: day.key,
-      day: day.day,
-      inMonth: day.inMonth,
-      isToday: day.key === todayKey,
-      isSelected: !!selectedKey && day.key === selectedKey,
-      hasHabits: day.inMonth && activeWeekdays.has(day.isoWeekday),
-      completedCount: (() => {
-        if (!day.inMonth) return 0;
-        const activeHabits = habitsByWeekday.get(day.isoWeekday) ?? new Set<string>();
-        if (activeHabits.size === 0) return 0;
-        const completed = completionMap.get(day.key);
-        if (!completed) return 0;
-        let count = 0;
+    week.map((day) => {
+      if (!day.inMonth) {
+        return {
+          key: day.key,
+          day: day.day,
+          inMonth: day.inMonth,
+          isToday: day.key === todayKey,
+          isSelected: !!selectedKey && day.key === selectedKey,
+          hasHabits: false,
+          completedCount: 0,
+          totalCount: 0,
+          label: dateFormatter.format(day.date),
+          href: `/calendar?month=${monthParam}&date=${day.key}`,
+        };
+      }
+
+      const activeHabits = habitSchedules.filter(({ schedule }) =>
+        isHabitActiveOnDate(schedule, day.date, timeZone),
+      );
+      const activeHabitIds = new Set(activeHabits.map(({ habit }) => habit.id));
+      const completed = completionMap.get(day.key);
+      let completedCount = 0;
+      if (completed) {
         for (const habitId of completed) {
-          if (activeHabits.has(habitId)) {
-            count += 1;
+          if (activeHabitIds.has(habitId)) {
+            completedCount += 1;
           }
         }
-        return count;
-      })(),
-      totalCount: day.inMonth ? (habitsByWeekday.get(day.isoWeekday)?.size ?? 0) : 0,
-      label: dateFormatter.format(day.date),
-      href: `/calendar?month=${monthParam}&date=${day.key}`,
-    })),
+      }
+
+      return {
+        key: day.key,
+        day: day.day,
+        inMonth: day.inMonth,
+        isToday: day.key === todayKey,
+        isSelected: !!selectedKey && day.key === selectedKey,
+        hasHabits: activeHabitIds.size > 0,
+        completedCount,
+        totalCount: activeHabitIds.size,
+        label: dateFormatter.format(day.date),
+        href: `/calendar?month=${monthParam}&date=${day.key}`,
+      };
+    }),
   );
 
   const monthDate = toUtcDateFromParts({ year, month, day: 1 });
@@ -235,11 +250,11 @@ export default async function CalendarPage({
                 Active habit day
               </span>
               <span className="inline-flex items-center gap-2">
-                <span className="h-3 w-3 rounded border border-black" aria-hidden="true" />
+                <span className="h-3 w-3 border border-black" aria-hidden="true" />
                 Today
               </span>
               <span className="inline-flex items-center gap-2">
-                <span className="h-3 w-3 rounded-full border border-black" aria-hidden="true" />
+                <span className="h-3 w-3 border-2 border-black" aria-hidden="true" />
                 Selected day
               </span>
             </div>
@@ -249,7 +264,6 @@ export default async function CalendarPage({
             <DailyCompletionPanel
               selectedDateKey={selectedKey}
               selectedLabel={selectedLabel}
-              clearHref={`/calendar?month=${monthParam}`}
               habits={selectedHabits}
               initialCompletedHabitIds={Array.from(selectedCompletedIds)}
               isFuture={isFuture}

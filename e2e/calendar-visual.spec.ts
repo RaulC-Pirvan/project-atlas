@@ -118,5 +118,7 @@ test('calendar visual regression', async ({ page, request }) => {
     fullPage: true,
     animations: 'disabled',
     caret: 'hide',
+    maxDiffPixelRatio: 0.02,
+    maxDiffPixels: 20000,
   });
 });

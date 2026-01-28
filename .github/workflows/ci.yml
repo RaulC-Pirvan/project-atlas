@@ -34,12 +34,19 @@ jobs:
       - name: Run CI checks
         run: npm run ci
 
+      - name: Ensure build output for artifact
+        run: |
+          if [ ! -d ".next" ] || [ -z "$(ls -A .next 2>/dev/null)" ]; then
+            npm run build
+          fi
+
       - name: Upload Next build artifact
         if: success()
         uses: actions/upload-artifact@v4
         with:
           name: next-build
           path: .next
+          if-no-files-found: warn
 
   e2e:
     name: E2E (Playwright)

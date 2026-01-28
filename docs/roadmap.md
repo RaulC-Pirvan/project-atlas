@@ -91,13 +91,13 @@
 
 ### Sprint 2.2: Daily Habit Completion
 
-- [ ] Show habits active on selected day
-- [ ] Allow checking/unchecking habits
-- [ ] Persist habit completion per date
-- [ ] Prevent double completion
-- [ ] Handle past/future dates correctly
-- [ ] Unit tests for completion logic
-- [ ] E2E tests for daily completion flow
+- [x] Show habits active on selected day
+- [x] Allow checking/unchecking habits
+- [x] Persist habit completion per date
+- [x] Prevent double completion
+- [x] Handle past/future dates correctly
+- [x] Unit tests for completion logic
+- [x] E2E tests for daily completion flow
 
 ---
 

@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation';
 import { CalendarMonth } from '../../components/calendar/CalendarMonth';
 import { DailyCompletionPanel } from '../../components/calendar/DailyCompletionPanel';
 import { AppShell } from '../../components/layout/AppShell';
-import { listCompletionsForDate } from '../../lib/api/habits/completions';
+import { listCompletionsForDate, listCompletionsInRange } from '../../lib/api/habits/completions';
 import { listHabits } from '../../lib/api/habits/habits';
 import { getServerAuthSession } from '../../lib/auth/session';
 import { prisma } from '../../lib/db/prisma';
@@ -105,11 +105,36 @@ export default async function CalendarPage({
   const monthGrid = getMonthGrid({ year, month, weekStart: user.weekStart });
   const habits = await listHabits({ prisma, userId: session.user.id, includeArchived: false });
   const activeWeekdays = new Set<number>();
+  const habitsByWeekday = new Map<number, Set<string>>();
 
   for (const habit of habits) {
     for (const weekday of habit.weekdays) {
       activeWeekdays.add(weekday);
+      const entry = habitsByWeekday.get(weekday) ?? new Set<string>();
+      entry.add(habit.id);
+      habitsByWeekday.set(weekday, entry);
     }
+  }
+
+  const firstWeek = monthGrid.weeks[0];
+  const lastWeek = monthGrid.weeks[monthGrid.weeks.length - 1];
+  const gridStart = firstWeek?.[0]?.date ?? null;
+  const gridEnd = lastWeek?.[6]?.date ?? null;
+  const rangeCompletions =
+    gridStart && gridEnd
+      ? await listCompletionsInRange({
+          prisma,
+          userId: session.user.id,
+          start: gridStart,
+          end: gridEnd,
+        })
+      : [];
+  const completionMap = new Map<string, Set<string>>();
+
+  for (const completion of rangeCompletions) {
+    const entry = completionMap.get(completion.date) ?? new Set<string>();
+    entry.add(completion.habitId);
+    completionMap.set(completion.date, entry);
   }
 
   const selectedDate = requestedDate ? toUtcDateFromParts(requestedDate) : null;
@@ -149,6 +174,21 @@ export default async function CalendarPage({
       isToday: day.key === todayKey,
       isSelected: !!selectedKey && day.key === selectedKey,
       hasHabits: day.inMonth && activeWeekdays.has(day.isoWeekday),
+      completedCount: (() => {
+        if (!day.inMonth) return 0;
+        const activeHabits = habitsByWeekday.get(day.isoWeekday) ?? new Set<string>();
+        if (activeHabits.size === 0) return 0;
+        const completed = completionMap.get(day.key);
+        if (!completed) return 0;
+        let count = 0;
+        for (const habitId of completed) {
+          if (activeHabits.has(habitId)) {
+            count += 1;
+          }
+        }
+        return count;
+      })(),
+      totalCount: day.inMonth ? (habitsByWeekday.get(day.isoWeekday)?.size ?? 0) : 0,
       label: dateFormatter.format(day.date),
       href: `/calendar?month=${monthParam}&date=${day.key}`,
     })),

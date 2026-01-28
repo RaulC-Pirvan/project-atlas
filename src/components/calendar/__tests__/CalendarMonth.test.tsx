@@ -3,7 +3,11 @@ import { describe, expect, it } from 'vitest';
 
 import { CalendarMonth, type CalendarWeekView } from '../CalendarMonth';
 
-function makeDay(day: number, hasHabits: boolean) {
+function makeDay(
+  day: number,
+  hasHabits: boolean,
+  counts: { completedCount?: number; totalCount?: number } = {},
+) {
   const padded = String(day).padStart(2, '0');
   return {
     key: `2026-02-${padded}`,
@@ -12,6 +16,8 @@ function makeDay(day: number, hasHabits: boolean) {
     isToday: false,
     isSelected: false,
     hasHabits,
+    completedCount: counts.completedCount ?? 0,
+    totalCount: counts.totalCount ?? 0,
     label: `February ${day}, 2026`,
     href: `/calendar?month=2026-02&date=2026-02-${padded}`,
   };
@@ -48,5 +54,34 @@ describe('CalendarMonth', () => {
 
     expect(habitDay.querySelector('span.bg-black')).not.toBeNull();
     expect(nonHabitDay.querySelector('span.bg-black')).toBeNull();
+  });
+
+  it('marks fully completed days as filled tiles', () => {
+    const week: CalendarWeekView = [
+      makeDay(5, true, { completedCount: 2, totalCount: 2 }),
+      makeDay(6, true, { completedCount: 1, totalCount: 2 }),
+    ];
+
+    render(
+      <CalendarMonth
+        monthLabel="February 2026"
+        weekStart="mon"
+        weeks={[week]}
+        prevHref="/calendar?month=2026-01"
+        nextHref="/calendar?month=2026-03"
+      />,
+    );
+
+    const completedDay = screen.getByRole('link', {
+      name: /open daily view for February 5, 2026/i,
+    });
+    const partialDay = screen.getByRole('link', {
+      name: /open daily view for February 6, 2026/i,
+    });
+
+    expect(completedDay.className).toContain('bg-black');
+    expect(completedDay.className).toContain('text-white');
+    expect(partialDay.className).not.toContain('text-white');
+    expect(screen.getByText(/2 of 2 habits completed/i)).toBeInTheDocument();
   });
 });

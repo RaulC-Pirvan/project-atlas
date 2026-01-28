@@ -45,6 +45,15 @@ type CompletionListClient = {
   };
 };
 
+type CompletionRangeClient = {
+  habitCompletion: {
+    findMany: (args: {
+      where: { date: { gte: Date; lte: Date }; habit: { userId: string } };
+      select: { habitId: true; date: true };
+    }) => Promise<{ habitId: string; date: Date }[]>;
+  };
+};
+
 export type CompletionStatus = 'created' | 'deleted' | 'noop';
 
 export type CompletionToggleResult = {
@@ -67,6 +76,13 @@ type ListCompletionsArgs = {
   prisma: CompletionListClient;
   userId: string;
   date: Date;
+};
+
+type ListCompletionRangeArgs = {
+  prisma: CompletionRangeClient;
+  userId: string;
+  start: Date;
+  end: Date;
 };
 
 function isFutureDate(targetDate: Date, now: Date, timeZone: string): boolean {
@@ -125,6 +141,20 @@ export async function listCompletionsForDate(
 ): Promise<{ habitId: string; date: string }[]> {
   const completions = await args.prisma.habitCompletion.findMany({
     where: { date: args.date, habit: { userId: args.userId } },
+    select: { habitId: true, date: true },
+  });
+
+  return completions.map((completion) => ({
+    habitId: completion.habitId,
+    date: toUtcDateKey(completion.date),
+  }));
+}
+
+export async function listCompletionsInRange(
+  args: ListCompletionRangeArgs,
+): Promise<{ habitId: string; date: string }[]> {
+  const completions = await args.prisma.habitCompletion.findMany({
+    where: { date: { gte: args.start, lte: args.end }, habit: { userId: args.userId } },
     select: { habitId: true, date: true },
   });
 

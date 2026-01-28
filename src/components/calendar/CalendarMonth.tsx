@@ -9,6 +9,8 @@ export type CalendarDayView = {
   isToday: boolean;
   isSelected: boolean;
   hasHabits: boolean;
+  completedCount: number;
+  totalCount: number;
   label: string;
   href: string;
 };
@@ -65,23 +67,39 @@ export function CalendarMonth({
 
           {weeks.map((week) =>
             week.map((day) => {
+              const isComplete = day.totalCount > 0 && day.completedCount >= day.totalCount;
+              const progressPercent =
+                day.totalCount > 0 ? Math.min(100, (day.completedCount / day.totalCount) * 100) : 0;
               const baseCellClasses =
                 'group flex min-h-[86px] flex-col justify-between bg-white px-3 py-2 text-left text-sm transition';
               const mutedClasses = day.inMonth ? 'text-black' : 'text-black/30';
-              const hoverClasses = day.inMonth ? 'hover:bg-black/5 focus-visible:bg-black/5' : '';
-              const todayClasses = day.isToday ? 'ring-1 ring-black ring-inset' : '';
-              const selectedClasses = day.isSelected
-                ? 'ring-2 ring-black ring-inset bg-black/5'
+              const completeClasses = isComplete ? 'bg-black text-white' : '';
+              const hoverClasses = day.inMonth
+                ? isComplete
+                  ? 'hover:bg-black/90 focus-visible:bg-black/90'
+                  : 'hover:bg-black/5 focus-visible:bg-black/5'
                 : '';
+              const todayClasses = day.isToday
+                ? isComplete
+                  ? 'ring-1 ring-white/60 ring-inset'
+                  : 'ring-1 ring-black ring-inset'
+                : '';
+              const selectedClasses = day.isSelected
+                ? isComplete
+                  ? 'ring-2 ring-white ring-inset'
+                  : 'ring-2 ring-black ring-inset bg-black/5'
+                : '';
+              const focusClasses = isComplete
+                ? 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60'
+                : 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20';
               const cellClasses = [
                 baseCellClasses,
                 mutedClasses,
+                completeClasses,
                 hoverClasses,
                 todayClasses,
                 selectedClasses,
-                'focus-visible:outline-none',
-                'focus-visible:ring-2',
-                'focus-visible:ring-black/20',
+                focusClasses,
               ]
                 .filter(Boolean)
                 .join(' ');
@@ -89,12 +107,41 @@ export function CalendarMonth({
               const content = (
                 <>
                   <span className="text-lg font-semibold">{day.day}</span>
-                  <div className="flex items-center">
-                    {day.hasHabits ? (
-                      <span className="h-1.5 w-1.5 rounded-full bg-black" aria-hidden="true" />
+                  <div className="space-y-2">
+                    {day.totalCount > 0 ? (
+                      <>
+                        <span className="sr-only">
+                          {day.completedCount} of {day.totalCount} habits completed
+                        </span>
+                        <div
+                          className={`h-1 w-full rounded-full ${
+                            isComplete ? 'bg-white/30' : 'bg-black/10'
+                          }`}
+                          aria-hidden="true"
+                        >
+                          <div
+                            className={`h-full rounded-full ${
+                              isComplete ? 'bg-white' : 'bg-black'
+                            }`}
+                            style={{ width: `${progressPercent}%` }}
+                          />
+                        </div>
+                      </>
                     ) : (
-                      <span className="h-1.5 w-1.5" aria-hidden="true" />
+                      <div className="h-1 w-full" aria-hidden="true" />
                     )}
+                    <div className="flex items-center">
+                      {day.hasHabits ? (
+                        <span
+                          className={`h-1.5 w-1.5 rounded-full ${
+                            isComplete ? 'bg-white' : 'bg-black'
+                          }`}
+                          aria-hidden="true"
+                        />
+                      ) : (
+                        <span className="h-1.5 w-1.5" aria-hidden="true" />
+                      )}
+                    </div>
                   </div>
                 </>
               );

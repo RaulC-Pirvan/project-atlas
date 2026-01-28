@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { getIsoWeekday, normalizeToUtcDate } from '../dates';
+import { getIsoWeekday, normalizeToUtcDate, parseUtcDateKey } from '../dates';
 import { utcDate } from './fixtures';
 
 describe('date helpers', () => {
@@ -23,5 +23,12 @@ describe('date helpers', () => {
     const normalized = normalizeToUtcDate(instant, 'UTC');
 
     expect(normalized.toISOString()).toBe('2026-01-08T00:00:00.000Z');
+  });
+
+  it('parses utc date keys', () => {
+    const parsed = parseUtcDateKey('2026-02-05');
+
+    expect(parsed?.toISOString()).toBe('2026-02-05T00:00:00.000Z');
+    expect(parseUtcDateKey('2026-02-30')).toBeNull();
   });
 });

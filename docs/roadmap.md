@@ -79,13 +79,13 @@
 
 ### Sprint 2.1: Calendar Core
 
-- [ ] Monthly calendar view
-- [ ] Correct date ↔ weekday mapping
-- [ ] Display which days have active habits
-- [ ] Click day → open daily view
-- [ ] Responsive layout (desktop-first, mobile-safe)
-- [ ] Unit tests for calendar date logic
-- [ ] E2E tests for calendar navigation
+- [x] Monthly calendar view
+- [x] Correct date ↔ weekday mapping
+- [x] Display which days have active habits
+- [x] Click day → open daily view
+- [x] Responsive layout (desktop-first, mobile-safe)
+- [x] Unit tests for calendar date logic
+- [x] E2E tests for calendar navigation
 
 ---
 

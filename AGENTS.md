@@ -18,15 +18,15 @@ A habit is defined independently of dates.
 - Next.js App Router + TypeScript + Tailwind CSS (v4).
 - PostgreSQL (Neon) + Prisma with `@prisma/adapter-pg` and `pg` pool.
 - Auth foundation implemented: signup, verify-email, resend-verification, logout, NextAuth Credentials (JWT sessions), middleware protection.
-- Account management API + UI: update email/password/display name; delete account.
+- Account management API + UI: update email/password/display name/week start; delete account.
 - Email verification uses Resend client; debug token capture plus `/api/auth/debug/verification-token` for tests.
-- Tests in place: Vitest unit/API tests, auth component tests, habit component tests, Playwright auth + habits E2E.
+- Tests in place: Vitest unit/API tests, auth + habit + calendar component tests, Playwright auth + habits + calendar E2E.
 - Habit domain models implemented (Habit, HabitSchedule, HabitCompletion) with migrations and seed data.
 - Habit domain helpers exist in `src/lib/habits` (dates, schedules, completions, streaks, query helpers, types).
 - Habit CRUD API implemented (list/create/update/archive) with a habits UI built around `HabitsPanel` and `HabitForm`.
 - Authenticated screens use `AppShell` + `AppSidebar` with Calendar/Habits/Account navigation and Sign out.
-- Calendar route exists as a placeholder (view not shipped yet).
-- User preferences include `weekStart` (sun/mon) and are used in habit scheduling UI.
+- Calendar view implemented with monthly grid, month navigation, and selected-day side panel (`?date=YYYY-MM-DD`).
+- User preferences include `weekStart` (sun/mon), used in habit scheduling UI and adjustable in account settings.
 
 ## UI Direction (authoritative)
 
@@ -44,7 +44,8 @@ A habit is defined independently of dates.
 - `src/app/api/account/delete-request/route.ts` - Account deletion request (hard delete).
 - `src/app/api/habits/route.ts` - Habit list/create API.
 - `src/app/api/habits/[id]/route.ts` - Habit update/archive API.
-- `src/app/calendar/page.tsx` - Calendar placeholder page.
+- `src/app/calendar/page.tsx` - Calendar month view + selected-day side panel.
+- `src/app/calendar/[date]/page.tsx` - Legacy daily view route (redirects to calendar with `date` param).
 - `src/app/habits/page.tsx` - Habits page (list/create/edit/archive).
 - `src/app/api/auth/[...nextauth]/route.ts` - NextAuth handler.
 - `src/lib/auth` - Auth utilities (hashing, policy, credentials, rate limit, nextauth).
@@ -52,10 +53,12 @@ A habit is defined independently of dates.
 - `src/lib/api/habits` - Habit API services and validation.
 - `src/lib/api/habits/__tests__` - Habit API service tests.
 - `src/components/habits` - Habit UI components and tests.
+- `src/components/calendar` - Calendar UI components and tests.
 - `src/components/layout` - App shell layout primitives (AppShell, AppSidebar).
+- `src/components/auth/AccountPanel.tsx` - Account settings (including week start).
 - `src/components/auth/SignOutButton.tsx` - Sign-out button for authenticated layouts.
 - `src/lib/db/prisma.ts` - Prisma singleton using adapter-pg + pg pool.
-- `src/lib/habits` - Habit domain helpers (date normalization, schedules, completions, query helpers, streaks, types).
+- `src/lib/habits` - Habit domain helpers (date normalization, schedules, calendar grids, completions, query helpers, streaks, types).
 - `src/lib/habits/__tests__` - Habit domain unit tests.
 - `src/infra/email` - Resend client, verification email sender, debug token store.
 - `src/types/next-auth.d.ts` - NextAuth session/JWT type extensions.
@@ -67,7 +70,7 @@ A habit is defined independently of dates.
 - `src/app/(auth)` - Auth pages (sign-in, sign-up, verify-email).
 - `src/app/account/page.tsx` - Account management page.
 - `middleware.ts` - Route protection using NextAuth JWT.
-- `e2e` - Playwright auth + habits E2E tests.
+- `e2e` - Playwright auth + habits + calendar E2E tests.
 
 ## Engineering Standards
 

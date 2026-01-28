@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { createHabitSchema, updateHabitSchema } from '../validation';
+import { createHabitSchema, toggleCompletionSchema, updateHabitSchema } from '../validation';
 
 describe('habit validation', () => {
   it('rejects empty weekday list on create', () => {
@@ -23,6 +23,16 @@ describe('habit validation', () => {
 
   it('requires at least one field on update', () => {
     const parsed = updateHabitSchema.safeParse({});
+
+    expect(parsed.success).toBe(false);
+  });
+
+  it('rejects invalid completion payloads', () => {
+    const parsed = toggleCompletionSchema.safeParse({
+      habitId: '',
+      date: '2026-1-5',
+      completed: 'yes',
+    });
 
     expect(parsed.success).toBe(false);
   });

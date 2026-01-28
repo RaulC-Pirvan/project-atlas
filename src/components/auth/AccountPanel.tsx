@@ -3,12 +3,12 @@
 import { useRef, useState } from 'react';
 
 import { getApiErrorMessage, parseJson } from '../../lib/api/client';
+import type { WeekStart } from '../habits/weekdays';
 import { Button } from '../ui/Button';
 import { FormField } from '../ui/FormField';
 import { Input } from '../ui/Input';
 import { Modal } from '../ui/Modal';
 import { type ToastItem, ToastStack } from '../ui/Toast';
-import type { WeekStart } from '../habits/weekdays';
 import { SignOutButton } from './SignOutButton';
 
 type AccountPanelProps = {

@@ -20,7 +20,9 @@ type SearchParams = {
   date?: string | string[];
 };
 
-function parseMonthParam(value: string | string[] | undefined): { year: number; month: number } | null {
+function parseMonthParam(
+  value: string | string[] | undefined,
+): { year: number; month: number } | null {
   const raw = Array.isArray(value) ? value[0] : value;
   if (!raw) return null;
   const match = /^\d{4}-\d{2}$/.exec(raw);
@@ -203,9 +205,7 @@ export default async function CalendarPage({
                   <p className="text-xs font-semibold uppercase tracking-[0.3em] text-black/60">
                     Selected day
                   </p>
-                  <h3 className="text-lg font-semibold">
-                    {selectedLabel ?? 'Pick a day'}
-                  </h3>
+                  <h3 className="text-lg font-semibold">{selectedLabel ?? 'Pick a day'}</h3>
                 </div>
                 {selectedKey ? (
                   <Link

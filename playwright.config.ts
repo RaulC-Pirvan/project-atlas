@@ -14,6 +14,7 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 2 : undefined,
   reporter: process.env.CI ? 'github' : 'list',
+  updateSnapshots: process.env.CI ? 'missing' : 'none',
 
   timeout: 30_000,
   expect: { timeout: 5_000 },

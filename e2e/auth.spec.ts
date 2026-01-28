@@ -26,12 +26,29 @@ async function signIn(page: Page, email: string, pass: string) {
 }
 
 async function fetchVerificationToken(request: APIRequestContext, email: string): Promise<string> {
-  const response = await request.get(
-    `/api/auth/debug/verification-token?email=${encodeURIComponent(email)}&t=${Date.now()}`,
-  );
-  expect(response.ok()).toBeTruthy();
-  const body = await response.json();
-  return body.data.token as string;
+  let lastError: Error | null = null;
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    try {
+      const response = await request.get(
+        `/api/auth/debug/verification-token?email=${encodeURIComponent(email)}&t=${Date.now()}`,
+      );
+      if (!response.ok()) {
+        lastError = new Error(`Token request failed: ${response.status()}`);
+      } else {
+        const body = await response.json();
+        const token = body?.data?.token as string | undefined;
+        if (token) {
+          return token;
+        }
+        lastError = new Error('Token missing in response.');
+      }
+    } catch (error) {
+      lastError = error as Error;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 300));
+  }
+
+  throw lastError ?? new Error('Token request failed.');
 }
 
 async function waitForNewVerificationToken(

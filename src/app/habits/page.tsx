@@ -1,14 +1,15 @@
 import { redirect } from 'next/navigation';
 
-import { AccountPanel } from '../../components/auth/AccountPanel';
+import { HabitsPanel } from '../../components/habits/HabitsPanel';
 import { AppShell } from '../../components/layout/AppShell';
+import { listHabits } from '../../lib/api/habits/habits';
 import { getServerAuthSession } from '../../lib/auth/session';
 import { prisma } from '../../lib/db/prisma';
 
-export default async function AccountPage() {
+export default async function HabitsPage() {
   const session = await getServerAuthSession();
 
-  if (!session?.user) {
+  if (!session?.user?.id) {
     redirect('/sign-in');
   }
 
@@ -21,13 +22,15 @@ export default async function AccountPage() {
     redirect('/sign-in');
   }
 
+  const habits = await listHabits({
+    prisma,
+    userId: session.user.id,
+    includeArchived: false,
+  });
+
   return (
-    <AppShell title="Account" subtitle="Manage your profile and security.">
-      <AccountPanel
-        email={session.user.email ?? ''}
-        displayName={session.user.name ?? session.user.email ?? 'User'}
-        weekStart={user.weekStart}
-      />
+    <AppShell title="Habits" subtitle="Build routines that stay with you.">
+      <HabitsPanel initialHabits={habits} weekStart={user.weekStart} />
     </AppShell>
   );
 }

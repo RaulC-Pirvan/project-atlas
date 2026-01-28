@@ -18,28 +18,50 @@ A habit is defined independently of dates.
 - Next.js App Router + TypeScript + Tailwind CSS (v4).
 - PostgreSQL (Neon) + Prisma with `@prisma/adapter-pg` and `pg` pool.
 - Auth foundation implemented: signup, verify-email, resend-verification, logout, NextAuth Credentials (JWT sessions), middleware protection.
-- Account management API + UI: update email/password/display name; delete account.
+- Account management API + UI: update email/password/display name/week start; delete account.
 - Email verification uses Resend client; debug token capture plus `/api/auth/debug/verification-token` for tests.
-- Tests in place: Vitest unit/API tests, auth component tests, Playwright auth E2E.
-- Habit domain models and UI are not implemented yet (auth-first groundwork).
+- Tests in place: Vitest unit/API tests, auth + habit + calendar component tests, Playwright auth + habits + calendar + daily completion + visual regression E2E.
+- Habit domain models implemented (Habit, HabitSchedule, HabitCompletion) with migrations and seed data.
+- Habit domain helpers exist in `src/lib/habits` (dates, schedules, completions, streaks, query helpers, types).
+- Habit CRUD API implemented (list/create/update/archive) with a habits UI built around `HabitsPanel` and `HabitForm`.
+- Authenticated screens use `AppShell` + `AppSidebar` with Calendar/Habits/Account navigation and Sign out.
+- Calendar view implemented with monthly grid, month navigation, selected-day side panel (`?date=YYYY-MM-DD`), daily completion toggles via `/api/completions`, per-day progress indicators, and golden completed-day tiles.
+- User preferences include `weekStart` (sun/mon), used in habit scheduling UI and adjustable in account settings.
 
 ## UI Direction (authoritative)
 
-- Visual style: clean, minimalist, black and white only.
+- Visual style: clean, minimalist, black and white foundation with a single golden accent (`#FAB95B`) for fully completed days.
 - Layout: generous whitespace, clear typographic hierarchy.
 - Components: build reusable primitives so styling changes are centralized.
-- Avoid heavy decoration, gradients, or bright accent colors.
+- Avoid heavy decoration, gradients, or bright accent colors beyond the gold accent.
 
 ## Codebase Map
 
 - `src/app` - App Router UI and API routes.
+- `src/app/page.tsx` - Marketing/landing page (pre-MVP copy).
 - `src/app/api/auth/*/route.ts` - Auth API routes (signup, verify, resend, logout, debug, NextAuth).
 - `src/app/api/account/route.ts` - Account update (email/password/display name).
 - `src/app/api/account/delete-request/route.ts` - Account deletion request (hard delete).
+- `src/app/api/habits/route.ts` - Habit list/create API.
+- `src/app/api/habits/[id]/route.ts` - Habit update/archive API.
+- `src/app/calendar/page.tsx` - Calendar month view + selected-day side panel + legend and progress indicators.
+- `src/app/calendar/[date]/page.tsx` - Legacy daily view route (redirects to calendar with `date` param).
+- `src/app/api/completions/route.ts` - Daily completion list/toggle API.
+- `src/app/habits/page.tsx` - Habits page (list/create/edit/archive).
 - `src/app/api/auth/[...nextauth]/route.ts` - NextAuth handler.
 - `src/lib/auth` - Auth utilities (hashing, policy, credentials, rate limit, nextauth).
 - `src/lib/api` - Shared API error/response helpers, auth services, validation.
+- `src/lib/api/habits` - Habit API services and validation.
+- `src/lib/api/habits/__tests__` - Habit API service tests.
+- `src/components/habits` - Habit UI components and tests.
+- `src/components/calendar` - Calendar UI components and tests.
+- `src/components/layout` - App shell layout primitives (AppShell, AppSidebar).
+- `src/components/auth/AccountPanel.tsx` - Account settings (including week start).
+- `src/components/auth/SignOutButton.tsx` - Sign-out button for authenticated layouts.
 - `src/lib/db/prisma.ts` - Prisma singleton using adapter-pg + pg pool.
+- `src/lib/habits` - Habit domain helpers (date normalization, schedules, calendar grids, completions, query helpers, streaks, types).
+- `src/lib/api/habits/completions.ts` - Completion toggle/list services (date/range).
+- `src/lib/habits/__tests__` - Habit domain unit tests.
 - `src/infra/email` - Resend client, verification email sender, debug token store.
 - `src/types/next-auth.d.ts` - NextAuth session/JWT type extensions.
 - `prisma/schema.prisma` - DB models; migrations in `prisma/migrations`; seed in `prisma/seed.ts`.
@@ -50,7 +72,7 @@ A habit is defined independently of dates.
 - `src/app/(auth)` - Auth pages (sign-in, sign-up, verify-email).
 - `src/app/account/page.tsx` - Account management page.
 - `middleware.ts` - Route protection using NextAuth JWT.
-- `e2e` - Playwright auth E2E tests.
+- `e2e` - Playwright auth + habits + calendar + daily completion + visual regression E2E tests.
 
 ## Engineering Standards
 
@@ -62,7 +84,7 @@ A habit is defined independently of dates.
 ## Tooling and Commands
 
 - Use `npm` only (no pnpm).
-- Common scripts: `npm run dev`, `npm run lint`, `npm run typecheck`, `npm test`, `npm run e2e`, `npm run format:check`, `npm run build`.
+- Common scripts: `npm run dev`, `npm run start`, `npm run start:test`, `npm run lint`, `npm run lint:next`, `npm run typecheck`, `npm test`, `npm run e2e`, `npm run format:check`, `npm run build`.
 - Extra scripts: `npm run test:watch`, `npm run test:coverage`, `npm run e2e:ui`, `npm run format`, `npm run lint:fix`, `npm run ci`, `npm run ci:full`.
 - Prisma scripts: `npm run prisma:generate`, `npm run prisma:seed`.
 - Prisma: `migrate dev` for authoring, `migrate deploy` for CI/prod.
@@ -83,3 +105,4 @@ A habit is defined independently of dates.
 - Think like a senior engineer and catch architectural mistakes early.
 - Prefer phased, test-driven implementation.
 - Do not suggest shortcuts that undermine quality.
+- For form validation, do not display inline error messages; use toast notifications for user-facing errors.

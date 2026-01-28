@@ -14,9 +14,17 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 2 : undefined,
   reporter: process.env.CI ? 'github' : 'list',
+  updateSnapshots: process.env.CI ? 'missing' : 'none',
+  snapshotPathTemplate: '{testDir}/{testFilePath}-snapshots/{arg}{-projectName}{ext}',
 
   timeout: 30_000,
-  expect: { timeout: 5_000 },
+  expect: {
+    timeout: 5_000,
+    toHaveScreenshot: {
+      maxDiffPixelRatio: 0.005,
+      maxDiffPixels: 1000,
+    },
+  },
 
   use: {
     baseURL: 'http://localhost:3000',

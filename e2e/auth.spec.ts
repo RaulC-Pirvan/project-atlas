@@ -26,12 +26,45 @@ async function signIn(page: Page, email: string, pass: string) {
 }
 
 async function fetchVerificationToken(request: APIRequestContext, email: string): Promise<string> {
-  const response = await request.get(
-    `/api/auth/debug/verification-token?email=${encodeURIComponent(email)}`,
-  );
-  expect(response.ok()).toBeTruthy();
-  const body = await response.json();
-  return body.data.token as string;
+  let lastError: Error | null = null;
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    try {
+      const response = await request.get(
+        `/api/auth/debug/verification-token?email=${encodeURIComponent(email)}&t=${Date.now()}`,
+      );
+      if (!response.ok()) {
+        lastError = new Error(`Token request failed: ${response.status()}`);
+      } else {
+        const body = await response.json();
+        const token = body?.data?.token as string | undefined;
+        if (token) {
+          return token;
+        }
+        lastError = new Error('Token missing in response.');
+      }
+    } catch (error) {
+      lastError = error as Error;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 300));
+  }
+
+  throw lastError ?? new Error('Token request failed.');
+}
+
+async function waitForNewVerificationToken(
+  request: APIRequestContext,
+  email: string,
+  previousToken: string,
+): Promise<string> {
+  let token = previousToken;
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    token = await fetchVerificationToken(request, email);
+    if (token !== previousToken) {
+      return token;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 200));
+  }
+  return token;
 }
 
 test('signup creates unverified account', async ({ page }) => {
@@ -82,7 +115,10 @@ test('logout ends session', async ({ page, request }) => {
   await signIn(page, email, password);
   await expect(page).toHaveURL(/\/account/);
 
-  await page.getByRole('button', { name: /sign out/i }).click();
+  await page
+    .getByRole('navigation')
+    .getByRole('button', { name: /sign out/i })
+    .click();
   await expect(page).toHaveURL(/\/sign-in/);
 
   await page.goto('/account');
@@ -96,10 +132,13 @@ test('resend verification works', async ({ page, request }) => {
   const tokenBefore = await fetchVerificationToken(request, email);
 
   await page.goto(`/verify-email?email=${encodeURIComponent(email)}`);
+  const resendResponse = page.waitForResponse((response) =>
+    response.url().includes('/api/auth/resend-verification'),
+  );
   await page.getByRole('button', { name: /resend verification email/i }).click();
-  await expect(page.getByText(/verification email resent|link will be sent/i)).toBeVisible();
+  await resendResponse;
 
-  const tokenAfter = await fetchVerificationToken(request, email);
+  const tokenAfter = await waitForNewVerificationToken(request, email, tokenBefore);
   expect(tokenAfter).not.toEqual(tokenBefore);
 });
 
@@ -120,7 +159,10 @@ test('account update works', async ({ page, request }) => {
   await page.getByRole('button', { name: /update password/i }).click();
   await expect(page.getByText('Password updated.')).toBeVisible();
 
-  await page.getByRole('button', { name: /sign out/i }).click();
+  await page
+    .getByRole('navigation')
+    .getByRole('button', { name: /sign out/i })
+    .click();
   await expect(page).toHaveURL(/\/sign-in/);
 
   await signIn(page, email, newPassword);

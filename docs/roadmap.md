@@ -49,29 +49,29 @@
 
 ### Sprint 1.2: Core Data Model (Prisma)
 
-- [ ] Design Prisma schema:
+- [x] Design Prisma schema:
   - User
   - Habit
   - HabitSchedule (weekday-based)
   - HabitCompletion (habit + date)
   - Streak (derived or stored)
-- [ ] Define indices & constraints
-- [ ] Run initial migration
-- [ ] Seed database with sample users & habits
-- [ ] Unit tests for domain logic (no UI)
-- [ ] Validate weekday → date mapping logic
+- [x] Define indices & constraints
+- [x] Run initial migration
+- [x] Seed database with sample users & habits
+- [x] Unit tests for domain logic (no UI)
+- [x] Validate weekday → date mapping logic
 
 ---
 
 ### Sprint 1.3: Habit CRUD
 
-- [ ] Create habit creation UI
-- [ ] Select active weekdays (Mon–Sun)
-- [ ] Edit / delete habits
-- [ ] Persist habits in DB
-- [ ] Validate habit rules (no empty weekday selection)
-- [ ] Unit tests for habit CRUD
-- [ ] E2E tests for habit creation/edit/delete
+- [x] Create habit creation UI
+- [x] Select active weekdays (Mon–Sun)
+- [x] Edit / delete habits
+- [x] Persist habits in DB
+- [x] Validate habit rules (no empty weekday selection)
+- [x] Unit tests for habit CRUD
+- [x] E2E tests for habit creation/edit/delete
 
 ---
 
@@ -79,36 +79,36 @@
 
 ### Sprint 2.1: Calendar Core
 
-- [ ] Monthly calendar view
-- [ ] Correct date ↔ weekday mapping
-- [ ] Display which days have active habits
-- [ ] Click day → open daily view
-- [ ] Responsive layout (desktop-first, mobile-safe)
-- [ ] Unit tests for calendar date logic
-- [ ] E2E tests for calendar navigation
+- [x] Monthly calendar view
+- [x] Correct date ↔ weekday mapping
+- [x] Display which days have active habits
+- [x] Click day → open daily view
+- [x] Responsive layout (desktop-first, mobile-safe)
+- [x] Unit tests for calendar date logic
+- [x] E2E tests for calendar navigation
 
 ---
 
 ### Sprint 2.2: Daily Habit Completion
 
-- [ ] Show habits active on selected day
-- [ ] Allow checking/unchecking habits
-- [ ] Persist habit completion per date
-- [ ] Prevent double completion
-- [ ] Handle past/future dates correctly
-- [ ] Unit tests for completion logic
-- [ ] E2E tests for daily completion flow
+- [x] Show habits active on selected day
+- [x] Allow checking/unchecking habits
+- [x] Persist habit completion per date
+- [x] Prevent double completion
+- [x] Handle past/future dates correctly
+- [x] Unit tests for completion logic
+- [x] E2E tests for daily completion flow
 
 ---
 
 ### Sprint 2.3: Visual Feedback & Delight
 
-- [ ] Day tile progress indicator
-- [ ] Fully completed day → golden state
-- [ ] Completion sound (configurable / subtle)
-- [ ] Smooth UI transitions
-- [ ] Accessibility considerations
-- [ ] Visual regression tests (Playwright)
+- [x] Day tile progress indicator
+- [x] Fully completed day → golden state
+- [x] Completion sound (configurable / subtle)
+- [x] Smooth UI transitions
+- [x] Accessibility considerations
+- [x] Visual regression tests (Playwright)
 
 ---
 

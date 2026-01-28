@@ -34,6 +34,20 @@ jobs:
       - name: Run CI checks
         run: npm run ci
 
+      - name: Ensure build output for artifact
+        run: |
+          if [ ! -d ".next" ] || [ -z "$(ls -A .next 2>/dev/null)" ]; then
+            npm run build
+          fi
+
+      - name: Upload Next build artifact
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: next-build
+          path: .next
+          if-no-files-found: warn
+
   e2e:
     name: E2E (Playwright)
     runs-on: ubuntu-latest
@@ -56,11 +70,27 @@ jobs:
       - name: Install dependencies (clean)
         run: npm ci
 
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('package-lock.json') }}
+
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
 
-      - name: Build
-        run: npm run build
+      - name: Download Next build artifact
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          name: next-build
+          path: .next
+
+      - name: Build (fallback if artifact missing)
+        run: |
+          if [ ! -d ".next" ] || [ -z "$(ls -A .next 2>/dev/null)" ]; then
+            npm run build
+          fi
 
       - name: Run E2E
         env:

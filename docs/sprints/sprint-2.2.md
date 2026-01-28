@@ -67,11 +67,11 @@ CI must remain green.
 
 ### Tasks (5)
 
-- [ ] **Task 2.1**: Render active habits in the selected-day panel
-- [ ] **Task 2.2**: Add check/uncheck controls and wire to API
-- [ ] **Task 2.3**: Handle past/future dates (disable or message when needed)
-- [ ] **Task 2.4**: Surface errors via toast (no inline errors)
-- [ ] **Task 2.5**: Add component tests for daily completion UI
+- [x] **Task 2.1**: Render active habits in the selected-day panel
+- [x] **Task 2.2**: Add check/uncheck controls and wire to API
+- [x] **Task 2.3**: Handle past/future dates (disable or message when needed)
+- [x] **Task 2.4**: Surface errors via toast (no inline errors)
+- [x] **Task 2.5**: Add component tests for daily completion UI
 
 ---
 

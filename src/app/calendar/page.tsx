@@ -2,7 +2,9 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
 import { CalendarMonth } from '../../components/calendar/CalendarMonth';
+import { DailyCompletionPanel } from '../../components/calendar/DailyCompletionPanel';
 import { AppShell } from '../../components/layout/AppShell';
+import { listCompletionsForDate } from '../../lib/api/habits/completions';
 import { listHabits } from '../../lib/api/habits/habits';
 import { getServerAuthSession } from '../../lib/auth/session';
 import { prisma } from '../../lib/db/prisma';
@@ -125,6 +127,13 @@ export default async function CalendarPage({
         habit.weekdays.some((weekday) => weekday === getIsoWeekdayFromUtcDate(selectedDate)),
       )
     : [];
+  const selectedCompletions = selectedDate
+    ? await listCompletionsForDate({ prisma, userId: session.user.id, date: selectedDate })
+    : [];
+  const selectedCompletedIds = new Set(
+    selectedCompletions.map((completion) => completion.habitId),
+  );
+  const isFuture = selectedDate ? selectedDate.getTime() > today.getTime() : false;
 
   const dateFormatter = new Intl.DateTimeFormat('en-US', {
     timeZone: 'UTC',
@@ -199,43 +208,14 @@ export default async function CalendarPage({
           </div>
 
           <aside className="lg:w-80">
-            <div className="rounded-2xl border border-black/10 px-6 py-6">
-              <div className="flex items-center justify-between gap-4">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.3em] text-black/60">
-                    Selected day
-                  </p>
-                  <h3 className="text-lg font-semibold">{selectedLabel ?? 'Pick a day'}</h3>
-                </div>
-                {selectedKey ? (
-                  <Link
-                    href={`/calendar?month=${monthParam}`}
-                    className="text-xs font-semibold uppercase tracking-[0.3em] text-black/60"
-                  >
-                    Clear
-                  </Link>
-                ) : null}
-              </div>
-
-              <div className="mt-5 space-y-3 text-sm text-black/70">
-                {!selectedKey ? (
-                  <p>Select a day to see scheduled habits.</p>
-                ) : selectedHabits.length === 0 ? (
-                  <p>No habits scheduled for this day.</p>
-                ) : (
-                  <ul className="space-y-3">
-                    {selectedHabits.map((habit) => (
-                      <li key={habit.id} className="rounded-xl border border-black/10 px-4 py-3">
-                        <p className="text-sm font-semibold text-black">{habit.title}</p>
-                        {habit.description ? (
-                          <p className="text-xs text-black/60">{habit.description}</p>
-                        ) : null}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            </div>
+            <DailyCompletionPanel
+              selectedDateKey={selectedKey}
+              selectedLabel={selectedLabel}
+              clearHref={`/calendar?month=${monthParam}`}
+              habits={selectedHabits}
+              initialCompletedHabitIds={Array.from(selectedCompletedIds)}
+              isFuture={isFuture}
+            />
           </aside>
         </div>
       </div>

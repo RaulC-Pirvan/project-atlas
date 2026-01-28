@@ -79,9 +79,9 @@ CI must remain green.
 
 ### Tasks (3)
 
-- [ ] **Task 3.1**: E2E: complete a habit for a selected day
-- [ ] **Task 3.2**: E2E: uncheck a completion
-- [ ] **Task 3.3**: E2E: prevent double completion
+- [x] **Task 3.1**: E2E: complete a habit for a selected day
+- [x] **Task 3.2**: E2E: uncheck a completion
+- [x] **Task 3.3**: E2E: prevent double completion
 
 ---
 

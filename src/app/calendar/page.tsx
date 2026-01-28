@@ -130,9 +130,7 @@ export default async function CalendarPage({
   const selectedCompletions = selectedDate
     ? await listCompletionsForDate({ prisma, userId: session.user.id, date: selectedDate })
     : [];
-  const selectedCompletedIds = new Set(
-    selectedCompletions.map((completion) => completion.habitId),
-  );
+  const selectedCompletedIds = new Set(selectedCompletions.map((completion) => completion.habitId));
   const isFuture = selectedDate ? selectedDate.getTime() > today.getTime() : false;
 
   const dateFormatter = new Intl.DateTimeFormat('en-US', {

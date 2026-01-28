@@ -141,13 +141,13 @@ export function DailyCompletionPanel({
                 } ${isDisabled ? 'opacity-60' : 'hover:bg-black/5'} `.trim()}
               >
                 <div>
-                  <p className={`text-sm font-semibold ${isCompleted ? 'text-white' : 'text-black'}`}>
+                  <p
+                    className={`text-sm font-semibold ${isCompleted ? 'text-white' : 'text-black'}`}
+                  >
                     {habit.title}
                   </p>
                   {habit.description ? (
-                    <p
-                      className={`text-xs ${isCompleted ? 'text-white/80' : 'text-black/60'}`}
-                    >
+                    <p className={`text-xs ${isCompleted ? 'text-white/80' : 'text-black/60'}`}>
                       {habit.description}
                     </p>
                   ) : null}

@@ -22,8 +22,11 @@ A habit is defined independently of dates.
 - Email verification uses Resend client; debug token capture plus `/api/auth/debug/verification-token` for tests.
 - Tests in place: Vitest unit/API tests, auth component tests, habit component tests, Playwright auth + habits E2E.
 - Habit domain models implemented (Habit, HabitSchedule, HabitCompletion) with migrations and seed data.
-- Habit domain helpers exist in `src/lib/habits` (dates, schedules, completions, streaks).
-- Habit CRUD API implemented (list/create/update/delete) with a basic habits UI.
+- Habit domain helpers exist in `src/lib/habits` (dates, schedules, completions, streaks, query helpers, types).
+- Habit CRUD API implemented (list/create/update/archive) with a habits UI built around `HabitsPanel` and `HabitForm`.
+- Authenticated screens use `AppShell` + `AppSidebar` with Calendar/Habits/Account navigation and Sign out.
+- Calendar route exists as a placeholder (view not shipped yet).
+- User preferences include `weekStart` (sun/mon) and are used in habit scheduling UI.
 
 ## UI Direction (authoritative)
 
@@ -35,20 +38,24 @@ A habit is defined independently of dates.
 ## Codebase Map
 
 - `src/app` - App Router UI and API routes.
+- `src/app/page.tsx` - Marketing/landing page (pre-MVP copy).
 - `src/app/api/auth/*/route.ts` - Auth API routes (signup, verify, resend, logout, debug, NextAuth).
 - `src/app/api/account/route.ts` - Account update (email/password/display name).
 - `src/app/api/account/delete-request/route.ts` - Account deletion request (hard delete).
 - `src/app/api/habits/route.ts` - Habit list/create API.
 - `src/app/api/habits/[id]/route.ts` - Habit update/archive API.
-- `src/app/habits/page.tsx` - Habits page (list/create/edit/delete).
+- `src/app/calendar/page.tsx` - Calendar placeholder page.
+- `src/app/habits/page.tsx` - Habits page (list/create/edit/archive).
 - `src/app/api/auth/[...nextauth]/route.ts` - NextAuth handler.
 - `src/lib/auth` - Auth utilities (hashing, policy, credentials, rate limit, nextauth).
 - `src/lib/api` - Shared API error/response helpers, auth services, validation.
 - `src/lib/api/habits` - Habit API services and validation.
 - `src/lib/api/habits/__tests__` - Habit API service tests.
 - `src/components/habits` - Habit UI components and tests.
+- `src/components/layout` - App shell layout primitives (AppShell, AppSidebar).
+- `src/components/auth/SignOutButton.tsx` - Sign-out button for authenticated layouts.
 - `src/lib/db/prisma.ts` - Prisma singleton using adapter-pg + pg pool.
-- `src/lib/habits` - Habit domain helpers (date normalization, schedules, completions, streaks).
+- `src/lib/habits` - Habit domain helpers (date normalization, schedules, completions, query helpers, streaks, types).
 - `src/lib/habits/__tests__` - Habit domain unit tests.
 - `src/infra/email` - Resend client, verification email sender, debug token store.
 - `src/types/next-auth.d.ts` - NextAuth session/JWT type extensions.
@@ -72,7 +79,7 @@ A habit is defined independently of dates.
 ## Tooling and Commands
 
 - Use `npm` only (no pnpm).
-- Common scripts: `npm run dev`, `npm run lint`, `npm run typecheck`, `npm test`, `npm run e2e`, `npm run format:check`, `npm run build`.
+- Common scripts: `npm run dev`, `npm run start`, `npm run start:test`, `npm run lint`, `npm run lint:next`, `npm run typecheck`, `npm test`, `npm run e2e`, `npm run format:check`, `npm run build`.
 - Extra scripts: `npm run test:watch`, `npm run test:coverage`, `npm run e2e:ui`, `npm run format`, `npm run lint:fix`, `npm run ci`, `npm run ci:full`.
 - Prisma scripts: `npm run prisma:generate`, `npm run prisma:seed`.
 - Prisma: `migrate dev` for authoring, `migrate deploy` for CI/prod.

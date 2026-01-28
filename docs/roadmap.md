@@ -65,13 +65,13 @@
 
 ### Sprint 1.3: Habit CRUD
 
-- [ ] Create habit creation UI
-- [ ] Select active weekdays (Mon–Sun)
-- [ ] Edit / delete habits
-- [ ] Persist habits in DB
-- [ ] Validate habit rules (no empty weekday selection)
-- [ ] Unit tests for habit CRUD
-- [ ] E2E tests for habit creation/edit/delete
+- [x] Create habit creation UI
+- [x] Select active weekdays (Mon–Sun)
+- [x] Edit / delete habits
+- [x] Persist habits in DB
+- [x] Validate habit rules (no empty weekday selection)
+- [x] Unit tests for habit CRUD
+- [x] E2E tests for habit creation/edit/delete
 
 ---
 

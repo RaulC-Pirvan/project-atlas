@@ -97,8 +97,8 @@ should be represented in the UI.
 
 ### Tasks (2)
 
-- [ ] **Task 2.1**: Emphasize continuity (e.g., current streak vs longest)
-- [ ] **Task 2.2**: Ensure styling stays within black/white + gold accent
+- [x] **Task 2.1**: Emphasize continuity (e.g., current streak vs longest)
+- [x] **Task 2.2**: Ensure styling stays within black/white + gold accent
 
 ---
 

@@ -36,7 +36,7 @@ export function StreakSummaryPanel({
           <div className="space-y-3">
             <div className="grid grid-cols-[minmax(0,1fr)_3.5rem_3.5rem] items-end gap-2 text-[10px] font-semibold uppercase tracking-[0.25em] text-black/40">
               <span>Habit</span>
-              <span className="text-center">Current</span>
+              <span className="text-center text-black/70">Current</span>
               <span className="pl-2 text-center">Longest</span>
             </div>
             <div className="divide-y divide-black/10">

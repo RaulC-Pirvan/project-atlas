@@ -65,7 +65,7 @@ section in sync with implementation and tests.
 - **Scheduled day**: A calendar day whose weekday is included in the habit schedule.
 - **Completion**: A `HabitCompletion` row for the habit on the scheduled day
   (stored as a UTC date key).
-- **Streak**: A count of *consecutive scheduled days* that are completed.
+- **Streak**: A count of _consecutive scheduled days_ that are completed.
 
 ### What counts toward a streak
 
@@ -123,9 +123,9 @@ These rules define how the `asOf` date is derived and how partial days behave.
 
 ### Tasks (3)
 
-- [ ] **Task 3.1**: Unit tests for current and longest streaks
-- [ ] **Task 3.2**: Tests for timezone boundaries and partial days
-- [ ] **Task 3.3**: Edge case tests (no schedule, no completions, gaps)
+- [x] **Task 3.1**: Unit tests for current and longest streaks
+- [x] **Task 3.2**: Tests for timezone boundaries and partial days
+- [x] **Task 3.3**: Edge case tests (no schedule, no completions, gaps)
 
 ---
 

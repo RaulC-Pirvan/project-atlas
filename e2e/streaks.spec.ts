@@ -2,9 +2,6 @@ import type { APIRequestContext, Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
 
 const password = 'AtlasTestPassword123!';
-const targetDate = '2026-01-05';
-const targetMonth = '2026-01';
-const targetWeekday = 1; // Monday
 
 function uniqueEmail(prefix: string) {
   const stamp = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
@@ -14,6 +11,14 @@ function uniqueEmail(prefix: string) {
 function uniqueTitle(prefix: string) {
   const stamp = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
   return `${prefix} ${stamp}`;
+}
+
+function utcDateKey(date: Date): string {
+  return date.toISOString().slice(0, 10);
+}
+
+function utcMonthKey(date: Date): string {
+  return date.toISOString().slice(0, 7);
 }
 
 async function signUp(page: Page, email: string) {
@@ -54,7 +59,7 @@ async function createVerifiedUser(page: Page, request: APIRequestContext, prefix
 }
 
 async function createHabit(page: Page, title: string, weekdays: number[]) {
-  const payload = { title, description: 'Completion test', weekdays };
+  const payload = { title, description: 'Streak test', weekdays };
   const result = await page.evaluate(async (data) => {
     const response = await fetch('/api/habits', {
       method: 'POST',
@@ -69,54 +74,43 @@ async function createHabit(page: Page, title: string, weekdays: number[]) {
   return result.json.data.habit as { id: string; title: string };
 }
 
-test('complete a habit for a selected day', async ({ page, request }) => {
-  await createVerifiedUser(page, request, 'daily-complete');
-  const habitTitle = uniqueTitle('Read');
-  await createHabit(page, habitTitle, [targetWeekday]);
+test('streaks update after completion toggle', async ({ page, request }) => {
+  await createVerifiedUser(page, request, 'streaks-update');
+  const habitTitle = uniqueTitle('Journal');
+  await createHabit(page, habitTitle, [1, 2, 3, 4, 5, 6, 7]);
 
-  await page.goto(`/calendar?month=${targetMonth}&date=${targetDate}`);
+  const today = new Date();
+  const dateKey = utcDateKey(today);
+  const monthKey = utcMonthKey(today);
+
+  await page.goto(`/calendar?month=${monthKey}&date=${dateKey}`);
+
+  const panel = page.getByTestId('streaks-panel');
+  await expect(panel).toContainText(/begin your first streak/i);
 
   const checkbox = page.getByRole('checkbox', { name: new RegExp(habitTitle, 'i') });
-  await expect(checkbox).toHaveAttribute('aria-checked', 'false');
   await checkbox.click();
   await expect(checkbox).toHaveAttribute('aria-checked', 'true');
+
+  await expect(panel).not.toContainText(/begin your first streak/i);
+
+  const row = panel.getByText(habitTitle).locator('..');
+  const values = row.locator('p');
+  await expect(values.nth(1)).toHaveText('1');
+  await expect(values.nth(2)).toHaveText('1');
 });
 
-test('uncheck a completion', async ({ page, request }) => {
-  await createVerifiedUser(page, request, 'daily-uncheck');
+test('empty state when no completions exist', async ({ page, request }) => {
+  await createVerifiedUser(page, request, 'streaks-empty');
   const habitTitle = uniqueTitle('Stretch');
-  await createHabit(page, habitTitle, [targetWeekday]);
+  await createHabit(page, habitTitle, [1, 2, 3, 4, 5, 6, 7]);
 
-  await page.goto(`/calendar?month=${targetMonth}&date=${targetDate}`);
+  const today = new Date();
+  const dateKey = utcDateKey(today);
+  const monthKey = utcMonthKey(today);
 
-  const checkbox = page.getByRole('checkbox', { name: new RegExp(habitTitle, 'i') });
-  await checkbox.click();
-  await expect(checkbox).toHaveAttribute('aria-checked', 'true');
+  await page.goto(`/calendar?month=${monthKey}&date=${dateKey}`);
 
-  await checkbox.click();
-  await expect(checkbox).toHaveAttribute('aria-checked', 'false');
-});
-
-test('prevent double completion', async ({ page, request }) => {
-  await createVerifiedUser(page, request, 'daily-double');
-  const habitTitle = uniqueTitle('Hydrate');
-  const habit = await createHabit(page, habitTitle, [targetWeekday]);
-
-  const api = page.context().request;
-  const payload = { habitId: habit.id, date: targetDate, completed: true };
-
-  const first = await api.post('/api/completions', { data: payload });
-  expect(first.ok()).toBeTruthy();
-
-  const second = await api.post('/api/completions', { data: payload });
-  expect(second.ok()).toBeTruthy();
-
-  const list = await api.get(`/api/completions?date=${targetDate}`);
-  expect(list.ok()).toBeTruthy();
-  const body = await list.json();
-  const matches = body.data.completions.filter(
-    (completion: { habitId: string }) => completion.habitId === habit.id,
-  );
-
-  expect(matches).toHaveLength(1);
+  const panel = page.getByTestId('streaks-panel');
+  await expect(panel).toContainText(/begin your first streak/i);
 });

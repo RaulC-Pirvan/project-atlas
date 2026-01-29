@@ -88,7 +88,8 @@ test('verify link marks account verified and login works', async ({ page, reques
   await expect(page.getByRole('heading', { name: /email verified\./i })).toBeVisible();
 
   await signIn(page, email, password);
-  await expect(page).toHaveURL(/\/account/);
+  await expect(page).toHaveURL(/\/calendar/);
+  await page.goto('/account');
   await expect(page.getByText(email)).toBeVisible();
 });
 
@@ -113,7 +114,7 @@ test('logout ends session', async ({ page, request }) => {
   await expect(page.getByRole('heading', { name: /email verified\./i })).toBeVisible();
 
   await signIn(page, email, password);
-  await expect(page).toHaveURL(/\/account/);
+  await expect(page).toHaveURL(/\/calendar/);
 
   await page
     .getByRole('navigation')
@@ -152,7 +153,8 @@ test('account update works', async ({ page, request }) => {
   await expect(page.getByRole('heading', { name: /email verified\./i })).toBeVisible();
 
   await signIn(page, email, password);
-  await expect(page).toHaveURL(/\/account/);
+  await expect(page).toHaveURL(/\/calendar/);
+  await page.goto('/account');
 
   await page.getByLabel(/^new password$/i).fill(newPassword);
   await page.getByLabel(/confirm new password/i).fill(newPassword);
@@ -166,7 +168,8 @@ test('account update works', async ({ page, request }) => {
   await expect(page).toHaveURL(/\/sign-in/);
 
   await signIn(page, email, newPassword);
-  await expect(page).toHaveURL(/\/account/);
+  await expect(page).toHaveURL(/\/calendar/);
+  await page.goto('/account');
 });
 
 test('display name update works', async ({ page, request }) => {
@@ -178,7 +181,8 @@ test('display name update works', async ({ page, request }) => {
   await expect(page.getByRole('heading', { name: /email verified\./i })).toBeVisible();
 
   await signIn(page, email, password);
-  await expect(page).toHaveURL(/\/account/);
+  await expect(page).toHaveURL(/\/calendar/);
+  await page.goto('/account');
 
   await page.getByLabel(/^display name$/i).fill('Atlas Prime');
   await page.getByRole('button', { name: /update display name/i }).click();
@@ -196,7 +200,8 @@ test('email update requires re-verification', async ({ page, request }) => {
   await expect(page.getByRole('heading', { name: /email verified\./i })).toBeVisible();
 
   await signIn(page, email, password);
-  await expect(page).toHaveURL(/\/account/);
+  await expect(page).toHaveURL(/\/calendar/);
+  await page.goto('/account');
 
   await page.getByLabel(/^email$/i).fill(newEmail);
   await page.getByLabel(/confirm password for email/i).fill(password);
@@ -210,7 +215,8 @@ test('email update requires re-verification', async ({ page, request }) => {
   await expect(page.getByRole('heading', { name: /email verified\./i })).toBeVisible();
 
   await signIn(page, newEmail, password);
-  await expect(page).toHaveURL(/\/account/);
+  await expect(page).toHaveURL(/\/calendar/);
+  await page.goto('/account');
   await expect(page.getByText(newEmail)).toBeVisible();
 });
 
@@ -223,7 +229,8 @@ test('account delete removes access', async ({ page, request }) => {
   await expect(page.getByRole('heading', { name: /email verified\./i })).toBeVisible();
 
   await signIn(page, email, password);
-  await expect(page).toHaveURL(/\/account/);
+  await expect(page).toHaveURL(/\/calendar/);
+  await page.goto('/account');
 
   await page.getByLabel(/^confirm$/i).fill('delete');
   await page.getByRole('button', { name: /request delete/i }).click();

@@ -1,9 +1,9 @@
-import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
 import { CalendarMonth } from '../../components/calendar/CalendarMonth';
 import { DailyCompletionPanel } from '../../components/calendar/DailyCompletionPanel';
 import { AppShell } from '../../components/layout/AppShell';
+import { StreakSummaryPanel } from '../../components/streaks/StreakSummaryPanel';
 import { listCompletionsForDate, listCompletionsInRange } from '../../lib/api/habits/completions';
 import { listHabits } from '../../lib/api/habits/habits';
 import { getServerAuthSession } from '../../lib/auth/session';
@@ -16,6 +16,7 @@ import {
   toUtcDateKey,
 } from '../../lib/habits/dates';
 import { isHabitActiveOnDate } from '../../lib/habits/schedule';
+import { calculateStreaks } from '../../lib/habits/streaks';
 
 type SearchParams = {
   month?: string | string[];
@@ -108,6 +109,38 @@ export default async function CalendarPage({
     habit,
     schedule: habit.weekdays.map((weekday) => ({ weekday })),
   }));
+
+  const habitIds = habits.map((habit) => habit.id);
+  const streakCompletions =
+    habitIds.length > 0
+      ? await prisma.habitCompletion.findMany({
+          where: { habitId: { in: habitIds }, habit: { userId: session.user.id } },
+          select: { habitId: true, date: true },
+        })
+      : [];
+  const completionByHabit = new Map<string, Date[]>();
+  for (const completion of streakCompletions) {
+    const dates = completionByHabit.get(completion.habitId) ?? [];
+    dates.push(completion.date);
+    completionByHabit.set(completion.habitId, dates);
+  }
+
+  const streakItems = habits.map((habit) => {
+    const summary = calculateStreaks({
+      schedule: habit.weekdays.map((weekday) => ({ weekday })),
+      completions: completionByHabit.get(habit.id) ?? [],
+      asOf: now,
+      timeZone,
+    });
+
+    return {
+      habitId: habit.id,
+      title: habit.title,
+      current: summary.current,
+      longest: summary.longest,
+    };
+  });
+  const hasCompletions = streakCompletions.length > 0;
 
   const firstWeek = monthGrid.weeks[0];
   const lastWeek = monthGrid.weeks[monthGrid.weeks.length - 1];
@@ -215,6 +248,11 @@ export default async function CalendarPage({
     month: 'long',
     year: 'numeric',
   }).format(monthDate);
+  const streakAsOfLabel = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'UTC',
+    month: 'short',
+    day: 'numeric',
+  }).format(today);
 
   const prev = shiftMonth(year, month, -1);
   const next = shiftMonth(year, month, 1);
@@ -224,16 +262,6 @@ export default async function CalendarPage({
   return (
     <AppShell title="Calendar" subtitle="Track your habits day by day.">
       <div className="space-y-6">
-        {habits.length === 0 ? (
-          <div className="rounded-2xl border border-black/10 px-6 py-4 text-sm text-black/60">
-            No habits yet. Create one to populate your calendar.{' '}
-            <Link href="/habits" className="font-semibold text-black">
-              Go to Habits
-            </Link>
-            .
-          </div>
-        ) : null}
-
         <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
           <div className="space-y-6 lg:flex-1">
             <CalendarMonth
@@ -261,13 +289,21 @@ export default async function CalendarPage({
           </div>
 
           <aside className="lg:w-80">
-            <DailyCompletionPanel
-              selectedDateKey={selectedKey}
-              selectedLabel={selectedLabel}
-              habits={selectedHabits}
-              initialCompletedHabitIds={Array.from(selectedCompletedIds)}
-              isFuture={isFuture}
-            />
+            <div className="space-y-6">
+              <StreakSummaryPanel
+                items={streakItems}
+                hasHabits={habits.length > 0}
+                hasCompletions={hasCompletions}
+                asOfLabel={streakAsOfLabel}
+              />
+              <DailyCompletionPanel
+                selectedDateKey={selectedKey}
+                selectedLabel={selectedLabel}
+                habits={selectedHabits}
+                initialCompletedHabitIds={Array.from(selectedCompletedIds)}
+                isFuture={isFuture}
+              />
+            </div>
           </aside>
         </div>
       </div>

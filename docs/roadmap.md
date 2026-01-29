@@ -116,13 +116,13 @@
 
 ### Sprint 3.1: Streak Logic
 
-- [ ] Define streak rules clearly (what breaks a streak)
-- [ ] Compute:
+- [x] Define streak rules clearly (what breaks a streak)
+- [x] Compute:
   - current streak
   - longest streak
-- [ ] Handle partial days correctly
-- [ ] Timezone-safe logic
-- [ ] Unit tests for streak calculations
+- [x] Handle partial days correctly
+- [x] Timezone-safe logic
+- [x] Unit tests for streak calculations
 
 ---
 

@@ -22,11 +22,13 @@ A habit is defined independently of dates.
 - Email verification uses Resend client; debug token capture plus `/api/auth/debug/verification-token` for tests.
 - Tests in place: Vitest unit/API tests, auth + habit + calendar component tests, Playwright auth + habits + calendar + daily completion + visual regression E2E.
 - Habit domain models implemented (Habit, HabitSchedule, HabitCompletion) with migrations and seed data.
-- Habit domain helpers exist in `src/lib/habits` (dates, schedules, completions, streaks, query helpers, types).
+- Habit domain helpers exist in `src/lib/habits` (dates, schedules, calendar grid, completions, streaks, query helpers, types).
 - Habit CRUD API implemented (list/create/update/archive) with a habits UI built around `HabitsPanel` and `HabitForm`.
 - Authenticated screens use `AppShell` + `AppSidebar` with Calendar/Habits/Account navigation and Sign out.
 - Calendar view implemented with monthly grid, month navigation, selected-day side panel (`?date=YYYY-MM-DD`), daily completion toggles via `/api/completions`, per-day progress indicators, and golden completed-day tiles.
-- User preferences include `weekStart` (sun/mon), used in habit scheduling UI and adjustable in account settings.
+- Daily completion supports check/uncheck with server-side schedule validation, future-date guard, and toast feedback; completions persist per habit+date.
+- Calendar polish includes motion-safe transitions, reduced-motion fallbacks, and subtle completion sounds on success.
+- User profile tracks `weekStart` (sun/mon) and `timezone` (defaults to UTC, no UI yet); week start controls calendar layout, timezone drives date normalization and completion rules.
 
 ## UI Direction (authoritative)
 
@@ -54,12 +56,18 @@ A habit is defined independently of dates.
 - `src/lib/api/habits` - Habit API services and validation.
 - `src/lib/api/habits/__tests__` - Habit API service tests.
 - `src/components/habits` - Habit UI components and tests.
-- `src/components/calendar` - Calendar UI components and tests.
+- `src/components/calendar/CalendarMonth.tsx` - Calendar grid + progress indicators + completed-day styling.
+- `src/components/calendar/DailyCompletionPanel.tsx` - Selected-day habit list + completion toggles + completion sounds.
+- `src/components/calendar/__tests__` - Calendar UI tests.
 - `src/components/layout` - App shell layout primitives (AppShell, AppSidebar).
 - `src/components/auth/AccountPanel.tsx` - Account settings (including week start).
 - `src/components/auth/SignOutButton.tsx` - Sign-out button for authenticated layouts.
+- `src/components/ui/Toast.tsx` - Toast notifications (no inline form errors).
+- `src/components/ui/Notice.tsx` - Inline notice/alert primitive.
 - `src/lib/db/prisma.ts` - Prisma singleton using adapter-pg + pg pool.
 - `src/lib/habits` - Habit domain helpers (date normalization, schedules, calendar grids, completions, query helpers, streaks, types).
+- `src/lib/habits/calendar.ts` - Month grid generation and weekday mapping.
+- `src/lib/habits/weekdays.ts` - Weekday ordering/labels for week start.
 - `src/lib/api/habits/completions.ts` - Completion toggle/list services (date/range).
 - `src/lib/habits/__tests__` - Habit domain unit tests.
 - `src/infra/email` - Resend client, verification email sender, debug token store.
@@ -72,6 +80,8 @@ A habit is defined independently of dates.
 - `src/app/(auth)` - Auth pages (sign-in, sign-up, verify-email).
 - `src/app/account/page.tsx` - Account management page.
 - `middleware.ts` - Route protection using NextAuth JWT.
+- `e2e/daily-completion.spec.ts` - Daily completion E2E flow coverage.
+- `e2e/calendar-visual.spec.ts` - Playwright visual regression coverage for calendar tiles.
 - `e2e` - Playwright auth + habits + calendar + daily completion + visual regression E2E tests.
 
 ## Engineering Standards

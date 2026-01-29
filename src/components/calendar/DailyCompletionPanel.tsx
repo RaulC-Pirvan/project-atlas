@@ -188,7 +188,7 @@ export function DailyCompletionPanel({
                 aria-checked={isCompleted}
                 disabled={isDisabled}
                 onClick={() => handleToggle(habit.id)}
-                className={`flex w-full items-start justify-between gap-4 rounded-xl border px-4 py-3 text-left motion-safe:transition-colors motion-safe:duration-200 motion-safe:ease-out motion-reduce:transition-none ${focusClasses} ${
+                className={`flex min-h-[44px] w-full items-start justify-between gap-4 rounded-xl border px-4 py-3 text-left motion-safe:transition-colors motion-safe:duration-200 motion-safe:ease-out motion-reduce:transition-none ${focusClasses} ${
                   isCompleted ? 'border-black bg-black text-white' : 'border-black/10 text-black'
                 } ${isDisabled ? 'opacity-60' : hoverClasses} `.trim()}
               >

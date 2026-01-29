@@ -128,10 +128,10 @@
 
 ### Sprint 3.2: Streak UI
 
-- [ ] Display streak stats in dashboard
-- [ ] Visual emphasis on streak continuity
-- [ ] Friendly empty states
-- [ ] E2E tests for streak updates
+- [x] Display streak stats in dashboard
+- [x] Visual emphasis on streak continuity
+- [x] Friendly empty states
+- [x] E2E tests for streak updates
 
 ---
 

@@ -26,7 +26,7 @@ type CalendarMonthProps = {
 };
 
 const navButtonClasses =
-  'inline-flex items-center justify-center rounded-full border border-black/20 px-4 py-2 text-xs font-semibold uppercase tracking-[0.25em] text-black/70 transition hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20';
+  'inline-flex items-center justify-center rounded-full border border-black/20 px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.25em] text-black/70 transition hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20 sm:px-4 sm:text-xs';
 
 export function CalendarMonth({
   monthLabel,
@@ -59,7 +59,7 @@ export function CalendarMonth({
           {weekdayOrder.map((weekday) => (
             <div
               key={weekday}
-              className="bg-white px-3 py-2 text-center text-xs font-semibold uppercase tracking-[0.25em] text-black/60"
+              className="bg-white px-2 py-2 text-center text-[10px] font-semibold uppercase tracking-[0.25em] text-black/60 sm:px-3 sm:text-xs"
             >
               {getWeekdayLabel(weekday)}
             </div>
@@ -71,7 +71,7 @@ export function CalendarMonth({
               const progressPercent =
                 day.totalCount > 0 ? Math.min(100, (day.completedCount / day.totalCount) * 100) : 0;
               const baseCellClasses =
-                'group flex min-h-[86px] flex-col justify-between px-3 py-2 text-left text-sm motion-safe:transition-colors motion-safe:duration-200 motion-safe:ease-out motion-reduce:transition-none';
+                'group flex min-h-[64px] touch-manipulation flex-col justify-between px-2 py-2 text-left text-xs motion-safe:transition-colors motion-safe:duration-200 motion-safe:ease-out motion-reduce:transition-none sm:min-h-[86px] sm:px-3 sm:text-sm';
               const mutedClasses = day.inMonth ? 'text-black' : 'text-black/30';
               const backgroundClasses = isComplete ? 'bg-[#FAB95B] text-white' : 'bg-white';
               const hoverClasses = day.inMonth
@@ -101,7 +101,7 @@ export function CalendarMonth({
 
               const content = (
                 <>
-                  <span className="text-lg font-semibold">{day.day}</span>
+                  <span className="text-base font-semibold sm:text-lg">{day.day}</span>
                   <div className="space-y-2">
                     {day.totalCount > 0 ? (
                       <>

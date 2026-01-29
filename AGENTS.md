@@ -28,7 +28,9 @@ A habit is defined independently of dates.
 - Calendar view implemented with monthly grid, month navigation, selected-day side panel (`?date=YYYY-MM-DD`), daily completion toggles via `/api/completions`, per-day progress indicators, and golden completed-day tiles.
 - Daily completion supports check/uncheck with server-side schedule validation, future-date guard, and toast feedback; completions persist per habit+date.
 - Calendar polish includes motion-safe transitions, reduced-motion fallbacks, and subtle completion sounds on success.
+- Streak logic implemented (current + longest) with timezone-safe normalization and unit tests; streak summary panel lives in the calendar sidebar.
 - User profile tracks `weekStart` (sun/mon) and `timezone` (defaults to UTC, no UI yet); week start controls calendar layout, timezone drives date normalization and completion rules.
+- Post-login redirect lands on `/calendar` (tests and flows expect Calendar as the default landing page).
 
 ## UI Direction (authoritative)
 
@@ -59,6 +61,7 @@ A habit is defined independently of dates.
 - `src/components/calendar/CalendarMonth.tsx` - Calendar grid + progress indicators + completed-day styling.
 - `src/components/calendar/DailyCompletionPanel.tsx` - Selected-day habit list + completion toggles + completion sounds.
 - `src/components/calendar/__tests__` - Calendar UI tests.
+- `src/components/streaks/StreakSummaryPanel.tsx` - Streak summary panel (current/longest + empty states).
 - `src/components/layout` - App shell layout primitives (AppShell, AppSidebar).
 - `src/components/auth/AccountPanel.tsx` - Account settings (including week start).
 - `src/components/auth/SignOutButton.tsx` - Sign-out button for authenticated layouts.
@@ -82,6 +85,7 @@ A habit is defined independently of dates.
 - `middleware.ts` - Route protection using NextAuth JWT.
 - `e2e/daily-completion.spec.ts` - Daily completion E2E flow coverage.
 - `e2e/calendar-visual.spec.ts` - Playwright visual regression coverage for calendar tiles.
+- `e2e/streaks.spec.ts` - Streak UI E2E coverage.
 - `e2e` - Playwright auth + habits + calendar + daily completion + visual regression E2E tests.
 
 ## Engineering Standards

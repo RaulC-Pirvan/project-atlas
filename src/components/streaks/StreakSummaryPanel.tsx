@@ -19,7 +19,7 @@ export function StreakSummaryPanel({
   asOfLabel,
 }: StreakSummaryPanelProps) {
   return (
-    <div className="rounded-2xl border border-black/10 px-6 py-6">
+    <div className="rounded-2xl border border-black/10 px-6 py-6" data-testid="streaks-panel">
       <div className="flex items-center justify-between gap-4">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.3em] text-black/60">Streaks</p>
@@ -29,7 +29,15 @@ export function StreakSummaryPanel({
 
       <div className="mt-4 text-sm text-black/70">
         {!hasHabits ? (
-          <p>Create a habit to start a streak.</p>
+          <div className="space-y-3">
+            <p>Create a habit to start a streak.</p>
+            <a
+              href="/habits"
+              className="inline-flex items-center justify-center rounded-full border border-black/20 px-4 py-2 text-xs font-semibold uppercase tracking-[0.25em] text-black/70 transition hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20"
+            >
+              Go to habits
+            </a>
+          </div>
         ) : !hasCompletions ? (
           <p>Complete a habit to begin your first streak.</p>
         ) : (

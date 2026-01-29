@@ -80,7 +80,7 @@ export function SignInForm() {
         return;
       }
 
-      router.push('/account');
+      router.push('/calendar');
       router.refresh();
     } finally {
       setSubmitting(false);

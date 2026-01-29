@@ -106,8 +106,8 @@ should be represented in the UI.
 
 ### Tasks (2)
 
-- [ ] **Task 3.1**: E2E: streaks update after completion toggle
-- [ ] **Task 3.2**: E2E: empty state when no completions exist
+- [x] **Task 3.1**: E2E: streaks update after completion toggle
+- [x] **Task 3.2**: E2E: empty state when no completions exist
 
 ---
 

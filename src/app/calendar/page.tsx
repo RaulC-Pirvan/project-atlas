@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
 import { CalendarMonth } from '../../components/calendar/CalendarMonth';
@@ -263,16 +262,6 @@ export default async function CalendarPage({
   return (
     <AppShell title="Calendar" subtitle="Track your habits day by day.">
       <div className="space-y-6">
-        {habits.length === 0 ? (
-          <div className="rounded-2xl border border-black/10 px-6 py-4 text-sm text-black/60">
-            No habits yet. Create one to populate your calendar.{' '}
-            <Link href="/habits" className="font-semibold text-black">
-              Go to Habits
-            </Link>
-            .
-          </div>
-        ) : null}
-
         <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
           <div className="space-y-6 lg:flex-1">
             <CalendarMonth

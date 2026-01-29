@@ -113,9 +113,9 @@ These rules define how the `asOf` date is derived and how partial days behave.
 
 ### Tasks (3)
 
-- [ ] **Task 2.1**: Implement current streak calculation
-- [ ] **Task 2.2**: Implement longest streak calculation
-- [ ] **Task 2.3**: Ensure timezone-safe normalization and weekday filtering
+- [x] **Task 2.1**: Implement current streak calculation
+- [x] **Task 2.2**: Implement longest streak calculation
+- [x] **Task 2.3**: Ensure timezone-safe normalization and weekday filtering
 
 ---
 

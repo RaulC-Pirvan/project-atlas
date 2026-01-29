@@ -1,4 +1,10 @@
-import { addUtcDays, getIsoWeekdayFromUtcDate, normalizeToUtcDate, toUtcDateKey } from './dates';
+import {
+  addUtcDays,
+  getIsoWeekdayFromUtcDate,
+  normalizeToUtcDate,
+  parseUtcDateKey,
+  toUtcDateKey,
+} from './dates';
 import { listActiveWeekdays } from './schedule';
 import type { HabitScheduleEntry } from './types';
 
@@ -14,28 +20,50 @@ export type StreakSummary = {
   longest: number;
 };
 
-function earliestDate(dates: Date[]): Date | null {
-  if (dates.length === 0) return null;
-  return dates.reduce((min, value) => (value < min ? value : min));
-}
+type PreparedStreakInputs = {
+  activeWeekdays: Set<number>;
+  completionKeys: Set<string>;
+  startDate: Date | null;
+  asOfDate: Date;
+};
 
-export function calculateStreaks(input: StreakInputs): StreakSummary {
-  const activeWeekdays = listActiveWeekdays(input.schedule);
-  if (activeWeekdays.length === 0) {
-    return { current: 0, longest: 0 };
+function prepareStreakInputs(input: StreakInputs): PreparedStreakInputs {
+  const activeWeekdays = new Set(listActiveWeekdays(input.schedule));
+  const asOfDate = normalizeToUtcDate(input.asOf, input.timeZone);
+  const asOfKey = toUtcDateKey(asOfDate);
+  const completionKeys = new Set<string>();
+  let earliestKey: string | null = null;
+
+  for (const completion of input.completions) {
+    const key = toUtcDateKey(completion);
+    if (key > asOfKey) continue;
+    completionKeys.add(key);
+    if (!earliestKey || key < earliestKey) {
+      earliestKey = key;
+    }
   }
 
-  const completionKeys = new Set(input.completions.map(toUtcDateKey));
-  const asOfDate = normalizeToUtcDate(input.asOf, input.timeZone);
-  const startDate = earliestDate(input.completions) ?? asOfDate;
-  const weekdaySet = new Set(activeWeekdays);
+  const startDate = earliestKey ? parseUtcDateKey(earliestKey) : null;
+
+  return { activeWeekdays, completionKeys, startDate, asOfDate };
+}
+
+function walkScheduledDays({
+  activeWeekdays,
+  completionKeys,
+  startDate,
+  asOfDate,
+}: PreparedStreakInputs): StreakSummary {
+  if (activeWeekdays.size === 0 || !startDate) {
+    return { current: 0, longest: 0 };
+  }
 
   let current = 0;
   let longest = 0;
 
   for (let date = startDate; date <= asOfDate; date = addUtcDays(date, 1)) {
     const weekday = getIsoWeekdayFromUtcDate(date);
-    if (!weekdaySet.has(weekday)) {
+    if (!activeWeekdays.has(weekday)) {
       continue;
     }
 
@@ -48,4 +76,16 @@ export function calculateStreaks(input: StreakInputs): StreakSummary {
   }
 
   return { current, longest };
+}
+
+export function calculateStreaks(input: StreakInputs): StreakSummary {
+  return walkScheduledDays(prepareStreakInputs(input));
+}
+
+export function calculateCurrentStreak(input: StreakInputs): number {
+  return walkScheduledDays(prepareStreakInputs(input)).current;
+}
+
+export function calculateLongestStreak(input: StreakInputs): number {
+  return walkScheduledDays(prepareStreakInputs(input)).longest;
 }

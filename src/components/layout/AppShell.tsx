@@ -24,7 +24,7 @@ export function AppShell({ title, subtitle, children }: AppShellProps) {
         <AppSidebar />
         <div className="flex min-h-[calc(100vh-56px)] flex-col">
           <div className="mx-auto w-full max-w-6xl flex-1">
-            <main className="flex-1 px-6 py-10 md:pl-72">
+            <main className="flex-1 px-6 pb-24 pt-10 md:pl-72 md:pb-10">
               <div className="space-y-8">
                 <div className="space-y-2">
                   <h1 className="text-3xl font-semibold tracking-tight">{title}</h1>

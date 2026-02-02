@@ -142,7 +142,12 @@ export function HabitForm({
       </FormField>
 
       <div className="flex flex-col gap-3 sm:flex-row">
-        <Button type="submit" variant="primary" className="flex-1" disabled={submitting}>
+        <Button
+          type="submit"
+          variant="primary"
+          className="flex-1 min-h-[48px] sm:min-h-0"
+          disabled={submitting}
+        >
           {submitting
             ? mode === 'create'
               ? 'Creating...'
@@ -152,7 +157,12 @@ export function HabitForm({
               : 'Save changes'}
         </Button>
         {onCancel ? (
-          <Button type="button" variant="outline" className="flex-1" onClick={onCancel}>
+          <Button
+            type="button"
+            variant="outline"
+            className="flex-1 min-h-[48px] sm:min-h-0"
+            onClick={onCancel}
+          >
             Cancel
           </Button>
         ) : null}

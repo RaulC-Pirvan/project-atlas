@@ -176,9 +176,11 @@ export function DailyCompletionPanel({
           const isPending = pendingIds.includes(habit.id);
           const isDisabled = isFuture || isPending;
           const focusClasses = isCompleted
-            ? 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60'
-            : 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20';
-          const hoverClasses = isCompleted ? 'hover:bg-black/90' : 'hover:bg-black/5';
+            ? 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black'
+            : 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20 focus-visible:ring-offset-2 focus-visible:ring-offset-white';
+          const hoverClasses = isCompleted
+            ? 'hover:bg-black/90 active:bg-black/80 active:scale-[0.99]'
+            : 'hover:bg-black/5 active:bg-black/10 active:scale-[0.99]';
 
           return (
             <li key={habit.id}>
@@ -188,7 +190,7 @@ export function DailyCompletionPanel({
                 aria-checked={isCompleted}
                 disabled={isDisabled}
                 onClick={() => handleToggle(habit.id)}
-                className={`flex min-h-[44px] w-full items-start justify-between gap-4 rounded-xl border px-4 py-3 text-left motion-safe:transition-colors motion-safe:duration-200 motion-safe:ease-out motion-reduce:transition-none ${focusClasses} ${
+                className={`flex min-h-[44px] w-full items-start justify-between gap-4 rounded-xl border px-4 py-3 text-left touch-manipulation motion-safe:transition-all motion-safe:duration-150 motion-safe:ease-out motion-reduce:transition-none ${focusClasses} ${
                   isCompleted ? 'border-black bg-black text-white' : 'border-black/10 text-black'
                 } ${isDisabled ? 'opacity-60' : hoverClasses} `.trim()}
               >

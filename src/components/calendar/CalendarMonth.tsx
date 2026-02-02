@@ -55,7 +55,7 @@ export function CalendarMonth({
       </div>
 
       <div className="overflow-hidden border border-black/10">
-        <div className="grid grid-cols-7 gap-px bg-black/10">
+        <div className="grid grid-cols-7 gap-px bg-black/10" data-testid="calendar-grid">
           {weekdayOrder.map((weekday) => (
             <div
               key={weekday}
@@ -71,13 +71,13 @@ export function CalendarMonth({
               const progressPercent =
                 day.totalCount > 0 ? Math.min(100, (day.completedCount / day.totalCount) * 100) : 0;
               const baseCellClasses =
-                'group flex min-h-[64px] touch-manipulation flex-col justify-between px-2 py-2 text-left text-xs motion-safe:transition-colors motion-safe:duration-200 motion-safe:ease-out motion-reduce:transition-none sm:min-h-[86px] sm:px-3 sm:text-sm';
+                'group flex min-h-[64px] touch-manipulation flex-col justify-between px-2 py-2 text-left text-xs motion-safe:transition-all motion-safe:duration-150 motion-safe:ease-out motion-reduce:transition-none sm:min-h-[86px] sm:px-3 sm:text-sm';
               const mutedClasses = day.inMonth ? 'text-black' : 'text-black/30';
               const backgroundClasses = isComplete ? 'bg-[#FAB95B] text-white' : 'bg-white';
               const hoverClasses = day.inMonth
                 ? isComplete
-                  ? 'hover:bg-[#E9A543] focus-visible:bg-[#E9A543]'
-                  : 'hover:bg-black/5 focus-visible:bg-black/5'
+                  ? 'hover:bg-[#E9A543] focus-visible:bg-[#E9A543] active:bg-[#D99638] active:scale-[0.98]'
+                  : 'hover:bg-black/5 focus-visible:bg-black/5 active:bg-black/10 active:scale-[0.98]'
                 : '';
               const todayClasses = day.isToday ? 'ring-1 ring-black ring-inset' : '';
               const selectedClasses = day.isSelected
@@ -153,6 +153,8 @@ export function CalendarMonth({
                 <Link
                   key={day.key}
                   href={day.href}
+                  data-date-key={day.key}
+                  scroll={false}
                   className={cellClasses}
                   aria-label={`Open daily view for ${day.label}`}
                 >

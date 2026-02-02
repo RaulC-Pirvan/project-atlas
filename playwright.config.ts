@@ -6,9 +6,12 @@ const webServerEnv = {
   NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET ?? 'test-secret',
   NEXTAUTH_URL: process.env.NEXTAUTH_URL ?? 'http://localhost:3000',
 };
+const isWindows = process.platform === 'win32';
+const devCommand = isWindows ? 'node ./node_modules/next/dist/bin/next dev -p 3000' : 'npm run dev';
 
 export default defineConfig({
   testDir: './e2e',
+  globalSetup: './playwright.global-setup.ts',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
@@ -32,8 +35,26 @@ export default defineConfig({
   },
 
   projects: [
-    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
-    { name: 'firefox', use: { ...devices['Desktop Firefox'] } },
+    {
+      name: 'chromium',
+      use: { ...devices['Desktop Chrome'] },
+      testIgnore: /calendar-visual\.spec\.ts/,
+    },
+    {
+      name: 'firefox',
+      use: { ...devices['Desktop Firefox'] },
+      testIgnore: /calendar-visual\.spec\.ts/,
+    },
+    ...(process.env.RUN_VISUAL === 'true' || process.env.CI === 'true'
+      ? [
+          {
+            name: 'visual',
+            testMatch: /calendar-visual\.spec\.ts/,
+            use: { ...devices['Desktop Chrome'] },
+            workers: 1,
+          },
+        ]
+      : []),
   ],
 
   webServer: process.env.CI
@@ -45,7 +66,7 @@ export default defineConfig({
         timeout: 120_000,
       }
     : {
-        command: 'npm run dev',
+        command: devCommand,
         url: 'http://localhost:3000',
         env: webServerEnv,
         reuseExistingServer: true,

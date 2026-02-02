@@ -139,10 +139,10 @@
 
 ### Sprint 4.1: Mobile & Responsiveness
 
-- [ ] Mobile-optimized calendar view
-- [ ] Touch-friendly interactions
-- [ ] Bottom-sheet style daily view (mobile)
-- [ ] Cross-device testing
+- [x] Mobile-optimized calendar view
+- [x] Touch-friendly interactions
+- [x] Bottom-sheet style daily view (mobile)
+- [x] Cross-device testing
 
 ---
 

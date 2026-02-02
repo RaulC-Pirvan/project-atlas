@@ -1,0 +1,127 @@
+'use client';
+
+import { useEffect, useId, useState } from 'react';
+
+import { DailyCompletionPanel } from './DailyCompletionPanel';
+
+type HabitSummary = {
+  id: string;
+  title: string;
+  description: string | null;
+};
+
+type MobileDailySheetProps = {
+  selectedDateKey: string | null;
+  selectedLabel: string | null;
+  habits: HabitSummary[];
+  initialCompletedHabitIds: string[];
+  isFuture: boolean;
+};
+
+export function MobileDailySheet({
+  selectedDateKey,
+  selectedLabel,
+  habits,
+  initialCompletedHabitIds,
+  isFuture,
+}: MobileDailySheetProps) {
+  const [open, setOpen] = useState(false);
+  const titleId = useId();
+  const sheetId = useId();
+
+  useEffect(() => {
+    if (!selectedDateKey) {
+      setOpen(false);
+      return;
+    }
+    setOpen(true);
+  }, [selectedDateKey]);
+
+  useEffect(() => {
+    if (!open) return;
+    const handleKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [open]);
+
+  useEffect(() => {
+    if (!selectedDateKey) return;
+    const handleClick = (event: MouseEvent) => {
+      const target = event.target as HTMLElement | null;
+      const anchor = target?.closest('[data-date-key]') as HTMLElement | null;
+      if (!anchor) return;
+      if (anchor.getAttribute('data-date-key') === selectedDateKey) {
+        setOpen(true);
+      }
+    };
+    document.addEventListener('click', handleClick);
+    return () => document.removeEventListener('click', handleClick);
+  }, [selectedDateKey]);
+
+  if (!selectedDateKey) {
+    return null;
+  }
+
+  return (
+    <div className="lg:hidden">
+      <div
+        className={`fixed inset-0 z-50 flex flex-col justify-end ${
+          open ? 'pointer-events-auto' : 'pointer-events-none'
+        }`}
+      >
+        <button
+          type="button"
+          aria-label="Close daily view"
+          onClick={() => setOpen(false)}
+          aria-hidden={!open}
+          className={`absolute inset-0 bg-black/30 backdrop-blur-[2px] motion-safe:transition-opacity motion-safe:duration-200 motion-safe:ease-out motion-reduce:transition-none ${
+            open ? 'opacity-100' : 'pointer-events-none opacity-0'
+          }`}
+        />
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby={titleId}
+          aria-hidden={!open}
+          id={sheetId}
+          className={`relative rounded-t-3xl border border-black/10 bg-white px-4 pb-6 pt-4 shadow-[0_-20px_40px_rgba(0,0,0,0.2)] motion-safe:transition-transform motion-safe:duration-300 motion-safe:ease-out motion-reduce:transition-none ${
+            open ? 'translate-y-0' : 'pointer-events-none translate-y-full'
+          }`}
+        >
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <p
+                id={titleId}
+                className="text-xs font-semibold uppercase tracking-[0.3em] text-black/60"
+              >
+                Daily view
+              </p>
+              <p className="text-sm font-semibold">{selectedLabel ?? 'Selected day'}</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              className="inline-flex min-h-[36px] items-center justify-center rounded-full border border-black/20 px-3 text-xs font-semibold uppercase tracking-[0.25em] text-black/70 transition hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20"
+            >
+              Close
+            </button>
+          </div>
+
+          <div className="mt-4 max-h-[70vh] overflow-y-auto pr-1">
+            <DailyCompletionPanel
+              selectedDateKey={selectedDateKey}
+              selectedLabel={selectedLabel}
+              habits={habits}
+              initialCompletedHabitIds={initialCompletedHabitIds}
+              isFuture={isFuture}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

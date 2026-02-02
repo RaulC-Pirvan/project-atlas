@@ -1,3 +1,6 @@
 {
-  "prettier.prettierPath": null
+  "prettier.prettierPath": null,
+  "terminal.integrated.autoReplies": {
+    "Terminate batch job (Y/N)": "Y\r"
+  }
 }

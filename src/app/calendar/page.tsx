@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 
 import { CalendarMonth } from '../../components/calendar/CalendarMonth';
 import { DailyCompletionPanel } from '../../components/calendar/DailyCompletionPanel';
+import { MobileDailySheet } from '../../components/calendar/MobileDailySheet';
 import { AppShell } from '../../components/layout/AppShell';
 import { StreakSummaryPanel } from '../../components/streaks/StreakSummaryPanel';
 import { listCompletionsForDate, listCompletionsInRange } from '../../lib/api/habits/completions';
@@ -296,16 +297,25 @@ export default async function CalendarPage({
                 hasCompletions={hasCompletions}
                 asOfLabel={streakAsOfLabel}
               />
-              <DailyCompletionPanel
-                selectedDateKey={selectedKey}
-                selectedLabel={selectedLabel}
-                habits={selectedHabits}
-                initialCompletedHabitIds={Array.from(selectedCompletedIds)}
-                isFuture={isFuture}
-              />
+              <div className="hidden lg:block">
+                <DailyCompletionPanel
+                  selectedDateKey={selectedKey}
+                  selectedLabel={selectedLabel}
+                  habits={selectedHabits}
+                  initialCompletedHabitIds={Array.from(selectedCompletedIds)}
+                  isFuture={isFuture}
+                />
+              </div>
             </div>
           </aside>
         </div>
+        <MobileDailySheet
+          selectedDateKey={selectedKey}
+          selectedLabel={selectedLabel}
+          habits={selectedHabits}
+          initialCompletedHabitIds={Array.from(selectedCompletedIds)}
+          isFuture={isFuture}
+        />
       </div>
     </AppShell>
   );

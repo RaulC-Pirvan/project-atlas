@@ -78,14 +78,43 @@ function walkScheduledDays({
   return { current, longest };
 }
 
+function adjustAsOfForCurrent(
+  activeWeekdays: Set<number>,
+  completionKeys: Set<string>,
+  asOfDate: Date,
+): Date {
+  const asOfKey = toUtcDateKey(asOfDate);
+  const weekday = getIsoWeekdayFromUtcDate(asOfDate);
+  if (!activeWeekdays.has(weekday)) return asOfDate;
+  if (completionKeys.has(asOfKey)) return asOfDate;
+  return addUtcDays(asOfDate, -1);
+}
+
 export function calculateStreaks(input: StreakInputs): StreakSummary {
-  return walkScheduledDays(prepareStreakInputs(input));
+  const prepared = prepareStreakInputs(input);
+  if (prepared.activeWeekdays.size === 0 || !prepared.startDate) {
+    return { current: 0, longest: 0 };
+  }
+
+  const longest = walkScheduledDays(prepared).longest;
+  const currentAsOf = adjustAsOfForCurrent(
+    prepared.activeWeekdays,
+    prepared.completionKeys,
+    prepared.asOfDate,
+  );
+
+  if (currentAsOf < prepared.startDate) {
+    return { current: 0, longest };
+  }
+
+  const current = walkScheduledDays({ ...prepared, asOfDate: currentAsOf }).current;
+  return { current, longest };
 }
 
 export function calculateCurrentStreak(input: StreakInputs): number {
-  return walkScheduledDays(prepareStreakInputs(input)).current;
+  return calculateStreaks(input).current;
 }
 
 export function calculateLongestStreak(input: StreakInputs): number {
-  return walkScheduledDays(prepareStreakInputs(input)).longest;
+  return calculateStreaks(input).longest;
 }

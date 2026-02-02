@@ -92,9 +92,9 @@ sync with implementation and tests.
 
 ### Tasks (3)
 
-- [ ] **Task 2.1**: Ensure touch targets meet minimum size (44px+)
-- [ ] **Task 2.2**: Improve touch feedback for calendar tiles and habit rows
-- [ ] **Task 2.3**: Verify scrolling and focus states on mobile devices
+- [x] **Task 2.1**: Ensure touch targets meet minimum size (44px+)
+- [x] **Task 2.2**: Improve touch feedback for calendar tiles and habit rows
+- [x] **Task 2.3**: Verify scrolling and focus states on mobile devices
 
 ---
 
@@ -102,9 +102,9 @@ sync with implementation and tests.
 
 ### Tasks (3)
 
-- [ ] **Task 3.1**: Implement bottom-sheet daily view for mobile
-- [ ] **Task 3.2**: Add open/close gestures or buttons (accessible)
-- [ ] **Task 3.3**: Preserve calendar selection when sheet closes
+- [x] **Task 3.1**: Implement bottom-sheet daily view for mobile
+- [x] **Task 3.2**: Add open/close gestures or buttons (accessible)
+- [x] **Task 3.3**: Preserve calendar selection when sheet closes
 
 ---
 

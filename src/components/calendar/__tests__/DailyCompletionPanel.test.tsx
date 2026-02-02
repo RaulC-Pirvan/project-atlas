@@ -67,4 +67,49 @@ describe('DailyCompletionPanel', () => {
     expect(screen.getByRole('checkbox', { name: /read/i })).toBeDisabled();
     expect(screen.getByText(/future dates cannot be completed yet/i)).toBeInTheDocument();
   });
+
+  it('rolls back optimistic updates when the request fails', async () => {
+    let resolveFetch: (value: {
+      ok: boolean;
+      status: number;
+      statusText: string;
+      json: () => Promise<unknown>;
+    }) => void = () => undefined;
+
+    const fetchPromise = new Promise((resolve) => {
+      resolveFetch = resolve;
+    });
+
+    const fetchMock = vi.fn().mockReturnValue(fetchPromise);
+    vi.stubGlobal('fetch', fetchMock);
+
+    render(
+      <DailyCompletionPanel
+        selectedDateKey="2026-02-05"
+        selectedLabel="February 5, 2026"
+        habits={[{ id: 'h1', title: 'Read', description: 'Read daily' }]}
+        initialCompletedHabitIds={[]}
+        isFuture={false}
+      />,
+    );
+
+    const checkbox = screen.getByRole('checkbox', { name: /read/i });
+
+    fireEvent.click(checkbox);
+    expect(checkbox).toHaveAttribute('aria-checked', 'true');
+
+    resolveFetch({
+      ok: false,
+      status: 400,
+      statusText: 'Bad Request',
+      json: async () => ({
+        ok: false,
+        error: { code: 'invalid_request', message: 'Invalid' },
+      }),
+    });
+
+    await waitFor(() => expect(checkbox).toHaveAttribute('aria-checked', 'false'));
+
+    vi.unstubAllGlobals();
+  });
 });

@@ -21,6 +21,8 @@ A habit is defined independently of dates.
 - Account management API + UI: update email/password/display name/week start; delete account.
 - Email verification uses Resend client; debug token capture plus `/api/auth/debug/verification-token` for tests.
 - Tests in place: Vitest unit/API tests, auth + habit + calendar component tests, Playwright auth + habits + calendar + daily completion + visual regression E2E.
+- Playwright E2E runs use a Windows-safe temp dir setup via `playwright.global-setup.ts` to avoid chromium shutdown hangs.
+- Daily completion E2E includes retry-safe habit creation to handle transient network resets in Firefox.
 - Habit domain models implemented (Habit, HabitSchedule, HabitCompletion) with migrations and seed data.
 - Habit domain helpers exist in `src/lib/habits` (dates, schedules, calendar grid, completions, streaks, query helpers, types).
 - Habit CRUD API implemented (list/create/update/archive) with a habits UI built around `HabitsPanel` and `HabitForm`.
@@ -87,6 +89,8 @@ A habit is defined independently of dates.
 - `e2e/calendar-visual.spec.ts` - Playwright visual regression coverage for calendar tiles.
 - `e2e/streaks.spec.ts` - Streak UI E2E coverage.
 - `e2e` - Playwright auth + habits + calendar + daily completion + visual regression E2E tests.
+- `playwright.config.ts` - Playwright config (chromium + firefox; visual project enabled via `RUN_VISUAL` or CI).
+- `playwright.global-setup.ts` - Windows temp dir setup for Playwright runs.
 
 ## Engineering Standards
 

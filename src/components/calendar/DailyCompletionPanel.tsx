@@ -110,6 +110,19 @@ export function DailyCompletionPanel({
     }, 350);
   };
 
+  const setCompletionState = (habitId: string, completed: boolean) => {
+    setCompletedIds((prev) => {
+      const hasHabit = prev.includes(habitId);
+      if (completed) {
+        return hasHabit ? prev : [...prev, habitId];
+      }
+      if (!hasHabit) {
+        return prev;
+      }
+      return prev.filter((id) => id !== habitId);
+    });
+  };
+
   const handleToggle = async (habitId: string) => {
     if (!selectedDateKey) return;
     if (isFuture) {
@@ -119,6 +132,7 @@ export function DailyCompletionPanel({
 
     const alreadyCompleted = completedIds.includes(habitId);
     setPendingIds((prev) => [...prev, habitId]);
+    setCompletionState(habitId, !alreadyCompleted);
 
     try {
       const response = await fetch('/api/completions', {
@@ -133,27 +147,27 @@ export function DailyCompletionPanel({
       const body = await parseJson<CompletionResponse>(response);
 
       if (!response.ok || !body?.ok) {
+        setCompletionState(habitId, alreadyCompleted);
         pushToast(getApiErrorMessage(response, body), 'error');
         return;
       }
 
       const result = body.data.result;
       if (result.status === 'created') {
-        const nextCompletedIds = completedIds.includes(habitId)
-          ? completedIds
-          : [...completedIds, habitId];
-        setCompletedIds(nextCompletedIds);
+        setCompletionState(habitId, true);
         router.refresh();
+        const nextCompletedIds = alreadyCompleted ? completedIds : [...completedIds, habitId];
         if (nextCompletedIds.length >= habits.length && habits.length > 0) {
           playDing('day');
         } else {
           playDing('habit');
         }
       } else if (result.status === 'deleted') {
-        setCompletedIds((prev) => prev.filter((id) => id !== habitId));
+        setCompletionState(habitId, false);
         router.refresh();
       }
     } catch {
+      setCompletionState(habitId, alreadyCompleted);
       pushToast('Unable to update completion.', 'error');
     } finally {
       setPendingIds((prev) => prev.filter((id) => id !== habitId));
@@ -170,7 +184,7 @@ export function DailyCompletionPanel({
     }
 
     return (
-      <ul className="space-y-3">
+      <ul className="space-y-3" aria-busy={pendingIds.length > 0}>
         {habits.map((habit) => {
           const isCompleted = completedIds.includes(habit.id);
           const isPending = pendingIds.includes(habit.id);
@@ -212,7 +226,17 @@ export function DailyCompletionPanel({
                     isCompleted ? 'border-white bg-white text-black' : 'border-black/20'
                   }`}
                 >
-                  {isCompleted ? <span className="h-2 w-2 rounded-full bg-black" /> : null}
+                  {isPending ? (
+                    <span
+                      className={`h-3 w-3 rounded-full border motion-safe:animate-spin motion-reduce:animate-none ${
+                        isCompleted
+                          ? 'border-black/40 border-t-transparent'
+                          : 'border-black/30 border-t-transparent'
+                      }`}
+                    />
+                  ) : isCompleted ? (
+                    <span className="h-2 w-2 rounded-full bg-black" />
+                  ) : null}
                 </span>
               </button>
             </li>

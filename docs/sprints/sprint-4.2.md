@@ -93,7 +93,7 @@ Keep these behavioral rules consistent across UI and tests.
 
 ### Tasks (1)
 
-- [ ] **Task 2.1**: Standardize API error responses and recovery UX
+- [x] **Task 2.1**: Standardize API error responses and recovery UX
 
 ---
 

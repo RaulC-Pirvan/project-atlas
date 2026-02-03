@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 
 import { CalendarMonth } from '../../components/calendar/CalendarMonth';
 import { DailyCompletionPanel } from '../../components/calendar/DailyCompletionPanel';
+import { MobileDailySheet } from '../../components/calendar/MobileDailySheet';
 import { AppShell } from '../../components/layout/AppShell';
 import { StreakSummaryPanel } from '../../components/streaks/StreakSummaryPanel';
 import { listCompletionsForDate, listCompletionsInRange } from '../../lib/api/habits/completions';
@@ -100,6 +101,10 @@ export default async function CalendarPage({
   const resolvedSearchParams = await searchParams;
   const requested = parseMonthParam(resolvedSearchParams?.month);
   const requestedDate = parseDateParam(resolvedSearchParams?.date);
+  const hasDateParam = resolvedSearchParams?.date !== undefined;
+  const isCurrentMonth = !requested
+    ? true
+    : requested.year === localParts.year && requested.month === localParts.month;
   const year = requested?.year ?? requestedDate?.year ?? localParts.year;
   const month = requested?.month ?? requestedDate?.month ?? localParts.month;
 
@@ -163,7 +168,11 @@ export default async function CalendarPage({
     completionMap.set(completion.date, entry);
   }
 
-  const selectedDate = requestedDate ? toUtcDateFromParts(requestedDate) : null;
+  const selectedDate = requestedDate
+    ? toUtcDateFromParts(requestedDate)
+    : !hasDateParam && isCurrentMonth
+      ? today
+      : null;
   const selectedKey = selectedDate ? toUtcDateKey(selectedDate) : null;
   const selectedLabel = selectedDate
     ? new Intl.DateTimeFormat('en-US', {
@@ -272,17 +281,26 @@ export default async function CalendarPage({
               nextHref={nextHref}
             />
 
-            <div className="flex flex-wrap items-center gap-4 text-xs uppercase tracking-[0.25em] text-black/50">
+            <div className="flex flex-wrap items-center gap-4 text-xs uppercase tracking-[0.25em] text-black/50 dark:text-white/50">
               <span className="inline-flex items-center gap-2">
-                <span className="h-1.5 w-1.5 rounded-full bg-black" aria-hidden="true" />
+                <span
+                  className="h-1.5 w-1.5 rounded-full bg-black dark:bg-white"
+                  aria-hidden="true"
+                />
                 Active habit day
               </span>
               <span className="inline-flex items-center gap-2">
-                <span className="h-3 w-3 border border-black" aria-hidden="true" />
+                <span
+                  className="h-3 w-3 border border-black dark:border-white"
+                  aria-hidden="true"
+                />
                 Today
               </span>
               <span className="inline-flex items-center gap-2">
-                <span className="h-3 w-3 border-2 border-black" aria-hidden="true" />
+                <span
+                  className="h-3 w-3 border-2 border-black dark:border-white"
+                  aria-hidden="true"
+                />
                 Selected day
               </span>
             </div>
@@ -296,16 +314,26 @@ export default async function CalendarPage({
                 hasCompletions={hasCompletions}
                 asOfLabel={streakAsOfLabel}
               />
-              <DailyCompletionPanel
-                selectedDateKey={selectedKey}
-                selectedLabel={selectedLabel}
-                habits={selectedHabits}
-                initialCompletedHabitIds={Array.from(selectedCompletedIds)}
-                isFuture={isFuture}
-              />
+              <div className="hidden lg:block">
+                <DailyCompletionPanel
+                  selectedDateKey={selectedKey}
+                  selectedLabel={selectedLabel}
+                  habits={selectedHabits}
+                  initialCompletedHabitIds={Array.from(selectedCompletedIds)}
+                  isFuture={isFuture}
+                />
+              </div>
             </div>
           </aside>
         </div>
+        <MobileDailySheet
+          selectedDateKey={selectedKey}
+          selectedLabel={selectedLabel}
+          habits={selectedHabits}
+          initialCompletedHabitIds={Array.from(selectedCompletedIds)}
+          autoOpen={hasDateParam}
+          isFuture={isFuture}
+        />
       </div>
     </AppShell>
   );

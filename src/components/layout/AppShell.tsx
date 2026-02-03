@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 
 import { Card } from '../ui/Card';
+import { ThemeToggle } from '../ui/ThemeToggle';
 import { AppSidebar } from './AppSidebar';
 
 type AppShellProps = {
@@ -11,12 +12,15 @@ type AppShellProps = {
 
 export function AppShell({ title, subtitle, children }: AppShellProps) {
   return (
-    <div className="min-h-screen bg-white text-black">
-      <header className="fixed inset-x-0 top-0 z-40 flex h-14 items-center border-b border-black/10 bg-white">
+    <div className="min-h-screen bg-white text-black dark:bg-black dark:text-white">
+      <header className="fixed inset-x-0 top-0 z-40 flex h-14 items-center border-b border-black/10 bg-white dark:border-white/10 dark:bg-black">
         <div className="mx-auto w-full max-w-6xl px-6">
-          <p className="text-center text-xs font-semibold uppercase tracking-[0.4em] text-black/60">
-            Project Atlas
-          </p>
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-semibold uppercase tracking-[0.4em] text-black/60 dark:text-white/60">
+              Project Atlas
+            </p>
+            <ThemeToggle />
+          </div>
         </div>
       </header>
 
@@ -24,17 +28,19 @@ export function AppShell({ title, subtitle, children }: AppShellProps) {
         <AppSidebar />
         <div className="flex min-h-[calc(100vh-56px)] flex-col">
           <div className="mx-auto w-full max-w-6xl flex-1">
-            <main className="flex-1 px-6 py-10 md:pl-72">
-              <div className="space-y-8">
+            <main className="flex-1 px-6 pb-24 pt-10 md:pl-72 md:pb-10">
+              <div className="space-y-8 opacity-0 translate-y-3 motion-reduce:translate-y-0 motion-reduce:opacity-100 motion-safe:animate-[rise-in_0.6s_ease-out_forwards]">
                 <div className="space-y-2">
                   <h1 className="text-3xl font-semibold tracking-tight">{title}</h1>
-                  {subtitle ? <p className="text-sm text-black/60">{subtitle}</p> : null}
+                  {subtitle ? (
+                    <p className="text-sm text-black/60 dark:text-white/60">{subtitle}</p>
+                  ) : null}
                 </div>
                 <Card>{children}</Card>
               </div>
             </main>
           </div>
-          <footer className="border-t border-black/10 px-6 py-6 text-center text-xs uppercase tracking-[0.3em] text-black/40">
+          <footer className="border-t border-black/10 px-6 py-6 text-center text-xs uppercase tracking-[0.3em] text-black/40 dark:border-white/10 dark:text-white/40 mb-[calc(56px+env(safe-area-inset-bottom))] md:mb-0">
             (c) 2026 Project Atlas
           </footer>
         </div>

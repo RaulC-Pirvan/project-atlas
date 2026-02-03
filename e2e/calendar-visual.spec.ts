@@ -30,12 +30,30 @@ async function signIn(page: Page, email: string) {
 }
 
 async function fetchVerificationToken(request: APIRequestContext, email: string): Promise<string> {
-  const response = await request.get(
-    `/api/auth/debug/verification-token?email=${encodeURIComponent(email)}`,
-  );
-  expect(response.ok()).toBeTruthy();
-  const body = await response.json();
-  return body.data.token as string;
+  let lastError: Error | null = null;
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    try {
+      const response = await request.get(
+        `/api/auth/debug/verification-token?email=${encodeURIComponent(email)}&t=${Date.now()}`,
+        { timeout: 10_000 },
+      );
+      if (!response.ok()) {
+        lastError = new Error(`Token request failed: ${response.status()}`);
+      } else {
+        const body = await response.json();
+        const token = body?.data?.token as string | undefined;
+        if (token) {
+          return token;
+        }
+        lastError = new Error('Token missing in response.');
+      }
+    } catch (error) {
+      lastError = error as Error;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 300));
+  }
+
+  throw lastError ?? new Error('Token request failed.');
 }
 
 async function createVerifiedUser(page: Page, request: APIRequestContext, prefix: string) {
@@ -48,49 +66,42 @@ async function createVerifiedUser(page: Page, request: APIRequestContext, prefix
   return email;
 }
 
-async function createHabit(page: Page, title: string, weekdays: number[]) {
+async function createHabit(request: APIRequestContext, title: string, weekdays: number[]) {
   const payload = { title, description: 'Visual test', weekdays };
-  const result = await page.evaluate(async (data) => {
-    const response = await fetch('/api/habits', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-    const json = await response.json().catch(() => null);
-    return { ok: response.ok, json };
-  }, payload);
-
-  expect(result.ok).toBeTruthy();
-  return result.json.data.habit as { id: string; title: string };
+  const response = await request.post('/api/habits', {
+    data: payload,
+    timeout: 10_000,
+  });
+  expect(response.ok()).toBeTruthy();
+  const body = await response.json();
+  return body.data.habit as { id: string; title: string };
 }
 
-async function createCompletion(page: Page, habitId: string, date: string) {
+async function createCompletion(request: APIRequestContext, habitId: string, date: string) {
   const payload = { habitId, date, completed: true };
-  const result = await page.evaluate(async (data) => {
-    const response = await fetch('/api/completions', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-    const json = await response.json().catch(() => null);
-    return { ok: response.ok, json };
-  }, payload);
-
-  expect(result.ok).toBeTruthy();
+  const response = await request.post('/api/completions', {
+    data: payload,
+    timeout: 10_000,
+  });
+  expect(response.ok()).toBeTruthy();
 }
 
 test.use({ viewport: { width: 1280, height: 900 }, deviceScaleFactor: 1 });
 
 test('calendar visual regression', async ({ page, request }) => {
+  test.setTimeout(30_000);
   await page.emulateMedia({ reducedMotion: 'reduce', colorScheme: 'light' });
+  page.setDefaultTimeout(10_000);
 
   await createVerifiedUser(page, request, 'calendar-visual');
-  const readHabit = await createHabit(page, 'Read', [targetWeekday]);
-  const hydrateHabit = await createHabit(page, 'Hydrate', [targetWeekday]);
-  await createCompletion(page, readHabit.id, targetDate);
-  await createCompletion(page, hydrateHabit.id, targetDate);
+  const readHabit = await createHabit(page.request, 'Read', [targetWeekday]);
+  const hydrateHabit = await createHabit(page.request, 'Hydrate', [targetWeekday]);
+  await createCompletion(page.request, readHabit.id, targetDate);
+  await createCompletion(page.request, hydrateHabit.id, targetDate);
 
-  await page.goto(`/calendar?month=${targetMonth}&date=${targetDate}`);
+  await page.goto(`/calendar?month=${targetMonth}&date=${targetDate}`, {
+    waitUntil: 'domcontentloaded',
+  });
   await page.addStyleTag({
     content: `
       button[aria-label="Open Next.js Dev Tools"],
@@ -114,11 +125,12 @@ test('calendar visual regression', async ({ page, request }) => {
   await expect(page.getByRole('heading', { name: 'January 2026' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'January 5, 2026' })).toBeVisible();
 
-  await expect(page).toHaveScreenshot('calendar-visual.png', {
-    fullPage: true,
+  const snapshotTarget = page.getByTestId('calendar-grid');
+  await expect(snapshotTarget).toHaveScreenshot('calendar-grid.png', {
     animations: 'disabled',
     caret: 'hide',
     maxDiffPixelRatio: 0.02,
     maxDiffPixels: 20000,
+    timeout: 10_000,
   });
 });

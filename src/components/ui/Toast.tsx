@@ -18,10 +18,13 @@ type ToastStackProps = {
 };
 
 const toneClasses: Record<ToastTone, string> = {
-  neutral: 'border-black/15 text-black/80',
-  success: 'border-emerald-200 bg-emerald-50/70 text-emerald-900',
-  warning: 'border-amber-200 bg-amber-50/70 text-amber-900',
-  error: 'border-rose-200 bg-rose-50/70 text-rose-900',
+  neutral: 'border-black/15 text-black/80 dark:border-white/15 dark:text-white/80',
+  success:
+    'border-emerald-200 bg-emerald-50/70 text-emerald-900 dark:border-emerald-400/40 dark:bg-emerald-500/10 dark:text-emerald-100',
+  warning:
+    'border-amber-200 bg-amber-50/70 text-amber-900 dark:border-amber-400/40 dark:bg-amber-500/10 dark:text-amber-100',
+  error:
+    'border-rose-200 bg-rose-50/70 text-rose-900 dark:border-rose-400/40 dark:bg-rose-500/10 dark:text-rose-100',
 };
 
 export function ToastStack({ toasts }: ToastStackProps) {
@@ -40,7 +43,7 @@ export function ToastStack({ toasts }: ToastStackProps) {
           key={toast.id}
           role={toast.tone === 'error' ? 'alert' : 'status'}
           aria-live={toast.tone === 'error' ? 'assertive' : 'polite'}
-          className={`pointer-events-auto rounded-2xl border bg-white/95 px-4 py-3 text-sm shadow-[0_14px_28px_rgba(0,0,0,0.12)] transition-all duration-200 ${
+          className={`pointer-events-auto rounded-2xl border bg-white/95 px-4 py-3 text-sm shadow-[0_14px_28px_rgba(0,0,0,0.12)] transition-all duration-200 dark:bg-black/80 dark:shadow-[0_18px_40px_rgba(0,0,0,0.5)] ${
             toast.state === 'closing'
               ? 'translate-y-2 opacity-0 ease-in'
               : toast.state === 'entering'

@@ -123,11 +123,13 @@ export function VerifyEmailPanel() {
   return (
     <div className="space-y-10">
       <div className="space-y-3">
-        <p className="text-xs uppercase tracking-[0.4em] text-black/60">Verification</p>
+        <p className="text-xs uppercase tracking-[0.4em] text-black/60 dark:text-white/60">
+          Verification
+        </p>
         <h2 className="text-2xl font-semibold tracking-tight">
           {verifyState === 'done' ? 'Email verified.' : 'Verify your email.'}
         </h2>
-        <p className="text-sm text-black/60">
+        <p className="text-sm text-black/60 dark:text-white/60">
           {verifyState === 'verifying'
             ? 'We are verifying your link now.'
             : verifyState === 'done'
@@ -136,7 +138,7 @@ export function VerifyEmailPanel() {
         </p>
         {verifyState === 'done' ? (
           <Link
-            className="inline-flex h-11 items-center justify-center rounded-full border border-black bg-black px-5 text-sm font-medium text-white transition hover:bg-black/90"
+            className="inline-flex h-11 items-center justify-center rounded-full border border-black bg-black px-5 text-sm font-medium text-white transition hover:bg-black/90 dark:border-white dark:bg-white dark:text-black dark:hover:bg-white/90"
             href="/sign-in"
           >
             Continue to sign in
@@ -144,12 +146,17 @@ export function VerifyEmailPanel() {
         ) : null}
       </div>
 
-      <form className="space-y-6 border-t border-black/10 pt-6" onSubmit={handleResend}>
+      <form
+        className="space-y-6 border-t border-black/10 pt-6 dark:border-white/10"
+        onSubmit={handleResend}
+      >
         <div className="space-y-1">
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-black/80">
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-black/80 dark:text-white/80">
             Resend verification
           </p>
-          <p className="text-sm text-black/60">We only send if the account is unverified.</p>
+          <p className="text-sm text-black/60 dark:text-white/60">
+            We only send if the account is unverified.
+          </p>
         </div>
         <FormField id="email" label="Email" error={null}>
           <Input

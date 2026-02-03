@@ -150,8 +150,10 @@ export function HabitsPanel({ initialHabits, weekStart }: HabitsPanelProps) {
       <div className="space-y-4">
         <div className="flex items-center justify-between gap-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-black/80">Habits</p>
-            <p className="text-sm text-black/60">
+            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-black/80 dark:text-white/80">
+              Habits
+            </p>
+            <p className="text-sm text-black/60 dark:text-white/60">
               {loading ? 'Loading habits...' : `${habits.length} active habit(s).`}
             </p>
           </div>
@@ -167,14 +169,17 @@ export function HabitsPanel({ initialHabits, weekStart }: HabitsPanelProps) {
         </div>
 
         {habits.length === 0 && !loading ? (
-          <div className="rounded-2xl border border-black/10 px-6 py-8 text-sm text-black/60">
+          <div className="rounded-2xl border border-black/10 px-6 py-8 text-sm text-black/60 dark:border-white/10 dark:text-white/60">
             No habits yet. Create your first habit above.
           </div>
         ) : null}
 
         <div className="space-y-4">
           {habits.map((habit) => (
-            <div key={habit.id} className="rounded-2xl border border-black/10 px-6 py-6">
+            <div
+              key={habit.id}
+              className="rounded-2xl border border-black/10 px-6 py-6 dark:border-white/10"
+            >
               {editingId === habit.id ? (
                 <HabitForm
                   mode="edit"
@@ -193,7 +198,9 @@ export function HabitsPanel({ initialHabits, weekStart }: HabitsPanelProps) {
                     <div className="space-y-1">
                       <p className="text-lg font-semibold">{habit.title}</p>
                       {habit.description ? (
-                        <p className="text-sm text-black/60">{habit.description}</p>
+                        <p className="text-sm text-black/60 dark:text-white/60">
+                          {habit.description}
+                        </p>
                       ) : null}
                     </div>
                     <div className="flex gap-2">
@@ -219,7 +226,7 @@ export function HabitsPanel({ initialHabits, weekStart }: HabitsPanelProps) {
                     {formatWeekdayLabels(habit.weekdays, weekStart).map((label) => (
                       <span
                         key={label}
-                        className="rounded-full border border-black/10 bg-black/5 px-3 py-1 text-xs font-medium text-black/70"
+                        className="rounded-full border border-black/10 bg-black/5 px-3 py-1 text-xs font-medium text-black/70 dark:border-white/10 dark:bg-white/10 dark:text-white/70"
                       >
                         {label}
                       </span>

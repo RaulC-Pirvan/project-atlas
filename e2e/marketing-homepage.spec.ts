@@ -63,21 +63,14 @@ async function createVerifiedUser(page: Page, request: APIRequestContext, prefix
   return email;
 }
 
-test('calendar navigation opens day panel', async ({ page, request }) => {
-  await createVerifiedUser(page, request, 'calendar-nav');
+test('marketing homepage introduces the product for signed-out visitors', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.getByRole('heading', { name: /habits that follow your week/i })).toBeVisible();
+  await expect(page.getByRole('link', { name: /create your account/i })).toBeVisible();
+});
 
-  await page.goto('/calendar?month=2026-01');
-  await expect(page.getByRole('heading', { name: /calendar/i })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'January 2026' })).toBeVisible();
-
-  await page.getByRole('link', { name: /next month/i }).click();
-  await expect(page).toHaveURL(/calendar\?month=2026-02/);
-
-  const febLink = page.getByRole('link', {
-    name: /open daily view for February 5, 2026/i,
-  });
-  await expect(febLink).toBeVisible({ timeout: 15_000 });
-  await febLink.click();
-  await expect(page).toHaveURL(/calendar\?month=2026-02&date=2026-02-05/);
-  await expect(page.getByRole('heading', { name: 'February 5, 2026' })).toBeVisible();
+test('signed-in visitors are redirected to the calendar', async ({ page, request }) => {
+  await createVerifiedUser(page, request, 'marketing-home');
+  await page.goto('/');
+  await expect(page).toHaveURL(/\/calendar/);
 });

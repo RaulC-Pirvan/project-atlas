@@ -40,12 +40,30 @@ async function signIn(page: Page, email: string) {
 }
 
 async function fetchVerificationToken(request: APIRequestContext, email: string): Promise<string> {
-  const response = await request.get(
-    `/api/auth/debug/verification-token?email=${encodeURIComponent(email)}`,
-  );
-  expect(response.ok()).toBeTruthy();
-  const body = await response.json();
-  return body.data.token as string;
+  let lastError: Error | null = null;
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    try {
+      const response = await request.get(
+        `/api/auth/debug/verification-token?email=${encodeURIComponent(email)}&t=${Date.now()}`,
+        { timeout: 10_000 },
+      );
+      if (!response.ok()) {
+        lastError = new Error(`Token request failed: ${response.status()}`);
+      } else {
+        const body = await response.json();
+        const token = body?.data?.token as string | undefined;
+        if (token) {
+          return token;
+        }
+        lastError = new Error('Token missing in response.');
+      }
+    } catch (error) {
+      lastError = error as Error;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 300));
+  }
+
+  throw lastError ?? new Error('Token request failed.');
 }
 
 async function createVerifiedUser(page: Page, request: APIRequestContext, prefix: string) {
@@ -60,21 +78,17 @@ async function createVerifiedUser(page: Page, request: APIRequestContext, prefix
 
 async function createHabit(page: Page, title: string, weekdays: number[]) {
   const payload = { title, description: 'Streak test', weekdays };
-  const result = await page.evaluate(async (data) => {
-    const response = await fetch('/api/habits', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-    const json = await response.json().catch(() => null);
-    return { ok: response.ok, json };
-  }, payload);
-
-  expect(result.ok).toBeTruthy();
-  return result.json.data.habit as { id: string; title: string };
+  const response = await page.request.post('/api/habits', {
+    data: payload,
+    timeout: 10_000,
+  });
+  expect(response.ok()).toBeTruthy();
+  const body = await response.json();
+  return body.data.habit as { id: string; title: string };
 }
 
 test('streaks update after completion toggle', async ({ page, request }) => {
+  page.setDefaultTimeout(10_000);
   await createVerifiedUser(page, request, 'streaks-update');
   const habitTitle = uniqueTitle('Journal');
   await createHabit(page, habitTitle, [1, 2, 3, 4, 5, 6, 7]);
@@ -89,12 +103,21 @@ test('streaks update after completion toggle', async ({ page, request }) => {
   await expect(panel).toContainText(/begin your first streak/i);
 
   const checkbox = page.getByRole('checkbox', { name: new RegExp(habitTitle, 'i') });
-  await checkbox.click();
+  await expect(checkbox).toBeVisible({ timeout: 10_000 });
+  const completionResponse = page.waitForResponse(
+    (response) =>
+      response.url().includes('/api/completions') && response.request().method() === 'POST',
+    { timeout: 10_000 },
+  );
+  await checkbox.click({ timeout: 10_000, noWaitAfter: true });
+  await completionResponse;
   await expect(checkbox).toHaveAttribute('aria-checked', 'true');
 
-  await expect(panel).not.toContainText(/begin your first streak/i);
+  await page.reload({ waitUntil: 'domcontentloaded' });
+  const refreshedPanel = page.getByTestId('streaks-panel');
+  await expect(refreshedPanel).not.toContainText(/begin your first streak/i);
 
-  const row = panel.getByText(habitTitle).locator('..');
+  const row = refreshedPanel.getByText(habitTitle).locator('..');
   const values = row.locator('p');
   await expect(values.nth(1)).toHaveText('1');
   await expect(values.nth(2)).toHaveText('1');

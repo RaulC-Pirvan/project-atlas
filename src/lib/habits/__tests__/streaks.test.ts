@@ -37,6 +37,17 @@ describe('streak helpers', () => {
     expect(result).toEqual({ current: 3, longest: 3 });
   });
 
+  it('keeps current streak through an incomplete scheduled day until it ends', () => {
+    const result = calculateStreaks({
+      schedule: schedule(1, 2, 3, 4, 5, 6, 7),
+      completions: completionDates(utcDate(2026, 1, 4), utcDate(2026, 1, 5)),
+      asOf: utcDate(2026, 1, 6),
+      timeZone: 'UTC',
+    });
+
+    expect(result).toEqual({ current: 2, longest: 2 });
+  });
+
   it('returns zero streaks when schedule is empty', () => {
     const result = calculateStreaks({
       schedule: [],

@@ -311,7 +311,7 @@ export function AccountPanel({ email, displayName, weekStart }: AccountPanelProp
         <div className="flex items-center gap-4">
           <div>
             <p className="text-sm font-semibold">{baselineDisplayName}</p>
-            <p className="text-xs text-black/50">{email}</p>
+            <p className="text-xs text-black/50 dark:text-white/50">{email}</p>
           </div>
         </div>
         <SignOutButton />
@@ -319,10 +319,10 @@ export function AccountPanel({ email, displayName, weekStart }: AccountPanelProp
 
       <form className="space-y-6" onSubmit={handleDisplayNameUpdate}>
         <div className="space-y-1">
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-black/80">
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-black/80 dark:text-white/80">
             Display name
           </p>
-          <p className="text-sm text-black/60">Update how your name appears.</p>
+          <p className="text-sm text-black/60 dark:text-white/60">Update how your name appears.</p>
         </div>
         <FormField id="account-display-name" label="Display name" error={null}>
           <Input
@@ -339,12 +339,17 @@ export function AccountPanel({ email, displayName, weekStart }: AccountPanelProp
         </Button>
       </form>
 
-      <form className="space-y-6 border-t border-black/10 pt-6" onSubmit={handleWeekStartUpdate}>
+      <form
+        className="space-y-6 border-t border-black/10 pt-6 dark:border-white/10"
+        onSubmit={handleWeekStartUpdate}
+      >
         <div className="space-y-1">
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-black/80">
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-black/80 dark:text-white/80">
             Week start
           </p>
-          <p className="text-sm text-black/60">Choose how the calendar week begins.</p>
+          <p className="text-sm text-black/60 dark:text-white/60">
+            Choose how the calendar week begins.
+          </p>
         </div>
         <FormField id="account-week-start" label="Week starts on" error={null}>
           <div className="flex flex-wrap gap-2">
@@ -371,10 +376,17 @@ export function AccountPanel({ email, displayName, weekStart }: AccountPanelProp
         </Button>
       </form>
 
-      <form className="space-y-6 border-t border-black/10 pt-6" onSubmit={handleEmailUpdate}>
+      <form
+        className="space-y-6 border-t border-black/10 pt-6 dark:border-white/10"
+        onSubmit={handleEmailUpdate}
+      >
         <div className="space-y-1">
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-black/80">Email</p>
-          <p className="text-sm text-black/60">Changing email requires confirmation.</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-black/80 dark:text-white/80">
+            Email
+          </p>
+          <p className="text-sm text-black/60 dark:text-white/60">
+            Changing email requires confirmation.
+          </p>
         </div>
         <FormField id="account-email" label="Email" error={null}>
           <Input
@@ -416,10 +428,15 @@ export function AccountPanel({ email, displayName, weekStart }: AccountPanelProp
         </Button>
       </form>
 
-      <form className="space-y-6 border-t border-black/10 pt-6" onSubmit={handlePasswordUpdate}>
+      <form
+        className="space-y-6 border-t border-black/10 pt-6 dark:border-white/10"
+        onSubmit={handlePasswordUpdate}
+      >
         <div className="space-y-1">
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-black/80">Password</p>
-          <p className="text-sm text-black/60">Choose a new password.</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-black/80 dark:text-white/80">
+            Password
+          </p>
+          <p className="text-sm text-black/60 dark:text-white/60">Choose a new password.</p>
         </div>
         <FormField id="account-password" label="New password" error={null}>
           <Input
@@ -448,10 +465,12 @@ export function AccountPanel({ email, displayName, weekStart }: AccountPanelProp
 
       <form className="space-y-6" onSubmit={handleDelete}>
         <div className="space-y-1">
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-black/80">
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-black/80 dark:text-white/80">
             Delete request
           </p>
-          <p className="text-sm text-black/60">Type DELETE to request account removal.</p>
+          <p className="text-sm text-black/60 dark:text-white/60">
+            Type DELETE to request account removal.
+          </p>
         </div>
         <FormField id="delete-confirm" label="Confirm" error={null}>
           <Input

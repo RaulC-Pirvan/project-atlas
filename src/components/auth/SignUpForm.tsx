@@ -131,22 +131,25 @@ export function SignUpForm() {
     return (
       <div className="space-y-8">
         <div className="space-y-2">
-          <p className="text-xs uppercase tracking-[0.4em] text-black/60">Account</p>
+          <p className="text-xs uppercase tracking-[0.4em] text-black/60 dark:text-white/60">
+            Account
+          </p>
           <h2 className="text-2xl font-semibold tracking-tight">You&apos;re in.</h2>
-          <p className="text-sm text-black/60">
-            We sent a verification link to <span className="font-semibold text-black">{email}</span>
-            . Verify to unlock your account.
+          <p className="text-sm text-black/60 dark:text-white/60">
+            We sent a verification link to{' '}
+            <span className="font-semibold text-black dark:text-white">{email}</span>. Verify to
+            unlock your account.
           </p>
         </div>
         <div className="flex flex-col gap-3">
           <Link
-            className="inline-flex h-11 items-center justify-center rounded-full border border-black bg-black px-5 text-sm font-medium text-white transition hover:bg-black/90"
+            className="inline-flex h-11 items-center justify-center rounded-full border border-black bg-black px-5 text-sm font-medium text-white transition hover:bg-black/90 dark:border-white dark:bg-white dark:text-black dark:hover:bg-white/90"
             href={`/verify-email?email=${encodeURIComponent(email)}`}
           >
             Open verification page
           </Link>
           <Link
-            className="inline-flex h-11 items-center justify-center rounded-full border border-black/15 px-5 text-sm font-medium text-black/70 transition hover:bg-black/5"
+            className="inline-flex h-11 items-center justify-center rounded-full border border-black/15 px-5 text-sm font-medium text-black/70 transition hover:bg-black/5 dark:border-white/20 dark:text-white/70 dark:hover:bg-white/10"
             href="/sign-in"
           >
             Back to sign in

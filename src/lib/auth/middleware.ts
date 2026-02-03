@@ -11,6 +11,7 @@ const PUBLIC_PATHS = new Set([
 export function isPublicPath(pathname: string): boolean {
   if (PUBLIC_PATHS.has(pathname)) return true;
   if (pathname.startsWith('/api/auth')) return true;
+  if (pathname.startsWith('/_obs')) return true;
   if (pathname.startsWith('/_next')) return true;
   return false;
 }

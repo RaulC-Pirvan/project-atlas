@@ -7,6 +7,7 @@ import { updateHabitSchema } from '../../../../lib/api/habits/validation';
 import { jsonError, jsonOk } from '../../../../lib/api/response';
 import { authOptions } from '../../../../lib/auth/nextauth';
 import { prisma } from '../../../../lib/db/prisma';
+import { withApiLogging } from '../../../../lib/observability/apiLogger';
 
 export const runtime = 'nodejs';
 
@@ -15,58 +16,70 @@ type RouteContext = {
 };
 
 export async function PUT(request: NextRequest, context: RouteContext) {
-  try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
-      throw new ApiError('unauthorized', 'Not authenticated.', 401);
-    }
+  return withApiLogging(
+    request,
+    { route: '/api/habits/[id]' },
+    async () => {
+      const session = await getServerSession(authOptions);
+      if (!session?.user?.id) {
+        throw new ApiError('unauthorized', 'Not authenticated.', 401);
+      }
 
-    const { id: habitId } = await context.params;
-    if (!habitId) {
-      throw new ApiError('invalid_request', 'Habit id is required.', 400);
-    }
+      const { id: habitId } = await context.params;
+      if (!habitId) {
+        throw new ApiError('invalid_request', 'Habit id is required.', 400);
+      }
 
-    const body = await request.json();
-    const parsed = updateHabitSchema.safeParse(body);
-    if (!parsed.success) {
-      throw new ApiError('invalid_request', 'Invalid request.', 400);
-    }
+      const body = await request.json();
+      const parsed = updateHabitSchema.safeParse(body);
+      if (!parsed.success) {
+        throw new ApiError('invalid_request', 'Invalid request.', 400);
+      }
 
-    const habit = await updateHabit({
-      prisma,
-      userId: session.user.id,
-      habitId,
-      title: parsed.data.title,
-      description: parsed.data.description,
-      weekdays: parsed.data.weekdays,
-    });
+      const habit = await updateHabit({
+        prisma,
+        userId: session.user.id,
+        habitId,
+        title: parsed.data.title,
+        description: parsed.data.description,
+        weekdays: parsed.data.weekdays,
+      });
 
-    return jsonOk({ habit });
-  } catch (error) {
-    return jsonError(asApiError(error));
-  }
+      return jsonOk({ habit });
+    },
+    (error) => {
+      const apiError = asApiError(error);
+      return { response: jsonError(apiError), errorCode: apiError.code };
+    },
+  );
 }
 
-export async function DELETE(_request: NextRequest, context: RouteContext) {
-  try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
-      throw new ApiError('unauthorized', 'Not authenticated.', 401);
-    }
+export async function DELETE(request: NextRequest, context: RouteContext) {
+  return withApiLogging(
+    request,
+    { route: '/api/habits/[id]' },
+    async () => {
+      const session = await getServerSession(authOptions);
+      if (!session?.user?.id) {
+        throw new ApiError('unauthorized', 'Not authenticated.', 401);
+      }
 
-    const { id: habitId } = await context.params;
-    if (!habitId) {
-      throw new ApiError('invalid_request', 'Habit id is required.', 400);
-    }
+      const { id: habitId } = await context.params;
+      if (!habitId) {
+        throw new ApiError('invalid_request', 'Habit id is required.', 400);
+      }
 
-    const result = await archiveHabit({
-      prisma,
-      userId: session.user.id,
-      habitId,
-    });
+      const result = await archiveHabit({
+        prisma,
+        userId: session.user.id,
+        habitId,
+      });
 
-    return jsonOk(result);
-  } catch (error) {
-    return jsonError(asApiError(error));
-  }
+      return jsonOk(result);
+    },
+    (error) => {
+      const apiError = asApiError(error);
+      return { response: jsonError(apiError), errorCode: apiError.code };
+    },
+  );
 }

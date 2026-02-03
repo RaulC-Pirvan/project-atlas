@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 
+import { withApiLogging } from '../../../../lib/observability/apiLogger';
+
 export const runtime = 'nodejs';
 
 const HTTP_ONLY_COOKIES = [
@@ -12,35 +14,37 @@ const HTTP_ONLY_COOKIES = [
 
 const NON_HTTP_ONLY_COOKIES = ['next-auth.callback-url'];
 
-export async function POST() {
-  const response = NextResponse.json({ ok: true });
-  const isSecure = process.env.NODE_ENV === 'production';
+export async function POST(request: Request) {
+  return withApiLogging(request, { route: '/api/auth/logout' }, async () => {
+    const response = NextResponse.json({ ok: true });
+    const isSecure = process.env.NODE_ENV === 'production';
 
-  for (const name of HTTP_ONLY_COOKIES) {
-    response.cookies.set({
-      name,
-      value: '',
-      path: '/',
-      maxAge: 0,
-      expires: new Date(0),
-      httpOnly: true,
-      sameSite: 'lax',
-      secure: isSecure,
-    });
-  }
+    for (const name of HTTP_ONLY_COOKIES) {
+      response.cookies.set({
+        name,
+        value: '',
+        path: '/',
+        maxAge: 0,
+        expires: new Date(0),
+        httpOnly: true,
+        sameSite: 'lax',
+        secure: isSecure,
+      });
+    }
 
-  for (const name of NON_HTTP_ONLY_COOKIES) {
-    response.cookies.set({
-      name,
-      value: '',
-      path: '/',
-      maxAge: 0,
-      expires: new Date(0),
-      httpOnly: false,
-      sameSite: 'lax',
-      secure: isSecure,
-    });
-  }
+    for (const name of NON_HTTP_ONLY_COOKIES) {
+      response.cookies.set({
+        name,
+        value: '',
+        path: '/',
+        maxAge: 0,
+        expires: new Date(0),
+        httpOnly: false,
+        sameSite: 'lax',
+        secure: isSecure,
+      });
+    }
 
-  return response;
+    return response;
+  });
 }

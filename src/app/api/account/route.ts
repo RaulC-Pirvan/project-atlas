@@ -8,102 +8,109 @@ import { authOptions } from '../../../lib/auth/nextauth';
 import { hashPassword, verifyPassword } from '../../../lib/auth/password';
 import { generateToken, hashToken } from '../../../lib/auth/tokens';
 import { prisma } from '../../../lib/db/prisma';
+import { withApiLogging } from '../../../lib/observability/apiLogger';
 
 export const runtime = 'nodejs';
 
 const VERIFICATION_TOKEN_TTL_MS = 1000 * 60 * 60 * 24;
 
 export async function PUT(request: Request) {
-  try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
-      throw new ApiError('unauthorized', 'Not authenticated.', 401);
-    }
-
-    const body = await request.json();
-    const parsed = updateAccountSchema.safeParse(body);
-    if (!parsed.success) {
-      throw new ApiError('invalid_request', 'Invalid request.', 400);
-    }
-
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: { id: true, email: true, passwordHash: true, displayName: true, weekStart: true },
-    });
-    if (!user) {
-      throw new ApiError('not_found', 'User not found.', 404);
-    }
-
-    const updates: {
-      email?: string;
-      passwordHash?: string;
-      emailVerified?: Date | null;
-      displayName?: string;
-      weekStart?: 'sun' | 'mon';
-    } = {};
-
-    if (parsed.data.email && parsed.data.email !== user.email) {
-      if (!parsed.data.currentPassword) {
-        throw new ApiError(
-          'invalid_request',
-          'Password confirmation required to change email.',
-          400,
-        );
+  return withApiLogging(
+    request,
+    { route: '/api/account' },
+    async () => {
+      const session = await getServerSession(authOptions);
+      if (!session?.user?.id) {
+        throw new ApiError('unauthorized', 'Not authenticated.', 401);
       }
 
-      const passwordOk = await verifyPassword(parsed.data.currentPassword, user.passwordHash);
-      if (!passwordOk) {
-        throw new ApiError('invalid_request', 'Password confirmation does not match.', 400);
+      const body = await request.json();
+      const parsed = updateAccountSchema.safeParse(body);
+      if (!parsed.success) {
+        throw new ApiError('invalid_request', 'Invalid request.', 400);
       }
 
-      const existing = await prisma.user.findUnique({
-        where: { email: parsed.data.email.toLowerCase() },
-        select: { id: true },
+      const user = await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { id: true, email: true, passwordHash: true, displayName: true, weekStart: true },
       });
-      if (existing && existing.id !== user.id) {
-        throw new ApiError('email_taken', 'Email already in use.', 409);
+      if (!user) {
+        throw new ApiError('not_found', 'User not found.', 404);
       }
 
-      updates.email = parsed.data.email.toLowerCase();
-      updates.emailVerified = null;
-    }
+      const updates: {
+        email?: string;
+        passwordHash?: string;
+        emailVerified?: Date | null;
+        displayName?: string;
+        weekStart?: 'sun' | 'mon';
+      } = {};
 
-    if (parsed.data.password) {
-      updates.passwordHash = await hashPassword(parsed.data.password);
-    }
+      if (parsed.data.email && parsed.data.email !== user.email) {
+        if (!parsed.data.currentPassword) {
+          throw new ApiError(
+            'invalid_request',
+            'Password confirmation required to change email.',
+            400,
+          );
+        }
 
-    if (parsed.data.displayName !== undefined) {
-      const normalizedDisplayName = parsed.data.displayName.trim();
-      if (!normalizedDisplayName) {
-        throw new ApiError('invalid_request', 'Display name is required.', 400);
+        const passwordOk = await verifyPassword(parsed.data.currentPassword, user.passwordHash);
+        if (!passwordOk) {
+          throw new ApiError('invalid_request', 'Password confirmation does not match.', 400);
+        }
+
+        const existing = await prisma.user.findUnique({
+          where: { email: parsed.data.email.toLowerCase() },
+          select: { id: true },
+        });
+        if (existing && existing.id !== user.id) {
+          throw new ApiError('email_taken', 'Email already in use.', 409);
+        }
+
+        updates.email = parsed.data.email.toLowerCase();
+        updates.emailVerified = null;
       }
-      updates.displayName = normalizedDisplayName;
-    }
 
-    if (parsed.data.weekStart && parsed.data.weekStart !== user.weekStart) {
-      updates.weekStart = parsed.data.weekStart;
-    }
+      if (parsed.data.password) {
+        updates.passwordHash = await hashPassword(parsed.data.password);
+      }
 
-    await prisma.user.update({
-      where: { id: user.id },
-      data: updates,
-    });
+      if (parsed.data.displayName !== undefined) {
+        const normalizedDisplayName = parsed.data.displayName.trim();
+        if (!normalizedDisplayName) {
+          throw new ApiError('invalid_request', 'Display name is required.', 400);
+        }
+        updates.displayName = normalizedDisplayName;
+      }
 
-    if (updates.email) {
-      const rawToken = generateToken();
-      const tokenHash = hashToken(rawToken);
-      const expiresAt = new Date(Date.now() + VERIFICATION_TOKEN_TTL_MS);
+      if (parsed.data.weekStart && parsed.data.weekStart !== user.weekStart) {
+        updates.weekStart = parsed.data.weekStart;
+      }
 
-      await prisma.emailVerificationToken.deleteMany({ where: { userId: user.id } });
-      await prisma.emailVerificationToken.create({
-        data: { userId: user.id, tokenHash, expiresAt },
+      await prisma.user.update({
+        where: { id: user.id },
+        data: updates,
       });
 
-      await sendVerificationEmail({ to: updates.email, token: rawToken });
-    }
+      if (updates.email) {
+        const rawToken = generateToken();
+        const tokenHash = hashToken(rawToken);
+        const expiresAt = new Date(Date.now() + VERIFICATION_TOKEN_TTL_MS);
 
-    return jsonOk({ ok: true });
-  } catch (error) {
-    return jsonError(asApiError(error));
-  }
+        await prisma.emailVerificationToken.deleteMany({ where: { userId: user.id } });
+        await prisma.emailVerificationToken.create({
+          data: { userId: user.id, tokenHash, expiresAt },
+        });
+
+        await sendVerificationEmail({ to: updates.email, token: rawToken });
+      }
+
+      return jsonOk({ ok: true });
+    },
+    (error) => {
+      const apiError = asApiError(error);
+      return { response: jsonError(apiError), errorCode: apiError.code };
+    },
+  );
 }

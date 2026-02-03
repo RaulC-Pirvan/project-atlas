@@ -20,13 +20,15 @@ A habit is defined independently of dates.
 - Auth foundation implemented: signup, verify-email, resend-verification, logout, NextAuth Credentials (JWT sessions), middleware protection.
 - Account management API + UI: update email/password/display name/week start; delete account.
 - Email verification uses Resend client; debug token capture plus `/api/auth/debug/verification-token` for tests.
-- Tests in place: Vitest unit/API tests, auth + habit + calendar component tests, Playwright auth + habits + calendar + daily completion + visual regression E2E.
+- Tests in place: Vitest unit/API tests, auth + habit + calendar + marketing component tests, Playwright auth + habits + calendar + daily completion + marketing + visual regression E2E.
 - Playwright E2E runs use a Windows-safe temp dir setup via `playwright.global-setup.ts` to avoid chromium shutdown hangs.
 - Daily completion E2E includes retry-safe habit creation to handle transient network resets in Firefox.
 - Habit domain models implemented (Habit, HabitSchedule, HabitCompletion) with migrations and seed data.
 - Habit domain helpers exist in `src/lib/habits` (dates, schedules, calendar grid, completions, streaks, query helpers, types).
 - Habit CRUD API implemented (list/create/update/archive) with a habits UI built around `HabitsPanel` and `HabitForm`.
 - Authenticated screens use `AppShell` + `AppSidebar` with Calendar-first navigation on desktop, Habits/Account links, and Sign out.
+- Marketing homepage built with hero, benefits, CTA, and auth-aware redirect to `/calendar`.
+- Light/dark theme toggle (system default + localStorage persistence) available on marketing/auth/app shells.
 - Calendar view implemented with monthly grid, month navigation, selected-day side panel (`?date=YYYY-MM-DD`), daily completion toggles via `/api/completions`, per-day progress indicators, and golden completed-day tiles (black text for contrast).
 - Calendar defaults to selecting today on `/calendar` (current month); mobile daily sheet only auto-opens when a `date` param is present.
 - Daily completion supports check/uncheck with server-side schedule validation, future-date guard, toast feedback, optimistic updates with rollback, and per-row pending indicators.
@@ -44,11 +46,12 @@ A habit is defined independently of dates.
 - Layout: generous whitespace, clear typographic hierarchy.
 - Components: build reusable primitives so styling changes are centralized.
 - Avoid heavy decoration, gradients, or bright accent colors beyond the gold accent.
+- Support light/dark themes while preserving the black/white system and gold-only completion accent.
 
 ## Codebase Map
 
 - `src/app` - App Router UI and API routes.
-- `src/app/page.tsx` - Marketing/landing page (pre-MVP copy; Phase 5.1 planned).
+- `src/app/page.tsx` - Marketing homepage with auth-aware redirect.
 - `src/app/api/auth/*/route.ts` - Auth API routes (signup, verify, resend, logout, debug, NextAuth).
 - `src/app/api/account/route.ts` - Account update (email/password/display name).
 - `src/app/api/account/delete-request/route.ts` - Account deletion request (hard delete).
@@ -73,6 +76,8 @@ A habit is defined independently of dates.
 - `src/components/layout` - App shell layout primitives (AppShell, AppSidebar).
 - `src/components/auth/AccountPanel.tsx` - Account settings (including week start).
 - `src/components/auth/SignOutButton.tsx` - Sign-out button for authenticated layouts.
+- `src/components/marketing` - Marketing homepage layout and sections.
+- `src/components/ui/ThemeToggle.tsx` - Light/dark theme toggle (system default + persistence).
 - `src/components/ui/Toast.tsx` - Toast notifications (no inline form errors).
 - `src/components/ui/Notice.tsx` - Inline notice/alert primitive.
 - `src/lib/db/prisma.ts` - Prisma singleton using adapter-pg + pg pool.
@@ -93,11 +98,13 @@ A habit is defined independently of dates.
 - `middleware.ts` - Route protection using NextAuth JWT.
 - `e2e/daily-completion.spec.ts` - Daily completion E2E flow coverage.
 - `e2e/calendar-visual.spec.ts` - Playwright visual regression coverage for calendar tiles.
+- `e2e/marketing-homepage.spec.ts` - Marketing homepage E2E coverage.
 - `e2e/streaks.spec.ts` - Streak UI E2E coverage.
 - `e2e` - Playwright auth + habits + calendar + daily completion + visual regression E2E tests.
-- `playwright.config.ts` - Playwright config (chromium + firefox; visual project enabled via `RUN_VISUAL` or CI).
+- `playwright.config.ts` - Playwright config (chromium + firefox + visual).
 - `playwright.global-setup.ts` - Windows temp dir setup for Playwright runs.
 - `docs/sprints/sprint-5.1.md` - Sprint plan for marketing homepage.
+- `docs/test workflows/sprint-5.1-test-workflows.md` - Marketing homepage + theme test workflows.
 - `docs/test workflows/sprint-4.2-test-workflows.md` - UX refinement test workflows.
 
 ## Engineering Standards

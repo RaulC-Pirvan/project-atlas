@@ -8,7 +8,13 @@ export const runtime = 'nodejs';
 
 const handler = NextAuth(authOptions);
 
-const loggedHandler = async (request: NextRequest) =>
-  withApiLogging(request, { route: '/api/auth/[...nextauth]' }, async () => handler(request));
+type AuthRouteContext = {
+  params: Promise<{ nextauth: string[] }>;
+};
+
+const loggedHandler = async (request: NextRequest, context: AuthRouteContext) =>
+  withApiLogging(request, { route: '/api/auth/[...nextauth]' }, async () =>
+    handler(request, context),
+  );
 
 export { loggedHandler as GET, loggedHandler as POST };

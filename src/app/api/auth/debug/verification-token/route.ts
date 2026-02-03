@@ -1,7 +1,17 @@
-import { getLatestVerificationToken } from '../../../../../infra/email/debugTokenStore';
+import {
+  getLatestVerificationToken,
+  getLatestVerificationTokenForUser,
+} from '../../../../../infra/email/debugTokenStore';
 import { resendVerificationSchema } from '../../../../../lib/api/auth/validation';
 import { ApiError, asApiError } from '../../../../../lib/api/errors';
 import { jsonError, jsonOk } from '../../../../../lib/api/response';
+import { AUTH_RATE_LIMIT, shouldBypassAuthRateLimit } from '../../../../../lib/auth/authRateLimit';
+import { prisma } from '../../../../../lib/db/prisma';
+import {
+  applyRateLimitHeaders,
+  consumeRateLimit,
+  getRateLimitKey,
+} from '../../../../../lib/http/rateLimit';
 import { withApiLogging } from '../../../../../lib/observability/apiLogger';
 
 export const runtime = 'nodejs';
@@ -11,6 +21,20 @@ export async function GET(request: Request) {
     request,
     { route: '/api/auth/debug/verification-token' },
     async () => {
+      if (!shouldBypassAuthRateLimit()) {
+        const decision = consumeRateLimit(
+          getRateLimitKey('auth:debug-verification-token', request),
+          AUTH_RATE_LIMIT,
+        );
+        if (decision.limited) {
+          const response = jsonError(
+            new ApiError('rate_limited', 'Too many requests. Try again later.', 429, 'retry_later'),
+          );
+          applyRateLimitHeaders(response.headers, decision);
+          return response;
+        }
+      }
+
       const allow =
         process.env.NODE_ENV !== 'production' || process.env.ENABLE_TEST_ENDPOINTS === 'true';
       if (!allow) {
@@ -24,7 +48,17 @@ export async function GET(request: Request) {
         throw new ApiError('invalid_request', 'Invalid request.', 400);
       }
 
-      const token = getLatestVerificationToken(parsed.data.email);
+      let token = getLatestVerificationToken(parsed.data.email);
+      if (!token) {
+        const user = await prisma.user.findUnique({
+          where: { email: parsed.data.email.toLowerCase() },
+          select: { id: true },
+        });
+        if (user) {
+          token = getLatestVerificationTokenForUser(user.id) ?? null;
+        }
+      }
+
       if (!token) {
         throw new ApiError('not_found', 'Token not found.', 404);
       }

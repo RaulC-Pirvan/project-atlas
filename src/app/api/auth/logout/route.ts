@@ -1,5 +1,11 @@
 import { NextResponse } from 'next/server';
 
+import { AUTH_RATE_LIMIT, shouldBypassAuthRateLimit } from '../../../../lib/auth/authRateLimit';
+import {
+  applyRateLimitHeaders,
+  consumeRateLimit,
+  getRateLimitKey,
+} from '../../../../lib/http/rateLimit';
 import { withApiLogging } from '../../../../lib/observability/apiLogger';
 
 export const runtime = 'nodejs';
@@ -16,6 +22,25 @@ const NON_HTTP_ONLY_COOKIES = ['next-auth.callback-url'];
 
 export async function POST(request: Request) {
   return withApiLogging(request, { route: '/api/auth/logout' }, async () => {
+    if (!shouldBypassAuthRateLimit()) {
+      const decision = consumeRateLimit(getRateLimitKey('auth:logout', request), AUTH_RATE_LIMIT);
+      if (decision.limited) {
+        const response = NextResponse.json(
+          {
+            ok: false,
+            error: {
+              code: 'rate_limited',
+              message: 'Too many requests. Try again later.',
+              recovery: 'retry_later',
+            },
+          },
+          { status: 429 },
+        );
+        applyRateLimitHeaders(response.headers, decision);
+        return response;
+      }
+    }
+
     const response = NextResponse.json({ ok: true });
     const isSecure = process.env.NODE_ENV === 'production';
 

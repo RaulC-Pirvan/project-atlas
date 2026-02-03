@@ -103,7 +103,7 @@ export async function PUT(request: Request) {
           data: { userId: user.id, tokenHash, expiresAt },
         });
 
-        await sendVerificationEmail({ to: updates.email, token: rawToken });
+        await sendVerificationEmail({ to: updates.email, token: rawToken, userId: user.id });
       }
 
       return jsonOk({ ok: true });

@@ -70,7 +70,7 @@ CI must remain green.
 
 ### Tasks (1)
 
-- [ ] **Task 3.1**: Add rate limiting on auth routes
+- [x] **Task 3.1**: Add rate limiting on auth routes
 
 ---
 

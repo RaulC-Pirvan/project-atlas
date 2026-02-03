@@ -172,11 +172,11 @@
 
 ### Sprint 6.1: Observability & Safety
 
-- [ ] Error tracking (Sentry or equivalent)
-- [ ] Structured logging
-- [ ] Health check endpoint
-- [ ] Rate limiting on auth routes
-- [ ] Security headers
+- [x] Error tracking (Sentry or equivalent)
+- [x] Structured logging
+- [x] Health check endpoint
+- [x] Rate limiting on auth routes
+- [x] Security headers
 
 ---
 

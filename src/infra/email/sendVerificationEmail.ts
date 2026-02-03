@@ -1,9 +1,10 @@
-import { setLatestVerificationToken } from './debugTokenStore';
+import { setLatestVerificationToken, setLatestVerificationTokenForUser } from './debugTokenStore';
 import { sendEmail } from './resendClient';
 
 type SendVerificationEmailArgs = {
   to: string;
   token: string;
+  userId?: string;
   baseUrl?: string;
 };
 
@@ -22,6 +23,9 @@ export async function sendVerificationEmail(args: SendVerificationEmailArgs): Pr
 
   if (testMode) {
     setLatestVerificationToken(args.to, args.token);
+    if (args.userId) {
+      setLatestVerificationTokenForUser(args.userId, args.token);
+    }
   }
 
   if (process.env.ENABLE_TEST_ENDPOINTS === 'true') {

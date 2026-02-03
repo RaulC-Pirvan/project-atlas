@@ -1,4 +1,4 @@
-import { logError, logInfo, serializeError, type LogContext } from './logger';
+import { type LogContext, logError, logInfo, serializeError } from './logger';
 
 type ApiLogOptions = {
   route?: string;

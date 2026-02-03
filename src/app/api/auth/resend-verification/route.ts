@@ -2,7 +2,13 @@ import { resendVerification } from '../../../../lib/api/auth/resendVerification'
 import { resendVerificationSchema } from '../../../../lib/api/auth/validation';
 import { ApiError, asApiError } from '../../../../lib/api/errors';
 import { jsonError, jsonOk } from '../../../../lib/api/response';
+import { AUTH_RATE_LIMIT, shouldBypassAuthRateLimit } from '../../../../lib/auth/authRateLimit';
 import { prisma } from '../../../../lib/db/prisma';
+import {
+  applyRateLimitHeaders,
+  consumeRateLimit,
+  getRateLimitKey,
+} from '../../../../lib/http/rateLimit';
 import { withApiLogging } from '../../../../lib/observability/apiLogger';
 
 export const runtime = 'nodejs';
@@ -12,6 +18,20 @@ export async function POST(request: Request) {
     request,
     { route: '/api/auth/resend-verification' },
     async () => {
+      if (!shouldBypassAuthRateLimit()) {
+        const decision = consumeRateLimit(
+          getRateLimitKey('auth:resend-verification', request),
+          AUTH_RATE_LIMIT,
+        );
+        if (decision.limited) {
+          const response = jsonError(
+            new ApiError('rate_limited', 'Too many requests. Try again later.', 429, 'retry_later'),
+          );
+          applyRateLimitHeaders(response.headers, decision);
+          return response;
+        }
+      }
+
       const body = await request.json();
       const parsed = resendVerificationSchema.safeParse(body);
       if (!parsed.success) {

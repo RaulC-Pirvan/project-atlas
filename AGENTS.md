@@ -19,7 +19,7 @@ A habit is defined independently of dates.
 - PostgreSQL (Neon) + Prisma with `@prisma/adapter-pg` and `pg` pool.
 - Auth foundation implemented: signup, verify-email, resend-verification, logout, NextAuth Credentials (JWT sessions), middleware protection.
 - Account management API + UI: update email/password/display name/week start; delete account.
-- Email verification uses Resend client; debug token capture plus `/api/auth/debug/verification-token` for tests.
+- Email verification uses Resend client; debug token capture plus `/api/auth/debug/verification-token` for tests (shared token store for API routes).
 - Tests in place: Vitest unit/API tests, auth + habit + calendar + marketing component tests, Playwright auth + habits + calendar + daily completion + marketing + visual regression E2E.
 - Playwright E2E runs use a Windows-safe temp dir setup via `playwright.global-setup.ts` to avoid chromium shutdown hangs.
 - Daily completion E2E includes retry-safe habit creation to handle transient network resets in Firefox.
@@ -39,6 +39,7 @@ A habit is defined independently of dates.
 - Streak logic implemented (current + longest) with timezone-safe normalization and unit tests; streak summary panel lives in the calendar sidebar.
 - User profile tracks `weekStart` (sun/mon) and `timezone` (defaults to UTC, no UI yet); week start controls calendar layout, timezone drives date normalization and completion rules.
 - Post-login redirect lands on `/calendar` (tests and flows expect Calendar as the default landing page).
+- Observability & safety in place: Sentry error tracking (with tunnel), structured API logging, `/api/health` endpoint, global security headers, and auth route rate limiting.
 
 ## UI Direction (authoritative)
 
@@ -53,6 +54,7 @@ A habit is defined independently of dates.
 - `src/app` - App Router UI and API routes.
 - `src/app/page.tsx` - Marketing homepage with auth-aware redirect.
 - `src/app/api/auth/*/route.ts` - Auth API routes (signup, verify, resend, logout, debug, NextAuth).
+- `src/app/api/health/route.ts` - Health check endpoint.
 - `src/app/api/account/route.ts` - Account update (email/password/display name).
 - `src/app/api/account/delete-request/route.ts` - Account deletion request (hard delete).
 - `src/app/api/habits/route.ts` - Habit list/create API.
@@ -80,6 +82,9 @@ A habit is defined independently of dates.
 - `src/components/ui/ThemeToggle.tsx` - Light/dark theme toggle (system default + persistence).
 - `src/components/ui/Toast.tsx` - Toast notifications (no inline form errors).
 - `src/components/ui/Notice.tsx` - Inline notice/alert primitive.
+- `src/app/global-error.tsx` - Global error boundary (Sentry capture + fallback UI).
+- `src/instrumentation.ts` - Sentry instrumentation hook for Next.js.
+- `sentry.client.config.ts` / `sentry.server.config.ts` / `sentry.edge.config.ts` - Sentry SDK config.
 - `src/lib/db/prisma.ts` - Prisma singleton using adapter-pg + pg pool.
 - `src/lib/habits` - Habit domain helpers (date normalization, schedules, calendar grids, completions, query helpers, streaks, types).
 - `src/lib/habits/calendar.ts` - Month grid generation and weekday mapping.
@@ -87,6 +92,9 @@ A habit is defined independently of dates.
 - `src/lib/api/habits/completions.ts` - Completion toggle/list services (date/range).
 - `src/lib/habits/__tests__` - Habit domain unit tests.
 - `src/infra/email` - Resend client, verification email sender, debug token store.
+- `src/lib/observability` - Structured logging + API logging wrapper.
+- `src/lib/http/securityHeaders.ts` - Shared security headers.
+- `src/lib/http/rateLimit.ts` - In-memory rate limiting helper.
 - `src/types/next-auth.d.ts` - NextAuth session/JWT type extensions.
 - `prisma/schema.prisma` - DB models; migrations in `prisma/migrations`; seed in `prisma/seed.ts`.
 - `src/app/api/auth/__tests__` - API auth tests.
@@ -106,6 +114,9 @@ A habit is defined independently of dates.
 - `docs/sprints/sprint-5.1.md` - Sprint plan for marketing homepage.
 - `docs/test workflows/sprint-5.1-test-workflows.md` - Marketing homepage + theme test workflows.
 - `docs/test workflows/sprint-4.2-test-workflows.md` - UX refinement test workflows.
+- `docs/sprints/sprint-6.1.md` - Observability & safety sprint plan.
+- `docs/test workflows/sprint-6.1-test-workflows.md` - Observability & safety test workflows.
+- `docs/sprints/sprint-6.2.md` - Admin dashboard sprint plan.
 
 ## Engineering Standards
 
@@ -127,7 +138,7 @@ A habit is defined independently of dates.
 - Login requires verified email and not soft-deleted (see `src/lib/auth/policy.ts`).
 - Email verification uses hashed tokens (see `src/lib/auth/emailVerification.ts`).
 - Resend verification rotates tokens; email updates reset `emailVerified` and trigger a new link.
-- Login rate limiting is in-memory and per-process (see `src/lib/auth/loginRateLimit.ts`).
+- Auth route rate limiting is in-memory and per-process (see `src/lib/http/rateLimit.ts` + `src/lib/auth/authRateLimit.ts`).
 - Debug verification tokens are stored in-memory and exposed via `/api/auth/debug/verification-token` in non-prod or when `ENABLE_TEST_ENDPOINTS=true`.
 - `ENABLE_TEST_ENDPOINTS=true` skips sending real emails.
 - `/api/auth/logout` clears NextAuth cookies.

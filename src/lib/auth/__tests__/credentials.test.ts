@@ -16,6 +16,7 @@ describe('authorizeCredentials', () => {
           emailVerified: new Date('2026-01-01T00:00:00.000Z'),
           deletedAt: null,
           displayName: 'User',
+          role: 'user',
         }),
       },
     };
@@ -43,6 +44,7 @@ describe('authorizeCredentials', () => {
           emailVerified: new Date('2026-01-01T00:00:00.000Z'),
           deletedAt: null,
           displayName: null,
+          role: 'user',
         }),
       },
     };
@@ -69,6 +71,7 @@ describe('authorizeCredentials', () => {
           emailVerified: null,
           deletedAt: null,
           displayName: null,
+          role: 'user',
         }),
       },
     };

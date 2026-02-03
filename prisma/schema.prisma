@@ -46,6 +46,7 @@ model User {
   emailVerified DateTime?
   passwordHash  String
   displayName   String
+  role          UserRole  @default(user)
   timezone      String    @default("UTC")
   weekStart     WeekStart @default(mon)
   createdAt     DateTime  @default(now())
@@ -187,6 +188,17 @@ enum WeekStart {
   sun
   mon
 }
+
+/**
+ * UserRole controls admin access to internal dashboards.
+ *
+ * Default is "user"; elevate to "admin" explicitly for trusted operators.
+ */
+enum UserRole {
+  user
+  admin
+}
+
 
 /**
  * Habit captures a user's recurring intention.

@@ -39,6 +39,8 @@ export const authOptions: NextAuthOptions = {
         token.userId = user.id;
         token.emailVerifiedAt = emailVerified ? emailVerified.toISOString() : null;
         token.name = typeof user.name === 'string' ? user.name : null;
+        token.email = typeof user.email === 'string' ? user.email : null;
+        token.isAdmin = typeof user.isAdmin === 'boolean' ? user.isAdmin : false;
       }
       return token;
     },
@@ -47,6 +49,7 @@ export const authOptions: NextAuthOptions = {
         session.user.id = token.userId as string;
         session.user.emailVerifiedAt = (token.emailVerifiedAt as string | null) ?? null;
         session.user.name = (token.name as string | null) ?? session.user.name ?? null;
+        session.user.isAdmin = (token.isAdmin as boolean | undefined) ?? false;
       }
       return session;
     },

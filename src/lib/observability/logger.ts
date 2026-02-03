@@ -1,3 +1,5 @@
+import { recordAdminLog } from './adminLogStore';
+
 export type LogLevel = 'info' | 'warn' | 'error';
 
 export type LogContext = Record<string, unknown>;
@@ -51,6 +53,8 @@ function writeLog(level: LogLevel, message: string, context?: LogContext) {
     ...baseContext,
     ...sanitizeContext(context),
   };
+
+  recordAdminLog(payload);
 
   const line = JSON.stringify(payload);
 

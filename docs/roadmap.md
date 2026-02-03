@@ -180,7 +180,19 @@
 
 ---
 
-### Sprint 6.2: Testing & Launch Readiness
+### Sprint 6.2: Admin Dashboard
+
+- [x] Admin access control (single-owner allowlist)
+- [x] Admin navigation entry and layout
+- [x] App health status panel
+- [x] User list (search + basic stats)
+- [x] Habit list (search + active/archived)
+- [x] Recent logs / audit trail view
+- [x] Admin-safe data export (CSV)
+
+---
+
+### Sprint 6.3: Testing & Launch Readiness
 
 - [ ] Expand E2E coverage (full habit lifecycle)
 - [ ] Achieve ~80% meaningful test coverage

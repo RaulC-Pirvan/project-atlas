@@ -61,8 +61,8 @@ CI must remain green.
 
 ### Tasks (2)
 
-- [ ] **Task 2.1**: Add health check endpoint
-- [ ] **Task 2.2**: Apply security headers globally
+- [x] **Task 2.1**: Add health check endpoint
+- [x] **Task 2.2**: Apply security headers globally
 
 ---
 

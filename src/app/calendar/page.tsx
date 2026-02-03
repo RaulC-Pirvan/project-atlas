@@ -281,17 +281,26 @@ export default async function CalendarPage({
               nextHref={nextHref}
             />
 
-            <div className="flex flex-wrap items-center gap-4 text-xs uppercase tracking-[0.25em] text-black/50">
+            <div className="flex flex-wrap items-center gap-4 text-xs uppercase tracking-[0.25em] text-black/50 dark:text-white/50">
               <span className="inline-flex items-center gap-2">
-                <span className="h-1.5 w-1.5 rounded-full bg-black" aria-hidden="true" />
+                <span
+                  className="h-1.5 w-1.5 rounded-full bg-black dark:bg-white"
+                  aria-hidden="true"
+                />
                 Active habit day
               </span>
               <span className="inline-flex items-center gap-2">
-                <span className="h-3 w-3 border border-black" aria-hidden="true" />
+                <span
+                  className="h-3 w-3 border border-black dark:border-white"
+                  aria-hidden="true"
+                />
                 Today
               </span>
               <span className="inline-flex items-center gap-2">
-                <span className="h-3 w-3 border-2 border-black" aria-hidden="true" />
+                <span
+                  className="h-3 w-3 border-2 border-black dark:border-white"
+                  aria-hidden="true"
+                />
                 Selected day
               </span>
             </div>

@@ -9,12 +9,22 @@ export default function SignInPage() {
       title="Welcome back"
       subtitle="Sign in with your verified account."
       footer={
-        <p className="text-center text-sm text-black/60">
-          Need an account?{' '}
-          <Link className="text-black underline underline-offset-4" href="/sign-up">
-            Create one
-          </Link>
-        </p>
+        <div className="space-y-2 text-center text-sm text-black/60 dark:text-white/60">
+          <p>
+            Need an account?{' '}
+            <Link
+              className="text-black underline underline-offset-4 dark:text-white"
+              href="/sign-up"
+            >
+              Create one
+            </Link>
+          </p>
+          <p>
+            <Link className="text-black underline underline-offset-4 dark:text-white" href="/">
+              Back to home
+            </Link>
+          </p>
+        </div>
       }
     >
       <SignInForm />

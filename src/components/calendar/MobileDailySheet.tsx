@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useId, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 import { DailyCompletionPanel } from './DailyCompletionPanel';
 
@@ -28,10 +29,15 @@ export function MobileDailySheet({
   autoOpen = true,
 }: MobileDailySheetProps) {
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const titleId = useId();
   const sheetId = useId();
   const closeButtonRef = useRef<HTMLButtonElement | null>(null);
   const lastActiveRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (!selectedDateKey) {
@@ -87,7 +93,11 @@ export function MobileDailySheet({
     return null;
   }
 
-  return (
+  if (!mounted) {
+    return null;
+  }
+
+  const content = (
     <div className="lg:hidden">
       <div
         className={`fixed inset-0 z-50 flex flex-col justify-end ${
@@ -109,7 +119,7 @@ export function MobileDailySheet({
           aria-labelledby={titleId}
           aria-hidden={!open}
           id={sheetId}
-          className={`relative rounded-t-3xl border border-black/10 bg-white px-4 pb-6 pt-4 shadow-[0_-20px_40px_rgba(0,0,0,0.2)] motion-safe:transition-transform motion-safe:duration-300 motion-safe:ease-out motion-reduce:transition-none ${
+          className={`relative rounded-t-3xl border border-black/10 bg-white px-4 pb-6 pt-4 shadow-[0_-20px_40px_rgba(0,0,0,0.2)] motion-safe:transition-transform motion-safe:duration-300 motion-safe:ease-out motion-reduce:transition-none dark:border-white/10 dark:bg-black dark:shadow-[0_-20px_40px_rgba(0,0,0,0.5)] ${
             open ? 'translate-y-0' : 'pointer-events-none translate-y-full'
           }`}
         >
@@ -117,7 +127,7 @@ export function MobileDailySheet({
             <div>
               <p
                 id={titleId}
-                className="text-xs font-semibold uppercase tracking-[0.3em] text-black/60"
+                className="text-xs font-semibold uppercase tracking-[0.3em] text-black/60 dark:text-white/60"
               >
                 Daily view
               </p>
@@ -127,7 +137,7 @@ export function MobileDailySheet({
               type="button"
               onClick={() => setOpen(false)}
               ref={closeButtonRef}
-              className="inline-flex min-h-[36px] items-center justify-center rounded-full border border-black/20 px-3 text-xs font-semibold uppercase tracking-[0.25em] text-black/70 transition hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20"
+              className="inline-flex min-h-[36px] items-center justify-center rounded-full border border-black/20 px-3 text-xs font-semibold uppercase tracking-[0.25em] text-black/70 transition hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20 dark:border-white/20 dark:text-white/70 dark:hover:bg-white/10 dark:focus-visible:ring-white/30"
             >
               Close
             </button>
@@ -146,4 +156,6 @@ export function MobileDailySheet({
       </div>
     </div>
   );
+
+  return createPortal(content, document.body);
 }

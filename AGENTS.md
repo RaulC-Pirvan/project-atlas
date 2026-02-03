@@ -26,10 +26,14 @@ A habit is defined independently of dates.
 - Habit domain models implemented (Habit, HabitSchedule, HabitCompletion) with migrations and seed data.
 - Habit domain helpers exist in `src/lib/habits` (dates, schedules, calendar grid, completions, streaks, query helpers, types).
 - Habit CRUD API implemented (list/create/update/archive) with a habits UI built around `HabitsPanel` and `HabitForm`.
-- Authenticated screens use `AppShell` + `AppSidebar` with Calendar/Habits/Account navigation and Sign out.
-- Calendar view implemented with monthly grid, month navigation, selected-day side panel (`?date=YYYY-MM-DD`), daily completion toggles via `/api/completions`, per-day progress indicators, and golden completed-day tiles.
-- Daily completion supports check/uncheck with server-side schedule validation, future-date guard, and toast feedback; completions persist per habit+date.
+- Authenticated screens use `AppShell` + `AppSidebar` with Calendar-first navigation on desktop, Habits/Account links, and Sign out.
+- Calendar view implemented with monthly grid, month navigation, selected-day side panel (`?date=YYYY-MM-DD`), daily completion toggles via `/api/completions`, per-day progress indicators, and golden completed-day tiles (black text for contrast).
+- Calendar defaults to selecting today on `/calendar` (current month); mobile daily sheet only auto-opens when a `date` param is present.
+- Daily completion supports check/uncheck with server-side schedule validation, future-date guard, toast feedback, optimistic updates with rollback, and per-row pending indicators.
 - Calendar polish includes motion-safe transitions, reduced-motion fallbacks, and subtle completion sounds on success.
+- Loading skeletons implemented for calendar and habits routes.
+- API error responses include standardized recovery hints; client messaging uses consistent recovery guidance.
+- Keyboard navigation and focus management implemented for calendar grid, daily panel, and mobile sheet.
 - Streak logic implemented (current + longest) with timezone-safe normalization and unit tests; streak summary panel lives in the calendar sidebar.
 - User profile tracks `weekStart` (sun/mon) and `timezone` (defaults to UTC, no UI yet); week start controls calendar layout, timezone drives date normalization and completion rules.
 - Post-login redirect lands on `/calendar` (tests and flows expect Calendar as the default landing page).
@@ -44,16 +48,18 @@ A habit is defined independently of dates.
 ## Codebase Map
 
 - `src/app` - App Router UI and API routes.
-- `src/app/page.tsx` - Marketing/landing page (pre-MVP copy).
+- `src/app/page.tsx` - Marketing/landing page (pre-MVP copy; Phase 5.1 planned).
 - `src/app/api/auth/*/route.ts` - Auth API routes (signup, verify, resend, logout, debug, NextAuth).
 - `src/app/api/account/route.ts` - Account update (email/password/display name).
 - `src/app/api/account/delete-request/route.ts` - Account deletion request (hard delete).
 - `src/app/api/habits/route.ts` - Habit list/create API.
 - `src/app/api/habits/[id]/route.ts` - Habit update/archive API.
 - `src/app/calendar/page.tsx` - Calendar month view + selected-day side panel + legend and progress indicators.
+- `src/app/calendar/loading.tsx` - Calendar route loading skeleton.
 - `src/app/calendar/[date]/page.tsx` - Legacy daily view route (redirects to calendar with `date` param).
 - `src/app/api/completions/route.ts` - Daily completion list/toggle API.
 - `src/app/habits/page.tsx` - Habits page (list/create/edit/archive).
+- `src/app/habits/loading.tsx` - Habits route loading skeleton.
 - `src/app/api/auth/[...nextauth]/route.ts` - NextAuth handler.
 - `src/lib/auth` - Auth utilities (hashing, policy, credentials, rate limit, nextauth).
 - `src/lib/api` - Shared API error/response helpers, auth services, validation.
@@ -91,6 +97,8 @@ A habit is defined independently of dates.
 - `e2e` - Playwright auth + habits + calendar + daily completion + visual regression E2E tests.
 - `playwright.config.ts` - Playwright config (chromium + firefox; visual project enabled via `RUN_VISUAL` or CI).
 - `playwright.global-setup.ts` - Windows temp dir setup for Playwright runs.
+- `docs/sprints/sprint-5.1.md` - Sprint plan for marketing homepage.
+- `docs/test workflows/sprint-4.2-test-workflows.md` - UX refinement test workflows.
 
 ## Engineering Standards
 

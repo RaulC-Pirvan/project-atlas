@@ -12,11 +12,12 @@ const navItems = [
 ];
 
 const baseClasses =
-  'inline-flex flex-1 items-center justify-center rounded-full border border-black/15 px-3 py-2 text-xs font-medium text-black/70 transition hover:bg-black/5 md:flex-none md:w-full md:rounded-none md:border-0 md:px-4 md:py-3 md:text-sm';
-const activeClasses = 'bg-black text-white hover:bg-black';
-const inactiveClasses = 'text-black/70 hover:bg-black/5';
+  'inline-flex flex-1 items-center justify-center rounded-full border border-black/15 px-3 py-2 text-xs font-medium text-black/70 transition hover:bg-black/5 md:flex-none md:w-full md:rounded-none md:border-0 md:px-4 md:py-3 md:text-sm dark:border-white/20 dark:text-white/80 dark:hover:bg-white/10';
+const activeClasses =
+  'bg-black text-white hover:bg-black dark:bg-white dark:text-black dark:!text-black dark:hover:bg-white';
+const inactiveClasses = 'text-black/70 hover:bg-black/5 dark:text-white/70 dark:hover:bg-white/10';
 const mobileCenterClasses =
-  'rounded-2xl border border-black/20 bg-black text-white shadow-[0_10px_24px_rgba(0,0,0,0.18)]';
+  'rounded-2xl border border-black/20 bg-black text-white shadow-[0_10px_24px_rgba(0,0,0,0.18)] dark:border-white/20 dark:bg-white dark:text-black dark:!text-black dark:shadow-[0_10px_24px_rgba(0,0,0,0.4)]';
 
 function NavIcon({ icon }: { icon: string }) {
   if (icon === 'calendar') {
@@ -90,7 +91,7 @@ function NavLink({
       aria-current={active ? 'page' : undefined}
       className={`${baseClasses} ${desktopOrder} ${
         active ? activeClasses : inactiveClasses
-      } ${active && icon === 'calendar' ? mobileCenterClasses : ''} md:justify-start md:gap-2`.trim()}
+      } ${active && icon === 'calendar' ? mobileCenterClasses : ''} md:justify-center`.trim()}
     >
       <span className="md:hidden">
         <NavIcon icon={icon} />
@@ -104,7 +105,7 @@ export function AppSidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="fixed inset-x-0 bottom-0 z-40 border-t border-black/10 bg-white md:fixed md:inset-y-14 md:left-0 md:h-[calc(100vh-56px)] md:w-64 md:border-t-0 md:border-r md:border-black/10">
+    <aside className="fixed inset-x-0 bottom-0 z-40 border-t border-black/10 bg-white dark:border-white/10 dark:bg-black md:fixed md:inset-y-14 md:left-0 md:h-[calc(100vh-56px)] md:w-64 md:border-t-0 md:border-r md:border-black/10 md:dark:border-white/10">
       <nav className="flex h-full items-center justify-between gap-2 px-3 py-2 md:flex-col md:items-stretch md:gap-0 md:px-0 md:py-0">
         <div className="flex w-full flex-row gap-2 md:flex-1 md:flex-col">
           {navItems.map((item) => (

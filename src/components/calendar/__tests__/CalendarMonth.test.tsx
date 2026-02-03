@@ -80,8 +80,8 @@ describe('CalendarMonth', () => {
     });
 
     expect(completedDay.className).toContain('bg-[#FAB95B]');
-    expect(completedDay.className).not.toContain('text-white');
-    expect(partialDay.className).not.toContain('text-white');
+    expect(completedDay.className).not.toMatch(/(^|\s)text-white(\s|$)/);
+    expect(partialDay.className).not.toMatch(/(^|\s)text-white(\s|$)/);
     expect(screen.getByText(/2 of 2 habits completed/i)).toBeInTheDocument();
   });
 

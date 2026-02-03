@@ -15,8 +15,8 @@ export function FormField({ id, label, hint, error, children }: FormFieldProps) 
     <div className="space-y-2">
       <Label htmlFor={id}>{label}</Label>
       {children}
-      {hint ? <p className="text-xs text-black/50">{hint}</p> : null}
-      {error ? <p className="text-xs font-medium text-black">{error}</p> : null}
+      {hint ? <p className="text-xs text-black/50 dark:text-white/50">{hint}</p> : null}
+      {error ? <p className="text-xs font-medium text-black dark:text-white">{error}</p> : null}
     </div>
   );
 }

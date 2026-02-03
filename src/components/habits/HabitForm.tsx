@@ -107,10 +107,10 @@ export function HabitForm({
   return (
     <form className="space-y-6" onSubmit={handleSubmit}>
       <div className="space-y-1">
-        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-black/80">
+        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-black/80 dark:text-white/80">
           {mode === 'create' ? 'Create habit' : 'Edit habit'}
         </p>
-        <p className="text-sm text-black/60">
+        <p className="text-sm text-black/60 dark:text-white/60">
           {mode === 'create'
             ? 'Build a new habit with a weekly schedule.'
             : 'Update the habit details and schedule.'}

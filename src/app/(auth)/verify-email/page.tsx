@@ -10,15 +10,15 @@ export default function VerifyEmailPage() {
       title="Verify your email"
       subtitle="Open the link we sent to complete signup."
       footer={
-        <p className="text-center text-sm text-black/60">
+        <p className="text-center text-sm text-black/60 dark:text-white/60">
           Ready to sign in?{' '}
-          <Link className="text-black underline underline-offset-4" href="/sign-in">
+          <Link className="text-black underline underline-offset-4 dark:text-white" href="/sign-in">
             Go to sign in
           </Link>
         </p>
       }
     >
-      <Suspense fallback={<p className="text-sm text-black/60">Loading...</p>}>
+      <Suspense fallback={<p className="text-sm text-black/60 dark:text-white/60">Loading...</p>}>
         <VerifyEmailPanel />
       </Suspense>
     </AuthShell>

@@ -30,7 +30,7 @@ type CalendarMonthProps = {
 };
 
 const navButtonClasses =
-  'inline-flex items-center justify-center rounded-full border border-black/20 px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.25em] text-black/70 transition hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20 sm:px-4 sm:text-xs';
+  'inline-flex items-center justify-center rounded-full border border-black/20 px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.25em] text-black/70 transition hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20 sm:px-4 sm:text-xs dark:border-white/20 dark:text-white/70 dark:hover:bg-white/10 dark:focus-visible:ring-white/30';
 
 export function CalendarMonth({
   monthLabel,
@@ -108,7 +108,9 @@ export function CalendarMonth({
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-black/60">Month</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-black/60 dark:text-white/60">
+            Month
+          </p>
           <h2 className="text-2xl font-semibold tracking-tight">{monthLabel}</h2>
         </div>
         <div className="flex items-center gap-2">
@@ -124,9 +126,9 @@ export function CalendarMonth({
       <p id={keyboardHintId} className="sr-only">
         Use arrow keys to move between days in the calendar.
       </p>
-      <div className="overflow-hidden border border-black/10">
+      <div className="overflow-hidden border border-black/10 dark:border-white/10">
         <div
-          className="grid grid-cols-7 gap-px bg-black/10"
+          className="grid grid-cols-7 gap-px bg-black/10 dark:bg-white/10"
           data-testid="calendar-grid"
           data-calendar-grid
           data-grid-size={gridSize}
@@ -135,7 +137,7 @@ export function CalendarMonth({
           {weekdayOrder.map((weekday) => (
             <div
               key={weekday}
-              className="bg-white px-2 py-2 text-center text-[10px] font-semibold uppercase tracking-[0.25em] text-black/60 sm:px-3 sm:text-xs"
+              className="flex items-center justify-center bg-white px-2 py-2 text-[10px] font-semibold uppercase tracking-[0.25em] text-black/60 sm:px-3 sm:text-xs dark:bg-black dark:text-white/60"
             >
               {getWeekdayLabel(weekday)}
             </div>
@@ -149,21 +151,27 @@ export function CalendarMonth({
               const gridIndex = weekIndex * 7 + dayIndex;
               const baseCellClasses =
                 'group flex min-h-[64px] touch-manipulation flex-col justify-between px-2 py-2 text-left text-xs motion-safe:transition-all motion-safe:duration-150 motion-safe:ease-out motion-reduce:transition-none sm:min-h-[86px] sm:px-3 sm:text-sm';
-              const mutedClasses = day.inMonth ? 'text-black' : 'text-black/30';
-              const backgroundClasses = isComplete ? 'bg-[#FAB95B] text-black' : 'bg-white';
+              const mutedClasses = day.inMonth
+                ? 'text-black dark:text-white'
+                : 'text-black/30 dark:text-white/30';
+              const backgroundClasses = isComplete
+                ? 'bg-[#FAB95B] text-black'
+                : 'bg-white dark:bg-black';
               const hoverClasses = day.inMonth
                 ? isComplete
                   ? 'hover:bg-[#E9A543] focus-visible:bg-[#E9A543] active:bg-[#D99638] active:scale-[0.98]'
-                  : 'hover:bg-black/5 focus-visible:bg-black/5 active:bg-black/10 active:scale-[0.98]'
+                  : 'hover:bg-black/5 focus-visible:bg-black/5 active:bg-black/10 active:scale-[0.98] dark:hover:bg-white/10 dark:focus-visible:bg-white/10 dark:active:bg-white/20'
                 : '';
-              const todayClasses = day.isToday ? 'ring-1 ring-black ring-inset' : '';
+              const todayClasses = day.isToday
+                ? 'ring-1 ring-black ring-inset dark:ring-white/60'
+                : '';
               const selectedClasses = day.isSelected
                 ? isComplete
-                  ? 'ring-2 ring-black ring-inset'
-                  : 'ring-2 ring-black ring-inset bg-black/5'
+                  ? 'ring-2 ring-black ring-inset dark:ring-white'
+                  : 'ring-2 ring-black ring-inset bg-black/5 dark:ring-white dark:bg-white/10'
                 : '';
               const focusClasses =
-                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20';
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20 dark:focus-visible:ring-white/30';
               const cellClasses = [
                 baseCellClasses,
                 mutedClasses,
@@ -187,13 +195,15 @@ export function CalendarMonth({
                         </span>
                         <div
                           className={`h-1 w-full rounded-full ${
-                            isComplete ? 'bg-black/20' : 'bg-black/10'
+                            isComplete
+                              ? 'bg-black/20 dark:bg-white/20'
+                              : 'bg-black/10 dark:bg-white/10'
                           }`}
                           aria-hidden="true"
                         >
                           <div
                             className={`h-full rounded-full ${
-                              isComplete ? 'bg-black' : 'bg-black'
+                              isComplete ? 'bg-black' : 'bg-black dark:bg-white'
                             } motion-safe:transition-[width] motion-safe:duration-300 motion-safe:ease-out motion-reduce:transition-none`}
                             style={{ width: `${progressPercent}%` }}
                           />
@@ -206,7 +216,7 @@ export function CalendarMonth({
                       {day.hasHabits ? (
                         <span
                           className={`h-1.5 w-1.5 rounded-full ${
-                            isComplete ? 'bg-black' : 'bg-black'
+                            isComplete ? 'bg-black' : 'bg-black dark:bg-white'
                           }`}
                           aria-hidden="true"
                         />

@@ -45,16 +45,12 @@ export default defineConfig({
       use: { ...devices['Desktop Firefox'] },
       testIgnore: /calendar-visual\.spec\.ts/,
     },
-    ...(process.env.RUN_VISUAL === 'true' || process.env.CI === 'true'
-      ? [
-          {
-            name: 'visual',
-            testMatch: /calendar-visual\.spec\.ts/,
-            use: { ...devices['Desktop Chrome'] },
-            workers: 1,
-          },
-        ]
-      : []),
+    {
+      name: 'visual',
+      testMatch: /calendar-visual\.spec\.ts/,
+      use: { ...devices['Desktop Chrome'] },
+      workers: 1,
+    },
   ],
 
   webServer: process.env.CI

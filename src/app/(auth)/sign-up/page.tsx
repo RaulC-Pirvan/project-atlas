@@ -9,9 +9,9 @@ export default function SignUpPage() {
       title="Create your account"
       subtitle="Minimal setup now. Verification required before login."
       footer={
-        <p className="text-center text-sm text-black/60">
+        <p className="text-center text-sm text-black/60 dark:text-white/60">
           Already have an account?{' '}
-          <Link className="text-black underline underline-offset-4" href="/sign-in">
+          <Link className="text-black underline underline-offset-4 dark:text-white" href="/sign-in">
             Sign in
           </Link>
         </p>

@@ -233,11 +233,11 @@ export function DailyCompletionPanel({
           const isDisabled = isFuture || isPending;
           const descriptionId = habit.description ? `${listId}-${habit.id}` : undefined;
           const focusClasses = isCompleted
-            ? 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black'
-            : 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20 focus-visible:ring-offset-2 focus-visible:ring-offset-white';
+            ? 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black dark:focus-visible:ring-black/40 dark:focus-visible:ring-offset-white'
+            : 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-white/30 dark:focus-visible:ring-offset-black';
           const hoverClasses = isCompleted
-            ? 'hover:bg-black/90 active:bg-black/80 active:scale-[0.99]'
-            : 'hover:bg-black/5 active:bg-black/10 active:scale-[0.99]';
+            ? 'hover:bg-black/90 active:bg-black/80 active:scale-[0.99] dark:hover:bg-white/90 dark:active:bg-white/80'
+            : 'hover:bg-black/5 active:bg-black/10 active:scale-[0.99] dark:hover:bg-white/10 dark:active:bg-white/20';
 
           return (
             <li key={habit.id}>
@@ -251,19 +251,27 @@ export function DailyCompletionPanel({
                 onClick={() => handleToggle(habit.id)}
                 onKeyDown={handleHabitKeyDown}
                 className={`flex min-h-[44px] w-full items-start justify-between gap-4 rounded-xl border px-4 py-3 text-left touch-manipulation motion-safe:transition-all motion-safe:duration-150 motion-safe:ease-out motion-reduce:transition-none ${focusClasses} ${
-                  isCompleted ? 'border-black bg-black text-white' : 'border-black/10 text-black'
+                  isCompleted
+                    ? 'border-black bg-black text-white dark:border-white dark:bg-white dark:text-black'
+                    : 'border-black/10 text-black dark:border-white/10 dark:text-white'
                 } ${isDisabled ? 'opacity-60' : hoverClasses} `.trim()}
               >
                 <div>
                   <p
-                    className={`text-sm font-semibold ${isCompleted ? 'text-white' : 'text-black'}`}
+                    className={`text-sm font-semibold ${
+                      isCompleted ? 'text-white dark:text-black' : 'text-black dark:text-white'
+                    }`}
                   >
                     {habit.title}
                   </p>
                   {habit.description ? (
                     <p
                       id={descriptionId}
-                      className={`text-xs ${isCompleted ? 'text-white/80' : 'text-black/60'}`}
+                      className={`text-xs ${
+                        isCompleted
+                          ? 'text-white/80 dark:text-black/70'
+                          : 'text-black/60 dark:text-white/60'
+                      }`}
                     >
                       {habit.description}
                     </p>
@@ -272,15 +280,17 @@ export function DailyCompletionPanel({
                 <span
                   aria-hidden="true"
                   className={`mt-1 inline-flex h-5 w-5 items-center justify-center rounded-full border ${
-                    isCompleted ? 'border-white bg-white text-black' : 'border-black/20'
+                    isCompleted
+                      ? 'border-white bg-white text-black dark:border-black/30 dark:bg-black/10 dark:text-black'
+                      : 'border-black/20 dark:border-white/20'
                   }`}
                 >
                   {isPending ? (
                     <span
                       className={`h-3 w-3 rounded-full border motion-safe:animate-spin motion-reduce:animate-none ${
                         isCompleted
-                          ? 'border-black/40 border-t-transparent'
-                          : 'border-black/30 border-t-transparent'
+                          ? 'border-black/40 border-t-transparent dark:border-black/50'
+                          : 'border-black/30 border-t-transparent dark:border-white/40'
                       }`}
                     />
                   ) : isCompleted ? (
@@ -296,19 +306,19 @@ export function DailyCompletionPanel({
   };
 
   return (
-    <div className="rounded-2xl border border-black/10 px-6 py-6">
+    <div className="rounded-2xl border border-black/10 px-6 py-6 dark:border-white/10">
       <div className="flex items-center justify-between gap-4">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-black/60">
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-black/60 dark:text-white/60">
             Selected day
           </p>
           <h3 className="text-lg font-semibold">{selectedLabel ?? 'Pick a day'}</h3>
         </div>
       </div>
 
-      <div className="mt-5 space-y-3 text-sm text-black/70">
+      <div className="mt-5 space-y-3 text-sm text-black/70 dark:text-white/70">
         {isFuture && selectedDateKey ? (
-          <p className="text-xs uppercase tracking-[0.25em] text-black/50">
+          <p className="text-xs uppercase tracking-[0.25em] text-black/50 dark:text-white/50">
             Future dates cannot be completed yet.
           </p>
         ) : null}

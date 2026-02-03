@@ -148,17 +148,29 @@
 
 ### Sprint 4.2: UX Refinement
 
-- [ ] Loading states
-- [ ] Optimistic updates
-- [ ] Error handling & recovery
-- [ ] Keyboard navigation
-- [ ] Accessibility pass (ARIA, contrast)
+- [x] Loading states
+- [x] Optimistic updates
+- [x] Error handling & recovery
+- [x] Keyboard navigation
+- [x] Accessibility pass (ARIA, contrast)
 
 ---
 
-## Phase 5: Production Hardening (Weeks 11–12)
+## Phase 5: Landing & Positioning (Week 11)
 
-### Sprint 5.1: Observability & Safety
+### Sprint 5.1: Marketing Homepage
+
+- [x] Define clear value prop and hero section
+- [x] Explain core benefits (schedule-based habits, daily completion, streaks)
+- [x] Add primary CTA (sign up / sign in)
+- [x] Auth-aware redirect: logged-in users go to `/calendar`
+- [x] Keep styling aligned with minimalist black/white system
+
+---
+
+## Phase 6: Production Hardening (Weeks 12-13)
+
+### Sprint 6.1: Observability & Safety
 
 - [ ] Error tracking (Sentry or equivalent)
 - [ ] Structured logging
@@ -168,7 +180,7 @@
 
 ---
 
-### Sprint 5.2: Testing & Launch Readiness
+### Sprint 6.2: Testing & Launch Readiness
 
 - [ ] Expand E2E coverage (full habit lifecycle)
 - [ ] Achieve ~80% meaningful test coverage
@@ -179,7 +191,7 @@
 
 ---
 
-## Phase 6: Post-Launch (Optional / Future)
+## Phase 7: Post-Launch (Optional / Future)
 
 - Habit templates
 - Reminders / notifications

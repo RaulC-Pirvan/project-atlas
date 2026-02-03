@@ -1,7 +1,8 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useEffect, useRef, useState } from 'react';
+import type { KeyboardEvent } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 
 import { getApiErrorMessage, parseJson } from '../../lib/api/client';
 import { type ToastItem, ToastStack } from '../ui/Toast';
@@ -43,6 +44,7 @@ export function DailyCompletionPanel({
   const [toasts, setToasts] = useState<ToastItem[]>([]);
   const toastIdRef = useRef(0);
   const completionSignature = initialCompletedHabitIds.join('|');
+  const listId = useId();
 
   useEffect(() => {
     setCompletedIds(initialCompletedHabitIds);
@@ -183,12 +185,53 @@ export function DailyCompletionPanel({
       return <p>No habits scheduled for this day.</p>;
     }
 
+    const handleHabitKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
+      const { key } = event;
+      if (!['ArrowUp', 'ArrowDown', 'Home', 'End'].includes(key)) return;
+
+      const list = event.currentTarget.closest<HTMLElement>('[data-habit-list]');
+      if (!list) return;
+
+      const buttons = Array.from(
+        list.querySelectorAll<HTMLButtonElement>('button[data-habit-id]'),
+      ).filter((button) => !button.disabled);
+      if (buttons.length === 0) return;
+
+      const currentIndex = buttons.findIndex((button) => button === event.currentTarget);
+      if (currentIndex === -1) return;
+
+      event.preventDefault();
+
+      if (key === 'Home') {
+        buttons[0]?.focus();
+        return;
+      }
+      if (key === 'End') {
+        buttons[buttons.length - 1]?.focus();
+        return;
+      }
+
+      const nextIndex =
+        key === 'ArrowUp'
+          ? Math.max(0, currentIndex - 1)
+          : Math.min(buttons.length - 1, currentIndex + 1);
+
+      buttons[nextIndex]?.focus();
+    };
+
     return (
-      <ul className="space-y-3" aria-busy={pendingIds.length > 0}>
+      <ul
+        className="space-y-3"
+        aria-busy={pendingIds.length > 0}
+        aria-label="Daily habits"
+        data-habit-list
+        id={listId}
+      >
         {habits.map((habit) => {
           const isCompleted = completedIds.includes(habit.id);
           const isPending = pendingIds.includes(habit.id);
           const isDisabled = isFuture || isPending;
+          const descriptionId = habit.description ? `${listId}-${habit.id}` : undefined;
           const focusClasses = isCompleted
             ? 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black'
             : 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20 focus-visible:ring-offset-2 focus-visible:ring-offset-white';
@@ -202,8 +245,11 @@ export function DailyCompletionPanel({
                 type="button"
                 role="checkbox"
                 aria-checked={isCompleted}
+                aria-describedby={descriptionId}
+                data-habit-id={habit.id}
                 disabled={isDisabled}
                 onClick={() => handleToggle(habit.id)}
+                onKeyDown={handleHabitKeyDown}
                 className={`flex min-h-[44px] w-full items-start justify-between gap-4 rounded-xl border px-4 py-3 text-left touch-manipulation motion-safe:transition-all motion-safe:duration-150 motion-safe:ease-out motion-reduce:transition-none ${focusClasses} ${
                   isCompleted ? 'border-black bg-black text-white' : 'border-black/10 text-black'
                 } ${isDisabled ? 'opacity-60' : hoverClasses} `.trim()}
@@ -215,7 +261,10 @@ export function DailyCompletionPanel({
                     {habit.title}
                   </p>
                   {habit.description ? (
-                    <p className={`text-xs ${isCompleted ? 'text-white/80' : 'text-black/60'}`}>
+                    <p
+                      id={descriptionId}
+                      className={`text-xs ${isCompleted ? 'text-white/80' : 'text-black/60'}`}
+                    >
                       {habit.description}
                     </p>
                   ) : null}

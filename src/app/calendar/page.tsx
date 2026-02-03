@@ -101,6 +101,10 @@ export default async function CalendarPage({
   const resolvedSearchParams = await searchParams;
   const requested = parseMonthParam(resolvedSearchParams?.month);
   const requestedDate = parseDateParam(resolvedSearchParams?.date);
+  const hasDateParam = resolvedSearchParams?.date !== undefined;
+  const isCurrentMonth = !requested
+    ? true
+    : requested.year === localParts.year && requested.month === localParts.month;
   const year = requested?.year ?? requestedDate?.year ?? localParts.year;
   const month = requested?.month ?? requestedDate?.month ?? localParts.month;
 
@@ -164,7 +168,11 @@ export default async function CalendarPage({
     completionMap.set(completion.date, entry);
   }
 
-  const selectedDate = requestedDate ? toUtcDateFromParts(requestedDate) : null;
+  const selectedDate = requestedDate
+    ? toUtcDateFromParts(requestedDate)
+    : !hasDateParam && isCurrentMonth
+      ? today
+      : null;
   const selectedKey = selectedDate ? toUtcDateKey(selectedDate) : null;
   const selectedLabel = selectedDate
     ? new Intl.DateTimeFormat('en-US', {
@@ -314,6 +322,7 @@ export default async function CalendarPage({
           selectedLabel={selectedLabel}
           habits={selectedHabits}
           initialCompletedHabitIds={Array.from(selectedCompletedIds)}
+          autoOpen={hasDateParam}
           isFuture={isFuture}
         />
       </div>

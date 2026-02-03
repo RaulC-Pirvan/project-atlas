@@ -101,8 +101,8 @@ Keep these behavioral rules consistent across UI and tests.
 
 ### Tasks (2)
 
-- [ ] **Task 3.1**: Add keyboard navigation across calendar and daily panel
-- [ ] **Task 3.2**: Accessibility pass (ARIA, contrast, focus management)
+- [x] **Task 3.1**: Add keyboard navigation across calendar and daily panel
+- [x] **Task 3.2**: Accessibility pass (ARIA, contrast, focus management)
 
 ---
 

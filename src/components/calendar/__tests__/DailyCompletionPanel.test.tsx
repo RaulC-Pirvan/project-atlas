@@ -112,4 +112,31 @@ describe('DailyCompletionPanel', () => {
 
     vi.unstubAllGlobals();
   });
+
+  it('moves focus between habits with arrow keys', () => {
+    render(
+      <DailyCompletionPanel
+        selectedDateKey="2026-02-05"
+        selectedLabel="February 5, 2026"
+        habits={[
+          { id: 'h1', title: 'Read', description: null },
+          { id: 'h2', title: 'Walk', description: null },
+        ]}
+        initialCompletedHabitIds={[]}
+        isFuture={false}
+      />,
+    );
+
+    const read = screen.getByRole('checkbox', { name: /read/i });
+    const walk = screen.getByRole('checkbox', { name: /walk/i });
+
+    read.focus();
+    expect(read).toHaveFocus();
+
+    fireEvent.keyDown(read, { key: 'ArrowDown' });
+    expect(walk).toHaveFocus();
+
+    fireEvent.keyDown(walk, { key: 'ArrowUp' });
+    expect(read).toHaveFocus();
+  });
 });

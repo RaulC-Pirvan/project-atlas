@@ -6,9 +6,9 @@ import { usePathname } from 'next/navigation';
 import { SignOutButton } from '../auth/SignOutButton';
 
 const navItems = [
-  { href: '/habits', label: 'Habits', icon: 'habits' },
-  { href: '/calendar', label: 'Calendar', icon: 'calendar' },
-  { href: '/account', label: 'Account', icon: 'account' },
+  { href: '/habits', label: 'Habits', icon: 'habits', desktopOrder: 'md:order-2' },
+  { href: '/calendar', label: 'Calendar', icon: 'calendar', desktopOrder: 'md:order-1' },
+  { href: '/account', label: 'Account', icon: 'account', desktopOrder: 'md:order-3' },
 ];
 
 const baseClasses =
@@ -16,7 +16,7 @@ const baseClasses =
 const activeClasses = 'bg-black text-white hover:bg-black';
 const inactiveClasses = 'text-black/70 hover:bg-black/5';
 const mobileCenterClasses =
-  'flex-[1.2] -translate-y-1 rounded-2xl border border-black/20 bg-black text-white shadow-[0_10px_24px_rgba(0,0,0,0.18)]';
+  'rounded-2xl border border-black/20 bg-black text-white shadow-[0_10px_24px_rgba(0,0,0,0.18)]';
 
 function NavIcon({ icon }: { icon: string }) {
   if (icon === 'calendar') {
@@ -76,17 +76,19 @@ function NavLink({
   label,
   active,
   icon,
+  desktopOrder,
 }: {
   href: string;
   label: string;
   active: boolean;
   icon: string;
+  desktopOrder: string;
 }) {
   return (
     <Link
       href={href}
       aria-current={active ? 'page' : undefined}
-      className={`${baseClasses} ${
+      className={`${baseClasses} ${desktopOrder} ${
         active ? activeClasses : inactiveClasses
       } ${active && icon === 'calendar' ? mobileCenterClasses : ''} md:justify-start md:gap-2`.trim()}
     >
@@ -111,6 +113,7 @@ export function AppSidebar() {
               href={item.href}
               label={item.label}
               icon={item.icon}
+              desktopOrder={item.desktopOrder}
               active={pathname === item.href || pathname.startsWith(`${item.href}/`)}
             />
           ))}

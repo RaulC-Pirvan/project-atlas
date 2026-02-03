@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
 import { CalendarMonth, type CalendarWeekView } from '../CalendarMonth';
@@ -80,8 +80,43 @@ describe('CalendarMonth', () => {
     });
 
     expect(completedDay.className).toContain('bg-[#FAB95B]');
-    expect(completedDay.className).toContain('text-white');
+    expect(completedDay.className).not.toContain('text-white');
     expect(partialDay.className).not.toContain('text-white');
     expect(screen.getByText(/2 of 2 habits completed/i)).toBeInTheDocument();
+  });
+
+  it('moves focus between days with arrow keys', () => {
+    const week: CalendarWeekView = [
+      makeDay(1, false),
+      makeDay(2, false),
+      makeDay(3, false),
+      makeDay(4, false),
+      makeDay(5, false),
+      makeDay(6, false),
+      makeDay(7, false),
+    ];
+
+    render(
+      <CalendarMonth
+        monthLabel="February 2026"
+        weekStart="mon"
+        weeks={[week]}
+        prevHref="/calendar?month=2026-01"
+        nextHref="/calendar?month=2026-03"
+      />,
+    );
+
+    const day1 = screen.getByRole('link', { name: /February 1, 2026/i });
+    const day2 = screen.getByRole('link', { name: /February 2, 2026/i });
+    const day7 = screen.getByRole('link', { name: /February 7, 2026/i });
+
+    day2.focus();
+    expect(day2).toHaveFocus();
+
+    fireEvent.keyDown(day2, { key: 'ArrowLeft' });
+    expect(day1).toHaveFocus();
+
+    fireEvent.keyDown(day1, { key: 'End' });
+    expect(day7).toHaveFocus();
   });
 });

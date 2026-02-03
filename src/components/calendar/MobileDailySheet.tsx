@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useId, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 
 import { DailyCompletionPanel } from './DailyCompletionPanel';
 
@@ -16,6 +16,7 @@ type MobileDailySheetProps = {
   habits: HabitSummary[];
   initialCompletedHabitIds: string[];
   isFuture: boolean;
+  autoOpen?: boolean;
 };
 
 export function MobileDailySheet({
@@ -24,18 +25,25 @@ export function MobileDailySheet({
   habits,
   initialCompletedHabitIds,
   isFuture,
+  autoOpen = true,
 }: MobileDailySheetProps) {
   const [open, setOpen] = useState(false);
   const titleId = useId();
   const sheetId = useId();
+  const closeButtonRef = useRef<HTMLButtonElement | null>(null);
+  const lastActiveRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     if (!selectedDateKey) {
       setOpen(false);
       return;
     }
-    setOpen(true);
-  }, [selectedDateKey]);
+    if (autoOpen) {
+      setOpen(true);
+    } else {
+      setOpen(false);
+    }
+  }, [selectedDateKey, autoOpen]);
 
   useEffect(() => {
     if (!open) return;
@@ -46,6 +54,19 @@ export function MobileDailySheet({
     };
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
+  }, [open]);
+
+  useEffect(() => {
+    if (open) {
+      lastActiveRef.current = document.activeElement as HTMLElement | null;
+      window.requestAnimationFrame(() => closeButtonRef.current?.focus());
+      return;
+    }
+
+    if (lastActiveRef.current) {
+      lastActiveRef.current.focus();
+      lastActiveRef.current = null;
+    }
   }, [open]);
 
   useEffect(() => {
@@ -105,6 +126,7 @@ export function MobileDailySheet({
             <button
               type="button"
               onClick={() => setOpen(false)}
+              ref={closeButtonRef}
               className="inline-flex min-h-[36px] items-center justify-center rounded-full border border-black/20 px-3 text-xs font-semibold uppercase tracking-[0.25em] text-black/70 transition hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20"
             >
               Close

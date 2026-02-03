@@ -1,4 +1,8 @@
+'use client';
+
 import Link from 'next/link';
+import type { KeyboardEvent } from 'react';
+import { useId } from 'react';
 
 import { getWeekdayLabel, getWeekdayOrder, type WeekStart } from '../habits/weekdays';
 
@@ -36,6 +40,69 @@ export function CalendarMonth({
   nextHref,
 }: CalendarMonthProps) {
   const weekdayOrder = getWeekdayOrder(weekStart);
+  const keyboardHintId = useId();
+  const gridSize = weeks.length * 7;
+
+  const focusByIndex = (grid: HTMLElement, index: number) => {
+    const target = grid.querySelector<HTMLElement>(
+      `[data-grid-index="${index}"][data-focusable="true"]`,
+    );
+    if (target) {
+      target.focus();
+      return true;
+    }
+    return false;
+  };
+
+  const focusEdge = (grid: HTMLElement, direction: 'start' | 'end') => {
+    const maxIndex = gridSize - 1;
+    const start = direction === 'start' ? 0 : maxIndex;
+    const end = direction === 'start' ? maxIndex : 0;
+    const step = direction === 'start' ? 1 : -1;
+
+    for (let index = start; direction === 'start' ? index <= end : index >= end; index += step) {
+      if (focusByIndex(grid, index)) return;
+    }
+  };
+
+  const focusAdjacent = (grid: HTMLElement, currentIndex: number, delta: number) => {
+    const maxIndex = gridSize - 1;
+    let nextIndex = currentIndex + delta;
+
+    while (nextIndex >= 0 && nextIndex <= maxIndex) {
+      if (focusByIndex(grid, nextIndex)) return;
+      nextIndex += delta;
+    }
+  };
+
+  const handleDayKeyDown = (event: KeyboardEvent<HTMLAnchorElement>) => {
+    const { key } = event;
+    if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End'].includes(key)) {
+      return;
+    }
+
+    const grid = event.currentTarget.closest<HTMLElement>('[data-calendar-grid]');
+    if (!grid) return;
+
+    const rawIndex = event.currentTarget.getAttribute('data-grid-index');
+    const currentIndex = rawIndex ? Number(rawIndex) : Number.NaN;
+    if (!Number.isFinite(currentIndex)) return;
+
+    event.preventDefault();
+
+    if (key === 'Home') {
+      focusEdge(grid, 'start');
+      return;
+    }
+
+    if (key === 'End') {
+      focusEdge(grid, 'end');
+      return;
+    }
+
+    const delta = key === 'ArrowLeft' ? -1 : key === 'ArrowRight' ? 1 : key === 'ArrowUp' ? -7 : 7;
+    focusAdjacent(grid, currentIndex, delta);
+  };
 
   return (
     <div className="space-y-6">
@@ -54,8 +121,17 @@ export function CalendarMonth({
         </div>
       </div>
 
+      <p id={keyboardHintId} className="sr-only">
+        Use arrow keys to move between days in the calendar.
+      </p>
       <div className="overflow-hidden border border-black/10">
-        <div className="grid grid-cols-7 gap-px bg-black/10" data-testid="calendar-grid">
+        <div
+          className="grid grid-cols-7 gap-px bg-black/10"
+          data-testid="calendar-grid"
+          data-calendar-grid
+          data-grid-size={gridSize}
+          aria-describedby={keyboardHintId}
+        >
           {weekdayOrder.map((weekday) => (
             <div
               key={weekday}
@@ -65,15 +141,16 @@ export function CalendarMonth({
             </div>
           ))}
 
-          {weeks.map((week) =>
-            week.map((day) => {
+          {weeks.map((week, weekIndex) =>
+            week.map((day, dayIndex) => {
               const isComplete = day.totalCount > 0 && day.completedCount >= day.totalCount;
               const progressPercent =
                 day.totalCount > 0 ? Math.min(100, (day.completedCount / day.totalCount) * 100) : 0;
+              const gridIndex = weekIndex * 7 + dayIndex;
               const baseCellClasses =
                 'group flex min-h-[64px] touch-manipulation flex-col justify-between px-2 py-2 text-left text-xs motion-safe:transition-all motion-safe:duration-150 motion-safe:ease-out motion-reduce:transition-none sm:min-h-[86px] sm:px-3 sm:text-sm';
               const mutedClasses = day.inMonth ? 'text-black' : 'text-black/30';
-              const backgroundClasses = isComplete ? 'bg-[#FAB95B] text-white' : 'bg-white';
+              const backgroundClasses = isComplete ? 'bg-[#FAB95B] text-black' : 'bg-white';
               const hoverClasses = day.inMonth
                 ? isComplete
                   ? 'hover:bg-[#E9A543] focus-visible:bg-[#E9A543] active:bg-[#D99638] active:scale-[0.98]'
@@ -110,13 +187,13 @@ export function CalendarMonth({
                         </span>
                         <div
                           className={`h-1 w-full rounded-full ${
-                            isComplete ? 'bg-white/30' : 'bg-black/10'
+                            isComplete ? 'bg-black/20' : 'bg-black/10'
                           }`}
                           aria-hidden="true"
                         >
                           <div
                             className={`h-full rounded-full ${
-                              isComplete ? 'bg-white' : 'bg-black'
+                              isComplete ? 'bg-black' : 'bg-black'
                             } motion-safe:transition-[width] motion-safe:duration-300 motion-safe:ease-out motion-reduce:transition-none`}
                             style={{ width: `${progressPercent}%` }}
                           />
@@ -129,7 +206,7 @@ export function CalendarMonth({
                       {day.hasHabits ? (
                         <span
                           className={`h-1.5 w-1.5 rounded-full ${
-                            isComplete ? 'bg-white' : 'bg-black'
+                            isComplete ? 'bg-black' : 'bg-black'
                           }`}
                           aria-hidden="true"
                         />
@@ -143,7 +220,12 @@ export function CalendarMonth({
 
               if (!day.inMonth) {
                 return (
-                  <div key={day.key} className={cellClasses} aria-hidden="true">
+                  <div
+                    key={day.key}
+                    className={cellClasses}
+                    aria-hidden="true"
+                    data-grid-index={gridIndex}
+                  >
                     {content}
                   </div>
                 );
@@ -154,9 +236,14 @@ export function CalendarMonth({
                   key={day.key}
                   href={day.href}
                   data-date-key={day.key}
+                  data-grid-index={gridIndex}
+                  data-focusable="true"
                   scroll={false}
                   className={cellClasses}
                   aria-label={`Open daily view for ${day.label}`}
+                  aria-current={day.isToday ? 'date' : undefined}
+                  aria-selected={day.isSelected || undefined}
+                  onKeyDown={handleDayKeyDown}
                 >
                   {content}
                 </Link>

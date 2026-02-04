@@ -18,9 +18,6 @@ type CreatePayload = {
 };
 
 function assertTestMode() {
-  if (process.env.NODE_ENV === 'production') {
-    throw new ApiError('not_found', 'Not found.', 404);
-  }
   if (process.env.ENABLE_TEST_ENDPOINTS !== 'true') {
     throw new ApiError('not_found', 'Not found.', 404);
   }

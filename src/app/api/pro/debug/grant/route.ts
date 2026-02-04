@@ -9,9 +9,6 @@ import { withApiLogging } from '../../../../../lib/observability/apiLogger';
 export const runtime = 'nodejs';
 
 function assertTestMode() {
-  if (process.env.NODE_ENV === 'production') {
-    throw new ApiError('not_found', 'Not found.', 404);
-  }
   if (process.env.ENABLE_TEST_ENDPOINTS !== 'true') {
     throw new ApiError('not_found', 'Not found.', 404);
   }

@@ -111,14 +111,14 @@ test('habit lifecycle from creation to archive', async ({ page, request }) => {
     await page.getByRole('button', { name: day }).click();
   }
 
-  const createResponse = page.waitForResponse(
-    (response) =>
-      response.url().includes('/api/habits') &&
-      response.request().method() === 'POST' &&
-      response.ok(),
+  const createResponsePromise = page.waitForResponse(
+    (response) => response.url().includes('/api/habits') && response.request().method() === 'POST',
   );
-  await page.getByRole('button', { name: /create habit/i }).click();
-  await createResponse;
+  const [createResponse] = await Promise.all([
+    createResponsePromise,
+    page.getByRole('button', { name: /create habit/i }).click(),
+  ]);
+  expect(createResponse.ok()).toBeTruthy();
   await expect(page.getByText(habitTitle)).toBeVisible();
 
   await page.goto(`/calendar?month=${todayMonthKey}&date=${todayKey}`);

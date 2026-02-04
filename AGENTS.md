@@ -13,6 +13,40 @@ A habit is defined independently of dates.
 - Daily completion is tracked per habit per date.
 - Do not create habits per date.
 
+## Completion Rules (locked)
+
+- History backfill is not a Pro feature.
+- Free grace window: users may complete "yesterday" until 02:00 the next day.
+- Future dates remain blocked.
+- All completion logic must remain timezone-safe and tested.
+
+## Product Decisions (locked)
+
+- Mobile launch uses a WebView wrapper (Capacitor preferred).
+- Target stores: Google Play and Apple App Store.
+- No native Swift/Kotlin rewrite planned.
+- Hardware access is limited to push notifications.
+
+## Monetization (locked)
+
+- Freemium with a one-time Pro purchase (no subscriptions).
+- Free tier remains fully useful for habit tracking.
+- No ads or ad-driven monetization.
+
+## Pro Focus (planned)
+
+- Advanced insights (trends, consistency, patterns).
+- Achievements and milestones (expanded Pro catalogue).
+- Smart reminders and push notifications.
+- Habit notes are optional and gating is TBD.
+
+## Non-Goals (updated)
+
+- Social features or sharing (for now).
+- Heavy gamification beyond streaks and tasteful achievements.
+- Native rewrite.
+- Ads-based monetization.
+
 ## Current State (high-level)
 
 - Next.js App Router + TypeScript + Tailwind CSS (v4).
@@ -20,7 +54,7 @@ A habit is defined independently of dates.
 - Auth foundation implemented: signup, verify-email, resend-verification, logout, NextAuth Credentials (JWT sessions), middleware protection.
 - Account management API + UI: update email/password/display name/week start; delete account.
 - Email verification uses Resend client; debug token capture plus `/api/auth/debug/verification-token` for tests (shared token store for API routes).
-- Tests in place: Vitest unit/API tests, auth + habit + calendar + marketing component tests, Playwright auth + habits + calendar + daily completion + marketing + visual regression E2E.
+- Tests in place: Vitest unit/API tests, auth + habit + calendar + marketing + admin component tests, Playwright auth + habits + calendar + daily completion + admin + marketing + visual regression E2E.
 - Playwright E2E runs use a Windows-safe temp dir setup via `playwright.global-setup.ts` to avoid chromium shutdown hangs.
 - Daily completion E2E includes retry-safe habit creation to handle transient network resets in Firefox.
 - Habit domain models implemented (Habit, HabitSchedule, HabitCompletion) with migrations and seed data.
@@ -40,6 +74,19 @@ A habit is defined independently of dates.
 - User profile tracks `weekStart` (sun/mon) and `timezone` (defaults to UTC, no UI yet); week start controls calendar layout, timezone drives date normalization and completion rules.
 - Post-login redirect lands on `/calendar` (tests and flows expect Calendar as the default landing page).
 - Observability & safety in place: Sentry error tracking (with tunnel), structured API logging, `/api/health` endpoint, global security headers, and auth route rate limiting.
+- Admin dashboard implemented with allowlist access, health status panel, user/habit lists, activity log, and admin-safe CSV exports.
+
+## Roadmap (high-level)
+
+- Expand testing and launch readiness (coverage, staging, backups, CI audit).
+- Pro entitlement model, upgrade UX, and gating (one-time purchase).
+- Advanced insights and analytics (Pro).
+- Achievements and milestone system (Pro).
+- Smart reminders and push notifications (Pro).
+- Today view, quick actions, sorting, and mobile performance work.
+- Offline-first completion queue with sync indicators.
+- Completion grace window enforcement until 02:00.
+- Store launch readiness (privacy, metadata, compliance assets).
 
 ## UI Direction (authoritative)
 
@@ -66,6 +113,8 @@ A habit is defined independently of dates.
 - `src/app/habits/page.tsx` - Habits page (list/create/edit/archive).
 - `src/app/habits/loading.tsx` - Habits route loading skeleton.
 - `src/app/api/auth/[...nextauth]/route.ts` - NextAuth handler.
+- `src/app/admin/page.tsx` - Admin dashboard UI (server-authenticated).
+- `src/app/api/admin/*/route.ts` - Admin APIs (health, users, habits, activity, exports).
 - `src/lib/auth` - Auth utilities (hashing, policy, credentials, rate limit, nextauth).
 - `src/lib/api` - Shared API error/response helpers, auth services, validation.
 - `src/lib/api/habits` - Habit API services and validation.
@@ -79,6 +128,7 @@ A habit is defined independently of dates.
 - `src/components/auth/AccountPanel.tsx` - Account settings (including week start).
 - `src/components/auth/SignOutButton.tsx` - Sign-out button for authenticated layouts.
 - `src/components/marketing` - Marketing homepage layout and sections.
+- `src/components/admin` - Admin UI components and tests.
 - `src/components/ui/ThemeToggle.tsx` - Light/dark theme toggle (system default + persistence).
 - `src/components/ui/Toast.tsx` - Toast notifications (no inline form errors).
 - `src/components/ui/Notice.tsx` - Inline notice/alert primitive.
@@ -91,6 +141,7 @@ A habit is defined independently of dates.
 - `src/lib/habits/weekdays.ts` - Weekday ordering/labels for week start.
 - `src/lib/api/habits/completions.ts` - Completion toggle/list services (date/range).
 - `src/lib/habits/__tests__` - Habit domain unit tests.
+- `src/lib/admin` - Admin access/auth and data services (users, habits, exports).
 - `src/infra/email` - Resend client, verification email sender, debug token store.
 - `src/lib/observability` - Structured logging + API logging wrapper.
 - `src/lib/http/securityHeaders.ts` - Shared security headers.
@@ -105,12 +156,15 @@ A habit is defined independently of dates.
 - `src/app/account/page.tsx` - Account management page.
 - `middleware.ts` - Route protection using NextAuth JWT.
 - `e2e/daily-completion.spec.ts` - Daily completion E2E flow coverage.
+- `e2e/admin.spec.ts` - Admin dashboard E2E coverage.
 - `e2e/calendar-visual.spec.ts` - Playwright visual regression coverage for calendar tiles.
 - `e2e/marketing-homepage.spec.ts` - Marketing homepage E2E coverage.
 - `e2e/streaks.spec.ts` - Streak UI E2E coverage.
 - `e2e` - Playwright auth + habits + calendar + daily completion + visual regression E2E tests.
 - `playwright.config.ts` - Playwright config (chromium + firefox + visual).
 - `playwright.global-setup.ts` - Windows temp dir setup for Playwright runs.
+- `docs/context.md` - Canonical product context and constraints.
+- `docs/roadmap.md` - Product and engineering roadmap.
 - `docs/sprints/sprint-5.1.md` - Sprint plan for marketing homepage.
 - `docs/test workflows/sprint-5.1-test-workflows.md` - Marketing homepage + theme test workflows.
 - `docs/test workflows/sprint-4.2-test-workflows.md` - UX refinement test workflows.
@@ -150,3 +204,4 @@ A habit is defined independently of dates.
 - Prefer phased, test-driven implementation.
 - Do not suggest shortcuts that undermine quality.
 - For form validation, do not display inline error messages; use toast notifications for user-facing errors.
+- Tone: direct and pragmatic, no fluff.

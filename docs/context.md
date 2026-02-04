@@ -1,16 +1,16 @@
-# AI CONTEXT — PROJECT ATLAS
+# AI CONTEXT — PROJECT ATLAS (Updated)
 
 ## Project Overview
 
-Project Atlas is a **habit-tracking web application** built with a **production-grade, corporate-quality stack**.
+Project Atlas is a **habit-tracking application** built with a **production-grade, corporate-quality stack**.
 The goal is not a toy app, but a clean, scalable, well-tested system with strong engineering discipline.
 
 Target users:
 
 - Individuals tracking daily/weekly habits
-- Emphasis on consistency, streaks, and visual feedback
+- Emphasis on consistency, streaks, visual feedback, and long-term habit building
 
-The app is currently **pre-MVP**, focusing on infrastructure, quality, and architecture first.
+The app currently exists as a **dynamic web application**, with a planned **mobile launch via WebView wrapper** (Google Play + App Store).
 
 ---
 
@@ -38,32 +38,153 @@ This mental model must never be violated.
 
 ---
 
-## Functional Scope (Planned)
+## Functional Scope (Current + Planned)
 
-### Authentication
+### Authentication (Implemented)
 
 - Email/password account creation
-- Email verification (Resend planned)
+- Email verification (Resend)
 - Login / logout
-- Account update (basic profile info)
-- Account deletion request
+- Account update (basic profile info + week start)
+- Account deletion request (hard delete)
 - No user-uploaded avatars (use default placeholder icon)
+- NextAuth Credentials + JWT sessions
+- Auth middleware route protection
 
-### Habit Tracking
+---
+
+### Habit Tracking (Implemented)
 
 - Unlimited habits per user
 - Habits active on selected weekdays
 - No per-date habit creation
 - Completion tracked per habit per date
+- Habit CRUD (create/update/archive)
+- Schedule validation enforced server-side
 
-### Calendar & UX
+---
+
+### Calendar & UX (Implemented)
 
 - Monthly calendar view
 - Clicking a day shows all habits active that day
 - Users check off completed habits
 - Day tile visually fills (golden state) when all habits completed
-- Completion sound on full completion
-- Streak tracking (daily / longest / current)
+- Completion sound on success (subtle)
+- Streak tracking:
+  - daily / current
+  - longest
+
+---
+
+## Mobile Strategy (NEW — LOCKED IN)
+
+Atlas will be launched as a mobile app using a **WebView wrapper approach** (recommended: **Capacitor**).
+
+Goals:
+
+- Publish on **Google Play Store**
+- Publish on **Apple App Store**
+- Avoid rewriting the app for native iOS/Android
+- No hardware access required beyond **push notifications**
+
+---
+
+## Monetisation Strategy (NEW — LOCKED IN)
+
+Atlas will use a **Freemium + One-Time Purchase** model:
+
+- Free tier remains fully useful for habit tracking
+- Pro tier is a **one-time payment unlock** for premium features
+- No Google Ads or ad-driven monetisation
+
+Monetisation principle:
+
+- Upgrade should be driven by real value (insights + motivation + convenience)
+- Avoid aggressive gating that makes Free feel broken
+
+---
+
+## Atlas Pro — Premium Features (Planned)
+
+The Pro tier will focus on features that create a strong incentive to upgrade:
+
+### 1) Advanced Insights (Pro)
+
+- Premium analytics for consistency and progress
+- Heatmaps / trends / patterns (privacy-respecting)
+- Motivational breakdowns and progress summaries
+
+### 2) Achievements + Milestone System (Pro)
+
+Inspired by apps like QuitNow:
+
+- Achievement unlocks (basic set in Free, expanded set in Pro)
+- Milestones and progress timelines (per habit and global)
+- Trophy-style cabinet / achievement screen (minimalist, not cringe)
+
+### 3) Smart Reminders + Push Notifications (Pro)
+
+- Smart reminders (per habit)
+- Daily digest reminders
+- Quiet hours
+- Snooze
+- Streak rescue nudges
+
+### 4) Habit Notes (Optional / TBD)
+
+- Notes per habit and/or per day
+- Reflection support without turning into a journaling app
+- Gating (Free vs Pro) will be decided later
+
+---
+
+## Completion Rule Update (NEW)
+
+History backfill should **NOT** be a Pro feature.
+
+Instead, Atlas will support a **Free grace window**:
+
+- Users may complete "yesterday" until **02:00 the next day**
+- This reduces frustration and reflects real-life behaviour (people forget at night)
+- Must remain timezone-safe and tested
+
+---
+
+## Enhancements & UX Improvements (Planned)
+
+These improvements are targeted for mobile readiness, retention, and polish:
+
+### Mobile & UX
+
+- **Today View / Daily dashboard** for fast daily usage
+- Quick actions:
+  - fast completion toggles
+  - undo last action
+- Habit ordering / pinning / sorting
+- Schedule UX presets:
+  - Weekdays
+  - Every day
+  - Weekend
+
+### Reliability & Performance
+
+- Offline-first completion toggles:
+  - queue changes locally
+  - sync when network returns
+  - show pending sync indicators
+
+### Engagement
+
+- Streak protection hints (non-annoying)
+- Weekly review / monthly recap summaries
+
+### Launch Readiness
+
+- Help / FAQ pages
+- Privacy Policy + Terms pages
+- Soft “Rate the app” prompts after win moments
+- Pro preview mode (teaser experience without aggressive popups)
 
 ---
 
@@ -78,6 +199,7 @@ This mental model must never be violated.
 - **Vitest** for unit tests
 - **Playwright** for E2E tests
 - **GitHub Actions** for CI/CD
+- **Sentry** for error tracking + observability
 
 ---
 
@@ -89,7 +211,7 @@ This project follows **corporate-level discipline**:
 - Prettier (enforced)
 - TypeScript `strict`
 - Unit tests for core domain logic
-- E2E smoke tests
+- E2E tests for core user flows
 - CI runs from clean checkout
 - CI gates merges (lint, typecheck, tests, build, e2e)
 
@@ -119,28 +241,24 @@ No time should be wasted fighting local hooks again unless absolutely necessary.
   - build
   - e2e tests
 
-### Database & Auth Foundation (Sprint 1.1 — Phase 1 ✅ COMPLETED)
+### Database & Auth (Implemented)
 
 - Prisma configured for Neon
-- Auth-related Prisma models implemented:
-  - User
-  - Account
-  - Session
-  - VerificationToken (NextAuth)
-  - EmailVerificationToken (custom, hashed)
-  - PasswordResetToken
-- Prisma client singleton pattern implemented (Next.js-safe)
-- Database migration created and applied (`auth_baseline`)
-- Seed script implemented:
-  - 1 verified user
-  - 1 unverified user
-- Domain-level auth logic implemented and unit tested:
-  - Password hashing & verification (bcrypt)
-  - Token hashing & expiry handling
-  - Email verification flow (pure service + mocked Prisma)
-  - Login policy (verified + not soft-deleted)
-- ESLint clean (no `any`, no rule suppression)
-- Domain tests pass deterministically (no DB dependency)
+- Auth foundation implemented with NextAuth Credentials
+- Email verification implemented with Resend
+- Account management implemented
+- Route protection via middleware
+- Tests implemented:
+  - unit tests (domain + API services)
+  - E2E tests (auth + habits + calendar + daily completion + streaks + marketing)
+
+### Habit Domain (Implemented)
+
+- Habit, HabitSchedule, HabitCompletion models
+- Habit CRUD API and UI
+- Calendar grid logic + schedule mapping
+- Completion toggles with validation
+- Streak logic (current + longest), timezone-safe
 
 ---
 
@@ -158,7 +276,6 @@ No time should be wasted fighting local hooks again unless absolutely necessary.
 - Migrations are code:
   - `migrate dev` = authoring
   - `migrate deploy` = CI / prod
-- Auth logic is tested **before** wiring NextAuth callbacks
 
 ---
 
@@ -184,34 +301,13 @@ Tone:
 
 ---
 
-## Immediate Next Logical Steps
+## Non-Goals (Updated)
 
-### Sprint 1.1 — Phase 2 (Next)
-
-1. Wire **NextAuth Credentials provider** to domain logic:
-   - `verifyPassword`
-   - `canLogin` (reject unverified / soft-deleted)
-2. Enforce email verification in auth flow
-3. Implement email verification API route (Resend integration)
-4. Add auth middleware for route protection
-5. Add E2E auth flow tests
-
-### After Auth
-
-6. Habit domain schema (Habit, HabitSchedule, HabitCompletion)
-7. Calendar domain logic (date ↔ weekday mapping)
-8. Habit completion & streak calculation
-9. Calendar/day UX state management
-
----
-
-## Non-Goals (for now)
-
-- Social features
-- Sharing
-- Mobile app (web only, responsive)
-- Gamification beyond streaks
-- Offline mode
+- Social features (for now)
+- Sharing (for now)
+- Heavy gamification beyond streaks + tasteful achievements
+- Native rewrite (Swift/Kotlin) — not planned
+- Ads-based monetisation — not planned
 
 ---
 

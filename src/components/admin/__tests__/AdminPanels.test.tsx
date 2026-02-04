@@ -129,4 +129,20 @@ describe('admin panels', () => {
     expect(screen.getByText(/download users csv/i)).toBeInTheDocument();
     expect(screen.getByText(/download habits csv/i)).toBeInTheDocument();
   });
+
+  it('starts export downloads when buttons are clicked', () => {
+    const locationMock = { href: 'http://localhost' } as Location & { href: string };
+    Object.defineProperty(window, 'location', {
+      value: locationMock,
+      writable: true,
+    });
+
+    render(<AdminExportPanel />);
+
+    screen.getByRole('button', { name: /download users csv/i }).click();
+    expect(window.location.href).toBe('/api/admin/exports/users');
+
+    screen.getByRole('button', { name: /download habits csv/i }).click();
+    expect(window.location.href).toBe('/api/admin/exports/habits');
+  });
 });

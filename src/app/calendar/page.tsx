@@ -7,9 +7,9 @@ import { InsightsSnapshotCard } from '../../components/insights/InsightsSnapshot
 import { InsightsUpgradeCard } from '../../components/insights/InsightsUpgradeCard';
 import { AppShell } from '../../components/layout/AppShell';
 import { StreakSummaryPanel } from '../../components/streaks/StreakSummaryPanel';
-import { getInsightsSummary } from '../../lib/api/insights/summary';
 import { listCompletionsForDate, listCompletionsInRange } from '../../lib/api/habits/completions';
 import { listHabits } from '../../lib/api/habits/habits';
+import { getInsightsSummary } from '../../lib/api/insights/summary';
 import { getServerAuthSession } from '../../lib/auth/session';
 import { prisma } from '../../lib/db/prisma';
 import { getMonthGrid } from '../../lib/habits/calendar';

@@ -5,7 +5,6 @@ import {
   toUtcDateKey,
 } from '../habits/dates';
 import { listActiveWeekdays } from '../habits/schedule';
-import { getWeekdayLabel } from './weekdays';
 import type {
   ConsistencyScore,
   HeatmapGrid,
@@ -16,6 +15,7 @@ import type {
   TrendSummary,
   WeekdayStat,
 } from './types';
+import { getWeekdayLabel } from './weekdays';
 
 const CONSISTENCY_WINDOWS = [7, 30, 90] as const;
 const TREND_WINDOW_DAYS = 14;

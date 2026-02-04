@@ -66,9 +66,14 @@ async function createVerifiedUser(page: Page, request: APIRequestContext, prefix
   return email;
 }
 
-async function createHabit(request: APIRequestContext, title: string, weekdays: number[]) {
-  const payload = { title, description: 'Visual test', weekdays };
-  const response = await request.post('/api/habits', {
+async function createHabit(
+  request: APIRequestContext,
+  title: string,
+  weekdays: number[],
+  createdAt: string,
+) {
+  const payload = { title, description: 'Visual test', weekdays, createdAt };
+  const response = await request.post('/api/habits/debug/create', {
     data: payload,
     timeout: 10_000,
   });
@@ -94,8 +99,8 @@ test('calendar visual regression', async ({ page, request }) => {
   page.setDefaultTimeout(10_000);
 
   await createVerifiedUser(page, request, 'calendar-visual');
-  const readHabit = await createHabit(page.request, 'Read', [targetWeekday]);
-  const hydrateHabit = await createHabit(page.request, 'Hydrate', [targetWeekday]);
+  const readHabit = await createHabit(page.request, 'Read', [targetWeekday], targetDate);
+  const hydrateHabit = await createHabit(page.request, 'Hydrate', [targetWeekday], targetDate);
   await createCompletion(page.request, readHabit.id, targetDate);
   await createCompletion(page.request, hydrateHabit.id, targetDate);
 

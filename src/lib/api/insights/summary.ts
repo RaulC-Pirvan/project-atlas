@@ -9,7 +9,12 @@ type InsightsClient = {
   habit: {
     findMany: (args: {
       where: { userId: string };
-      select: { id: true; archivedAt: true; createdAt: true; schedule: { select: { weekday: true } } };
+      select: {
+        id: true;
+        archivedAt: true;
+        createdAt: true;
+        schedule: { select: { weekday: true } };
+      };
     }) => Promise<HabitRecord[]>;
   };
   habitCompletion: {
@@ -39,7 +44,12 @@ export async function getInsightsSummary({
   const [habits, completions] = await Promise.all([
     prisma.habit.findMany({
       where: { userId },
-      select: { id: true, archivedAt: true, createdAt: true, schedule: { select: { weekday: true } } },
+      select: {
+        id: true,
+        archivedAt: true,
+        createdAt: true,
+        schedule: { select: { weekday: true } },
+      },
     }),
     prisma.habitCompletion.findMany({
       where: { date: { gte: start, lte: today }, habit: { userId } },

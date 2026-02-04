@@ -1,5 +1,5 @@
-import { getWeekdayLabel, getWeekdayOrder, type WeekStart } from '../../lib/insights/weekdays';
 import type { InsightsSummary } from '../../lib/insights/types';
+import { getWeekdayLabel, getWeekdayOrder, type WeekStart } from '../../lib/insights/weekdays';
 import { Notice } from '../ui/Notice';
 
 type InsightsDashboardProps = {
@@ -234,27 +234,21 @@ export function InsightsDashboard({
               <p className="text-2xl font-semibold text-black dark:text-white">
                 {formatPercent(avgRate)}
               </p>
-              <p className="text-xs text-black/50 dark:text-white/50">
-                Overall completion rate.
-              </p>
+              <p className="text-xs text-black/50 dark:text-white/50">Overall completion rate.</p>
             </div>
             <div className="space-y-2">
               <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-black/40 dark:text-white/40">
                 Opportunities
               </p>
               <p className="text-2xl font-semibold text-black dark:text-white">{totalScheduled}</p>
-              <p className="text-xs text-black/50 dark:text-white/50">
-                Scheduled habit instances.
-              </p>
+              <p className="text-xs text-black/50 dark:text-white/50">Scheduled habit instances.</p>
             </div>
             <div className="space-y-2">
               <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-black/40 dark:text-white/40">
                 Completed
               </p>
               <p className="text-2xl font-semibold text-black dark:text-white">{totalCompleted}</p>
-              <p className="text-xs text-black/50 dark:text-white/50">
-                Total completions logged.
-              </p>
+              <p className="text-xs text-black/50 dark:text-white/50">Total completions logged.</p>
             </div>
           </div>
         </div>

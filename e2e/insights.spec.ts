@@ -1,9 +1,6 @@
-import { expect, test, type APIRequestContext, type Page } from '@playwright/test';
-import { PrismaClient } from '@prisma/client';
+import { type APIRequestContext, expect, type Page, test } from '@playwright/test';
 
 const password = 'AtlasTestPassword123!';
-const prisma = new PrismaClient();
-
 function uniqueEmail(prefix: string) {
   const stamp = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
   return `${prefix}-${stamp}@example.com`;
@@ -64,22 +61,12 @@ async function createVerifiedUser(page: Page, request: APIRequestContext, prefix
   return email;
 }
 
-async function grantProEntitlement(email: string) {
-  const user = await prisma.user.findUnique({ where: { email } });
-  if (!user) {
-    throw new Error('Unable to grant Pro: user not found.');
+async function grantProEntitlement(page: Page) {
+  const response = await page.request.post('/api/pro/debug/grant', { timeout: 10_000 });
+  if (!response.ok()) {
+    throw new Error(`Unable to grant Pro: ${response.status()}`);
   }
-
-  await prisma.proEntitlement.upsert({
-    where: { userId: user.id },
-    update: { status: 'active', source: 'manual', restoredAt: null },
-    create: { userId: user.id, status: 'active', source: 'manual' },
-  });
 }
-
-test.afterAll(async () => {
-  await prisma.$disconnect();
-});
 
 test('free users see insights preview and upgrade CTA', async ({ page, request }) => {
   await createVerifiedUser(page, request, 'insights-preview');
@@ -91,8 +78,8 @@ test('free users see insights preview and upgrade CTA', async ({ page, request }
 });
 
 test('pro users see full insights dashboard', async ({ page, request }) => {
-  const email = await createVerifiedUser(page, request, 'insights-pro');
-  await grantProEntitlement(email);
+  await createVerifiedUser(page, request, 'insights-pro');
+  await grantProEntitlement(page);
 
   await page.goto('/insights');
   await expect(page.getByTestId('insights-dashboard')).toBeVisible();

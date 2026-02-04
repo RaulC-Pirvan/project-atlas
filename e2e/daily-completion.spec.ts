@@ -2,9 +2,6 @@ import type { APIRequestContext, Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
 
 const password = 'AtlasTestPassword123!';
-const targetDate = '2026-01-05';
-const targetMonth = '2026-01';
-const targetWeekday = 1; // Monday
 const retryableNetworkErrors = ['econnreset', 'econnrefused', 'socket hang up'];
 
 function uniqueEmail(prefix: string) {
@@ -15,6 +12,19 @@ function uniqueEmail(prefix: string) {
 function uniqueTitle(prefix: string) {
   const stamp = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
   return `${prefix} ${stamp}`;
+}
+
+function utcDateKey(date: Date): string {
+  return date.toISOString().slice(0, 10);
+}
+
+function utcMonthKey(date: Date): string {
+  return date.toISOString().slice(0, 7);
+}
+
+function isoWeekday(date: Date): number {
+  const day = date.getUTCDay();
+  return day === 0 ? 7 : day;
 }
 
 async function signUp(page: Page, email: string) {
@@ -125,6 +135,10 @@ async function createHabit(page: Page, title: string, weekdays: number[]) {
 
 test('complete a habit for a selected day', async ({ page, request }) => {
   await createVerifiedUser(page, request, 'daily-complete');
+  const today = new Date();
+  const targetDate = utcDateKey(today);
+  const targetMonth = utcMonthKey(today);
+  const targetWeekday = isoWeekday(today);
   const habitTitle = uniqueTitle('Read');
   await createHabit(page, habitTitle, [targetWeekday]);
 
@@ -138,6 +152,10 @@ test('complete a habit for a selected day', async ({ page, request }) => {
 
 test('uncheck a completion', async ({ page, request }) => {
   await createVerifiedUser(page, request, 'daily-uncheck');
+  const today = new Date();
+  const targetDate = utcDateKey(today);
+  const targetMonth = utcMonthKey(today);
+  const targetWeekday = isoWeekday(today);
   const habitTitle = uniqueTitle('Stretch');
   await createHabit(page, habitTitle, [targetWeekday]);
 
@@ -153,6 +171,9 @@ test('uncheck a completion', async ({ page, request }) => {
 
 test('prevent double completion', async ({ page, request }) => {
   await createVerifiedUser(page, request, 'daily-double');
+  const today = new Date();
+  const targetDate = utcDateKey(today);
+  const targetWeekday = isoWeekday(today);
   const habitTitle = uniqueTitle('Hydrate');
   const habit = await createHabit(page, habitTitle, [targetWeekday]);
 

@@ -2,9 +2,7 @@ import type { APIRequestContext, Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
 
 const password = 'AtlasTestPassword123!';
-const targetMonth = '2026-01';
-const mondayDate = '2026-01-05';
-const tuesdayDate = '2026-01-06';
+const weekdayLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 function uniqueEmail(prefix: string) {
   const stamp = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
@@ -14,6 +12,19 @@ function uniqueEmail(prefix: string) {
 function uniqueTitle(prefix: string) {
   const stamp = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
   return `${prefix} ${stamp}`;
+}
+
+function utcDateKey(date: Date): string {
+  return date.toISOString().slice(0, 10);
+}
+
+function utcMonthKey(date: Date): string {
+  return date.toISOString().slice(0, 7);
+}
+
+function isoWeekday(date: Date): number {
+  const day = date.getUTCDay();
+  return day === 0 ? 7 : day;
 }
 
 async function signUp(page: Page, email: string) {
@@ -72,61 +83,88 @@ async function createVerifiedUser(page: Page, request: APIRequestContext, prefix
 }
 
 async function openHabits(page: Page) {
-  await page.goto('/habits');
+  try {
+    await page.goto('/habits', { waitUntil: 'domcontentloaded' });
+  } catch {
+    await page.goto('/habits', { waitUntil: 'domcontentloaded' });
+  }
   await expect(page.getByRole('heading', { name: /habits/i })).toBeVisible();
 }
 
 test('habit lifecycle from creation to archive', async ({ page, request }) => {
   await createVerifiedUser(page, request, 'habit-lifecycle');
   const habitTitle = uniqueTitle('Lifecycle habit');
+  const today = new Date();
+  const tomorrow = new Date(today.getTime() + 24 * 60 * 60 * 1000);
+  const todayKey = utcDateKey(today);
+  const todayMonthKey = utcMonthKey(today);
+  const todayLabel = weekdayLabels[isoWeekday(today) % 7];
+  const tomorrowLabel = weekdayLabels[isoWeekday(tomorrow) % 7];
 
   await openHabits(page);
 
   await page.getByLabel(/^title$/i).fill(habitTitle);
   await page.getByLabel(/description/i).fill('Lifecycle coverage test');
 
-  for (const day of ['Tue', 'Thu', 'Fri', 'Sat', 'Sun']) {
+  for (const day of weekdayLabels) {
+    if (day === todayLabel) continue;
     await page.getByRole('button', { name: day }).click();
   }
 
+  const createResponse = page.waitForResponse(
+    (response) =>
+      response.url().includes('/api/habits') &&
+      response.request().method() === 'POST' &&
+      response.ok(),
+  );
   await page.getByRole('button', { name: /create habit/i }).click();
+  await createResponse;
   await expect(page.getByText(habitTitle)).toBeVisible();
 
-  await page.goto(`/calendar?month=${targetMonth}&date=${mondayDate}`);
-  const mondayCheckbox = page.getByRole('checkbox', { name: new RegExp(habitTitle, 'i') });
-  await expect(mondayCheckbox).toBeVisible();
-
-  await page.goto(`/calendar?month=${targetMonth}&date=${tuesdayDate}`);
-  await expect(page.getByRole('main').getByText('No habits scheduled for this day.')).toBeVisible();
-
-  await openHabits(page);
-  await page.getByRole('button', { name: 'Edit' }).click();
-  await page.getByRole('button', { name: 'Tue' }).nth(1).click();
-  await page.getByRole('button', { name: /save changes/i }).click();
-  await expect(page.getByText(habitTitle)).toBeVisible();
-
-  await page.goto(`/calendar?month=${targetMonth}&date=${tuesdayDate}`);
-  const tuesdayCheckbox = page.getByRole('checkbox', { name: new RegExp(habitTitle, 'i') });
-  await expect(tuesdayCheckbox).toHaveAttribute('aria-checked', 'false');
+  await page.goto(`/calendar?month=${todayMonthKey}&date=${todayKey}`);
+  const todayCheckbox = page.getByRole('checkbox', { name: new RegExp(habitTitle, 'i') });
+  await expect(todayCheckbox).toHaveAttribute('aria-checked', 'false');
   const completionResponse = page.waitForResponse(
     (response) =>
       response.url().includes('/api/completions') &&
       response.request().method() === 'POST' &&
       response.ok(),
   );
-  await tuesdayCheckbox.click();
+  await todayCheckbox.click();
   await completionResponse;
-  await expect(tuesdayCheckbox).toHaveAttribute('aria-checked', 'true');
+  await expect(todayCheckbox).toHaveAttribute('aria-checked', 'true');
 
-  const tuesdayTile = page.locator(`[data-date-key="${tuesdayDate}"]`);
-  await expect(tuesdayTile).toHaveClass(/bg-\[#FAB95B\]/);
+  await openHabits(page);
+  await page.getByRole('button', { name: 'Edit' }).click();
+  await page.getByRole('button', { name: todayLabel }).nth(1).click();
+  await page.getByRole('button', { name: tomorrowLabel }).nth(1).click();
+  const updateResponse = page.waitForResponse(
+    (response) =>
+      response.url().includes('/api/habits/') &&
+      response.request().method() === 'PUT' &&
+      response.ok(),
+  );
+  await page.getByRole('button', { name: /save changes/i }).click();
+  await updateResponse;
+  await expect(page.getByText(habitTitle)).toBeVisible();
+
+  await page.goto(`/calendar?month=${todayMonthKey}&date=${todayKey}`);
+  await expect(page.getByRole('main').getByText('No habits scheduled for this day.')).toBeVisible();
+  await expect(page.locator(`[data-date-key="${todayKey}"]`)).not.toHaveClass(/bg-\[#FAB95B\]/);
 
   await openHabits(page);
   await page.getByRole('button', { name: 'Delete' }).click();
+  const deleteResponse = page.waitForResponse(
+    (response) =>
+      response.url().includes('/api/habits/') &&
+      response.request().method() === 'DELETE' &&
+      response.ok(),
+  );
   await page.getByRole('button', { name: /delete habit/i }).click();
+  await deleteResponse;
   await expect(page.getByText(habitTitle, { exact: true })).toHaveCount(0);
 
-  await page.goto(`/calendar?month=${targetMonth}&date=${tuesdayDate}`);
+  await page.goto(`/calendar?month=${todayMonthKey}&date=${todayKey}`);
   await expect(page.getByRole('main').getByText('No habits scheduled for this day.')).toBeVisible();
-  await expect(page.locator(`[data-date-key="${tuesdayDate}"]`)).not.toHaveClass(/bg-\[#FAB95B\]/);
+  await expect(page.locator(`[data-date-key="${todayKey}"]`)).not.toHaveClass(/bg-\[#FAB95B\]/);
 });

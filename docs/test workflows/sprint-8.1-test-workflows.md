@@ -56,15 +56,10 @@ checks to validate accuracy, access control, and presentation.
 
 ## Workflow 2: Pro user sees full Insights dashboard [x]
 
-1. Promote a user to Pro using SQL:
+1. Promote a user to Pro using the test endpoint:
 
-   ```sql
-   SELECT id, email FROM "User" WHERE email = 'pro@example.com';
-
-   INSERT INTO "ProEntitlement" ("userId", "status", "source")
-   VALUES ('USER_ID', 'active', 'manual')
-   ON CONFLICT ("userId") DO UPDATE
-   SET "status" = 'active', "source" = 'manual', "updatedAt" = now();
+   ```bash
+   curl -X POST http://localhost:3000/api/pro/debug/grant
    ```
 
 2. Sign in as the Pro user.

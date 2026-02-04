@@ -99,8 +99,8 @@ CI must remain green.
 
 ### Tasks (2)
 
-- [ ] **Task 2.1**: Add Insights API endpoints (privacy-respecting, aggregated)
-- [ ] **Task 2.2**: Add Insights UI (minimalist cards, charts/heatmap)
+- [x] **Task 2.1**: Add Insights API endpoints (privacy-respecting, aggregated)
+- [x] **Task 2.2**: Add Insights UI (minimalist cards, charts/heatmap)
 
 ---
 

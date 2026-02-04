@@ -5,7 +5,9 @@ import { getInsightsSummary } from '../../../../lib/api/insights/summary';
 import { getProEntitlementSummary } from '../../../../lib/pro/entitlement';
 import { GET } from '../route';
 
-const mockedFindUnique = vi.fn();
+const { mockedFindUnique } = vi.hoisted(() => ({
+  mockedFindUnique: vi.fn(),
+}));
 
 vi.mock('next-auth/next', () => ({ getServerSession: vi.fn() }));
 vi.mock('../../../../lib/db/prisma', () => ({

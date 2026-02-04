@@ -1,25 +1,16 @@
 import { redirect } from 'next/navigation';
 
-import { AccountPanel } from '../../components/auth/AccountPanel';
 import { AppShell } from '../../components/layout/AppShell';
 import { ProAccountCard } from '../../components/pro/ProAccountCard';
+import { ProPreviewCard } from '../../components/pro/ProPreviewCard';
 import { getServerAuthSession } from '../../lib/auth/session';
 import { prisma } from '../../lib/db/prisma';
 import { getProEntitlementSummary } from '../../lib/pro/entitlement';
 
-export default async function AccountPage() {
+export default async function ProPage() {
   const session = await getServerAuthSession();
 
-  if (!session?.user) {
-    redirect('/sign-in');
-  }
-
-  const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
-    select: { weekStart: true },
-  });
-
-  if (!user) {
+  if (!session?.user?.id) {
     redirect('/sign-in');
   }
 
@@ -29,14 +20,10 @@ export default async function AccountPage() {
   });
 
   return (
-    <AppShell title="Account" subtitle="Manage your profile and security.">
-      <div className="space-y-10">
+    <AppShell title="Atlas Pro" subtitle="More insight, more motivation, no extra friction.">
+      <div className="space-y-8">
         <ProAccountCard isPro={proEntitlement.isPro} />
-        <AccountPanel
-          email={session.user.email ?? ''}
-          displayName={session.user.name ?? session.user.email ?? 'User'}
-          weekStart={user.weekStart}
-        />
+        <ProPreviewCard isPro={proEntitlement.isPro} />
       </div>
     </AppShell>
   );

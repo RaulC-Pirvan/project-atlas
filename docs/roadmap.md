@@ -207,12 +207,12 @@
 
 ### Sprint 7.1: Atlas Pro — Product Strategy & Gating
 
-- [ ] Define Free vs Pro feature matrix (one-time purchase)
-- [ ] Add Pro entitlement model (server-side)
-- [ ] Add Pro upgrade UI entry points (non-intrusive, contextual)
-- [ ] Add "Restore purchase" UX placeholder (mobile-first)
-- [ ] Add Pro preview states (locked panels with teaser content)
-- [ ] Ensure Pro gating does not break core invariant (habits are weekday-based)
+- [x] Define Free vs Pro feature matrix (one-time purchase)
+- [x] Add Pro entitlement model (server-side)
+- [x] Add Pro upgrade UI entry points (non-intrusive, contextual)
+- [x] Add "Restore purchase" UX placeholder (mobile-first)
+- [x] Add Pro preview states (locked panels with teaser content)
+- [x] Ensure Pro gating does not break core invariant (habits are weekday-based)
 
 ---
 

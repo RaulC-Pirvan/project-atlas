@@ -89,6 +89,7 @@ After each coverage increase, ensure new tests are stable and meaningful:
 - `src/components/**/__tests__/*`
 - `src/app/api/**/__tests__/*`
 - `docs/test workflows/*`
+- `docs/ops/*`
 - `docs/sprints/sprint-6.3.md`
 
 ---

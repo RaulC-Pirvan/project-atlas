@@ -6,9 +6,10 @@ import { usePathname } from 'next/navigation';
 import { SignOutButton } from '../auth/SignOutButton';
 
 const navItems = [
-  { href: '/habits', label: 'Habits', icon: 'habits', desktopOrder: 'md:order-2' },
+  { href: '/habits', label: 'Habits', icon: 'habits', desktopOrder: 'md:order-3' },
   { href: '/calendar', label: 'Calendar', icon: 'calendar', desktopOrder: 'md:order-1' },
-  { href: '/account', label: 'Account', icon: 'account', desktopOrder: 'md:order-3' },
+  { href: '/insights', label: 'Insights', icon: 'insights', desktopOrder: 'md:order-2' },
+  { href: '/account', label: 'Account', icon: 'account', desktopOrder: 'md:order-4' },
 ];
 
 const baseClasses =
@@ -52,6 +53,26 @@ function NavIcon({ icon }: { icon: string }) {
         <circle cx="4.25" cy="6.5" r="1" />
         <circle cx="4.25" cy="12" r="1" />
         <circle cx="4.25" cy="17.5" r="1" />
+      </svg>
+    );
+  }
+
+  if (icon === 'insights') {
+    return (
+      <svg
+        viewBox="0 0 24 24"
+        aria-hidden="true"
+        className="h-5 w-5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M4 18h16" />
+        <path d="M7 14v-4" />
+        <path d="M12 18v-8" />
+        <path d="M17 18v-12" />
       </svg>
     );
   }

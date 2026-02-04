@@ -2,6 +2,7 @@ import type { APIRequestContext, Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
 
 const password = 'AtlasTestPassword123!';
+const retryableNetworkErrors = ['econnreset', 'econnrefused', 'socket hang up'];
 
 function uniqueEmail(prefix: string) {
   const stamp = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
@@ -76,15 +77,55 @@ async function createVerifiedUser(page: Page, request: APIRequestContext, prefix
   return email;
 }
 
+function isRetryableNetworkError(error: unknown) {
+  if (!(error instanceof Error)) {
+    return false;
+  }
+  const message = error.message.toLowerCase();
+  return retryableNetworkErrors.some((fragment) => message.includes(fragment));
+}
+
+async function findHabitByTitle(request: APIRequestContext, title: string) {
+  try {
+    const response = await request.get('/api/habits', { timeout: 10_000 });
+    if (!response.ok()) {
+      return null;
+    }
+    const body = await response.json();
+    const habits = (body?.data?.habits ?? []) as { id: string; title: string }[];
+    return habits.find((habit) => habit.title === title) ?? null;
+  } catch {
+    return null;
+  }
+}
+
 async function createHabit(page: Page, title: string, weekdays: number[]) {
   const payload = { title, description: 'Streak test', weekdays };
-  const response = await page.request.post('/api/habits', {
-    data: payload,
-    timeout: 10_000,
-  });
-  expect(response.ok()).toBeTruthy();
-  const body = await response.json();
-  return body.data.habit as { id: string; title: string };
+  let lastError: Error | null = null;
+
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
+    try {
+      const response = await page.request.post('/api/habits', {
+        data: payload,
+        timeout: 10_000,
+      });
+      expect(response.ok()).toBeTruthy();
+      const body = await response.json();
+      return body.data.habit as { id: string; title: string };
+    } catch (error) {
+      lastError = error as Error;
+      if (!isRetryableNetworkError(error)) {
+        throw error;
+      }
+      const existingHabit = await findHabitByTitle(page.request, title);
+      if (existingHabit) {
+        return existingHabit;
+      }
+      await new Promise((resolve) => setTimeout(resolve, 250 * attempt));
+    }
+  }
+
+  throw lastError ?? new Error('Unable to create habit.');
 }
 
 test('streaks update after completion toggle', async ({ page, request }) => {

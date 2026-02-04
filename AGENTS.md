@@ -38,7 +38,6 @@ A habit is defined independently of dates.
 - Advanced insights (trends, consistency, patterns).
 - Achievements and milestones (expanded Pro catalogue).
 - Smart reminders and push notifications.
-- Habit notes are optional and gating is TBD.
 
 ## Non-Goals (updated)
 
@@ -56,7 +55,7 @@ A habit is defined independently of dates.
 - Email verification uses Resend client; debug token capture plus `/api/auth/debug/verification-token` for tests (shared token store for API routes).
 - Tests in place: Vitest unit/API tests, auth + habit + calendar + marketing + admin component tests, Playwright auth + habits + calendar + daily completion + admin + marketing + visual regression E2E.
 - Playwright E2E runs use a Windows-safe temp dir setup via `playwright.global-setup.ts` to avoid chromium shutdown hangs.
-- Daily completion E2E includes retry-safe habit creation to handle transient network resets in Firefox.
+- Daily completion and streaks E2E include retry-safe habit creation to handle transient network resets in Firefox.
 - Habit domain models implemented (Habit, HabitSchedule, HabitCompletion) with migrations and seed data.
 - Habit domain helpers exist in `src/lib/habits` (dates, schedules, calendar grid, completions, streaks, query helpers, types).
 - Habit CRUD API implemented (list/create/update/archive) with a habits UI built around `HabitsPanel` and `HabitForm`.
@@ -75,6 +74,8 @@ A habit is defined independently of dates.
 - Post-login redirect lands on `/calendar` (tests and flows expect Calendar as the default landing page).
 - Observability & safety in place: Sentry error tracking (with tunnel), structured API logging, `/api/health` endpoint, global security headers, and auth route rate limiting.
 - Admin dashboard implemented with allowlist access, health status panel, user/habit lists, activity log, and admin-safe CSV exports.
+- Pro entitlement model implemented (server-side) with `ProEntitlement` table and `/api/pro/entitlement` endpoint.
+- Pro upgrade entry points and preview states implemented (calendar and account surfaces), with a dedicated `/pro` page and mobile-first restore purchase placeholder.
 
 ## Roadmap (high-level)
 
@@ -115,6 +116,7 @@ A habit is defined independently of dates.
 - `src/app/api/auth/[...nextauth]/route.ts` - NextAuth handler.
 - `src/app/admin/page.tsx` - Admin dashboard UI (server-authenticated).
 - `src/app/api/admin/*/route.ts` - Admin APIs (health, users, habits, activity, exports).
+- `src/app/api/pro/entitlement/route.ts` - Pro entitlement API (read-only summary).
 - `src/lib/auth` - Auth utilities (hashing, policy, credentials, rate limit, nextauth).
 - `src/lib/api` - Shared API error/response helpers, auth services, validation.
 - `src/lib/api/habits` - Habit API services and validation.
@@ -129,6 +131,7 @@ A habit is defined independently of dates.
 - `src/components/auth/SignOutButton.tsx` - Sign-out button for authenticated layouts.
 - `src/components/marketing` - Marketing homepage layout and sections.
 - `src/components/admin` - Admin UI components and tests.
+- `src/components/pro` - Pro upgrade entry points and preview cards.
 - `src/components/ui/ThemeToggle.tsx` - Light/dark theme toggle (system default + persistence).
 - `src/components/ui/Toast.tsx` - Toast notifications (no inline form errors).
 - `src/components/ui/Notice.tsx` - Inline notice/alert primitive.
@@ -142,6 +145,7 @@ A habit is defined independently of dates.
 - `src/lib/api/habits/completions.ts` - Completion toggle/list services (date/range).
 - `src/lib/habits/__tests__` - Habit domain unit tests.
 - `src/lib/admin` - Admin access/auth and data services (users, habits, exports).
+- `src/lib/pro` - Pro entitlement helpers.
 - `src/infra/email` - Resend client, verification email sender, debug token store.
 - `src/lib/observability` - Structured logging + API logging wrapper.
 - `src/lib/http/securityHeaders.ts` - Shared security headers.
@@ -154,6 +158,7 @@ A habit is defined independently of dates.
 - `src/components/ui` - Shared UI primitives.
 - `src/app/(auth)` - Auth pages (sign-in, sign-up, verify-email).
 - `src/app/account/page.tsx` - Account management page.
+- `src/app/pro/page.tsx` - Pro upgrade page and preview content.
 - `middleware.ts` - Route protection using NextAuth JWT.
 - `e2e/daily-completion.spec.ts` - Daily completion E2E flow coverage.
 - `e2e/admin.spec.ts` - Admin dashboard E2E coverage.
@@ -171,6 +176,12 @@ A habit is defined independently of dates.
 - `docs/sprints/sprint-6.1.md` - Observability & safety sprint plan.
 - `docs/test workflows/sprint-6.1-test-workflows.md` - Observability & safety test workflows.
 - `docs/sprints/sprint-6.2.md` - Admin dashboard sprint plan.
+- `docs/sprints/sprint-6.3.md` - Testing & launch readiness sprint plan.
+- `docs/test workflows/sprint-6.3-test-workflows.md` - Staging and backup test workflows.
+- `docs/sprints/sprint-7.1.md` - Atlas Pro gating sprint plan.
+- `docs/test workflows/sprint-7.1-test-workflows.md` - Atlas Pro gating test workflows.
+- `docs/ops/staging.md` - Staging environment guide.
+- `docs/ops/backups.md` - Backup strategy and validation checklist.
 
 ## Engineering Standards
 

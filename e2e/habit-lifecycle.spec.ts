@@ -108,7 +108,14 @@ test('habit lifecycle from creation to archive', async ({ page, request }) => {
   await page.goto(`/calendar?month=${targetMonth}&date=${tuesdayDate}`);
   const tuesdayCheckbox = page.getByRole('checkbox', { name: new RegExp(habitTitle, 'i') });
   await expect(tuesdayCheckbox).toHaveAttribute('aria-checked', 'false');
+  const completionResponse = page.waitForResponse(
+    (response) =>
+      response.url().includes('/api/completions') &&
+      response.request().method() === 'POST' &&
+      response.ok(),
+  );
   await tuesdayCheckbox.click();
+  await completionResponse;
   await expect(tuesdayCheckbox).toHaveAttribute('aria-checked', 'true');
 
   const tuesdayTile = page.locator(`[data-date-key="${tuesdayDate}"]`);

@@ -6,6 +6,7 @@ export type ApiErrorCode =
   | 'token_expired'
   | 'not_found'
   | 'unauthorized'
+  | 'forbidden'
   | 'internal_error';
 
 export type ApiErrorRecovery =
@@ -37,6 +38,7 @@ export function asApiError(error: unknown): ApiError {
 export function getApiErrorRecovery(code: ApiErrorCode, status: number): ApiErrorRecovery {
   if (code === 'rate_limited' || status === 429) return 'retry_later';
   if (code === 'unauthorized' || status === 401) return 'reauth';
+  if (code === 'forbidden' || status === 403) return 'none';
   if (code === 'email_taken' || code === 'invalid_request') return 'update_input';
   if (code === 'token_invalid' || code === 'token_expired') return 'resend';
   if (code === 'internal_error' || status >= 500) return 'retry';

@@ -3,11 +3,13 @@ import { redirect } from 'next/navigation';
 import { CalendarMonth } from '../../components/calendar/CalendarMonth';
 import { DailyCompletionPanel } from '../../components/calendar/DailyCompletionPanel';
 import { MobileDailySheet } from '../../components/calendar/MobileDailySheet';
+import { InsightsSnapshotCard } from '../../components/insights/InsightsSnapshotCard';
+import { InsightsUpgradeCard } from '../../components/insights/InsightsUpgradeCard';
 import { AppShell } from '../../components/layout/AppShell';
-import { ProPreviewCard } from '../../components/pro/ProPreviewCard';
 import { StreakSummaryPanel } from '../../components/streaks/StreakSummaryPanel';
 import { listCompletionsForDate, listCompletionsInRange } from '../../lib/api/habits/completions';
 import { listHabits } from '../../lib/api/habits/habits';
+import { getInsightsSummary } from '../../lib/api/insights/summary';
 import { getServerAuthSession } from '../../lib/auth/session';
 import { prisma } from '../../lib/db/prisma';
 import { getMonthGrid } from '../../lib/habits/calendar';
@@ -120,6 +122,7 @@ export default async function CalendarPage({
   const habitSchedules = habits.map((habit) => ({
     habit,
     schedule: habit.weekdays.map((weekday) => ({ weekday })),
+    createdAtUtc: normalizeToUtcDate(habit.createdAt, timeZone),
   }));
 
   const habitIds = habits.map((habit) => habit.id);
@@ -153,6 +156,15 @@ export default async function CalendarPage({
     };
   });
   const hasCompletions = streakCompletions.length > 0;
+
+  const insightsSummary = proEntitlement.isPro
+    ? await getInsightsSummary({
+        prisma,
+        userId: session.user.id,
+        timeZone,
+        now,
+      })
+    : null;
 
   const firstWeek = monthGrid.weeks[0];
   const lastWeek = monthGrid.weeks[monthGrid.weeks.length - 1];
@@ -190,13 +202,15 @@ export default async function CalendarPage({
       }).format(selectedDate)
     : null;
   const selectedHabits = selectedDate
-    ? habits.filter((habit) =>
-        isHabitActiveOnDate(
+    ? habits.filter((habit) => {
+        const createdAtUtc = normalizeToUtcDate(habit.createdAt, timeZone);
+        if (selectedDate < createdAtUtc) return false;
+        return isHabitActiveOnDate(
           habit.weekdays.map((weekday) => ({ weekday })),
           selectedDate,
           timeZone,
-        ),
-      )
+        );
+      })
     : [];
   const selectedCompletions = selectedDate
     ? await listCompletionsForDate({ prisma, userId: session.user.id, date: selectedDate })
@@ -229,9 +243,10 @@ export default async function CalendarPage({
         };
       }
 
-      const activeHabits = habitSchedules.filter(({ schedule }) =>
-        isHabitActiveOnDate(schedule, day.date, timeZone),
-      );
+      const activeHabits = habitSchedules.filter(({ schedule, createdAtUtc }) => {
+        if (day.date < createdAtUtc) return false;
+        return isHabitActiveOnDate(schedule, day.date, timeZone);
+      });
       const activeHabitIds = new Set(activeHabits.map(({ habit }) => habit.id));
       const completed = completionMap.get(day.key);
       let completedCount = 0;
@@ -312,7 +327,11 @@ export default async function CalendarPage({
               </span>
             </div>
 
-            <ProPreviewCard isPro={proEntitlement.isPro} />
+            {proEntitlement.isPro && insightsSummary ? (
+              <InsightsSnapshotCard summary={insightsSummary} />
+            ) : (
+              <InsightsUpgradeCard />
+            )}
           </div>
 
           <aside className="lg:w-80">

@@ -42,28 +42,30 @@ function buildDayMetrics({
   completions,
   start,
   end,
+  timeZone,
 }: {
   habits: InsightHabit[];
   completions: InsightCompletion[];
   start: Date;
   end: Date;
+  timeZone: string;
 }): DayMetric[] {
   const activeHabits = habits.filter((habit) => !habit.archivedAt);
   const scheduleByHabit = new Map<string, Set<number>>();
-  const scheduledByWeekday = new Map<number, number>();
+  const createdAtByHabit = new Map<string, Date>();
 
   for (const habit of activeHabits) {
     const weekdays = listActiveWeekdays(habit.schedule);
     scheduleByHabit.set(habit.id, new Set(weekdays));
-    for (const weekday of weekdays) {
-      scheduledByWeekday.set(weekday, (scheduledByWeekday.get(weekday) ?? 0) + 1);
-    }
+    createdAtByHabit.set(habit.id, normalizeToUtcDate(habit.createdAt, timeZone));
   }
 
   const completionCounts = new Map<string, number>();
   for (const completion of completions) {
     const schedule = scheduleByHabit.get(completion.habitId);
     if (!schedule) continue;
+    const createdAt = createdAtByHabit.get(completion.habitId);
+    if (createdAt && completion.date < createdAt) continue;
     const weekday = getIsoWeekdayFromUtcDate(completion.date);
     if (!schedule.has(weekday)) continue;
     const key = toUtcDateKey(completion.date);
@@ -73,10 +75,18 @@ function buildDayMetrics({
   const metrics: DayMetric[] = [];
   for (let date = start; date <= end; date = addUtcDays(date, 1)) {
     const weekday = getIsoWeekdayFromUtcDate(date);
+    let scheduled = 0;
+    for (const [habitId, schedule] of scheduleByHabit.entries()) {
+      const createdAt = createdAtByHabit.get(habitId);
+      if (createdAt && date < createdAt) continue;
+      if (schedule.has(weekday)) {
+        scheduled += 1;
+      }
+    }
     metrics.push({
       date,
       weekday,
-      scheduled: scheduledByWeekday.get(weekday) ?? 0,
+      scheduled,
       completed: completionCounts.get(toUtcDateKey(date)) ?? 0,
     });
   }
@@ -207,6 +217,7 @@ export function buildInsightsSummary(args: BuildInsightsArgs): InsightsSummary {
     completions: args.completions,
     start,
     end: today,
+    timeZone: args.timeZone,
   });
 
   return {

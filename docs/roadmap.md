@@ -220,14 +220,14 @@
 
 ### Sprint 8.1: Advanced Insights v1
 
-- [ ] Define Insights spec (metrics list + formulas)
-- [ ] Add Insights API endpoints (privacy-respecting, aggregated)
-- [ ] Add Insights UI (minimalist cards, charts/heatmap)
-- [ ] Add consistency score (7/30/90 days)
-- [ ] Add best/worst weekday stats
-- [ ] Add completion trend indicators
-- [ ] Add unit tests for insight calculations
-- [ ] Add E2E coverage for Insights visibility + gating
+- [x] Define Insights spec (metrics list + formulas)
+- [x] Add Insights API endpoints (privacy-respecting, aggregated)
+- [x] Add Insights UI (minimalist cards, charts/heatmap)
+- [x] Add consistency score (7/30/90 days)
+- [x] Add best/worst weekday stats
+- [x] Add completion trend indicators
+- [x] Add unit tests for insight calculations
+- [x] Add E2E coverage for Insights visibility + gating
 
 ---
 

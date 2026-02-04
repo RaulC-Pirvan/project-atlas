@@ -1,6 +1,7 @@
 export type InsightHabit = {
   id: string;
   archivedAt?: Date | null;
+  createdAt: Date;
   schedule: { weekday: number }[];
 };
 

@@ -13,6 +13,7 @@ type HabitRecord = {
   title: string;
   description: string | null;
   archivedAt: Date | null;
+  createdAt: Date;
   schedule: ScheduleRecord[];
 };
 
@@ -77,6 +78,7 @@ export type HabitSummary = {
   title: string;
   description: string | null;
   archivedAt: Date | null;
+  createdAt: Date;
   weekdays: number[];
 };
 
@@ -143,6 +145,7 @@ function toHabitSummary(habit: HabitRecord): HabitSummary {
     title: habit.title,
     description: habit.description,
     archivedAt: habit.archivedAt,
+    createdAt: habit.createdAt,
     weekdays: listActiveWeekdays(habit.schedule),
   };
 }

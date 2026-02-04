@@ -30,7 +30,12 @@ describe('buildInsightsSummary', () => {
 
   it('computes consistency and trend windows', () => {
     const now = utcDate(2026, 2, 15);
-    const habit = { id: 'habit-1', archivedAt: null, schedule: schedule(1, 2, 3, 4, 5, 6, 7) };
+    const habit = {
+      id: 'habit-1',
+      archivedAt: null,
+      createdAt: utcDate(2026, 1, 1),
+      schedule: schedule(1, 2, 3, 4, 5, 6, 7),
+    };
     const completions = Array.from({ length: 14 }, (_, index) => ({
       habitId: habit.id,
       date: addUtcDays(now, -index),
@@ -57,8 +62,8 @@ describe('buildInsightsSummary', () => {
     expect(thirtyDay?.rate).toBeCloseTo(14 / 30, 4);
 
     expect(ninetyDay?.completed).toBe(14);
-    expect(ninetyDay?.scheduled).toBe(90);
-    expect(ninetyDay?.rate).toBeCloseTo(14 / 90, 4);
+    expect(ninetyDay?.scheduled).toBe(46);
+    expect(ninetyDay?.rate).toBeCloseTo(14 / 46, 4);
 
     expect(summary.trend.direction).toBe('up');
     expect(summary.trend.currentRate).toBe(1);
@@ -68,7 +73,12 @@ describe('buildInsightsSummary', () => {
 
   it('selects best and worst weekdays by completion rate', () => {
     const now = utcDate(2026, 2, 15);
-    const habit = { id: 'habit-2', archivedAt: null, schedule: schedule(1, 2, 3, 4, 5, 6, 7) };
+    const habit = {
+      id: 'habit-2',
+      archivedAt: null,
+      createdAt: utcDate(2026, 1, 1),
+      schedule: schedule(1, 2, 3, 4, 5, 6, 7),
+    };
     const start = addUtcDays(now, -89);
     const completions: { habitId: string; date: Date }[] = [];
 
@@ -92,5 +102,27 @@ describe('buildInsightsSummary', () => {
     expect(summary.weekdayStats.worst?.weekday).toBe(2);
     expect(summary.weekdayStats.worst?.label).toBe('Tuesday');
     expect(summary.weekdayStats.worst?.rate).toBe(0);
+  });
+
+  it('ignores scheduled opportunities before the habit creation date', () => {
+    const now = utcDate(2026, 2, 10);
+    const createdAt = utcDate(2026, 2, 7);
+    const habit = {
+      id: 'habit-3',
+      archivedAt: null,
+      createdAt,
+      schedule: schedule(1, 2, 3, 4, 5, 6, 7),
+    };
+
+    const summary = buildInsightsSummary({
+      habits: [habit],
+      completions: [],
+      timeZone: 'UTC',
+      now,
+    });
+
+    const sevenDay = summary.consistency.find((window) => window.windowDays === 7);
+    expect(sevenDay?.scheduled).toBe(4);
+    expect(sevenDay?.completed).toBe(0);
   });
 });

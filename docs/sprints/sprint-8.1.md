@@ -108,8 +108,8 @@ CI must remain green.
 
 ### Tasks (2)
 
-- [ ] **Task 3.1**: Add unit tests for insight calculations
-- [ ] **Task 3.2**: Add E2E coverage for Insights visibility + gating
+- [x] **Task 3.1**: Add unit tests for insight calculations
+- [x] **Task 3.2**: Add E2E coverage for Insights visibility + gating
 
 ---
 

@@ -4,6 +4,7 @@ import { CalendarMonth } from '../../components/calendar/CalendarMonth';
 import { DailyCompletionPanel } from '../../components/calendar/DailyCompletionPanel';
 import { MobileDailySheet } from '../../components/calendar/MobileDailySheet';
 import { AppShell } from '../../components/layout/AppShell';
+import { ProPreviewCard } from '../../components/pro/ProPreviewCard';
 import { StreakSummaryPanel } from '../../components/streaks/StreakSummaryPanel';
 import { listCompletionsForDate, listCompletionsInRange } from '../../lib/api/habits/completions';
 import { listHabits } from '../../lib/api/habits/habits';
@@ -18,6 +19,7 @@ import {
 } from '../../lib/habits/dates';
 import { isHabitActiveOnDate } from '../../lib/habits/schedule';
 import { calculateStreaks } from '../../lib/habits/streaks';
+import { getProEntitlementSummary } from '../../lib/pro/entitlement';
 
 type SearchParams = {
   month?: string | string[];
@@ -91,6 +93,11 @@ export default async function CalendarPage({
   if (!user) {
     redirect('/sign-in');
   }
+
+  const proEntitlement = await getProEntitlementSummary({
+    prisma,
+    userId: session.user.id,
+  });
 
   const timeZone = user.timezone || 'UTC';
   const now = new Date();
@@ -304,6 +311,8 @@ export default async function CalendarPage({
                 Selected day
               </span>
             </div>
+
+            <ProPreviewCard isPro={proEntitlement.isPro} />
           </div>
 
           <aside className="lg:w-80">

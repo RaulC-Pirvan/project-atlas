@@ -65,7 +65,7 @@ export default defineConfig({
         command: devCommand,
         url: 'http://localhost:3000',
         env: webServerEnv,
-        reuseExistingServer: true,
+        reuseExistingServer: process.env.PLAYWRIGHT_REUSE_SERVER === 'true',
         timeout: 30_000,
       },
 });

@@ -12,10 +12,9 @@ const navItems = [
 ];
 
 const baseClasses =
-  'inline-flex flex-1 items-center justify-center rounded-full border border-black/15 px-3 py-2 text-xs font-medium text-black/70 transition hover:bg-black/5 md:flex-none md:w-full md:rounded-none md:border-0 md:px-4 md:py-3 md:text-sm dark:border-white/20 dark:text-white/80 dark:hover:bg-white/10';
-const activeClasses =
-  'bg-black text-white hover:bg-black dark:bg-white dark:text-black dark:!text-black dark:hover:bg-white';
-const inactiveClasses = 'text-black/70 hover:bg-black/5 dark:text-white/70 dark:hover:bg-white/10';
+  'inline-flex flex-1 items-center justify-center rounded-full border border-black/15 px-3 py-2 text-xs font-medium text-black/70 md:flex-none md:w-full md:rounded-none md:border-0 md:px-4 md:py-3 md:text-sm dark:border-white/20 dark:text-white/80';
+const activeClasses = 'bg-black text-white dark:bg-white dark:text-black dark:!text-black';
+const inactiveClasses = 'text-black/70 dark:text-white/70';
 const mobileCenterClasses =
   'rounded-2xl border border-black/20 bg-black text-white shadow-[0_10px_24px_rgba(0,0,0,0.18)] dark:border-white/20 dark:bg-white dark:text-black dark:!text-black dark:shadow-[0_10px_24px_rgba(0,0,0,0.4)]';
 

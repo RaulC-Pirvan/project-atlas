@@ -32,7 +32,12 @@ type SignupArgs = {
   now?: Date;
   baseUrl?: string;
   generateRawToken?: () => string;
-  sendEmail?: (args: { to: string; token: string; baseUrl?: string }) => Promise<void>;
+  sendEmail?: (args: {
+    to: string;
+    token: string;
+    userId?: string;
+    baseUrl?: string;
+  }) => Promise<void>;
 };
 
 export async function signupUser(args: SignupArgs): Promise<{ userId: string }> {
@@ -68,6 +73,7 @@ export async function signupUser(args: SignupArgs): Promise<{ userId: string }> 
   await (args.sendEmail ?? sendVerificationEmail)({
     to: user.email,
     token: rawToken,
+    userId: user.id,
     baseUrl: args.baseUrl,
   });
 

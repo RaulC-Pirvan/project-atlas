@@ -13,6 +13,7 @@ type PrismaClientLike = {
         emailVerified: true;
         deletedAt: true;
         displayName: true;
+        role: true;
       };
     }) => Promise<{
       id: string;
@@ -21,6 +22,7 @@ type PrismaClientLike = {
       emailVerified: Date | null;
       deletedAt: Date | null;
       displayName: string | null;
+      role: 'user' | 'admin';
     } | null>;
   };
 };
@@ -30,6 +32,7 @@ export type AuthorizedUser = {
   email: string;
   emailVerified: Date | null;
   name?: string | null;
+  isAdmin?: boolean;
 };
 
 type AuthorizeArgs = {
@@ -66,6 +69,7 @@ export async function authorizeCredentials({
       emailVerified: true,
       deletedAt: true,
       displayName: true,
+      role: true,
     },
   });
 
@@ -95,5 +99,6 @@ export async function authorizeCredentials({
     email: user.email,
     emailVerified: user.emailVerified,
     name: user.displayName,
+    isAdmin: user.role === 'admin',
   };
 }

@@ -31,7 +31,12 @@ type ResendArgs = {
   now?: Date;
   baseUrl?: string;
   generateRawToken?: () => string;
-  sendEmail?: (args: { to: string; token: string; baseUrl?: string }) => Promise<void>;
+  sendEmail?: (args: {
+    to: string;
+    token: string;
+    userId?: string;
+    baseUrl?: string;
+  }) => Promise<void>;
 };
 
 export async function resendVerification(args: ResendArgs): Promise<{ status: 'sent' | 'noop' }> {
@@ -75,6 +80,7 @@ export async function resendVerification(args: ResendArgs): Promise<{ status: 's
   await (args.sendEmail ?? sendVerificationEmail)({
     to: user.email,
     token: rawToken,
+    userId: user.id,
     baseUrl: args.baseUrl,
   });
 

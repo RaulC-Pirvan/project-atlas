@@ -1,8 +1,8 @@
-# Project Atlas — Product & Engineering Roadmap
+# Project Atlas — Product & Engineering Roadmap (Updated)
 
 ---
 
-## Phase 0: Engineering Foundation (Completed / In Progress)
+## Phase 0: Engineering Foundation (Completed)
 
 ### Sprint 0.1: Project & Tooling Setup
 
@@ -30,7 +30,7 @@
 
 ---
 
-## Phase 1: Core Domain & Auth MVP (Weeks 1–3)
+## Phase 1: Core Domain & Auth MVP (Weeks 1–3) (Completed)
 
 ### Sprint 1.1: Authentication Foundation
 
@@ -75,7 +75,7 @@
 
 ---
 
-## Phase 2: Calendar & Daily Tracking (Weeks 4–6)
+## Phase 2: Calendar & Daily Tracking (Weeks 4–6) (Completed)
 
 ### Sprint 2.1: Calendar Core
 
@@ -112,7 +112,7 @@
 
 ---
 
-## Phase 3: Streaks & Engagement (Weeks 7–8)
+## Phase 3: Streaks & Engagement (Weeks 7–8) (Completed)
 
 ### Sprint 3.1: Streak Logic
 
@@ -135,7 +135,7 @@
 
 ---
 
-## Phase 4: UX Polish & Mobile (Weeks 9–10)
+## Phase 4: UX Polish & Mobile (Weeks 9–10) (Completed)
 
 ### Sprint 4.1: Mobile & Responsiveness
 
@@ -156,7 +156,7 @@
 
 ---
 
-## Phase 5: Landing & Positioning (Week 11)
+## Phase 5: Landing & Positioning (Week 11) (Completed)
 
 ### Sprint 5.1: Marketing Homepage
 
@@ -168,19 +168,31 @@
 
 ---
 
-## Phase 6: Production Hardening (Weeks 12-13)
+## Phase 6: Production Hardening (Weeks 12–13) (Completed / In Progress)
 
 ### Sprint 6.1: Observability & Safety
 
-- [ ] Error tracking (Sentry or equivalent)
-- [ ] Structured logging
-- [ ] Health check endpoint
-- [ ] Rate limiting on auth routes
-- [ ] Security headers
+- [x] Error tracking (Sentry or equivalent)
+- [x] Structured logging
+- [x] Health check endpoint
+- [x] Rate limiting on auth routes
+- [x] Security headers
 
 ---
 
-### Sprint 6.2: Testing & Launch Readiness
+### Sprint 6.2: Admin Dashboard
+
+- [x] Admin access control (single-owner allowlist)
+- [x] Admin navigation entry and layout
+- [x] App health status panel
+- [x] User list (search + basic stats)
+- [x] Habit list (search + active/archived)
+- [x] Recent logs / audit trail view
+- [x] Admin-safe data export (CSV)
+
+---
+
+### Sprint 6.3: Testing & Launch Readiness
 
 - [ ] Expand E2E coverage (full habit lifecycle)
 - [ ] Achieve ~80% meaningful test coverage
@@ -191,14 +203,131 @@
 
 ---
 
-## Phase 7: Post-Launch (Optional / Future)
+## Phase 7: Monetisation & Pro Foundation (New)
 
-- Habit templates
-- Reminders / notifications
-- Analytics (privacy-respecting)
-- Premium features
-- Offline support (PWA)
-- Data export
+### Sprint 7.1: Atlas Pro — Product Strategy & Gating
+
+- [x] Define Free vs Pro feature matrix (one-time purchase)
+- [x] Add Pro entitlement model (server-side)
+- [x] Add Pro upgrade UI entry points (non-intrusive, contextual)
+- [x] Add "Restore purchase" UX placeholder (mobile-first)
+- [x] Add Pro preview states (locked panels with teaser content)
+- [x] Ensure Pro gating does not break core invariant (habits are weekday-based)
+
+---
+
+## Phase 8: Advanced Insights (Pro) (New)
+
+### Sprint 8.1: Advanced Insights v1
+
+- [ ] Define Insights spec (metrics list + formulas)
+- [ ] Add Insights API endpoints (privacy-respecting, aggregated)
+- [ ] Add Insights UI (minimalist cards, charts/heatmap)
+- [ ] Add consistency score (7/30/90 days)
+- [ ] Add best/worst weekday stats
+- [ ] Add completion trend indicators
+- [ ] Add unit tests for insight calculations
+- [ ] Add E2E coverage for Insights visibility + gating
+
+---
+
+## Phase 9: Achievements & Milestones (Pro) (New)
+
+### Sprint 9.1: Achievements System v1
+
+- [ ] Define achievement catalogue (Free baseline + Pro extended)
+- [ ] Implement achievement evaluation engine (pure domain logic)
+- [ ] Add achievements UI ("Trophy cabinet")
+- [ ] Add milestone timeline per habit (7/30/100 completions, perfect weeks, etc.)
+- [ ] Ensure achievements are timezone-safe
+- [ ] Unit tests for achievements unlock logic
+- [ ] E2E tests for achievement unlock display
+
+---
+
+## Phase 10: Smart Reminders + Push Notifications (Pro) (New)
+
+### Sprint 10.1: Reminder Scheduling v1 (Web + Mobile Ready)
+
+- [ ] Define reminder model:
+  - per habit reminder time(s)
+  - daily digest
+  - quiet hours
+  - snooze
+- [ ] Add reminder settings UI
+- [ ] Implement notification delivery strategy (push-ready)
+- [ ] Add server-side validation + rate limiting for reminder APIs
+- [ ] Add tests for reminder scheduling rules
+
+---
+
+### Sprint 10.2: Mobile Push Implementation (WebView)
+
+- [ ] Wrap app using WebView (Capacitor recommended)
+- [ ] Setup Android push (FCM)
+- [ ] Setup iOS push (APNs)
+- [ ] Implement device token registration + secure storage
+- [ ] Implement push send pipeline
+- [ ] E2E/manual test plan for push delivery on devices
+
+---
+
+## Phase 11: Notes & Reflection (Optional) (New)
+
+### Sprint 11.1: Habit Notes v1
+
+- [ ] Add habit notes (per habit) and/or daily notes (per date)
+- [ ] Add Notes UI (minimal, distraction-free)
+- [ ] Decide Free vs Pro gating for notes
+- [ ] Add unit tests + E2E tests for notes flows
+
+---
+
+## Phase 12: Mobile Experience Enhancements (New)
+
+### Sprint 12.1: Today View + Speed Improvements
+
+- [ ] Add "Today" screen (fast daily entry)
+- [ ] Add quick actions (complete/uncomplete + undo)
+- [ ] Add habit ordering/pinning/sorting
+- [ ] Add schedule presets (Weekdays / Every day / Weekend)
+- [ ] Improve daily panel performance on mobile
+
+---
+
+### Sprint 12.2: Offline-first Completions
+
+- [ ] Implement offline queue for completion toggles
+- [ ] Sync queue when network returns
+- [ ] Add "pending sync" UI indicators
+- [ ] Add unit tests for offline queue logic
+- [ ] Add E2E coverage for flaky network scenarios
+
+---
+
+## Phase 13: Grace Window Rule (Free) (New)
+
+### Sprint 13.1: Completion Grace Window Until 02:00
+
+- [ ] Implement Free grace window: allow completing "yesterday" until 02:00
+- [ ] Keep future-date guard intact
+- [ ] Ensure timezone-safe boundary handling
+- [ ] Update UI copy to explain grace window
+- [ ] Add unit tests + E2E tests for grace window edge cases
+
+---
+
+## Phase 14: Store Launch (Google Play + App Store) (New)
+
+### Sprint 14.1: Store Readiness & Compliance
+
+- [ ] App icons, splash screens, store screenshots
+- [ ] Privacy policy + Terms pages (in-app + hosted)
+- [ ] App Store / Play Store metadata (description, keywords)
+- [ ] Data safety declarations (Google Play)
+- [ ] Apple privacy labels + review notes
+- [ ] Beta testing tracks (internal/closed)
+- [ ] Production release checklist
 
 ---
 

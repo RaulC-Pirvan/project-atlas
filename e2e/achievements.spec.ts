@@ -1,5 +1,4 @@
-import type { APIRequestContext, Page } from '@playwright/test';
-import { expect, test } from '@playwright/test';
+import { type APIRequestContext, expect, type Page, test } from '@playwright/test';
 
 const password = 'AtlasTestPassword123!';
 const retryableNetworkErrors = ['econnreset', 'econnrefused', 'socket hang up'];
@@ -16,10 +15,6 @@ function uniqueTitle(prefix: string) {
 
 function utcDateKey(date: Date): string {
   return date.toISOString().slice(0, 10);
-}
-
-function utcMonthKey(date: Date): string {
-  return date.toISOString().slice(0, 7);
 }
 
 function isoWeekday(date: Date): number {
@@ -105,7 +100,7 @@ async function findHabitByTitle(request: APIRequestContext, title: string) {
 }
 
 async function createHabit(page: Page, title: string, weekdays: number[]) {
-  const payload = { title, description: 'Lifecycle coverage test', weekdays };
+  const payload = { title, description: 'Achievements test', weekdays };
   let lastError: Error | null = null;
 
   for (let attempt = 1; attempt <= 3; attempt += 1) {
@@ -133,64 +128,29 @@ async function createHabit(page: Page, title: string, weekdays: number[]) {
   throw lastError ?? new Error('Unable to create habit.');
 }
 
-async function openHabits(page: Page) {
-  try {
-    await page.goto('/habits', { waitUntil: 'domcontentloaded' });
-  } catch {
-    await page.goto('/habits', { waitUntil: 'domcontentloaded' });
-  }
-  await expect(page.getByRole('heading', { name: /habits/i })).toBeVisible();
-}
+test('achievements unlock after first completion', async ({ page, request }) => {
+  await createVerifiedUser(page, request, 'achievements');
 
-test('habit lifecycle from creation to archive', async ({ page, request }) => {
-  await createVerifiedUser(page, request, 'habit-lifecycle');
-  const habitTitle = uniqueTitle('Lifecycle habit');
   const today = new Date();
-  const tomorrow = new Date(today.getTime() + 24 * 60 * 60 * 1000);
-  const todayKey = utcDateKey(today);
-  const todayMonthKey = utcMonthKey(today);
+  const targetDate = utcDateKey(today);
+  const targetWeekday = isoWeekday(today);
+  const habitTitle = uniqueTitle('Achievement');
+  const habit = await createHabit(page, habitTitle, [targetWeekday]);
 
-  await openHabits(page);
-
-  const habit = await createHabit(page, habitTitle, [isoWeekday(today), isoWeekday(tomorrow)]);
-  await page.reload();
-  await expect(page.getByText(habitTitle)).toBeVisible();
-
-  await page.goto(`/calendar?month=${todayMonthKey}&date=${todayKey}`);
-  const todayCheckbox = page.getByRole('checkbox', { name: new RegExp(habitTitle, 'i') });
-  await expect(todayCheckbox).toHaveAttribute('aria-checked', 'false');
-  const completionResponse = page.waitForResponse(
-    (response) =>
-      response.url().includes('/api/completions') &&
-      response.request().method() === 'POST' &&
-      response.ok(),
-  );
-  await todayCheckbox.click();
-  await completionResponse;
-  await expect(todayCheckbox).toHaveAttribute('aria-checked', 'true');
-
-  const updateResponse = await page.request.put(`/api/habits/${habit.id}`, {
-    data: {
-      title: habitTitle,
-      description: 'Lifecycle coverage test',
-      weekdays: [isoWeekday(tomorrow)],
-    },
+  const completionResponse = await page.request.post('/api/completions', {
+    data: { habitId: habit.id, date: targetDate, completed: true },
     timeout: 10_000,
   });
-  expect(updateResponse.ok()).toBeTruthy();
-  await page.reload();
-  await expect(page.getByText(habitTitle)).toBeVisible();
+  expect(completionResponse.ok()).toBeTruthy();
 
-  await page.goto(`/calendar?month=${todayMonthKey}&date=${todayKey}`);
-  await expect(page.getByRole('main').getByText('No habits scheduled for this day.')).toBeVisible();
-  await expect(page.locator(`[data-date-key="${todayKey}"]`)).not.toHaveClass(/bg-\[#FAB95B\]/);
-
-  const deleteResponse = await page.request.delete(`/api/habits/${habit.id}`, { timeout: 10_000 });
-  expect(deleteResponse.ok()).toBeTruthy();
-  await page.reload();
-  await expect(page.getByText(habitTitle, { exact: true })).toHaveCount(0);
-
-  await page.goto(`/calendar?month=${todayMonthKey}&date=${todayKey}`);
-  await expect(page.getByRole('main').getByText('No habits scheduled for this day.')).toBeVisible();
-  await expect(page.locator(`[data-date-key="${todayKey}"]`)).not.toHaveClass(/bg-\[#FAB95B\]/);
+  await page.goto('/achievements');
+  await expect(page.getByTestId('achievements-dashboard')).toBeVisible();
+  await expect(page.getByTestId('achievement-first-completion')).toHaveAttribute(
+    'data-status',
+    'unlocked',
+  );
+  await expect(page.getByTestId('achievement-thirty-completions')).toHaveAttribute(
+    'data-status',
+    'pro-locked',
+  );
 });

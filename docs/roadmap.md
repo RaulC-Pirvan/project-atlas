@@ -235,13 +235,13 @@
 
 ### Sprint 9.1: Achievements System v1
 
-- [ ] Define achievement catalogue (Free baseline + Pro extended)
-- [ ] Implement achievement evaluation engine (pure domain logic)
-- [ ] Add achievements UI ("Trophy cabinet")
-- [ ] Add milestone timeline per habit (7/30/100 completions, perfect weeks, etc.)
-- [ ] Ensure achievements are timezone-safe
-- [ ] Unit tests for achievements unlock logic
-- [ ] E2E tests for achievement unlock display
+- [x] Define achievement catalogue (Free baseline + Pro extended)
+- [x] Implement achievement evaluation engine (pure domain logic)
+- [x] Add achievements UI ("Trophy cabinet")
+- [x] Add milestone timeline per habit (7/30/100 completions, perfect weeks, etc.)
+- [x] Ensure achievements are timezone-safe
+- [x] Unit tests for achievements unlock logic
+- [x] E2E tests for achievement unlock display
 
 ---
 

@@ -5,6 +5,7 @@ import type { KeyboardEvent } from 'react';
 import { useEffect, useId, useRef, useState } from 'react';
 
 import { getApiErrorMessage, parseJson } from '../../lib/api/client';
+import { type AchievementToastItem, AchievementToastStack } from '../achievements/AchievementToast';
 import { type ToastItem, ToastStack } from '../ui/Toast';
 
 type HabitSummary = {
@@ -21,6 +22,32 @@ type CompletionResult = {
 
 type CompletionResponse = {
   result: CompletionResult;
+};
+
+type AchievementProgress = {
+  current: number;
+  target: number;
+  ratio: number;
+};
+
+type AchievementSnapshotItem = {
+  id: string;
+  title: string;
+  description: string;
+  tier: 'free' | 'pro';
+  unlocked: boolean;
+  progress: AchievementProgress;
+};
+
+type AchievementsResponse = {
+  isPro: boolean;
+  achievements: AchievementSnapshotItem[];
+};
+
+type AchievementsSnapshot = {
+  isPro: boolean;
+  achievements: AchievementSnapshotItem[];
+  byId: Map<string, AchievementSnapshotItem>;
 };
 
 type DailyCompletionPanelProps = {
@@ -42,7 +69,11 @@ export function DailyCompletionPanel({
   const [completedIds, setCompletedIds] = useState<string[]>(initialCompletedHabitIds);
   const [pendingIds, setPendingIds] = useState<string[]>([]);
   const [toasts, setToasts] = useState<ToastItem[]>([]);
+  const [achievementToasts, setAchievementToasts] = useState<AchievementToastItem[]>([]);
   const toastIdRef = useRef(0);
+  const achievementToastIdRef = useRef(0);
+  const achievementsSnapshotRef = useRef<AchievementsSnapshot | null>(null);
+  const achievementsLoadingRef = useRef<Promise<AchievementsSnapshot | null> | null>(null);
   const completionSignature = initialCompletedHabitIds.join('|');
   const listId = useId();
 
@@ -50,6 +81,10 @@ export function DailyCompletionPanel({
     setCompletedIds(initialCompletedHabitIds);
     setPendingIds([]);
   }, [selectedDateKey, completionSignature]);
+
+  useEffect(() => {
+    void ensureAchievementsSnapshot();
+  }, []);
 
   const pushToast = (message: string, tone: ToastItem['tone'] = 'neutral') => {
     const id = toastIdRef.current + 1;
@@ -71,6 +106,61 @@ export function DailyCompletionPanel({
     window.setTimeout(() => {
       setToasts((prev) => prev.filter((toast) => toast.id !== id));
     }, 4800);
+  };
+
+  const pushAchievementToast = (toast: Omit<AchievementToastItem, 'id' | 'state'>) => {
+    const id = achievementToastIdRef.current + 1;
+    achievementToastIdRef.current = id;
+    setAchievementToasts((prev) => [...prev, { ...toast, id, state: 'entering' }]);
+
+    window.requestAnimationFrame(() => {
+      setAchievementToasts((prev) =>
+        prev.map((item) => (item.id === id ? { ...item, state: 'open' } : item)),
+      );
+    });
+
+    window.setTimeout(() => {
+      setAchievementToasts((prev) =>
+        prev.map((item) => (item.id === id ? { ...item, state: 'closing' } : item)),
+      );
+    }, 4500);
+
+    window.setTimeout(() => {
+      setAchievementToasts((prev) => prev.filter((item) => item.id !== id));
+    }, 4800);
+  };
+
+  const buildAchievementsSnapshot = (data: AchievementsResponse): AchievementsSnapshot => ({
+    isPro: data.isPro,
+    achievements: data.achievements,
+    byId: new Map(data.achievements.map((achievement) => [achievement.id, achievement])),
+  });
+
+  const loadAchievementsSnapshot = async (): Promise<AchievementsSnapshot | null> => {
+    try {
+      const response = await fetch('/api/achievements');
+      const body = await parseJson<AchievementsResponse>(response);
+      if (!response.ok || !body?.ok) {
+        return null;
+      }
+      const snapshot = buildAchievementsSnapshot(body.data);
+      achievementsSnapshotRef.current = snapshot;
+      return snapshot;
+    } catch {
+      return null;
+    }
+  };
+
+  const ensureAchievementsSnapshot = async (): Promise<AchievementsSnapshot | null> => {
+    if (achievementsSnapshotRef.current) return achievementsSnapshotRef.current;
+    if (!achievementsLoadingRef.current) {
+      achievementsLoadingRef.current = (async () => {
+        const snapshot = await loadAchievementsSnapshot();
+        achievementsLoadingRef.current = null;
+        return snapshot;
+      })();
+    }
+    return achievementsLoadingRef.current;
   };
 
   const playDing = (tone: 'habit' | 'day') => {
@@ -112,6 +202,122 @@ export function DailyCompletionPanel({
     }, 350);
   };
 
+  const playAchievementDing = () => {
+    if (typeof window === 'undefined') return;
+    type WebkitWindow = typeof window & { webkitAudioContext?: typeof AudioContext };
+    const AudioContextCtor = window.AudioContext || (window as WebkitWindow).webkitAudioContext;
+    if (!AudioContextCtor) return;
+
+    const context = new AudioContextCtor();
+    const now = context.currentTime;
+
+    const createTone = (frequency: number, duration: number, gainPeak: number, start: number) => {
+      const oscillator = context.createOscillator();
+      const gain = context.createGain();
+      oscillator.type = 'sine';
+      oscillator.frequency.setValueAtTime(frequency, start);
+      gain.gain.setValueAtTime(0.0001, start);
+      gain.gain.linearRampToValueAtTime(gainPeak, start + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+      oscillator.connect(gain);
+      gain.connect(context.destination);
+      oscillator.start(start);
+      oscillator.stop(start + duration);
+      oscillator.onended = () => {
+        oscillator.disconnect();
+        gain.disconnect();
+      };
+    };
+
+    createTone(820, 0.14, 0.09, now);
+    createTone(1060, 0.2, 0.07, now + 0.04);
+
+    window.setTimeout(() => {
+      void context.close();
+    }, 350);
+  };
+
+  const refreshAchievements = async (emitToasts: boolean): Promise<boolean> => {
+    const previous = achievementsSnapshotRef.current;
+    const next = await loadAchievementsSnapshot();
+    if (!next) return false;
+
+    if (!emitToasts || !previous) return false;
+
+    const shouldPlayDing = next.achievements.some((achievement) => {
+      const prev = previous.byId.get(achievement.id);
+      if (!prev) return false;
+      if (!next.isPro && achievement.tier === 'pro') return false;
+      return !prev.unlocked && achievement.unlocked;
+    });
+
+    const progressCandidates: Array<{
+      achievement: AchievementSnapshotItem;
+      prev: AchievementSnapshotItem;
+    }> = [];
+
+    for (const achievement of next.achievements) {
+      const prev = previous.byId.get(achievement.id);
+      if (!prev) continue;
+      if (!next.isPro && achievement.tier === 'pro') continue;
+
+      if (!prev.unlocked && achievement.unlocked) {
+        pushAchievementToast({
+          kind: 'unlock',
+          title: achievement.title,
+          description: achievement.description,
+          current: achievement.progress.current,
+          target: achievement.progress.target,
+          ratio: achievement.progress.ratio,
+          tier: achievement.tier,
+        });
+        continue;
+      }
+
+      if (achievement.progress.current > prev.progress.current && !achievement.unlocked) {
+        progressCandidates.push({ achievement, prev });
+      }
+    }
+
+    if (progressCandidates.length > 0) {
+      const selected = [...progressCandidates].sort((a, b) => {
+        const ratioA = a.achievement.progress.ratio;
+        const ratioB = b.achievement.progress.ratio;
+        if (ratioB !== ratioA) return ratioB - ratioA;
+        const remainingA = a.achievement.progress.target - a.achievement.progress.current;
+        const remainingB = b.achievement.progress.target - b.achievement.progress.current;
+        if (remainingA !== remainingB) return remainingA - remainingB;
+        return a.achievement.progress.target - b.achievement.progress.target;
+      })[0];
+
+      if (selected) {
+        const fromCurrent = selected.prev.progress.current;
+        const fromRatio =
+          selected.achievement.progress.target > 0
+            ? Math.min(1, fromCurrent / selected.achievement.progress.target)
+            : 0;
+
+        pushAchievementToast({
+          kind: 'progress',
+          title: selected.achievement.title,
+          description: selected.achievement.description,
+          current: selected.achievement.progress.current,
+          target: selected.achievement.progress.target,
+          ratio: selected.achievement.progress.ratio,
+          tier: selected.achievement.tier,
+          fromCurrent,
+          fromRatio,
+        });
+      }
+    }
+
+    if (shouldPlayDing) {
+      playAchievementDing();
+    }
+
+    return shouldPlayDing;
+  };
+
   const setCompletionState = (habitId: string, completed: boolean) => {
     setCompletedIds((prev) => {
       const hasHabit = prev.includes(habitId);
@@ -137,6 +343,7 @@ export function DailyCompletionPanel({
     setCompletionState(habitId, !alreadyCompleted);
 
     try {
+      await ensureAchievementsSnapshot();
       const response = await fetch('/api/completions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -158,15 +365,19 @@ export function DailyCompletionPanel({
       if (result.status === 'created') {
         setCompletionState(habitId, true);
         router.refresh();
-        const nextCompletedIds = alreadyCompleted ? completedIds : [...completedIds, habitId];
-        if (nextCompletedIds.length >= habits.length && habits.length > 0) {
-          playDing('day');
-        } else {
-          playDing('habit');
+        const unlocked = await refreshAchievements(true);
+        if (!unlocked) {
+          const nextCompletedIds = alreadyCompleted ? completedIds : [...completedIds, habitId];
+          if (nextCompletedIds.length >= habits.length && habits.length > 0) {
+            playDing('day');
+          } else {
+            playDing('habit');
+          }
         }
       } else if (result.status === 'deleted') {
         setCompletionState(habitId, false);
         router.refresh();
+        await refreshAchievements(false);
       }
     } catch {
       setCompletionState(habitId, alreadyCompleted);
@@ -326,6 +537,7 @@ export function DailyCompletionPanel({
       </div>
 
       <ToastStack toasts={toasts} />
+      <AchievementToastStack toasts={achievementToasts} />
     </div>
   );
 }

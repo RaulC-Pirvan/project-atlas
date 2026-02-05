@@ -6,10 +6,16 @@ import { usePathname } from 'next/navigation';
 import { SignOutButton } from '../auth/SignOutButton';
 
 const navItems = [
-  { href: '/habits', label: 'Habits', icon: 'habits', desktopOrder: 'md:order-3' },
+  { href: '/habits', label: 'Habits', icon: 'habits', desktopOrder: 'md:order-4' },
   { href: '/calendar', label: 'Calendar', icon: 'calendar', desktopOrder: 'md:order-1' },
   { href: '/insights', label: 'Insights', icon: 'insights', desktopOrder: 'md:order-2' },
-  { href: '/account', label: 'Account', icon: 'account', desktopOrder: 'md:order-4' },
+  {
+    href: '/achievements',
+    label: 'Achievements',
+    icon: 'achievements',
+    desktopOrder: 'md:order-3',
+  },
+  { href: '/account', label: 'Account', icon: 'account', desktopOrder: 'md:order-5' },
 ];
 
 const baseClasses =
@@ -73,6 +79,26 @@ function NavIcon({ icon }: { icon: string }) {
         <path d="M7 14v-4" />
         <path d="M12 18v-8" />
         <path d="M17 18v-12" />
+      </svg>
+    );
+  }
+
+  if (icon === 'achievements') {
+    return (
+      <svg
+        viewBox="0 0 24 24"
+        aria-hidden="true"
+        className="h-5 w-5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M7 6h10v3c0 3-2.2 5-5 5s-5-2-5-5V6Z" />
+        <path d="M9 14v3h6v-3" />
+        <path d="M5 6h2v3a4 4 0 0 1-2-1.5V6Z" />
+        <path d="M19 6h-2v3a4 4 0 0 0 2-1.5V6Z" />
       </svg>
     );
   }

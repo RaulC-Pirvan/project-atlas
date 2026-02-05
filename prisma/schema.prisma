@@ -59,6 +59,8 @@ model User {
   emailVerificationTokens EmailVerificationToken[]
   passwordResetTokens PasswordResetToken[]
   proEntitlement ProEntitlement?
+  achievementUnlocks AchievementUnlock[]
+  habitMilestoneUnlocks HabitMilestoneUnlock[]
 
   @@index([email])
 }
@@ -253,6 +255,7 @@ model Habit {
   user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   schedule    HabitSchedule[]
   completions HabitCompletion[]
+  milestoneUnlocks HabitMilestoneUnlock[]
 
   @@index([userId])
 }
@@ -288,4 +291,33 @@ model HabitCompletion {
   @@unique([habitId, date])
   @@index([habitId])
   @@index([date])
+}
+
+model AchievementUnlock {
+  id            String   @id @default(cuid())
+  userId        String
+  achievementId String
+  unlockedAt    DateTime @default(now())
+  createdAt     DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, achievementId])
+  @@index([userId])
+}
+
+model HabitMilestoneUnlock {
+  id          String   @id @default(cuid())
+  userId      String
+  habitId     String
+  milestoneId String
+  unlockedAt  DateTime @default(now())
+  createdAt   DateTime @default(now())
+
+  user User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  habit Habit @relation(fields: [habitId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, habitId, milestoneId])
+  @@index([userId])
+  @@index([habitId])
 }

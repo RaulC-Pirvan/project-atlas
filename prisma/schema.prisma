@@ -56,11 +56,13 @@ model User {
   accounts Account[]
   sessions Session[]
   habits Habit[]
+  reminderSettings UserReminderSettings?
   emailVerificationTokens EmailVerificationToken[]
   passwordResetTokens PasswordResetToken[]
   proEntitlement ProEntitlement?
   achievementUnlocks AchievementUnlock[]
   habitMilestoneUnlocks HabitMilestoneUnlock[]
+  habitReminderSnoozes HabitReminderSnooze[]
 
   @@index([email])
 }
@@ -255,6 +257,7 @@ model Habit {
   user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   schedule    HabitSchedule[]
   completions HabitCompletion[]
+  reminders   HabitReminder[]
   milestoneUnlocks HabitMilestoneUnlock[]
 
   @@index([userId])
@@ -291,6 +294,72 @@ model HabitCompletion {
   @@unique([habitId, date])
   @@index([habitId])
   @@index([date])
+}
+
+/**
+ * UserReminderSettings stores per-user reminder preferences.
+ *
+ * Time values are minutes since midnight in the user's timezone (0-1439).
+ */
+model UserReminderSettings {
+  id                     String   @id @default(cuid())
+  userId                 String   @unique
+  dailyDigestEnabled     Boolean  @default(true)
+  dailyDigestTimeMinutes Int      @default(1200) @db.SmallInt
+  quietHoursEnabled      Boolean  @default(false)
+  quietHoursStartMinutes Int      @default(1320) @db.SmallInt
+  quietHoursEndMinutes   Int      @default(420) @db.SmallInt
+  snoozeDefaultMinutes   Int      @default(10) @db.SmallInt
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+/**
+ * HabitReminder stores reminder times per habit.
+ *
+ * Reminder times are local minutes since midnight (0-1439).
+ */
+model HabitReminder {
+  id          String   @id @default(cuid())
+  habitId     String
+  timeMinutes Int      @db.SmallInt
+  enabled     Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  habit   Habit                 @relation(fields: [habitId], references: [id], onDelete: Cascade)
+  snoozes HabitReminderSnooze[]
+
+  @@unique([habitId, timeMinutes])
+  @@index([habitId])
+}
+
+/**
+ * HabitReminderSnooze stores same-day snooze state per reminder.
+ *
+ * localDate is the user's local date (stored as date-only).
+ */
+model HabitReminderSnooze {
+  id               String   @id @default(cuid())
+  habitReminderId  String
+  userId           String
+  localDate        DateTime @db.Date
+  snoozedUntil     DateTime
+  totalMinutes     Int      @default(0) @db.SmallInt
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  reminder HabitReminder @relation(fields: [habitReminderId], references: [id], onDelete: Cascade)
+  user     User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([habitReminderId, localDate])
+  @@index([habitReminderId])
+  @@index([userId])
+  @@index([localDate])
 }
 
 model AchievementUnlock {

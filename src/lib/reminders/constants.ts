@@ -1,0 +1,13 @@
+export const MINUTES_PER_DAY = 24 * 60;
+export const MIN_TIME_MINUTES = 0;
+export const MAX_TIME_MINUTES = MINUTES_PER_DAY - 1;
+
+export const MAX_REMINDERS_PER_HABIT = 3;
+
+export const DEFAULT_DAILY_DIGEST_MINUTES = 20 * 60;
+export const DEFAULT_QUIET_HOURS_START_MINUTES = 22 * 60;
+export const DEFAULT_QUIET_HOURS_END_MINUTES = 7 * 60;
+
+export const DEFAULT_SNOOZE_MINUTES = 10;
+export const MAX_SNOOZE_MINUTES = 120;
+export const MAX_SNOOZE_DAILY_MINUTES = 240;

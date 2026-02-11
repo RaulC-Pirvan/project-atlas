@@ -110,8 +110,8 @@ CI must remain green.
 
 ### Tasks (2)
 
-- [ ] **Task 3.1**: Add server-side validation + rate limiting for reminder APIs
-- [ ] **Task 3.2**: Add tests for reminder scheduling rules
+- [x] **Task 3.1**: Add server-side validation + rate limiting for reminder APIs
+- [x] **Task 3.2**: Add tests for reminder scheduling rules
 
 ---
 
@@ -143,8 +143,8 @@ CI must remain green.
 1. [x] Reminder model is defined and documented
 2. [x] Reminder settings UI is accessible and functional
 3. [x] Delivery strategy is push-ready and documented
-4. [ ] Reminder APIs validate input and are rate-limited
-5. [ ] Reminder scheduling rules are covered by unit tests
+4. [x] Reminder APIs validate input and are rate-limited
+5. [x] Reminder scheduling rules are covered by unit tests
 6. [ ] CI passes from a clean checkout
 
 ---

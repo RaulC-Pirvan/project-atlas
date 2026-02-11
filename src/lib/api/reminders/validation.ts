@@ -1,10 +1,6 @@
 import { z } from 'zod';
 
-import {
-  MAX_SNOOZE_MINUTES,
-  MAX_TIME_MINUTES,
-  MIN_TIME_MINUTES,
-} from '../../reminders/constants';
+import { MAX_SNOOZE_MINUTES, MAX_TIME_MINUTES, MIN_TIME_MINUTES } from '../../reminders/constants';
 
 const timeMinutesSchema = z.number().int().min(MIN_TIME_MINUTES).max(MAX_TIME_MINUTES);
 

@@ -1,14 +1,11 @@
 import { getServerSession } from 'next-auth/next';
 
 import { ApiError, asApiError } from '../../../../lib/api/errors';
-import { jsonError, jsonOk } from '../../../../lib/api/response';
 import { updateReminderSettingsSchema } from '../../../../lib/api/reminders/validation';
+import { jsonError, jsonOk } from '../../../../lib/api/response';
 import { authOptions } from '../../../../lib/auth/nextauth';
 import { prisma } from '../../../../lib/db/prisma';
-import {
-  applyRateLimitHeaders,
-  consumeRateLimit,
-} from '../../../../lib/http/rateLimit';
+import { applyRateLimitHeaders, consumeRateLimit } from '../../../../lib/http/rateLimit';
 import { withApiLogging } from '../../../../lib/observability/apiLogger';
 import {
   getReminderRateLimitKey,
@@ -111,15 +108,11 @@ export async function PUT(request: Request) {
       const base = resolveReminderSettings(existing);
       const next = {
         dailyDigestEnabled: parsed.data.dailyDigestEnabled ?? base.dailyDigestEnabled,
-        dailyDigestTimeMinutes:
-          parsed.data.dailyDigestTimeMinutes ?? base.dailyDigestTimeMinutes,
+        dailyDigestTimeMinutes: parsed.data.dailyDigestTimeMinutes ?? base.dailyDigestTimeMinutes,
         quietHoursEnabled: parsed.data.quietHoursEnabled ?? base.quietHoursEnabled,
-        quietHoursStartMinutes:
-          parsed.data.quietHoursStartMinutes ?? base.quietHoursStartMinutes,
-        quietHoursEndMinutes:
-          parsed.data.quietHoursEndMinutes ?? base.quietHoursEndMinutes,
-        snoozeDefaultMinutes:
-          parsed.data.snoozeDefaultMinutes ?? base.snoozeDefaultMinutes,
+        quietHoursStartMinutes: parsed.data.quietHoursStartMinutes ?? base.quietHoursStartMinutes,
+        quietHoursEndMinutes: parsed.data.quietHoursEndMinutes ?? base.quietHoursEndMinutes,
+        snoozeDefaultMinutes: parsed.data.snoozeDefaultMinutes ?? base.snoozeDefaultMinutes,
       };
 
       const validationError = getReminderSettingsValidationError(next);

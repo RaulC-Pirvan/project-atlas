@@ -1,6 +1,10 @@
 import { z } from 'zod';
 
-import { MAX_REMINDERS_PER_HABIT, MAX_TIME_MINUTES, MIN_TIME_MINUTES } from '../../reminders/constants';
+import {
+  MAX_REMINDERS_PER_HABIT,
+  MAX_TIME_MINUTES,
+  MIN_TIME_MINUTES,
+} from '../../reminders/constants';
 
 const weekdaySchema = z.number().int().min(1).max(7);
 const titleSchema = z.string().trim().min(1);

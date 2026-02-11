@@ -1,9 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import {
-  MAX_SNOOZE_DAILY_MINUTES,
-  MAX_SNOOZE_MINUTES,
-} from '../constants';
+import { MAX_SNOOZE_DAILY_MINUTES, MAX_SNOOZE_MINUTES } from '../constants';
 import { getAllowedSnoozeMinutes, isTimeWithinQuietHours } from '../rules';
 
 describe('reminder rules', () => {
@@ -29,9 +26,7 @@ describe('reminder rules', () => {
 
   it('clamps snooze minutes by max and daily cap', () => {
     expect(getAllowedSnoozeMinutes(10, 0)).toBe(10);
-    expect(getAllowedSnoozeMinutes(MAX_SNOOZE_MINUTES + 30, 0)).toBe(
-      MAX_SNOOZE_MINUTES,
-    );
+    expect(getAllowedSnoozeMinutes(MAX_SNOOZE_MINUTES + 30, 0)).toBe(MAX_SNOOZE_MINUTES);
 
     const remaining = MAX_SNOOZE_DAILY_MINUTES - 15;
     expect(getAllowedSnoozeMinutes(30, MAX_SNOOZE_DAILY_MINUTES - 15)).toBe(15);

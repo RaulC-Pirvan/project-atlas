@@ -180,22 +180,22 @@ export function HabitForm({
       <FormField
         id={`${mode}-habit-reminders`}
         label="Reminder times"
-        hint={`Optional. Up to ${MAX_REMINDERS_PER_HABIT}.${
+        hint={`Use 24-hour time (HH:MM). Optional. Up to ${MAX_REMINDERS_PER_HABIT}.${
           timezoneLabel ? ` Times use ${timezoneLabel}.` : ''
         }`}
         error={null}
       >
         <div className="space-y-3">
           {reminderTimes.length === 0 ? (
-            <p className="text-sm text-black/60 dark:text-white/60">
-              No reminder times set yet.
-            </p>
+            <p className="text-sm text-black/60 dark:text-white/60">No reminder times set yet.</p>
           ) : null}
           {reminderTimes.map((timeValue, index) => (
             <div key={`${mode}-reminder-${index}`} className="flex items-center gap-2">
               <Input
-                type="time"
-                step="60"
+                type="text"
+                inputMode="numeric"
+                pattern="[0-2][0-9]:[0-5][0-9]"
+                placeholder="HH:MM"
                 value={timeValue}
                 onChange={(event) => {
                   const next = [...reminderTimes];

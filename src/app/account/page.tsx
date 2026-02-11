@@ -48,15 +48,12 @@ export default async function AccountPage() {
     <AppShell title="Account" subtitle="Manage your profile and security.">
       <div className="space-y-10">
         <ProAccountCard isPro={proEntitlement.isPro} />
-        <ReminderSettingsPanel
-          initialSettings={reminderSettings}
-          timezoneLabel={user.timezone}
-        />
         <AccountPanel
           email={session.user.email ?? ''}
           displayName={session.user.name ?? session.user.email ?? 'User'}
           weekStart={user.weekStart}
         />
+        <ReminderSettingsPanel initialSettings={reminderSettings} timezoneLabel={user.timezone} />
       </div>
     </AppShell>
   );

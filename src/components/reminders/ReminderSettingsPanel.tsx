@@ -3,10 +3,7 @@
 import { useRef, useState } from 'react';
 
 import { getApiErrorMessage, parseJson } from '../../lib/api/client';
-import {
-  MAX_SNOOZE_DAILY_MINUTES,
-  MAX_SNOOZE_MINUTES,
-} from '../../lib/reminders/constants';
+import { MAX_SNOOZE_DAILY_MINUTES, MAX_SNOOZE_MINUTES } from '../../lib/reminders/constants';
 import { minutesToTimeString, timeStringToMinutes } from '../../lib/reminders/time';
 import type { UserReminderSettings } from '../../lib/reminders/types';
 import { Button } from '../ui/Button';
@@ -27,24 +24,18 @@ export function ReminderSettingsPanel({
   initialSettings,
   timezoneLabel,
 }: ReminderSettingsPanelProps) {
-  const [dailyDigestEnabled, setDailyDigestEnabled] = useState(
-    initialSettings.dailyDigestEnabled,
-  );
+  const [dailyDigestEnabled, setDailyDigestEnabled] = useState(initialSettings.dailyDigestEnabled);
   const [dailyDigestTime, setDailyDigestTime] = useState(
     minutesToTimeString(initialSettings.dailyDigestTimeMinutes),
   );
-  const [quietHoursEnabled, setQuietHoursEnabled] = useState(
-    initialSettings.quietHoursEnabled,
-  );
+  const [quietHoursEnabled, setQuietHoursEnabled] = useState(initialSettings.quietHoursEnabled);
   const [quietHoursStart, setQuietHoursStart] = useState(
     minutesToTimeString(initialSettings.quietHoursStartMinutes),
   );
   const [quietHoursEnd, setQuietHoursEnd] = useState(
     minutesToTimeString(initialSettings.quietHoursEndMinutes),
   );
-  const [snoozeDefault, setSnoozeDefault] = useState(
-    String(initialSettings.snoozeDefaultMinutes),
-  );
+  const [snoozeDefault, setSnoozeDefault] = useState(String(initialSettings.snoozeDefaultMinutes));
   const [saving, setSaving] = useState(false);
   const [toasts, setToasts] = useState<ToastItem[]>([]);
   const [baseline, setBaseline] = useState(initialSettings);
@@ -190,13 +181,15 @@ export function ReminderSettingsPanel({
       <FormField
         id="reminder-digest-time"
         label="Digest time"
-        hint="Default is 20:00."
+        hint="Use 24-hour time (HH:MM). Default is 20:00."
         error={null}
       >
         <Input
           id="reminder-digest-time"
-          type="time"
-          step="60"
+          type="text"
+          inputMode="numeric"
+          pattern="[0-2][0-9]:[0-5][0-9]"
+          placeholder="HH:MM"
           value={dailyDigestTime}
           onChange={(event) => setDailyDigestTime(event.target.value)}
           disabled={!dailyDigestEnabled}
@@ -229,13 +222,15 @@ export function ReminderSettingsPanel({
         <FormField
           id="quiet-hours-start"
           label="Quiet hours start"
-          hint="Suggested 22:00."
+          hint="Use 24-hour time (HH:MM). Suggested 22:00."
           error={null}
         >
           <Input
             id="quiet-hours-start"
-            type="time"
-            step="60"
+            type="text"
+            inputMode="numeric"
+            pattern="[0-2][0-9]:[0-5][0-9]"
+            placeholder="HH:MM"
             value={quietHoursStart}
             onChange={(event) => setQuietHoursStart(event.target.value)}
             disabled={!quietHoursEnabled}
@@ -244,13 +239,15 @@ export function ReminderSettingsPanel({
         <FormField
           id="quiet-hours-end"
           label="Quiet hours end"
-          hint="Suggested 07:00."
+          hint="Use 24-hour time (HH:MM). Suggested 07:00."
           error={null}
         >
           <Input
             id="quiet-hours-end"
-            type="time"
-            step="60"
+            type="text"
+            inputMode="numeric"
+            pattern="[0-2][0-9]:[0-5][0-9]"
+            placeholder="HH:MM"
             value={quietHoursEnd}
             onChange={(event) => setQuietHoursEnd(event.target.value)}
             disabled={!quietHoursEnabled}

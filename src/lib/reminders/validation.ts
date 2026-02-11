@@ -3,9 +3,7 @@ import { isQuietHoursRangeValid } from './rules';
 import { isValidTimeMinutes } from './time';
 import type { UserReminderSettings } from './types';
 
-export function getReminderSettingsValidationError(
-  settings: UserReminderSettings,
-): string | null {
+export function getReminderSettingsValidationError(settings: UserReminderSettings): string | null {
   if (!isValidTimeMinutes(settings.dailyDigestTimeMinutes)) {
     return 'Daily digest time is invalid.';
   }

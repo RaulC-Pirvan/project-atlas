@@ -249,15 +249,15 @@
 
 ### Sprint 10.1: Reminder Scheduling v1 (Web + Mobile Ready)
 
-- [ ] Define reminder model:
+- [x] Define reminder model:
   - per habit reminder time(s)
   - daily digest
   - quiet hours
   - snooze
-- [ ] Add reminder settings UI
-- [ ] Implement notification delivery strategy (push-ready)
-- [ ] Add server-side validation + rate limiting for reminder APIs
-- [ ] Add tests for reminder scheduling rules
+- [x] Add reminder settings UI
+- [x] Implement notification delivery strategy (push-ready)
+- [x] Add server-side validation + rate limiting for reminder APIs
+- [x] Add tests for reminder scheduling rules
 
 ---
 

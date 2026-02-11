@@ -26,21 +26,15 @@ export function getDefaultReminderSettings(): UserReminderSettings {
   };
 }
 
-export function resolveReminderSettings(
-  record?: SettingsRecord | null,
-): UserReminderSettings {
+export function resolveReminderSettings(record?: SettingsRecord | null): UserReminderSettings {
   const defaults = getDefaultReminderSettings();
   if (!record) return defaults;
   return {
     dailyDigestEnabled: record.dailyDigestEnabled ?? defaults.dailyDigestEnabled,
-    dailyDigestTimeMinutes:
-      record.dailyDigestTimeMinutes ?? defaults.dailyDigestTimeMinutes,
+    dailyDigestTimeMinutes: record.dailyDigestTimeMinutes ?? defaults.dailyDigestTimeMinutes,
     quietHoursEnabled: record.quietHoursEnabled ?? defaults.quietHoursEnabled,
-    quietHoursStartMinutes:
-      record.quietHoursStartMinutes ?? defaults.quietHoursStartMinutes,
-    quietHoursEndMinutes:
-      record.quietHoursEndMinutes ?? defaults.quietHoursEndMinutes,
-    snoozeDefaultMinutes:
-      record.snoozeDefaultMinutes ?? defaults.snoozeDefaultMinutes,
+    quietHoursStartMinutes: record.quietHoursStartMinutes ?? defaults.quietHoursStartMinutes,
+    quietHoursEndMinutes: record.quietHoursEndMinutes ?? defaults.quietHoursEndMinutes,
+    snoozeDefaultMinutes: record.snoozeDefaultMinutes ?? defaults.snoozeDefaultMinutes,
   };
 }

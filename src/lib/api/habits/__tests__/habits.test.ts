@@ -14,6 +14,7 @@ describe('habit api services', () => {
           archivedAt: null,
           createdAt: new Date('2026-02-01T00:00:00.000Z'),
           schedule: [{ weekday: 1 }, { weekday: 3 }],
+          reminders: [],
         }),
       },
     };
@@ -49,6 +50,7 @@ describe('habit api services', () => {
             archivedAt: null,
             createdAt: new Date('2026-02-01T00:00:00.000Z'),
             schedule: [{ weekday: 5 }, { weekday: 1 }],
+            reminders: [{ timeMinutes: 540 }, { timeMinutes: 60 }],
           },
         ]),
       },
@@ -70,6 +72,7 @@ describe('habit api services', () => {
           archivedAt: null,
           createdAt: new Date('2026-02-01T00:00:00.000Z'),
           schedule: [{ weekday: 2 }],
+          reminders: [],
         }),
         findUnique: vi.fn().mockResolvedValue({
           id: 'h1',
@@ -78,6 +81,7 @@ describe('habit api services', () => {
           archivedAt: null,
           createdAt: new Date('2026-02-01T00:00:00.000Z'),
           schedule: [{ weekday: 2 }],
+          reminders: [],
         }),
       },
     };

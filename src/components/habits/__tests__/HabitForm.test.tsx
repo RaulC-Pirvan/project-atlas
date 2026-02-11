@@ -48,6 +48,7 @@ describe('HabitForm', () => {
         title: 'Read',
         description: 'Focus',
         weekdays: [1],
+        reminderTimes: [],
       }),
     );
   });

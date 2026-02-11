@@ -2,6 +2,8 @@
 
 import { useRef, useState } from 'react';
 
+import { MAX_REMINDERS_PER_HABIT } from '../../lib/reminders/constants';
+import { minutesToTimeString, timeStringToMinutes } from '../../lib/reminders/time';
 import { Button } from '../ui/Button';
 import { FormField } from '../ui/FormField';
 import { Input } from '../ui/Input';
@@ -13,6 +15,7 @@ export type HabitFormValues = {
   title: string;
   description?: string;
   weekdays: number[];
+  reminderTimes: number[];
 };
 
 type HabitFormProps = {
@@ -22,9 +25,11 @@ type HabitFormProps = {
   onSubmit: (payload: HabitFormValues) => Promise<void>;
   onCancel?: () => void;
   resetOnSubmit?: boolean;
+  timezoneLabel?: string;
 };
 
 const DEFAULT_WEEKDAYS = [1, 2, 3, 4, 5, 6, 7];
+const DEFAULT_REMINDER_TIME = '09:00';
 
 export function HabitForm({
   mode,
@@ -33,11 +38,17 @@ export function HabitForm({
   onSubmit,
   onCancel,
   resetOnSubmit = false,
+  timezoneLabel,
 }: HabitFormProps) {
   const [title, setTitle] = useState(initialValues?.title ?? '');
   const [description, setDescription] = useState(initialValues?.description ?? '');
   const [weekdays, setWeekdays] = useState(
     initialValues?.weekdays ? normalizeWeekdays(initialValues.weekdays) : DEFAULT_WEEKDAYS,
+  );
+  const [reminderTimes, setReminderTimes] = useState<string[]>(
+    initialValues?.reminderTimes?.length
+      ? initialValues.reminderTimes.map((time) => minutesToTimeString(time))
+      : [],
   );
   const [submitting, setSubmitting] = useState(false);
   const [toasts, setToasts] = useState<ToastItem[]>([]);
@@ -81,11 +92,35 @@ export function HabitForm({
       return;
     }
 
+    const parsedReminderTimes: number[] = [];
+    const seenTimes = new Set<number>();
+    for (const timeValue of reminderTimes) {
+      const minutes = timeStringToMinutes(timeValue);
+      if (minutes === null) {
+        pushToast('Reminder time must be in HH:MM format.', 'error');
+        return;
+      }
+      if (seenTimes.has(minutes)) {
+        pushToast('Reminder times must be unique.', 'error');
+        return;
+      }
+      seenTimes.add(minutes);
+      parsedReminderTimes.push(minutes);
+    }
+
+    if (parsedReminderTimes.length > MAX_REMINDERS_PER_HABIT) {
+      pushToast(`Up to ${MAX_REMINDERS_PER_HABIT} reminders per habit.`, 'error');
+      return;
+    }
+
+    parsedReminderTimes.sort((a, b) => a - b);
+
     const normalizedDescription = description.trim();
     const payload: HabitFormValues = {
       title: normalizedTitle,
       description: normalizedDescription ? normalizedDescription : undefined,
       weekdays: normalizedWeekdays,
+      reminderTimes: parsedReminderTimes,
     };
 
     setSubmitting(true);
@@ -96,6 +131,7 @@ export function HabitForm({
         setTitle('');
         setDescription('');
         setWeekdays(DEFAULT_WEEKDAYS);
+        setReminderTimes([]);
       }
     } catch {
       pushToast('Something went wrong. Try again.', 'error');
@@ -139,6 +175,64 @@ export function HabitForm({
 
       <FormField id={`${mode}-habit-weekdays`} label="Active weekdays" error={null}>
         <WeekdaySelector value={weekdays} weekStart={weekStart} onChange={setWeekdays} />
+      </FormField>
+
+      <FormField
+        id={`${mode}-habit-reminders`}
+        label="Reminder times"
+        hint={`Optional. Up to ${MAX_REMINDERS_PER_HABIT}.${
+          timezoneLabel ? ` Times use ${timezoneLabel}.` : ''
+        }`}
+        error={null}
+      >
+        <div className="space-y-3">
+          {reminderTimes.length === 0 ? (
+            <p className="text-sm text-black/60 dark:text-white/60">
+              No reminder times set yet.
+            </p>
+          ) : null}
+          {reminderTimes.map((timeValue, index) => (
+            <div key={`${mode}-reminder-${index}`} className="flex items-center gap-2">
+              <Input
+                type="time"
+                step="60"
+                value={timeValue}
+                onChange={(event) => {
+                  const next = [...reminderTimes];
+                  next[index] = event.target.value;
+                  setReminderTimes(next);
+                }}
+                className="max-w-[160px]"
+                aria-label={`Reminder time ${index + 1}`}
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setReminderTimes((prev) => prev.filter((_, i) => i !== index));
+                }}
+              >
+                Remove
+              </Button>
+            </div>
+          ))}
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              if (reminderTimes.length >= MAX_REMINDERS_PER_HABIT) {
+                pushToast(`Up to ${MAX_REMINDERS_PER_HABIT} reminders per habit.`, 'error');
+                return;
+              }
+              setReminderTimes((prev) => [...prev, DEFAULT_REMINDER_TIME]);
+            }}
+            disabled={reminderTimes.length >= MAX_REMINDERS_PER_HABIT}
+          >
+            Add time
+          </Button>
+        </div>
       </FormField>
 
       <div className="flex flex-col gap-3 sm:flex-row">

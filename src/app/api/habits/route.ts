@@ -57,6 +57,7 @@ export async function POST(request: Request) {
         title: parsed.data.title,
         description: parsed.data.description,
         weekdays: parsed.data.weekdays,
+        reminderTimes: parsed.data.reminderTimes,
       });
 
       return jsonOk({ habit }, 201);

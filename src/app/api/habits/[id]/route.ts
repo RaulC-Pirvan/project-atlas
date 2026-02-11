@@ -43,6 +43,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
         title: parsed.data.title,
         description: parsed.data.description,
         weekdays: parsed.data.weekdays,
+        reminderTimes: parsed.data.reminderTimes,
       });
 
       return jsonOk({ habit });

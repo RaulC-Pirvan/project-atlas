@@ -2,7 +2,16 @@
 
 import { useRouter } from 'next/navigation';
 import type { KeyboardEvent } from 'react';
-import { memo, useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
+import {
+  memo,
+  useCallback,
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 
 import { getApiErrorMessage, parseJson } from '../../lib/api/client';
 import { orderHabitsByCompletion } from '../../lib/habits/ordering';
@@ -90,7 +99,7 @@ const HabitRow = memo(function HabitRow({
     : 'hover:bg-black/5 active:bg-black/10 sm:active:scale-[0.99] dark:hover:bg-white/10 dark:active:bg-white/20';
 
   return (
-    <li>
+    <li data-habit-row data-habit-id={habit.id}>
       <button
         type="button"
         role="checkbox"
@@ -129,7 +138,7 @@ const HabitRow = memo(function HabitRow({
         </div>
         <span
           aria-hidden="true"
-          className={`mt-1 inline-flex h-5 w-5 items-center justify-center rounded-full border ${
+          className={`inline-flex h-5 w-5 items-center justify-center self-center rounded-full border ${
             isCompleted
               ? 'border-white bg-white text-black dark:border-black/30 dark:bg-black/10 dark:text-black'
               : 'border-black/20 dark:border-white/20'
@@ -174,6 +183,9 @@ export function DailyCompletionPanel({
   const achievementsLoadingRef = useRef<Promise<AchievementsSnapshot | null> | null>(null);
   const completedCountRef = useRef(initialCompletedHabitIds.length);
   const habitsCountRef = useRef(habits.length);
+  const listRef = useRef<HTMLUListElement | null>(null);
+  const positionsRef = useRef<Map<string, DOMRect>>(new Map());
+  const hasMountedRef = useRef(false);
   const completionSignature = initialCompletedHabitIds.join('|');
   const listId = useId();
   const resolvedContextLabel = contextLabel ?? 'Selected day';
@@ -184,14 +196,52 @@ export function DailyCompletionPanel({
     [habits, completionSet, keepCompletedAtBottom],
   );
 
+  useLayoutEffect(() => {
+    const list = listRef.current;
+    if (!list) return;
+    if (typeof window === 'undefined') return;
+
+    const prefersReducedMotion =
+      window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
+
+    const items = Array.from(list.querySelectorAll<HTMLElement>('[data-habit-row]'));
+    const prevPositions = positionsRef.current;
+    const nextPositions = new Map<string, DOMRect>();
+
+    for (const item of items) {
+      const habitId = item.dataset.habitId;
+      if (!habitId) continue;
+      nextPositions.set(habitId, item.getBoundingClientRect());
+    }
+
+    positionsRef.current = nextPositions;
+
+    if (!hasMountedRef.current) {
+      hasMountedRef.current = true;
+      return;
+    }
+
+    if (prefersReducedMotion) return;
+
+    for (const item of items) {
+      const habitId = item.dataset.habitId;
+      if (!habitId) continue;
+      const previous = prevPositions.get(habitId);
+      const next = nextPositions.get(habitId);
+      if (!previous || !next) continue;
+      const deltaY = previous.top - next.top;
+      if (Math.abs(deltaY) < 1) continue;
+      item.animate([{ transform: `translateY(${deltaY}px)` }, { transform: 'translateY(0)' }], {
+        duration: 180,
+        easing: 'cubic-bezier(0.2, 0.6, 0.2, 1)',
+      });
+    }
+  }, [orderedHabits]);
+
   useEffect(() => {
     setCompletedIds(initialCompletedHabitIds);
     setPendingIds([]);
   }, [selectedDateKey, completionSignature]);
-
-  useEffect(() => {
-    void ensureAchievementsSnapshot();
-  }, [ensureAchievementsSnapshot]);
 
   useEffect(() => {
     completedCountRef.current = completedIds.length;
@@ -201,49 +251,70 @@ export function DailyCompletionPanel({
     habitsCountRef.current = habits.length;
   }, [habits.length]);
 
-  const pushToast = useCallback((message: string, tone: ToastItem['tone'] = 'neutral') => {
-    const id = toastIdRef.current + 1;
-    toastIdRef.current = id;
-    setToasts((prev) => [...prev, { id, tone, message, state: 'entering' }]);
+  const pushToast = useCallback(
+    (message: string, tone: ToastItem['tone'] = 'neutral') => {
+      const id = toastIdRef.current + 1;
+      toastIdRef.current = id;
+      setToasts((prev) => [...prev, { id, tone, message, state: 'entering' }]);
 
-    window.requestAnimationFrame(() => {
-      setToasts((prev) =>
-        prev.map((toast) => (toast.id === id ? { ...toast, state: 'open' } : toast)),
-      );
-    });
+      window.requestAnimationFrame(() => {
+        setToasts((prev) =>
+          prev.map((toast) => (toast.id === id ? { ...toast, state: 'open' } : toast)),
+        );
+      });
 
-    window.setTimeout(() => {
-      setToasts((prev) =>
-        prev.map((toast) => (toast.id === id ? { ...toast, state: 'closing' } : toast)),
-      );
-    }, 4500);
+      window.setTimeout(() => {
+        setToasts((prev) =>
+          prev.map((toast) => (toast.id === id ? { ...toast, state: 'closing' } : toast)),
+        );
+      }, 4500);
 
-    window.setTimeout(() => {
-      setToasts((prev) => prev.filter((toast) => toast.id !== id));
-    }, 4800);
-  }, [setToasts]);
+      window.setTimeout(() => {
+        setToasts((prev) => prev.filter((toast) => toast.id !== id));
+      }, 4800);
+    },
+    [setToasts],
+  );
 
-  const pushAchievementToast = useCallback((toast: Omit<AchievementToastItem, 'id' | 'state'>) => {
-    const id = achievementToastIdRef.current + 1;
-    achievementToastIdRef.current = id;
-    setAchievementToasts((prev) => [...prev, { ...toast, id, state: 'entering' }]);
+  const pushAchievementToast = useCallback(
+    (toast: Omit<AchievementToastItem, 'id' | 'state'>) => {
+      const id = achievementToastIdRef.current + 1;
+      achievementToastIdRef.current = id;
+      setAchievementToasts((prev) => [...prev, { ...toast, id, state: 'entering' }]);
 
-    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => {
+        setAchievementToasts((prev) =>
+          prev.map((item) => (item.id === id ? { ...item, state: 'open' } : item)),
+        );
+      });
+
+      window.setTimeout(() => {
+        setAchievementToasts((prev) =>
+          prev.map((item) => (item.id === id ? { ...item, state: 'closing' } : item)),
+        );
+      }, 4500);
+
+      window.setTimeout(() => {
+        setAchievementToasts((prev) => prev.filter((item) => item.id !== id));
+      }, 4800);
+    },
+    [setAchievementToasts],
+  );
+
+  const dismissAchievementToast = useCallback(
+    (id: number) => {
       setAchievementToasts((prev) =>
-        prev.map((item) => (item.id === id ? { ...item, state: 'open' } : item)),
+        prev.map((toast) =>
+          toast.id === id && toast.state !== 'closing' ? { ...toast, state: 'closing' } : toast,
+        ),
       );
-    });
 
-    window.setTimeout(() => {
-      setAchievementToasts((prev) =>
-        prev.map((item) => (item.id === id ? { ...item, state: 'closing' } : item)),
-      );
-    }, 4500);
-
-    window.setTimeout(() => {
-      setAchievementToasts((prev) => prev.filter((item) => item.id !== id));
-    }, 4800);
-  }, [setAchievementToasts]);
+      window.setTimeout(() => {
+        setAchievementToasts((prev) => prev.filter((toast) => toast.id !== id));
+      }, 220);
+    },
+    [setAchievementToasts],
+  );
 
   const buildAchievementsSnapshot = useCallback(
     (data: AchievementsResponse): AchievementsSnapshot => ({
@@ -280,6 +351,10 @@ export function DailyCompletionPanel({
     }
     return achievementsLoadingRef.current;
   }, [loadAchievementsSnapshot]);
+
+  useEffect(() => {
+    void ensureAchievementsSnapshot();
+  }, [ensureAchievementsSnapshot]);
 
   const playDing = useCallback((tone: 'habit' | 'day') => {
     if (typeof window === 'undefined') return;
@@ -355,86 +430,89 @@ export function DailyCompletionPanel({
     }, 350);
   }, []);
 
-  const refreshAchievements = useCallback(async (emitToasts: boolean): Promise<boolean> => {
-    const previous = achievementsSnapshotRef.current;
-    const next = await loadAchievementsSnapshot();
-    if (!next) return false;
+  const refreshAchievements = useCallback(
+    async (emitToasts: boolean): Promise<boolean> => {
+      const previous = achievementsSnapshotRef.current;
+      const next = await loadAchievementsSnapshot();
+      if (!next) return false;
 
-    if (!emitToasts || !previous) return false;
+      if (!emitToasts || !previous) return false;
 
-    const shouldPlayDing = next.achievements.some((achievement) => {
-      const prev = previous.byId.get(achievement.id);
-      if (!prev) return false;
-      if (!next.isPro && achievement.tier === 'pro') return false;
-      return !prev.unlocked && achievement.unlocked;
-    });
+      const shouldPlayDing = next.achievements.some((achievement) => {
+        const prev = previous.byId.get(achievement.id);
+        if (!prev) return false;
+        if (!next.isPro && achievement.tier === 'pro') return false;
+        return !prev.unlocked && achievement.unlocked;
+      });
 
-    const progressCandidates: Array<{
-      achievement: AchievementSnapshotItem;
-      prev: AchievementSnapshotItem;
-    }> = [];
+      const progressCandidates: Array<{
+        achievement: AchievementSnapshotItem;
+        prev: AchievementSnapshotItem;
+      }> = [];
 
-    for (const achievement of next.achievements) {
-      const prev = previous.byId.get(achievement.id);
-      if (!prev) continue;
-      if (!next.isPro && achievement.tier === 'pro') continue;
+      for (const achievement of next.achievements) {
+        const prev = previous.byId.get(achievement.id);
+        if (!prev) continue;
+        if (!next.isPro && achievement.tier === 'pro') continue;
 
-      if (!prev.unlocked && achievement.unlocked) {
-        pushAchievementToast({
-          kind: 'unlock',
-          title: achievement.title,
-          description: achievement.description,
-          current: achievement.progress.current,
-          target: achievement.progress.target,
-          ratio: achievement.progress.ratio,
-          tier: achievement.tier,
-        });
-        continue;
+        if (!prev.unlocked && achievement.unlocked) {
+          pushAchievementToast({
+            kind: 'unlock',
+            title: achievement.title,
+            description: achievement.description,
+            current: achievement.progress.current,
+            target: achievement.progress.target,
+            ratio: achievement.progress.ratio,
+            tier: achievement.tier,
+          });
+          continue;
+        }
+
+        if (achievement.progress.current > prev.progress.current && !achievement.unlocked) {
+          progressCandidates.push({ achievement, prev });
+        }
       }
 
-      if (achievement.progress.current > prev.progress.current && !achievement.unlocked) {
-        progressCandidates.push({ achievement, prev });
+      if (progressCandidates.length > 0) {
+        const selected = [...progressCandidates].sort((a, b) => {
+          const ratioA = a.achievement.progress.ratio;
+          const ratioB = b.achievement.progress.ratio;
+          if (ratioB !== ratioA) return ratioB - ratioA;
+          const remainingA = a.achievement.progress.target - a.achievement.progress.current;
+          const remainingB = b.achievement.progress.target - b.achievement.progress.current;
+          if (remainingA !== remainingB) return remainingA - remainingB;
+          return a.achievement.progress.target - b.achievement.progress.target;
+        })[0];
+
+        if (selected) {
+          const fromCurrent = selected.prev.progress.current;
+          const fromRatio =
+            selected.achievement.progress.target > 0
+              ? Math.min(1, fromCurrent / selected.achievement.progress.target)
+              : 0;
+
+          pushAchievementToast({
+            kind: 'progress',
+            title: selected.achievement.title,
+            description: selected.achievement.description,
+            current: selected.achievement.progress.current,
+            target: selected.achievement.progress.target,
+            ratio: selected.achievement.progress.ratio,
+            tier: selected.achievement.tier,
+            fromCurrent,
+            fromRatio,
+          });
+        }
       }
-    }
 
-    if (progressCandidates.length > 0) {
-      const selected = [...progressCandidates].sort((a, b) => {
-        const ratioA = a.achievement.progress.ratio;
-        const ratioB = b.achievement.progress.ratio;
-        if (ratioB !== ratioA) return ratioB - ratioA;
-        const remainingA = a.achievement.progress.target - a.achievement.progress.current;
-        const remainingB = b.achievement.progress.target - b.achievement.progress.current;
-        if (remainingA !== remainingB) return remainingA - remainingB;
-        return a.achievement.progress.target - b.achievement.progress.target;
-      })[0];
-
-      if (selected) {
-        const fromCurrent = selected.prev.progress.current;
-        const fromRatio =
-          selected.achievement.progress.target > 0
-            ? Math.min(1, fromCurrent / selected.achievement.progress.target)
-            : 0;
-
-        pushAchievementToast({
-          kind: 'progress',
-          title: selected.achievement.title,
-          description: selected.achievement.description,
-          current: selected.achievement.progress.current,
-          target: selected.achievement.progress.target,
-          ratio: selected.achievement.progress.ratio,
-          tier: selected.achievement.tier,
-          fromCurrent,
-          fromRatio,
-        });
+      if (shouldPlayDing) {
+        playAchievementDing();
       }
-    }
 
-    if (shouldPlayDing) {
-      playAchievementDing();
-    }
-
-    return shouldPlayDing;
-  }, [loadAchievementsSnapshot, playAchievementDing, pushAchievementToast]);
+      return shouldPlayDing;
+    },
+    [loadAchievementsSnapshot, playAchievementDing, pushAchievementToast],
+  );
 
   const setCompletionState = useCallback((habitId: string, completed: boolean) => {
     setCompletedIds((prev) => {
@@ -449,72 +527,75 @@ export function DailyCompletionPanel({
     });
   }, []);
 
-  const handleToggle = useCallback(async (habitId: string, wasCompleted: boolean) => {
-    if (!selectedDateKey) return;
-    if (isFuture) {
-      pushToast('Future dates cannot be completed yet.', 'error');
-      return;
-    }
-
-    const alreadyCompleted = wasCompleted;
-    setPendingIds((prev) => [...prev, habitId]);
-    setCompletionState(habitId, !alreadyCompleted);
-
-    try {
-      await ensureAchievementsSnapshot();
-      const response = await fetch('/api/completions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          habitId,
-          date: selectedDateKey,
-          completed: !alreadyCompleted,
-        }),
-      });
-      const body = await parseJson<CompletionResponse>(response);
-
-      if (!response.ok || !body?.ok) {
-        setCompletionState(habitId, alreadyCompleted);
-        pushToast(getApiErrorMessage(response, body), 'error');
+  const handleToggle = useCallback(
+    async (habitId: string, wasCompleted: boolean) => {
+      if (!selectedDateKey) return;
+      if (isFuture) {
+        pushToast('Future dates cannot be completed yet.', 'error');
         return;
       }
 
-      const result = body.data.result;
-      if (result.status === 'created') {
-        setCompletionState(habitId, true);
-        router.refresh();
-        const unlocked = await refreshAchievements(true);
-        if (!unlocked) {
-          const totalHabits = habitsCountRef.current;
-          const currentCompletedCount = completedCountRef.current;
-          const nextCompletedCount = Math.min(totalHabits, currentCompletedCount + 1);
-          if (nextCompletedCount >= totalHabits && totalHabits > 0) {
-            playDing('day');
-          } else {
-            playDing('habit');
-          }
+      const alreadyCompleted = wasCompleted;
+      setPendingIds((prev) => [...prev, habitId]);
+      setCompletionState(habitId, !alreadyCompleted);
+
+      try {
+        await ensureAchievementsSnapshot();
+        const response = await fetch('/api/completions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            habitId,
+            date: selectedDateKey,
+            completed: !alreadyCompleted,
+          }),
+        });
+        const body = await parseJson<CompletionResponse>(response);
+
+        if (!response.ok || !body?.ok) {
+          setCompletionState(habitId, alreadyCompleted);
+          pushToast(getApiErrorMessage(response, body), 'error');
+          return;
         }
-      } else if (result.status === 'deleted') {
-        setCompletionState(habitId, false);
-        router.refresh();
-        await refreshAchievements(false);
+
+        const result = body.data.result;
+        if (result.status === 'created') {
+          setCompletionState(habitId, true);
+          router.refresh();
+          const unlocked = await refreshAchievements(true);
+          if (!unlocked) {
+            const totalHabits = habitsCountRef.current;
+            const currentCompletedCount = completedCountRef.current;
+            const nextCompletedCount = Math.min(totalHabits, currentCompletedCount + 1);
+            if (nextCompletedCount >= totalHabits && totalHabits > 0) {
+              playDing('day');
+            } else {
+              playDing('habit');
+            }
+          }
+        } else if (result.status === 'deleted') {
+          setCompletionState(habitId, false);
+          router.refresh();
+          await refreshAchievements(false);
+        }
+      } catch {
+        setCompletionState(habitId, alreadyCompleted);
+        pushToast('Unable to update completion.', 'error');
+      } finally {
+        setPendingIds((prev) => prev.filter((id) => id !== habitId));
       }
-    } catch {
-      setCompletionState(habitId, alreadyCompleted);
-      pushToast('Unable to update completion.', 'error');
-    } finally {
-      setPendingIds((prev) => prev.filter((id) => id !== habitId));
-    }
-  }, [
-    selectedDateKey,
-    isFuture,
-    pushToast,
-    ensureAchievementsSnapshot,
-    setCompletionState,
-    router,
-    refreshAchievements,
-    playDing,
-  ]);
+    },
+    [
+      selectedDateKey,
+      isFuture,
+      pushToast,
+      ensureAchievementsSnapshot,
+      setCompletionState,
+      router,
+      refreshAchievements,
+      playDing,
+    ],
+  );
 
   const renderContent = () => {
     if (!selectedDateKey) {
@@ -566,6 +647,7 @@ export function DailyCompletionPanel({
         aria-label="Daily habits"
         data-habit-list
         id={listId}
+        ref={listRef}
       >
         {orderedHabits.map((habit) => (
           <HabitRow
@@ -604,7 +686,7 @@ export function DailyCompletionPanel({
       </div>
 
       <ToastStack toasts={toasts} />
-      <AchievementToastStack toasts={achievementToasts} />
+      <AchievementToastStack toasts={achievementToasts} onDismiss={dismissAchievementToast} />
     </div>
   );
 }

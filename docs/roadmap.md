@@ -273,11 +273,11 @@
 
 ### Sprint 11.1: Today View + Speed Improvements
 
-- [ ] Add "Today" screen (fast daily entry)
-- [ ] Add quick actions (complete/uncomplete + undo)
-- [ ] Add habit ordering/pinning/sorting
-- [ ] Add schedule presets (Weekdays / Every day / Weekend)
-- [ ] Improve daily panel performance on small screens
+- [x] Add "Today" screen (fast daily entry)
+- [x] Add quick actions (complete/uncomplete + undo)
+- [x] Add habit ordering/pinning/sorting
+- [x] Add schedule presets (Weekdays / Every day / Weekend)
+- [x] Improve daily panel performance on small screens
 
 ---
 

@@ -154,10 +154,7 @@ test('manual ordering moves habits', async ({ page, request }) => {
     (response) =>
       response.url().includes('/api/habits/order') && response.request().method() === 'PUT',
   );
-  await page
-    .locator('[data-habit-title="Beta habit"]')
-    .getByRole('button', { name: 'Up' })
-    .click();
+  await page.locator('[data-habit-title="Beta habit"]').getByRole('button', { name: 'Up' }).click();
   await reorderResponse;
 
   await expect(cards.nth(0)).toHaveAttribute('data-habit-title', 'Beta habit');

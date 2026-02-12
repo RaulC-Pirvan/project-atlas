@@ -148,7 +148,10 @@ type HabitReorderClient = {
       where: { userId: string; archivedAt?: Date | null; id?: { in: string[] } };
       select: { id: true };
     }) => Promise<Array<{ id: string }>>;
-    update: (args: { where: { id: string }; data: { sortOrder: number } }) => Promise<{ id: string }>;
+    update: (args: {
+      where: { id: string };
+      data: { sortOrder: number };
+    }) => Promise<{ id: string }>;
   };
   $transaction: <T>(actions: Promise<T>[]) => Promise<T[]>;
 };

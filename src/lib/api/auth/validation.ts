@@ -28,8 +28,7 @@ export const updateAccountSchema = z
       data.weekStart ||
       data.keepCompletedAtBottom !== undefined,
     {
-      message:
-        'Provide an email, password, display name, week start, or ordering preference.',
+      message: 'Provide an email, password, display name, week start, or ordering preference.',
     },
   );
 

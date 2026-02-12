@@ -141,7 +141,7 @@ describe('habit api services', () => {
           return Promise.resolve({ id: where.id });
         }),
       },
-      $transaction: vi.fn((actions: Promise<unknown>[]) => Promise.all(actions)),
+      $transaction: <T>(actions: Promise<T>[]) => Promise.all(actions),
     };
 
     const result = await reorderHabits({

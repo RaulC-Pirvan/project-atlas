@@ -51,28 +51,30 @@ A habit is defined independently of dates.
 - Next.js App Router + TypeScript + Tailwind CSS (v4).
 - PostgreSQL (Neon) + Prisma with `@prisma/adapter-pg` and `pg` pool.
 - Auth foundation implemented: signup, verify-email, resend-verification, logout, NextAuth Credentials (JWT sessions), middleware protection.
-- Account management API + UI: update email/password/display name/week start; delete account.
+- Account management API + UI: update email/password/display name/week start + daily ordering preference; delete account.
 - Email verification uses Resend client; debug token capture plus `/api/auth/debug/verification-token` for tests (shared token store for API routes).
-- Tests in place: Vitest unit/API tests, auth + habit + calendar + marketing + admin component tests, Playwright auth + habits + calendar + daily completion + admin + marketing + visual regression E2E.
+- Tests in place: Vitest unit/API tests, auth + habit + calendar + marketing + admin component tests, Playwright auth + habits + today + calendar + daily completion + admin + marketing + visual regression E2E.
 - Playwright E2E runs use a Windows-safe temp dir setup via `playwright.global-setup.ts` to avoid chromium shutdown hangs.
 - Daily completion and streaks E2E include retry-safe habit creation to handle transient network resets in Firefox.
 - Habit domain models implemented (Habit, HabitSchedule, HabitCompletion) with migrations and seed data.
 - Habit domain helpers exist in `src/lib/habits` (dates, schedules, calendar grid, completions, streaks, query helpers, types).
-- Habit CRUD API implemented (list/create/update/archive) with a habits UI built around `HabitsPanel` and `HabitForm`.
-- Habit scheduling now respects habit creation date: habits only appear on/after their creation date in calendar and insights.
-- Authenticated screens use `AppShell` + `AppSidebar` with Calendar-first navigation on desktop, Habits/Account links, and Sign out.
-- Marketing homepage built with hero, benefits, CTA, and auth-aware redirect to `/calendar`.
+- Habit CRUD API implemented (list/create/update/archive) plus manual ordering with a habits UI built around `HabitsPanel` and `HabitForm`.
+- Habit ordering supports manual order (`sortOrder`), reorder API, and an optional "keep completed at bottom" preference (default on) shared across Today and daily panels.
+- Habit scheduling now respects habit creation date: habits only appear on/after their creation date in Today, calendar, and insights.
+- Authenticated screens use `AppShell` + `AppSidebar` with Today-first navigation on desktop, plus Calendar/Habits/Account links and Sign out.
+- Marketing homepage built with hero, benefits, CTA, and auth-aware redirect to `/today`.
 - Light/dark theme toggle (system default + localStorage persistence) available on marketing/auth/app shells.
+- Today view implemented at `/today` for fast daily entry of today's due habits.
 - Calendar view implemented with monthly grid, month navigation, selected-day side panel (`?date=YYYY-MM-DD`), daily completion toggles via `/api/completions`, per-day progress indicators, and golden completed-day tiles (black text for contrast).
 - Calendar defaults to selecting today on `/calendar` (current month); mobile daily sheet only auto-opens when a `date` param is present.
-- Daily completion supports check/uncheck with server-side schedule validation, future-date guard, toast feedback, optimistic updates with rollback, and per-row pending indicators.
+- Daily completion supports check/uncheck with server-side schedule validation, future-date guard, toast feedback, optimistic updates with rollback, per-row pending indicators, and motion-safe reorder animation.
 - Calendar polish includes motion-safe transitions, reduced-motion fallbacks, and subtle completion sounds on success.
 - Loading skeletons implemented for calendar and habits routes.
 - API error responses include standardized recovery hints; client messaging uses consistent recovery guidance.
 - Keyboard navigation and focus management implemented for calendar grid, daily panel, and mobile sheet.
 - Streak logic implemented (current + longest) with timezone-safe normalization and unit tests; streak summary panel lives in the calendar sidebar.
-- User profile tracks `weekStart` (sun/mon) and `timezone` (defaults to UTC, no UI yet); week start controls calendar layout, timezone drives date normalization and completion rules.
-- Post-login redirect lands on `/calendar` (tests and flows expect Calendar as the default landing page).
+- User profile tracks `weekStart` (sun/mon), `timezone` (defaults to UTC, no UI yet), and `keepCompletedAtBottom` for daily ordering.
+- Post-login redirect lands on `/today` (tests and flows expect Today as the default landing page).
 - Observability & safety in place: Sentry error tracking (with tunnel), structured API logging, `/api/health` endpoint, global security headers, and auth route rate limiting.
 - Admin dashboard implemented with allowlist access, health status panel, user/habit lists, activity log, and admin-safe CSV exports.
 - Pro entitlement model implemented (server-side) with `ProEntitlement` table and `/api/pro/entitlement` endpoint.
@@ -82,7 +84,7 @@ A habit is defined independently of dates.
 - Achievements System v1 implemented with expanded Free/Pro catalogue, per-habit milestones, and a trophy cabinet UI.
 - Achievements are persisted and locked on unlock (cannot regress), backed by `AchievementUnlock` and `HabitMilestoneUnlock`.
 - Achievements UI includes search, filters, tabs (Achievements/Milestones), and a "Next Up" panel.
-- Achievement progress/unlock toasts are shown on completion; unlocks play a distinct ding.
+- Achievement progress/unlock toasts are shown on completion, clickable to dismiss; unlocks play a distinct ding.
 - Reminder Scheduling v1 implemented: reminder data model, settings API, and reminder UI on Account.
 - Per-habit reminders support up to 3 daily times (24-hour `HH:MM` format), stored on habits and shown in the habit list.
 - Reminder settings include daily digest, quiet hours, and snooze defaults (24-hour `HH:MM` inputs), with server-side validation + rate limiting.
@@ -97,7 +99,7 @@ A habit is defined independently of dates.
 - Advanced insights and analytics (Pro).
 - Achievements and milestone system (Pro).
 - Smart reminders and push notifications (Pro).
-- Today view, quick actions, sorting, and mobile performance work.
+- Quick actions, schedule presets, and mobile performance work.
 - Offline-first completion queue with sync indicators.
 - Completion grace window enforcement until 02:00.
 - Store launch readiness (privacy, metadata, compliance assets).
@@ -113,16 +115,18 @@ A habit is defined independently of dates.
 ## Codebase Map
 
 - `src/app` - App Router UI and API routes.
-- `src/app/page.tsx` - Marketing homepage with auth-aware redirect.
+- `src/app/page.tsx` - Marketing homepage with auth-aware redirect to `/today`.
 - `src/app/api/auth/*/route.ts` - Auth API routes (signup, verify, resend, logout, debug, NextAuth).
 - `src/app/api/health/route.ts` - Health check endpoint.
-- `src/app/api/account/route.ts` - Account update (email/password/display name).
+- `src/app/api/account/route.ts` - Account update (email/password/display name + daily ordering preference).
 - `src/app/api/account/delete-request/route.ts` - Account deletion request (hard delete).
 - `src/app/api/habits/route.ts` - Habit list/create API.
 - `src/app/api/habits/[id]/route.ts` - Habit update/archive API.
+- `src/app/api/habits/order/route.ts` - Habit reorder API.
 - `src/app/calendar/page.tsx` - Calendar month view + selected-day side panel + legend and progress indicators.
 - `src/app/calendar/loading.tsx` - Calendar route loading skeleton.
 - `src/app/calendar/[date]/page.tsx` - Legacy daily view route (redirects to calendar with `date` param).
+- `src/app/today/page.tsx` - Today view for fast daily entry.
 - `src/app/api/completions/route.ts` - Daily completion list/toggle API.
 - `src/app/habits/page.tsx` - Habits page (list/create/edit/archive).
 - `src/app/habits/loading.tsx` - Habits route loading skeleton.
@@ -144,13 +148,13 @@ A habit is defined independently of dates.
 - `src/lib/api/reminders/validation.ts` - Reminder settings validation schema.
 - `src/lib/api/insights/summary.ts` - Insights data service (aggregated).
 - `src/lib/api/achievements/summary.ts` - Achievements data service (unlock persistence).
-- `src/components/habits` - Habit UI components and tests.
+- `src/components/habits` - Habit UI components and tests (including manual ordering controls).
 - `src/components/calendar/CalendarMonth.tsx` - Calendar grid + progress indicators + completed-day styling.
-- `src/components/calendar/DailyCompletionPanel.tsx` - Selected-day habit list + completion toggles + completion sounds.
+- `src/components/calendar/DailyCompletionPanel.tsx` - Selected-day habit list + completion toggles + completion ordering + completion sounds.
 - `src/components/calendar/__tests__` - Calendar UI tests.
 - `src/components/streaks/StreakSummaryPanel.tsx` - Streak summary panel (current/longest + empty states).
 - `src/components/layout` - App shell layout primitives (AppShell, AppSidebar).
-- `src/components/auth/AccountPanel.tsx` - Account settings (including week start).
+- `src/components/auth/AccountPanel.tsx` - Account settings (including week start + daily ordering preference).
 - `src/components/auth/SignOutButton.tsx` - Sign-out button for authenticated layouts.
 - `src/components/marketing` - Marketing homepage layout and sections.
 - `src/components/admin` - Admin UI components and tests.
@@ -166,6 +170,7 @@ A habit is defined independently of dates.
 - `sentry.client.config.ts` / `sentry.server.config.ts` / `sentry.edge.config.ts` - Sentry SDK config.
 - `src/lib/db/prisma.ts` - Prisma singleton using adapter-pg + pg pool.
 - `src/lib/habits` - Habit domain helpers (date normalization, schedules, calendar grids, completions, query helpers, streaks, types).
+- `src/lib/habits/ordering.ts` - Habit ordering helpers (manual order + completed-at-bottom logic).
 - `src/lib/habits/calendar.ts` - Month grid generation and weekday mapping.
 - `src/lib/habits/weekdays.ts` - Weekday ordering/labels for week start.
 - `src/lib/api/habits/completions.ts` - Completion toggle/list services (date/range).
@@ -220,6 +225,8 @@ A habit is defined independently of dates.
 - `docs/sprints/sprint-9.1.md` - Achievements System v1 sprint plan.
 - `docs/test workflows/sprint-9.1-test-workflows.md` - Achievements System v1 test workflows.
 - `docs/test workflows/sprint-10.1-test-workflows.md` - Reminder Scheduling v1 test workflows.
+- `docs/sprints/sprint-11.1.md` - Today view + ordering sprint plan.
+- `docs/test workflows/sprint-11.1-test-workflows.md` - Today view + ordering test workflows.
 - `docs/ops/staging.md` - Staging environment guide.
 - `docs/ops/backups.md` - Backup strategy and validation checklist.
 - `docs/ops/reminders-delivery.md` - Reminder delivery strategy (push-ready).

@@ -27,6 +27,10 @@ type HabitResponse = {
   habit: HabitSummary;
 };
 
+type ReorderResponse = {
+  habitIds: string[];
+};
+
 type HabitsPanelProps = {
   initialHabits: HabitSummary[];
   weekStart: WeekStart;
@@ -36,6 +40,7 @@ type HabitsPanelProps = {
 export function HabitsPanel({ initialHabits, weekStart, timezoneLabel }: HabitsPanelProps) {
   const [habits, setHabits] = useState<HabitSummary[]>(initialHabits);
   const [loading, setLoading] = useState(false);
+  const [reordering, setReordering] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<HabitSummary | null>(null);
   const [toasts, setToasts] = useState<ToastItem[]>([]);
@@ -148,6 +153,39 @@ export function HabitsPanel({ initialHabits, weekStart, timezoneLabel }: HabitsP
     }
   };
 
+  const persistOrder = async (nextHabits: HabitSummary[], previousHabits: HabitSummary[]) => {
+    setHabits(nextHabits);
+    setReordering(true);
+    try {
+      const response = await fetch('/api/habits/order', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ habitIds: nextHabits.map((habit) => habit.id) }),
+      });
+      const body = await parseJson<ReorderResponse>(response);
+      if (!response.ok || !body?.ok) {
+        setHabits(previousHabits);
+        pushToast(getApiErrorMessage(response, body), 'error');
+      }
+    } catch {
+      setHabits(previousHabits);
+      pushToast('Unable to update habit order.', 'error');
+    } finally {
+      setReordering(false);
+    }
+  };
+
+  const moveHabit = (habitId: string, direction: number) => {
+    const index = habits.findIndex((habit) => habit.id === habitId);
+    if (index === -1) return;
+    const nextIndex = index + direction;
+    if (nextIndex < 0 || nextIndex >= habits.length) return;
+    const nextHabits = [...habits];
+    const [removed] = nextHabits.splice(index, 1);
+    nextHabits.splice(nextIndex, 0, removed);
+    void persistOrder(nextHabits, habits);
+  };
+
   return (
     <div className="space-y-10">
       <HabitForm
@@ -186,10 +224,12 @@ export function HabitsPanel({ initialHabits, weekStart, timezoneLabel }: HabitsP
         ) : null}
 
         <div className="space-y-4">
-          {habits.map((habit) => (
+          {habits.map((habit, index) => (
             <div
               key={habit.id}
               className="rounded-2xl border border-black/10 px-6 py-6 dark:border-white/10"
+              data-habit-id={habit.id}
+              data-habit-title={habit.title}
             >
               {editingId === habit.id ? (
                 <HabitForm
@@ -216,7 +256,31 @@ export function HabitsPanel({ initialHabits, weekStart, timezoneLabel }: HabitsP
                         </p>
                       ) : null}
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap gap-2">
+                      {habits.length > 1 ? (
+                        <>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => moveHabit(habit.id, -1)}
+                            disabled={reordering || loading || index === 0}
+                            aria-label={`Move ${habit.title} up`}
+                          >
+                            Up
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => moveHabit(habit.id, 1)}
+                            disabled={reordering || loading || index === habits.length - 1}
+                            aria-label={`Move ${habit.title} down`}
+                          >
+                            Down
+                          </Button>
+                        </>
+                      ) : null}
                       <Button
                         type="button"
                         variant="outline"

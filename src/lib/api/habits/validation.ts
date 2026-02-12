@@ -40,6 +40,15 @@ export const toggleCompletionSchema = z.object({
   completed: z.boolean(),
 });
 
+export const reorderHabitsSchema = z
+  .object({
+    habitIds: z.array(z.string().min(1)).min(1),
+  })
+  .refine((data) => new Set(data.habitIds).size === data.habitIds.length, {
+    message: 'Habit order must be unique.',
+  });
+
 export type CreateHabitInput = z.infer<typeof createHabitSchema>;
 export type UpdateHabitInput = z.infer<typeof updateHabitSchema>;
 export type ToggleCompletionInput = z.infer<typeof toggleCompletionSchema>;
+export type ReorderHabitsInput = z.infer<typeof reorderHabitsSchema>;

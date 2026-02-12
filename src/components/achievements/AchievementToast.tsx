@@ -22,6 +22,7 @@ export type AchievementToastItem = {
 
 type AchievementToastStackProps = {
   toasts: AchievementToastItem[];
+  onDismiss?: (id: number) => void;
 };
 
 function prefersReducedMotion() {
@@ -33,7 +34,13 @@ function formatProgress(current: number, target: number) {
   return `${current} / ${target}`;
 }
 
-function AchievementToastCard({ toast }: { toast: AchievementToastItem }) {
+function AchievementToastCard({
+  toast,
+  onDismiss,
+}: {
+  toast: AchievementToastItem;
+  onDismiss?: (id: number) => void;
+}) {
   const initialCurrent = toast.fromCurrent ?? toast.current;
   const initialRatio = toast.fromRatio ?? toast.ratio;
   const [displayCurrent, setDisplayCurrent] = useState(initialCurrent);
@@ -84,13 +91,14 @@ function AchievementToastCard({ toast }: { toast: AchievementToastItem }) {
     <div
       role="status"
       aria-live="polite"
+      onClick={onDismiss ? () => onDismiss(toast.id) : undefined}
       className={`pointer-events-auto rounded-2xl border border-black/10 bg-white/95 px-5 py-4 text-sm shadow-[0_18px_40px_rgba(0,0,0,0.16)] transition-all duration-200 dark:border-white/10 dark:bg-black/85 dark:shadow-[0_18px_40px_rgba(0,0,0,0.5)] ${
         toast.state === 'closing'
           ? 'translate-y-3 opacity-0 ease-in'
           : toast.state === 'entering'
             ? 'translate-y-3 opacity-0 ease-out'
             : 'translate-y-0 opacity-100 ease-out'
-      }`}
+      } ${onDismiss ? 'cursor-pointer' : ''}`}
     >
       <div className="flex items-start justify-between gap-3">
         <div>
@@ -124,7 +132,7 @@ function AchievementToastCard({ toast }: { toast: AchievementToastItem }) {
   );
 }
 
-export function AchievementToastStack({ toasts }: AchievementToastStackProps) {
+export function AchievementToastStack({ toasts, onDismiss }: AchievementToastStackProps) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -136,7 +144,7 @@ export function AchievementToastStack({ toasts }: AchievementToastStackProps) {
   const content = (
     <div className="pointer-events-none fixed bottom-6 left-1/2 z-[70] flex w-full max-w-md -translate-x-1/2 flex-col gap-3 px-4">
       {toasts.map((toast) => (
-        <AchievementToastCard key={toast.id} toast={toast} />
+        <AchievementToastCard key={toast.id} toast={toast} onDismiss={onDismiss} />
       ))}
     </div>
   );

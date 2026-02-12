@@ -27,7 +27,7 @@ async function signIn(page: Page, email: string, pass: string) {
   await page.getByLabel('Email').fill(email);
   await page.getByLabel('Password').fill(pass);
   await page.getByRole('button', { name: /sign in/i }).click();
-  await expect(page).toHaveURL(/\/calendar/, { timeout: 15_000 });
+  await expect(page).toHaveURL(/\/today/, { timeout: 15_000 });
 }
 
 async function fetchVerificationToken(request: APIRequestContext, email: string): Promise<string> {
@@ -77,7 +77,7 @@ test('non-admin users are redirected from /admin and blocked on admin APIs', asy
   await verifyAccount(page, page.request, email);
   await signIn(page, email, password);
   await page.goto('/admin', { waitUntil: 'domcontentloaded' });
-  await page.waitForURL(/\/calendar/);
+  await page.waitForURL(/\/today/);
 
   const response = await page.request.get('/api/admin/health');
   expect(response.status()).toBe(403);

@@ -1,4 +1,5 @@
-import { type APIRequestContext, expect, type Page, test } from '@playwright/test';
+import type { APIRequestContext, Page } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 
 const password = 'AtlasTestPassword123!';
 const retryableNetworkErrors = ['econnreset', 'econnrefused', 'socket hang up'];
@@ -15,6 +16,10 @@ function uniqueTitle(prefix: string) {
 
 function utcDateKey(date: Date): string {
   return date.toISOString().slice(0, 10);
+}
+
+function utcMonthKey(date: Date): string {
+  return date.toISOString().slice(0, 7);
 }
 
 function isoWeekday(date: Date): number {
@@ -100,7 +105,7 @@ async function findHabitByTitle(request: APIRequestContext, title: string) {
 }
 
 async function createHabit(page: Page, title: string, weekdays: number[]) {
-  const payload = { title, description: 'Achievements test', weekdays };
+  const payload = { title, description: 'Offline completion test', weekdays };
   let lastError: Error | null = null;
 
   for (let attempt = 1; attempt <= 3; attempt += 1) {
@@ -128,29 +133,39 @@ async function createHabit(page: Page, title: string, weekdays: number[]) {
   throw lastError ?? new Error('Unable to create habit.');
 }
 
-test('achievements unlock after first completion', async ({ page, request }) => {
-  await createVerifiedUser(page, request, 'achievements');
-
+test('queues offline completions and syncs when back online', async ({ page, request }) => {
+  await createVerifiedUser(page, request, 'offline-completion');
   const today = new Date();
   const targetDate = utcDateKey(today);
+  const targetMonth = utcMonthKey(today);
   const targetWeekday = isoWeekday(today);
-  const habitTitle = uniqueTitle('Achievement');
-  const habit = await createHabit(page, habitTitle, [targetWeekday]);
+  const habitTitle = uniqueTitle('Offline habit');
 
-  const completionResponse = await page.request.post('/api/completions', {
-    data: { habitId: habit.id, date: targetDate, completed: true },
-    timeout: 10_000,
-  });
-  expect(completionResponse.ok()).toBeTruthy();
+  await createHabit(page, habitTitle, [targetWeekday]);
+  await page.goto(`/calendar?month=${targetMonth}&date=${targetDate}`);
 
-  await page.goto('/achievements');
-  await expect(page.getByTestId('achievements-dashboard')).toBeVisible();
-  await expect(page.getByTestId('achievement-first-completion')).toHaveAttribute(
-    'data-status',
-    'unlocked',
-  );
-  await expect(page.getByTestId('achievement-thirty-completions')).toHaveAttribute(
-    'data-status',
-    'pro-locked',
-  );
+  const checkbox = page.getByRole('checkbox', { name: new RegExp(habitTitle, 'i') });
+  await expect(checkbox).toHaveAttribute('aria-checked', 'false');
+
+  await page.context().setOffline(true);
+  await page.evaluate(() => window.dispatchEvent(new Event('offline')));
+  await page.waitForFunction(() => navigator.onLine === false);
+
+  await checkbox.click();
+  await expect(checkbox).toHaveAttribute('aria-checked', 'true');
+  await expect(checkbox).toHaveAttribute('data-pending', 'true');
+
+  const dayLink = page.locator(`[data-date-key="${targetDate}"]`);
+  await expect(dayLink).toHaveAttribute('data-pending', 'true');
+
+  await page.context().setOffline(false);
+  await page.evaluate(() => window.dispatchEvent(new Event('online')));
+  await page.waitForFunction(() => navigator.onLine === true);
+
+  await expect(checkbox).not.toHaveAttribute('data-pending', 'true');
+  await expect(dayLink).not.toHaveAttribute('data-pending', 'true');
+
+  await page.reload();
+  const checkboxAfter = page.getByRole('checkbox', { name: new RegExp(habitTitle, 'i') });
+  await expect(checkboxAfter).toHaveAttribute('aria-checked', 'true');
 });

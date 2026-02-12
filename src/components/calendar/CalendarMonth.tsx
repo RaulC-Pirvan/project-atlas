@@ -3,6 +3,7 @@ import Link from 'next/link';
 import type { KeyboardEvent } from 'react';
 import { useId } from 'react';
 
+import { useOfflineCompletionSnapshot } from '../../lib/habits/offlineQueueClient';
 import { getWeekdayLabel, getWeekdayOrder, type WeekStart } from '../habits/weekdays';
 
 export type CalendarDayView = {
@@ -41,6 +42,7 @@ export function CalendarMonth({
   const weekdayOrder = getWeekdayOrder(weekStart);
   const keyboardHintId = useId();
   const gridSize = weeks.length * 7;
+  const offlineSnapshot = useOfflineCompletionSnapshot();
 
   const focusByIndex = (grid: HTMLElement, index: number) => {
     const target = grid.querySelector<HTMLElement>(
@@ -148,6 +150,9 @@ export function CalendarMonth({
               const progressPercent =
                 day.totalCount > 0 ? Math.min(100, (day.completedCount / day.totalCount) * 100) : 0;
               const gridIndex = weekIndex * 7 + dayIndex;
+              const pendingSet = offlineSnapshot.pendingByDate.get(day.key);
+              const pendingCount = pendingSet?.size ?? 0;
+              const hasPending = pendingCount > 0;
               const baseCellClasses =
                 'group flex min-h-[64px] touch-manipulation flex-col justify-between px-2 py-2 text-left text-xs motion-safe:transition-all motion-safe:duration-150 motion-safe:ease-out motion-reduce:transition-none sm:min-h-[86px] sm:px-3 sm:text-sm';
               const mutedClasses = day.inMonth
@@ -193,7 +198,7 @@ export function CalendarMonth({
                           {day.completedCount} of {day.totalCount} habits completed
                         </span>
                         <div
-                          className={`h-1 w-full rounded-full ${
+                          className={`relative h-1 w-full rounded-full ${
                             isComplete
                               ? 'bg-black/20 dark:bg-white/20'
                               : 'bg-black/10 dark:bg-white/10'
@@ -206,12 +211,23 @@ export function CalendarMonth({
                             } motion-safe:transition-[width] motion-safe:duration-300 motion-safe:ease-out motion-reduce:transition-none`}
                             style={{ width: `${progressPercent}%` }}
                           />
+                          {hasPending ? (
+                            <div
+                              className={`absolute inset-0 rounded-full border border-dashed ${
+                                isComplete
+                                  ? 'border-black/60 dark:border-white/60'
+                                  : 'border-black/40 dark:border-white/40'
+                              }`}
+                              aria-hidden="true"
+                            />
+                          ) : null}
                         </div>
+                        {hasPending ? <span className="sr-only">Pending sync</span> : null}
                       </>
                     ) : (
                       <div className="h-1 w-full" aria-hidden="true" />
                     )}
-                    <div className="flex items-center">
+                    <div className="flex items-center gap-2">
                       {day.hasHabits ? (
                         <span
                           className={`h-1.5 w-1.5 rounded-full ${
@@ -222,6 +238,16 @@ export function CalendarMonth({
                       ) : (
                         <span className="h-1.5 w-1.5" aria-hidden="true" />
                       )}
+                      {hasPending ? (
+                        <span
+                          className={`h-2 w-2 rounded-full border border-dashed motion-safe:animate-spin motion-reduce:animate-none ${
+                            isComplete
+                              ? 'border-black/70 dark:border-white/70'
+                              : 'border-black/40 dark:border-white/40'
+                          }`}
+                          aria-hidden="true"
+                        />
+                      ) : null}
                     </div>
                   </div>
                 </>
@@ -247,6 +273,7 @@ export function CalendarMonth({
                   data-date-key={day.key}
                   data-grid-index={gridIndex}
                   data-focusable="true"
+                  data-pending={hasPending ? 'true' : undefined}
                   scroll={false}
                   className={cellClasses}
                   aria-label={`Open daily view for ${day.label}`}

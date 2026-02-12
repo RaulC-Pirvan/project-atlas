@@ -20,7 +20,7 @@ describe('AdminPage', () => {
     vi.clearAllMocks();
   });
 
-  it('redirects non-admin users to /calendar', async () => {
+  it('redirects non-admin users to /today', async () => {
     mockedGetServerSession.mockResolvedValue({ user: { id: 'u1' } });
     mockedRequireAdminSession.mockImplementation(() => {
       throw new Error('Not allowed');
@@ -28,7 +28,7 @@ describe('AdminPage', () => {
 
     await AdminPage();
 
-    expect(mockedRedirect).toHaveBeenCalledWith('/calendar');
+    expect(mockedRedirect).toHaveBeenCalledWith('/today');
   });
 
   it('renders for admin users', async () => {

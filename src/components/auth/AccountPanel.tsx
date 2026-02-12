@@ -15,16 +15,24 @@ type AccountPanelProps = {
   email: string;
   displayName: string;
   weekStart: WeekStart;
+  keepCompletedAtBottom: boolean;
 };
 
 type AccountResponse = {
   ok: boolean;
 };
 
-export function AccountPanel({ email, displayName, weekStart }: AccountPanelProps) {
+export function AccountPanel({
+  email,
+  displayName,
+  weekStart,
+  keepCompletedAtBottom,
+}: AccountPanelProps) {
   const [nextEmail, setNextEmail] = useState(email);
   const [displayNameInput, setDisplayNameInput] = useState(displayName);
   const [weekStartInput, setWeekStartInput] = useState<WeekStart>(weekStart);
+  const [keepCompletedAtBottomInput, setKeepCompletedAtBottomInput] =
+    useState(keepCompletedAtBottom);
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [currentPassword, setCurrentPassword] = useState('');
@@ -32,6 +40,7 @@ export function AccountPanel({ email, displayName, weekStart }: AccountPanelProp
   const [toasts, setToasts] = useState<ToastItem[]>([]);
   const [updatingName, setUpdatingName] = useState(false);
   const [updatingWeekStart, setUpdatingWeekStart] = useState(false);
+  const [updatingOrdering, setUpdatingOrdering] = useState(false);
   const [updatingEmail, setUpdatingEmail] = useState(false);
   const [updatingPassword, setUpdatingPassword] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -42,6 +51,8 @@ export function AccountPanel({ email, displayName, weekStart }: AccountPanelProp
   const [currentPasswordError, setCurrentPasswordError] = useState(false);
   const [baselineDisplayName, setBaselineDisplayName] = useState(displayName);
   const [baselineWeekStart, setBaselineWeekStart] = useState<WeekStart>(weekStart);
+  const [baselineKeepCompletedAtBottom, setBaselineKeepCompletedAtBottom] =
+    useState(keepCompletedAtBottom);
 
   const deleteConfirmInvalid = deleteConfirmError;
   const toastIdRef = useRef(0);
@@ -202,6 +213,44 @@ export function AccountPanel({ email, displayName, weekStart }: AccountPanelProp
       pushToast('Week start update is not available yet.', 'error');
     } finally {
       setUpdatingWeekStart(false);
+    }
+  };
+
+  const handleOrderingUpdate = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (keepCompletedAtBottomInput === baselineKeepCompletedAtBottom) {
+      pushToast('No changes to update.', 'neutral');
+      return;
+    }
+
+    setUpdatingOrdering(true);
+
+    try {
+      const response = await fetch('/api/account', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          keepCompletedAtBottom: keepCompletedAtBottomInput,
+        }),
+      });
+      const body = await parseJson<AccountResponse>(response);
+
+      if (!response.ok || !body?.ok) {
+        if (response.status === 404) {
+          pushToast('Ordering updates are not available yet.', 'error');
+          return;
+        }
+        pushToast(getApiErrorMessage(response, body), 'error');
+        return;
+      }
+
+      setBaselineKeepCompletedAtBottom(keepCompletedAtBottomInput);
+      pushToast('Ordering preference updated.', 'success');
+    } catch {
+      pushToast('Ordering update is not available yet.', 'error');
+    } finally {
+      setUpdatingOrdering(false);
     }
   };
 
@@ -373,6 +422,43 @@ export function AccountPanel({ email, displayName, weekStart }: AccountPanelProp
         </FormField>
         <Button type="submit" variant="outline" className="w-full" disabled={updatingWeekStart}>
           {updatingWeekStart ? 'Updating...' : 'Update week start'}
+        </Button>
+      </form>
+
+      <form
+        className="space-y-6 border-t border-black/10 pt-6 dark:border-white/10"
+        onSubmit={handleOrderingUpdate}
+      >
+        <div className="space-y-1">
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-black/80 dark:text-white/80">
+            Daily ordering
+          </p>
+          <p className="text-sm text-black/60 dark:text-white/60">
+            Decide whether completed habits stay below unfinished ones.
+          </p>
+        </div>
+        <FormField id="account-ordering" label="Completion ordering" error={null}>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              type="button"
+              size="sm"
+              variant={keepCompletedAtBottomInput ? 'primary' : 'outline'}
+              onClick={() => setKeepCompletedAtBottomInput(true)}
+            >
+              Keep completed at bottom
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant={!keepCompletedAtBottomInput ? 'primary' : 'outline'}
+              onClick={() => setKeepCompletedAtBottomInput(false)}
+            >
+              Keep original order
+            </Button>
+          </div>
+        </FormField>
+        <Button type="submit" variant="outline" className="w-full" disabled={updatingOrdering}>
+          {updatingOrdering ? 'Updating...' : 'Update ordering'}
         </Button>
       </form>
 

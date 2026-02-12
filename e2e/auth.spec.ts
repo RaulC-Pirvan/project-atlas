@@ -88,7 +88,7 @@ test('verify link marks account verified and login works', async ({ page, reques
   await expect(page.getByRole('heading', { name: /email verified\./i })).toBeVisible();
 
   await signIn(page, email, password);
-  await expect(page).toHaveURL(/\/calendar/, { timeout: 15_000 });
+  await expect(page).toHaveURL(/\/today/, { timeout: 15_000 });
   await page.goto('/account');
   await expect(page.getByText(email)).toBeVisible();
 });
@@ -114,7 +114,7 @@ test('logout ends session', async ({ page, request }) => {
   await expect(page.getByRole('heading', { name: /email verified\./i })).toBeVisible();
 
   await signIn(page, email, password);
-  await expect(page).toHaveURL(/\/calendar/, { timeout: 15_000 });
+  await expect(page).toHaveURL(/\/today/, { timeout: 15_000 });
 
   await page
     .getByRole('navigation')
@@ -153,7 +153,7 @@ test('account update works', async ({ page, request }) => {
   await expect(page.getByRole('heading', { name: /email verified\./i })).toBeVisible();
 
   await signIn(page, email, password);
-  await expect(page).toHaveURL(/\/calendar/, { timeout: 15_000 });
+  await expect(page).toHaveURL(/\/today/, { timeout: 15_000 });
   await page.goto('/account');
 
   await page.getByLabel(/^new password$/i).fill(newPassword);
@@ -168,7 +168,7 @@ test('account update works', async ({ page, request }) => {
   await expect(page).toHaveURL(/\/sign-in/);
 
   await signIn(page, email, newPassword);
-  await expect(page).toHaveURL(/\/calendar/, { timeout: 15_000 });
+  await expect(page).toHaveURL(/\/today/, { timeout: 15_000 });
   await page.goto('/account');
 });
 
@@ -181,13 +181,31 @@ test('display name update works', async ({ page, request }) => {
   await expect(page.getByRole('heading', { name: /email verified\./i })).toBeVisible();
 
   await signIn(page, email, password);
-  await expect(page).toHaveURL(/\/calendar/, { timeout: 15_000 });
+  await expect(page).toHaveURL(/\/today/, { timeout: 15_000 });
   await page.goto('/account');
 
   await page.getByLabel(/^display name$/i).fill('Atlas Prime');
   await page.getByRole('button', { name: /update display name/i }).click();
   await expect(page.getByText('Display name updated.')).toBeVisible();
   await expect(page.getByText('Atlas Prime')).toBeVisible();
+});
+
+test('ordering preference update works', async ({ page, request }) => {
+  const email = uniqueEmail('ordering');
+
+  await signUp(page, email);
+  const token = await fetchVerificationToken(request, email);
+  await page.goto(`/verify-email?token=${encodeURIComponent(token)}`);
+  await expect(page.getByRole('heading', { name: /email verified\./i })).toBeVisible();
+
+  await signIn(page, email, password);
+  await expect(page).toHaveURL(/\/today/, { timeout: 15_000 });
+  await page.goto('/account');
+
+  await page.getByRole('button', { name: /keep original order/i }).click();
+  await page.getByRole('button', { name: /update ordering/i }).click();
+
+  await expect(page.getByText('Ordering preference updated.')).toBeVisible();
 });
 
 test('email update requires re-verification', async ({ page, request }) => {
@@ -200,7 +218,7 @@ test('email update requires re-verification', async ({ page, request }) => {
   await expect(page.getByRole('heading', { name: /email verified\./i })).toBeVisible();
 
   await signIn(page, email, password);
-  await expect(page).toHaveURL(/\/calendar/, { timeout: 15_000 });
+  await expect(page).toHaveURL(/\/today/, { timeout: 15_000 });
   await page.goto('/account');
 
   await page.getByLabel(/^email$/i).fill(newEmail);
@@ -215,7 +233,7 @@ test('email update requires re-verification', async ({ page, request }) => {
   await expect(page.getByRole('heading', { name: /email verified\./i })).toBeVisible();
 
   await signIn(page, newEmail, password);
-  await expect(page).toHaveURL(/\/calendar/, { timeout: 15_000 });
+  await expect(page).toHaveURL(/\/today/, { timeout: 15_000 });
   await page.goto('/account');
   await expect(page.getByText(newEmail)).toBeVisible();
 });
@@ -229,7 +247,7 @@ test('account delete removes access', async ({ page, request }) => {
   await expect(page.getByRole('heading', { name: /email verified\./i })).toBeVisible();
 
   await signIn(page, email, password);
-  await expect(page).toHaveURL(/\/calendar/, { timeout: 15_000 });
+  await expect(page).toHaveURL(/\/today/, { timeout: 15_000 });
   await page.goto('/account');
 
   await page.getByLabel(/^confirm$/i).fill('delete');

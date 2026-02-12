@@ -16,7 +16,7 @@ export default async function AdminPage() {
   try {
     requireAdminSession(session);
   } catch {
-    redirect('/calendar');
+    redirect('/today');
   }
 
   return (

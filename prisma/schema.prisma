@@ -49,6 +49,7 @@ model User {
   role          UserRole  @default(user)
   timezone      String    @default("UTC")
   weekStart     WeekStart @default(mon)
+  keepCompletedAtBottom Boolean @default(true)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   deletedAt     DateTime?
@@ -250,6 +251,7 @@ model Habit {
   userId      String
   title       String
   description String?
+  sortOrder   Int       @default(0)
   archivedAt  DateTime?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
@@ -261,6 +263,7 @@ model Habit {
   milestoneUnlocks HabitMilestoneUnlock[]
 
   @@index([userId])
+  @@index([userId, sortOrder])
 }
 
 /**

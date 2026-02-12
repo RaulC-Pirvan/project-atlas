@@ -18,11 +18,17 @@ export const updateAccountSchema = z
     currentPassword: z.string().min(8).max(72).optional(),
     displayName: z.string().min(2).max(80).optional(),
     weekStart: z.enum(['sun', 'mon']).optional(),
+    keepCompletedAtBottom: z.boolean().optional(),
   })
   .refine(
-    (data) => data.email || data.password || data.displayName !== undefined || data.weekStart,
+    (data) =>
+      data.email ||
+      data.password ||
+      data.displayName !== undefined ||
+      data.weekStart ||
+      data.keepCompletedAtBottom !== undefined,
     {
-      message: 'Provide an email, password, display name, or week start.',
+      message: 'Provide an email, password, display name, week start, or ordering preference.',
     },
   );
 

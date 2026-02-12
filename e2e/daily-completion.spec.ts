@@ -42,7 +42,7 @@ async function signIn(page: Page, email: string) {
   await page.getByLabel('Email').fill(email);
   await page.getByLabel('Password').fill(password);
   await page.getByRole('button', { name: /sign in/i }).click();
-  await expect(page).toHaveURL(/\/calendar/, { timeout: 15_000 });
+  await expect(page).toHaveURL(/\/today/, { timeout: 15_000 });
 }
 
 async function fetchVerificationToken(request: APIRequestContext, email: string): Promise<string> {

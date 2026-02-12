@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import type { KeyboardEvent } from 'react';
-import { useEffect, useId, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 
 import { getApiErrorMessage, parseJson } from '../../lib/api/client';
 import { orderHabitsByCompletion } from '../../lib/habits/ordering';
@@ -61,6 +61,99 @@ type DailyCompletionPanelProps = {
   keepCompletedAtBottom?: boolean;
 };
 
+type HabitRowProps = {
+  habit: HabitSummary;
+  isCompleted: boolean;
+  isPending: boolean;
+  isFuture: boolean;
+  listId: string;
+  onToggle: (habitId: string, wasCompleted: boolean) => void;
+  onKeyDown: (event: KeyboardEvent<HTMLButtonElement>) => void;
+};
+
+const HabitRow = memo(function HabitRow({
+  habit,
+  isCompleted,
+  isPending,
+  isFuture,
+  listId,
+  onToggle,
+  onKeyDown,
+}: HabitRowProps) {
+  const isDisabled = isFuture || isPending;
+  const descriptionId = habit.description ? `${listId}-${habit.id}` : undefined;
+  const focusClasses = isCompleted
+    ? 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black dark:focus-visible:ring-black/40 dark:focus-visible:ring-offset-white'
+    : 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-white/30 dark:focus-visible:ring-offset-black';
+  const hoverClasses = isCompleted
+    ? 'hover:bg-black/90 active:bg-black/80 sm:active:scale-[0.99] dark:hover:bg-white/90 dark:active:bg-white/80'
+    : 'hover:bg-black/5 active:bg-black/10 sm:active:scale-[0.99] dark:hover:bg-white/10 dark:active:bg-white/20';
+
+  return (
+    <li>
+      <button
+        type="button"
+        role="checkbox"
+        aria-checked={isCompleted}
+        aria-describedby={descriptionId}
+        data-habit-id={habit.id}
+        disabled={isDisabled}
+        onClick={() => onToggle(habit.id, isCompleted)}
+        onKeyDown={onKeyDown}
+        className={`flex min-h-[44px] w-full items-start justify-between gap-4 rounded-xl border px-4 py-3 text-left touch-manipulation motion-safe:transition-colors motion-safe:duration-150 motion-safe:ease-out motion-reduce:transition-none ${focusClasses} ${
+          isCompleted
+            ? 'border-black bg-black text-white dark:border-white dark:bg-white dark:text-black'
+            : 'border-black/10 text-black dark:border-white/10 dark:text-white'
+        } ${isDisabled ? 'opacity-60' : hoverClasses} `.trim()}
+      >
+        <div>
+          <p
+            className={`text-sm font-semibold ${
+              isCompleted ? 'text-white dark:text-black' : 'text-black dark:text-white'
+            }`}
+          >
+            {habit.title}
+          </p>
+          {habit.description ? (
+            <p
+              id={descriptionId}
+              className={`text-xs ${
+                isCompleted
+                  ? 'text-white/80 dark:text-black/70'
+                  : 'text-black/60 dark:text-white/60'
+              }`}
+            >
+              {habit.description}
+            </p>
+          ) : null}
+        </div>
+        <span
+          aria-hidden="true"
+          className={`mt-1 inline-flex h-5 w-5 items-center justify-center rounded-full border ${
+            isCompleted
+              ? 'border-white bg-white text-black dark:border-black/30 dark:bg-black/10 dark:text-black'
+              : 'border-black/20 dark:border-white/20'
+          }`}
+        >
+          {isPending ? (
+            <span
+              className={`h-3 w-3 rounded-full border motion-safe:animate-spin motion-reduce:animate-none ${
+                isCompleted
+                  ? 'border-black/40 border-t-transparent dark:border-black/50'
+                  : 'border-black/30 border-t-transparent dark:border-white/40'
+              }`}
+            />
+          ) : isCompleted ? (
+            <span className="h-2 w-2 rounded-full bg-black" />
+          ) : null}
+        </span>
+      </button>
+    </li>
+  );
+});
+
+HabitRow.displayName = 'HabitRow';
+
 export function DailyCompletionPanel({
   selectedDateKey,
   selectedLabel,
@@ -79,9 +172,17 @@ export function DailyCompletionPanel({
   const achievementToastIdRef = useRef(0);
   const achievementsSnapshotRef = useRef<AchievementsSnapshot | null>(null);
   const achievementsLoadingRef = useRef<Promise<AchievementsSnapshot | null> | null>(null);
+  const completedCountRef = useRef(initialCompletedHabitIds.length);
+  const habitsCountRef = useRef(habits.length);
   const completionSignature = initialCompletedHabitIds.join('|');
   const listId = useId();
   const resolvedContextLabel = contextLabel ?? 'Selected day';
+  const completionSet = useMemo(() => new Set(completedIds), [completedIds]);
+  const pendingSet = useMemo(() => new Set(pendingIds), [pendingIds]);
+  const orderedHabits = useMemo(
+    () => orderHabitsByCompletion(habits, completionSet, keepCompletedAtBottom),
+    [habits, completionSet, keepCompletedAtBottom],
+  );
 
   useEffect(() => {
     setCompletedIds(initialCompletedHabitIds);
@@ -90,9 +191,17 @@ export function DailyCompletionPanel({
 
   useEffect(() => {
     void ensureAchievementsSnapshot();
-  }, []);
+  }, [ensureAchievementsSnapshot]);
 
-  const pushToast = (message: string, tone: ToastItem['tone'] = 'neutral') => {
+  useEffect(() => {
+    completedCountRef.current = completedIds.length;
+  }, [completedIds]);
+
+  useEffect(() => {
+    habitsCountRef.current = habits.length;
+  }, [habits.length]);
+
+  const pushToast = useCallback((message: string, tone: ToastItem['tone'] = 'neutral') => {
     const id = toastIdRef.current + 1;
     toastIdRef.current = id;
     setToasts((prev) => [...prev, { id, tone, message, state: 'entering' }]);
@@ -112,9 +221,9 @@ export function DailyCompletionPanel({
     window.setTimeout(() => {
       setToasts((prev) => prev.filter((toast) => toast.id !== id));
     }, 4800);
-  };
+  }, [setToasts]);
 
-  const pushAchievementToast = (toast: Omit<AchievementToastItem, 'id' | 'state'>) => {
+  const pushAchievementToast = useCallback((toast: Omit<AchievementToastItem, 'id' | 'state'>) => {
     const id = achievementToastIdRef.current + 1;
     achievementToastIdRef.current = id;
     setAchievementToasts((prev) => [...prev, { ...toast, id, state: 'entering' }]);
@@ -134,15 +243,18 @@ export function DailyCompletionPanel({
     window.setTimeout(() => {
       setAchievementToasts((prev) => prev.filter((item) => item.id !== id));
     }, 4800);
-  };
+  }, [setAchievementToasts]);
 
-  const buildAchievementsSnapshot = (data: AchievementsResponse): AchievementsSnapshot => ({
-    isPro: data.isPro,
-    achievements: data.achievements,
-    byId: new Map(data.achievements.map((achievement) => [achievement.id, achievement])),
-  });
+  const buildAchievementsSnapshot = useCallback(
+    (data: AchievementsResponse): AchievementsSnapshot => ({
+      isPro: data.isPro,
+      achievements: data.achievements,
+      byId: new Map(data.achievements.map((achievement) => [achievement.id, achievement])),
+    }),
+    [],
+  );
 
-  const loadAchievementsSnapshot = async (): Promise<AchievementsSnapshot | null> => {
+  const loadAchievementsSnapshot = useCallback(async (): Promise<AchievementsSnapshot | null> => {
     try {
       const response = await fetch('/api/achievements');
       const body = await parseJson<AchievementsResponse>(response);
@@ -155,9 +267,9 @@ export function DailyCompletionPanel({
     } catch {
       return null;
     }
-  };
+  }, [buildAchievementsSnapshot]);
 
-  const ensureAchievementsSnapshot = async (): Promise<AchievementsSnapshot | null> => {
+  const ensureAchievementsSnapshot = useCallback(async (): Promise<AchievementsSnapshot | null> => {
     if (achievementsSnapshotRef.current) return achievementsSnapshotRef.current;
     if (!achievementsLoadingRef.current) {
       achievementsLoadingRef.current = (async () => {
@@ -167,9 +279,9 @@ export function DailyCompletionPanel({
       })();
     }
     return achievementsLoadingRef.current;
-  };
+  }, [loadAchievementsSnapshot]);
 
-  const playDing = (tone: 'habit' | 'day') => {
+  const playDing = useCallback((tone: 'habit' | 'day') => {
     if (typeof window === 'undefined') return;
     type WebkitWindow = typeof window & { webkitAudioContext?: typeof AudioContext };
     const AudioContextCtor = window.AudioContext || (window as WebkitWindow).webkitAudioContext;
@@ -206,9 +318,9 @@ export function DailyCompletionPanel({
     window.setTimeout(() => {
       void context.close();
     }, 350);
-  };
+  }, []);
 
-  const playAchievementDing = () => {
+  const playAchievementDing = useCallback(() => {
     if (typeof window === 'undefined') return;
     type WebkitWindow = typeof window & { webkitAudioContext?: typeof AudioContext };
     const AudioContextCtor = window.AudioContext || (window as WebkitWindow).webkitAudioContext;
@@ -241,9 +353,9 @@ export function DailyCompletionPanel({
     window.setTimeout(() => {
       void context.close();
     }, 350);
-  };
+  }, []);
 
-  const refreshAchievements = async (emitToasts: boolean): Promise<boolean> => {
+  const refreshAchievements = useCallback(async (emitToasts: boolean): Promise<boolean> => {
     const previous = achievementsSnapshotRef.current;
     const next = await loadAchievementsSnapshot();
     if (!next) return false;
@@ -322,9 +434,9 @@ export function DailyCompletionPanel({
     }
 
     return shouldPlayDing;
-  };
+  }, [loadAchievementsSnapshot, playAchievementDing, pushAchievementToast]);
 
-  const setCompletionState = (habitId: string, completed: boolean) => {
+  const setCompletionState = useCallback((habitId: string, completed: boolean) => {
     setCompletedIds((prev) => {
       const hasHabit = prev.includes(habitId);
       if (completed) {
@@ -335,16 +447,16 @@ export function DailyCompletionPanel({
       }
       return prev.filter((id) => id !== habitId);
     });
-  };
+  }, []);
 
-  const handleToggle = async (habitId: string) => {
+  const handleToggle = useCallback(async (habitId: string, wasCompleted: boolean) => {
     if (!selectedDateKey) return;
     if (isFuture) {
       pushToast('Future dates cannot be completed yet.', 'error');
       return;
     }
 
-    const alreadyCompleted = completedIds.includes(habitId);
+    const alreadyCompleted = wasCompleted;
     setPendingIds((prev) => [...prev, habitId]);
     setCompletionState(habitId, !alreadyCompleted);
 
@@ -373,8 +485,10 @@ export function DailyCompletionPanel({
         router.refresh();
         const unlocked = await refreshAchievements(true);
         if (!unlocked) {
-          const nextCompletedIds = alreadyCompleted ? completedIds : [...completedIds, habitId];
-          if (nextCompletedIds.length >= habits.length && habits.length > 0) {
+          const totalHabits = habitsCountRef.current;
+          const currentCompletedCount = completedCountRef.current;
+          const nextCompletedCount = Math.min(totalHabits, currentCompletedCount + 1);
+          if (nextCompletedCount >= totalHabits && totalHabits > 0) {
             playDing('day');
           } else {
             playDing('habit');
@@ -391,7 +505,16 @@ export function DailyCompletionPanel({
     } finally {
       setPendingIds((prev) => prev.filter((id) => id !== habitId));
     }
-  };
+  }, [
+    selectedDateKey,
+    isFuture,
+    pushToast,
+    ensureAchievementsSnapshot,
+    setCompletionState,
+    router,
+    refreshAchievements,
+    playDing,
+  ]);
 
   const renderContent = () => {
     if (!selectedDateKey) {
@@ -436,12 +559,6 @@ export function DailyCompletionPanel({
       buttons[nextIndex]?.focus();
     };
 
-    const orderedHabits = orderHabitsByCompletion(
-      habits,
-      new Set(completedIds),
-      keepCompletedAtBottom,
-    );
-
     return (
       <ul
         className="space-y-3"
@@ -450,80 +567,18 @@ export function DailyCompletionPanel({
         data-habit-list
         id={listId}
       >
-        {orderedHabits.map((habit) => {
-          const isCompleted = completedIds.includes(habit.id);
-          const isPending = pendingIds.includes(habit.id);
-          const isDisabled = isFuture || isPending;
-          const descriptionId = habit.description ? `${listId}-${habit.id}` : undefined;
-          const focusClasses = isCompleted
-            ? 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black dark:focus-visible:ring-black/40 dark:focus-visible:ring-offset-white'
-            : 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-white/30 dark:focus-visible:ring-offset-black';
-          const hoverClasses = isCompleted
-            ? 'hover:bg-black/90 active:bg-black/80 active:scale-[0.99] dark:hover:bg-white/90 dark:active:bg-white/80'
-            : 'hover:bg-black/5 active:bg-black/10 active:scale-[0.99] dark:hover:bg-white/10 dark:active:bg-white/20';
-
-          return (
-            <li key={habit.id}>
-              <button
-                type="button"
-                role="checkbox"
-                aria-checked={isCompleted}
-                aria-describedby={descriptionId}
-                data-habit-id={habit.id}
-                disabled={isDisabled}
-                onClick={() => handleToggle(habit.id)}
-                onKeyDown={handleHabitKeyDown}
-                className={`flex min-h-[44px] w-full items-start justify-between gap-4 rounded-xl border px-4 py-3 text-left touch-manipulation motion-safe:transition-all motion-safe:duration-150 motion-safe:ease-out motion-reduce:transition-none ${focusClasses} ${
-                  isCompleted
-                    ? 'border-black bg-black text-white dark:border-white dark:bg-white dark:text-black'
-                    : 'border-black/10 text-black dark:border-white/10 dark:text-white'
-                } ${isDisabled ? 'opacity-60' : hoverClasses} `.trim()}
-              >
-                <div>
-                  <p
-                    className={`text-sm font-semibold ${
-                      isCompleted ? 'text-white dark:text-black' : 'text-black dark:text-white'
-                    }`}
-                  >
-                    {habit.title}
-                  </p>
-                  {habit.description ? (
-                    <p
-                      id={descriptionId}
-                      className={`text-xs ${
-                        isCompleted
-                          ? 'text-white/80 dark:text-black/70'
-                          : 'text-black/60 dark:text-white/60'
-                      }`}
-                    >
-                      {habit.description}
-                    </p>
-                  ) : null}
-                </div>
-                <span
-                  aria-hidden="true"
-                  className={`mt-1 inline-flex h-5 w-5 items-center justify-center rounded-full border ${
-                    isCompleted
-                      ? 'border-white bg-white text-black dark:border-black/30 dark:bg-black/10 dark:text-black'
-                      : 'border-black/20 dark:border-white/20'
-                  }`}
-                >
-                  {isPending ? (
-                    <span
-                      className={`h-3 w-3 rounded-full border motion-safe:animate-spin motion-reduce:animate-none ${
-                        isCompleted
-                          ? 'border-black/40 border-t-transparent dark:border-black/50'
-                          : 'border-black/30 border-t-transparent dark:border-white/40'
-                      }`}
-                    />
-                  ) : isCompleted ? (
-                    <span className="h-2 w-2 rounded-full bg-black" />
-                  ) : null}
-                </span>
-              </button>
-            </li>
-          );
-        })}
+        {orderedHabits.map((habit) => (
+          <HabitRow
+            key={habit.id}
+            habit={habit}
+            isCompleted={completionSet.has(habit.id)}
+            isPending={pendingSet.has(habit.id)}
+            isFuture={isFuture}
+            listId={listId}
+            onToggle={handleToggle}
+            onKeyDown={handleHabitKeyDown}
+          />
+        ))}
       </ul>
     );
   };

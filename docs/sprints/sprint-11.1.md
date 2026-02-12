@@ -84,8 +84,8 @@ The focus is speed, clarity, and consistent ordering without bulk actions or und
 
 ### Phase 4: Performance & Polish
 
-- [ ] Reduce unnecessary rerenders in daily habit list.
-- [ ] Keep animations motion-safe and light on small screens.
+- [x] Reduce unnecessary rerenders in daily habit list.
+- [x] Keep animations motion-safe and light on small screens.
 
 ---
 

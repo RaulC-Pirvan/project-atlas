@@ -133,3 +133,36 @@ test('validation blocks empty weekday selection', async ({ page, request }) => {
 
   await expect(page.getByText('Select at least one weekday.')).toBeVisible();
 });
+
+test('manual ordering moves habits', async ({ page, request }) => {
+  await createVerifiedUser(page, request, 'habit-order');
+  await openHabits(page);
+
+  await page.getByLabel(/^title$/i).fill('Alpha habit');
+  await page.getByRole('button', { name: /create habit/i }).click();
+  await expect(page.getByText('Alpha habit')).toBeVisible();
+
+  await page.getByLabel(/^title$/i).fill('Beta habit');
+  await page.getByRole('button', { name: /create habit/i }).click();
+  await expect(page.getByText('Beta habit')).toBeVisible();
+
+  const cards = page.locator('[data-habit-title]');
+  await expect(cards).toHaveCount(2);
+  await expect(cards.nth(0)).toHaveAttribute('data-habit-title', 'Alpha habit');
+
+  const reorderResponse = page.waitForResponse(
+    (response) =>
+      response.url().includes('/api/habits/order') && response.request().method() === 'PUT',
+  );
+  await page
+    .locator('[data-habit-title="Beta habit"]')
+    .getByRole('button', { name: 'Up' })
+    .click();
+  await reorderResponse;
+
+  await expect(cards.nth(0)).toHaveAttribute('data-habit-title', 'Beta habit');
+
+  await page.reload();
+  const cardsAfterReload = page.locator('[data-habit-title]');
+  await expect(cardsAfterReload.nth(0)).toHaveAttribute('data-habit-title', 'Beta habit');
+});

@@ -5,6 +5,7 @@ import type { KeyboardEvent } from 'react';
 import { useEffect, useId, useRef, useState } from 'react';
 
 import { getApiErrorMessage, parseJson } from '../../lib/api/client';
+import { orderHabitsByCompletion } from '../../lib/habits/ordering';
 import { type AchievementToastItem, AchievementToastStack } from '../achievements/AchievementToast';
 import { type ToastItem, ToastStack } from '../ui/Toast';
 
@@ -57,6 +58,7 @@ type DailyCompletionPanelProps = {
   initialCompletedHabitIds: string[];
   isFuture: boolean;
   contextLabel?: string;
+  keepCompletedAtBottom?: boolean;
 };
 
 export function DailyCompletionPanel({
@@ -66,6 +68,7 @@ export function DailyCompletionPanel({
   initialCompletedHabitIds,
   isFuture,
   contextLabel,
+  keepCompletedAtBottom = true,
 }: DailyCompletionPanelProps) {
   const router = useRouter();
   const [completedIds, setCompletedIds] = useState<string[]>(initialCompletedHabitIds);
@@ -433,6 +436,12 @@ export function DailyCompletionPanel({
       buttons[nextIndex]?.focus();
     };
 
+    const orderedHabits = orderHabitsByCompletion(
+      habits,
+      new Set(completedIds),
+      keepCompletedAtBottom,
+    );
+
     return (
       <ul
         className="space-y-3"
@@ -441,7 +450,7 @@ export function DailyCompletionPanel({
         data-habit-list
         id={listId}
       >
-        {habits.map((habit) => {
+        {orderedHabits.map((habit) => {
           const isCompleted = completedIds.includes(habit.id);
           const isPending = pendingIds.includes(habit.id);
           const isDisabled = isFuture || isPending;

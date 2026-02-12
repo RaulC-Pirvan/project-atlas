@@ -18,6 +18,7 @@ type MobileDailySheetProps = {
   initialCompletedHabitIds: string[];
   isFuture: boolean;
   autoOpen?: boolean;
+  keepCompletedAtBottom?: boolean;
 };
 
 export function MobileDailySheet({
@@ -27,6 +28,7 @@ export function MobileDailySheet({
   initialCompletedHabitIds,
   isFuture,
   autoOpen = true,
+  keepCompletedAtBottom = true,
 }: MobileDailySheetProps) {
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -150,6 +152,7 @@ export function MobileDailySheet({
               habits={habits}
               initialCompletedHabitIds={initialCompletedHabitIds}
               isFuture={isFuture}
+              keepCompletedAtBottom={keepCompletedAtBottom}
             />
           </div>
         </div>

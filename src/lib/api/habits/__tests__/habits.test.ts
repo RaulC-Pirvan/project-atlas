@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 
 import { ApiError } from '../../errors';
-import { archiveHabit, createHabit, listHabits, updateHabit } from '../habits';
+import { archiveHabit, createHabit, listHabits, reorderHabits, updateHabit } from '../habits';
 
 describe('habit api services', () => {
   it('creates a habit with normalized fields', async () => {
@@ -11,11 +11,13 @@ describe('habit api services', () => {
           id: 'h1',
           title: 'Read',
           description: 'Desc',
+          sortOrder: 0,
           archivedAt: null,
           createdAt: new Date('2026-02-01T00:00:00.000Z'),
           schedule: [{ weekday: 1 }, { weekday: 3 }],
           reminders: [],
         }),
+        findFirst: vi.fn().mockResolvedValue({ sortOrder: 2 }),
       },
     };
 
@@ -47,6 +49,7 @@ describe('habit api services', () => {
             id: 'h1',
             title: 'Read',
             description: null,
+            sortOrder: 0,
             archivedAt: null,
             createdAt: new Date('2026-02-01T00:00:00.000Z'),
             schedule: [{ weekday: 5 }, { weekday: 1 }],
@@ -69,6 +72,7 @@ describe('habit api services', () => {
           id: 'h1',
           title: 'Updated',
           description: null,
+          sortOrder: 0,
           archivedAt: null,
           createdAt: new Date('2026-02-01T00:00:00.000Z'),
           schedule: [{ weekday: 2 }],
@@ -78,6 +82,7 @@ describe('habit api services', () => {
           id: 'h1',
           title: 'Updated',
           description: null,
+          sortOrder: 0,
           archivedAt: null,
           createdAt: new Date('2026-02-01T00:00:00.000Z'),
           schedule: [{ weekday: 2 }],
@@ -124,6 +129,32 @@ describe('habit api services', () => {
         data: expect.objectContaining({ archivedAt: expect.any(Date) }),
       }),
     );
+  });
+
+  it('reorders habits by supplied order', async () => {
+    const updates: Array<{ id: string; sortOrder: number }> = [];
+    const prisma = {
+      habit: {
+        findMany: vi.fn().mockResolvedValue([{ id: 'h1' }, { id: 'h2' }]),
+        update: vi.fn().mockImplementation(({ where, data }) => {
+          updates.push({ id: where.id, sortOrder: data.sortOrder });
+          return Promise.resolve({ id: where.id });
+        }),
+      },
+      $transaction: vi.fn((actions: Promise<unknown>[]) => Promise.all(actions)),
+    };
+
+    const result = await reorderHabits({
+      prisma,
+      userId: 'u1',
+      habitIds: ['h2', 'h1'],
+    });
+
+    expect(result.habitIds).toEqual(['h2', 'h1']);
+    expect(updates).toEqual([
+      { id: 'h2', sortOrder: 0 },
+      { id: 'h1', sortOrder: 1 },
+    ]);
   });
 
   it('throws when habit is missing', async () => {

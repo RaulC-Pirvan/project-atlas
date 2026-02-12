@@ -73,9 +73,9 @@ The focus is speed, clarity, and consistent ordering without bulk actions or und
 
 ### Phase 2: Ordering
 
-- [ ] Add habit ordering fields and API support.
-- [ ] Add UI controls for manual ordering.
-- [ ] Implement ordering logic based on completion status and user preference.
+- [x] Add habit ordering fields and API support.
+- [x] Add UI controls for manual ordering.
+- [x] Implement ordering logic based on completion status and user preference.
 
 ### Phase 3: Settings
 

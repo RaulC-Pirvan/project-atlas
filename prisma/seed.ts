@@ -98,6 +98,7 @@ async function main() {
       userId: verifiedUser.id,
       title: 'Read 10 pages',
       description: 'Read at least 10 pages of any book.',
+      sortOrder: 0,
       schedule: {
         create: [{ weekday: 1 }, { weekday: 3 }, { weekday: 5 }],
       },
@@ -109,6 +110,7 @@ async function main() {
       userId: verifiedUser.id,
       title: 'Drink water',
       description: '8 cups a day.',
+      sortOrder: 1,
       schedule: {
         create: [
           { weekday: 1 },
@@ -128,6 +130,7 @@ async function main() {
       userId: verifiedUser.id,
       title: 'Workout',
       description: 'Strength or cardio session.',
+      sortOrder: 2,
       schedule: {
         create: [{ weekday: 2 }, { weekday: 4 }, { weekday: 6 }],
       },

@@ -18,6 +18,7 @@ type HabitRecord = {
   id: string;
   title: string;
   description: string | null;
+  sortOrder: number;
   archivedAt: Date | null;
   createdAt: Date;
   schedule: ScheduleRecord[];
@@ -32,18 +33,26 @@ type HabitListClient = {
         schedule: { select: { weekday: true } };
         reminders: { select: { timeMinutes: true } };
       };
-      orderBy?: { createdAt: 'asc' | 'desc' };
+      orderBy?:
+        | { createdAt?: 'asc' | 'desc'; sortOrder?: 'asc' | 'desc' }
+        | Array<{ createdAt?: 'asc' | 'desc'; sortOrder?: 'asc' | 'desc' }>;
     }) => Promise<HabitRecord[]>;
   };
 };
 
 type HabitCreateClient = {
   habit: {
+    findFirst: (args: {
+      where: { userId: string; archivedAt?: Date | null };
+      orderBy: { sortOrder: 'asc' | 'desc' };
+      select: { sortOrder: true };
+    }) => Promise<{ sortOrder: number } | null>;
     create: (args: {
       data: {
         userId: string;
         title: string;
         description?: string | null;
+        sortOrder: number;
         schedule: { create: ScheduleRecord[] };
         reminders?: { create: ReminderRecord[] };
       };
@@ -133,6 +142,23 @@ type ArchiveHabitArgs = {
   now?: Date;
 };
 
+type HabitReorderClient = {
+  habit: {
+    findMany: (args: {
+      where: { userId: string; archivedAt?: Date | null; id?: { in: string[] } };
+      select: { id: true };
+    }) => Promise<Array<{ id: string }>>;
+    update: (args: { where: { id: string }; data: { sortOrder: number } }) => Promise<{ id: string }>;
+  };
+  $transaction: <T>(actions: Promise<T>[]) => Promise<T[]>;
+};
+
+type ReorderHabitsArgs = {
+  prisma: HabitReorderClient;
+  userId: string;
+  habitIds: string[];
+};
+
 function normalizeTitle(title: string): string {
   const trimmed = title.trim();
   if (!trimmed) {
@@ -193,6 +219,15 @@ function normalizeReminderTimes(reminderTimes?: number[]): number[] | undefined 
   return normalized;
 }
 
+async function nextHabitSortOrder(prisma: HabitCreateClient, userId: string): Promise<number> {
+  const latest = await prisma.habit.findFirst({
+    where: { userId, archivedAt: null },
+    orderBy: { sortOrder: 'desc' },
+    select: { sortOrder: true },
+  });
+  return (latest?.sortOrder ?? -1) + 1;
+}
+
 function toHabitSummary(habit: HabitRecord): HabitSummary {
   const reminderTimes = habit.reminders.map((reminder) => reminder.timeMinutes);
   reminderTimes.sort((a, b) => a - b);
@@ -218,7 +253,7 @@ export async function listHabits(args: ListHabitsArgs): Promise<HabitSummary[]> 
       schedule: { select: { weekday: true } },
       reminders: { select: { timeMinutes: true } },
     },
-    orderBy: { createdAt: 'asc' },
+    orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
   });
 
   return habits.map(toHabitSummary);
@@ -229,12 +264,14 @@ export async function createHabit(args: CreateHabitArgs): Promise<HabitSummary> 
   const description = normalizeDescription(args.description);
   const weekdays = normalizeWeekdays(args.weekdays);
   const reminderTimes = normalizeReminderTimes(args.reminderTimes);
+  const sortOrder = await nextHabitSortOrder(args.prisma, args.userId);
 
   const habit = await args.prisma.habit.create({
     data: {
       userId: args.userId,
       title,
       description,
+      sortOrder,
       schedule: { create: weekdays.map((weekday) => ({ weekday })) },
       ...(reminderTimes && reminderTimes.length > 0
         ? { reminders: { create: reminderTimes.map((timeMinutes) => ({ timeMinutes })) } }
@@ -324,4 +361,45 @@ export async function archiveHabit(args: ArchiveHabitArgs): Promise<{ habitId: s
   });
 
   return { habitId: args.habitId };
+}
+
+export async function reorderHabits(args: ReorderHabitsArgs): Promise<{ habitIds: string[] }> {
+  if (args.habitIds.length === 0) {
+    throw new ApiError('invalid_request', 'Habit order is required.', 400);
+  }
+
+  const unique = new Set(args.habitIds);
+  if (unique.size !== args.habitIds.length) {
+    throw new ApiError('invalid_request', 'Habit order must be unique.', 400);
+  }
+
+  const activeHabits = await args.prisma.habit.findMany({
+    where: {
+      userId: args.userId,
+      archivedAt: null,
+    },
+    select: { id: true },
+  });
+
+  if (activeHabits.length !== args.habitIds.length) {
+    throw new ApiError('invalid_request', 'Habit order must include all active habits.', 400);
+  }
+
+  const activeIds = new Set(activeHabits.map((habit) => habit.id));
+  for (const habitId of args.habitIds) {
+    if (!activeIds.has(habitId)) {
+      throw new ApiError('not_found', 'One or more habits are missing.', 404);
+    }
+  }
+
+  const updates = args.habitIds.map((habitId, index) =>
+    args.prisma.habit.update({
+      where: { id: habitId },
+      data: { sortOrder: index },
+    }),
+  );
+
+  await args.prisma.$transaction(updates);
+
+  return { habitIds: args.habitIds };
 }

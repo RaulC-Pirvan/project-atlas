@@ -51,11 +51,19 @@ export async function POST(request: Request) {
         throw new ApiError('invalid_request', 'Invalid createdAt date.', 400);
       }
 
+      const latest = await prisma.habit.findFirst({
+        where: { userId: session.user.id, archivedAt: null },
+        orderBy: { sortOrder: 'desc' },
+        select: { sortOrder: true },
+      });
+      const sortOrder = (latest?.sortOrder ?? -1) + 1;
+
       const habit = await prisma.habit.create({
         data: {
           userId: session.user.id,
           title,
           description: body.description?.trim() || null,
+          sortOrder,
           createdAt: createdAt ?? undefined,
           schedule: { create: activeWeekdays.map((weekday) => ({ weekday })) },
         },

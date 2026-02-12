@@ -285,6 +285,8 @@ export default async function CalendarPage({
     day: 'numeric',
   }).format(today);
 
+  const keepCompletedAtBottom = true;
+
   const prev = shiftMonth(year, month, -1);
   const next = shiftMonth(year, month, 1);
   const prevHref = `/calendar?month=${formatMonthParam(prev.year, prev.month)}`;
@@ -349,6 +351,7 @@ export default async function CalendarPage({
                   habits={selectedHabits}
                   initialCompletedHabitIds={Array.from(selectedCompletedIds)}
                   isFuture={isFuture}
+                  keepCompletedAtBottom={keepCompletedAtBottom}
                 />
               </div>
             </div>
@@ -361,6 +364,7 @@ export default async function CalendarPage({
           initialCompletedHabitIds={Array.from(selectedCompletedIds)}
           autoOpen={hasDateParam}
           isFuture={isFuture}
+          keepCompletedAtBottom={keepCompletedAtBottom}
         />
       </div>
     </AppShell>

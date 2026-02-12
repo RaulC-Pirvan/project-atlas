@@ -89,7 +89,7 @@ export default async function CalendarPage({
 
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
-    select: { timezone: true, weekStart: true },
+    select: { timezone: true, weekStart: true, keepCompletedAtBottom: true },
   });
 
   if (!user) {
@@ -285,7 +285,7 @@ export default async function CalendarPage({
     day: 'numeric',
   }).format(today);
 
-  const keepCompletedAtBottom = true;
+  const keepCompletedAtBottom = user.keepCompletedAtBottom;
 
   const prev = shiftMonth(year, month, -1);
   const next = shiftMonth(year, month, 1);

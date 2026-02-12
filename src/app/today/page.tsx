@@ -18,7 +18,7 @@ export default async function TodayPage() {
 
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
-    select: { timezone: true },
+    select: { timezone: true, keepCompletedAtBottom: true },
   });
 
   if (!user) {
@@ -64,7 +64,7 @@ export default async function TodayPage() {
         habits={todayHabits}
         initialCompletedHabitIds={Array.from(completedIds)}
         isFuture={false}
-        keepCompletedAtBottom
+        keepCompletedAtBottom={user.keepCompletedAtBottom}
       />
     </AppShell>
   );

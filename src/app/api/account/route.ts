@@ -32,7 +32,14 @@ export async function PUT(request: Request) {
 
       const user = await prisma.user.findUnique({
         where: { id: session.user.id },
-        select: { id: true, email: true, passwordHash: true, displayName: true, weekStart: true },
+        select: {
+          id: true,
+          email: true,
+          passwordHash: true,
+          displayName: true,
+          weekStart: true,
+          keepCompletedAtBottom: true,
+        },
       });
       if (!user) {
         throw new ApiError('not_found', 'User not found.', 404);
@@ -44,6 +51,7 @@ export async function PUT(request: Request) {
         emailVerified?: Date | null;
         displayName?: string;
         weekStart?: 'sun' | 'mon';
+        keepCompletedAtBottom?: boolean;
       } = {};
 
       if (parsed.data.email && parsed.data.email !== user.email) {
@@ -86,6 +94,13 @@ export async function PUT(request: Request) {
 
       if (parsed.data.weekStart && parsed.data.weekStart !== user.weekStart) {
         updates.weekStart = parsed.data.weekStart;
+      }
+
+      if (
+        parsed.data.keepCompletedAtBottom !== undefined &&
+        parsed.data.keepCompletedAtBottom !== user.keepCompletedAtBottom
+      ) {
+        updates.keepCompletedAtBottom = parsed.data.keepCompletedAtBottom;
       }
 
       await prisma.user.update({

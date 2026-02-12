@@ -79,8 +79,8 @@ The focus is speed, clarity, and consistent ordering without bulk actions or und
 
 ### Phase 3: Settings
 
-- [ ] Add account setting for �keep completed at bottom.�
-- [ ] Persist and apply preference across Today view and daily panels.
+- [x] Add account setting for �keep completed at bottom.�
+- [x] Persist and apply preference across Today view and daily panels.
 
 ### Phase 4: Performance & Polish
 

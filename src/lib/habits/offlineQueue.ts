@@ -292,6 +292,7 @@ export class OfflineCompletionQueue {
     input: { habitId: string; dateKey: string; completed: boolean },
     policy: OfflineQueuePolicy,
   ): Promise<{ ok: true; item: OfflineCompletionAction } | OfflineQueueValidation> {
+    await this.hydrate();
     const validation = validateCompletionDate(input.dateKey, policy);
     if (!validation.ok) return validation;
 

@@ -351,6 +351,7 @@ export default async function CalendarPage({
                   habits={selectedHabits}
                   initialCompletedHabitIds={Array.from(selectedCompletedIds)}
                   isFuture={isFuture}
+                  timeZone={timeZone}
                   keepCompletedAtBottom={keepCompletedAtBottom}
                 />
               </div>
@@ -364,6 +365,7 @@ export default async function CalendarPage({
           initialCompletedHabitIds={Array.from(selectedCompletedIds)}
           autoOpen={hasDateParam}
           isFuture={isFuture}
+          timeZone={timeZone}
           keepCompletedAtBottom={keepCompletedAtBottom}
         />
       </div>

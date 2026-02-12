@@ -16,6 +16,7 @@ describe('DailyCompletionPanel', () => {
         habits={[]}
         initialCompletedHabitIds={[]}
         isFuture={false}
+        timeZone="UTC"
       />,
     );
 
@@ -39,6 +40,7 @@ describe('DailyCompletionPanel', () => {
         habits={[{ id: 'h1', title: 'Read', description: 'Read daily' }]}
         initialCompletedHabitIds={[]}
         isFuture={false}
+        timeZone="UTC"
       />,
     );
 
@@ -61,6 +63,7 @@ describe('DailyCompletionPanel', () => {
         habits={[{ id: 'h1', title: 'Read', description: null }]}
         initialCompletedHabitIds={[]}
         isFuture={true}
+        timeZone="UTC"
       />,
     );
 
@@ -90,6 +93,7 @@ describe('DailyCompletionPanel', () => {
         habits={[{ id: 'h1', title: 'Read', description: 'Read daily' }]}
         initialCompletedHabitIds={[]}
         isFuture={false}
+        timeZone="UTC"
       />,
     );
 
@@ -124,6 +128,7 @@ describe('DailyCompletionPanel', () => {
         ]}
         initialCompletedHabitIds={[]}
         isFuture={false}
+        timeZone="UTC"
       />,
     );
 

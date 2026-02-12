@@ -14,6 +14,15 @@ import {
 } from 'react';
 
 import { getApiErrorMessage, parseJson } from '../../lib/api/client';
+import {
+  getOfflineCompletionQueue,
+  type OfflineQueueValidation,
+} from '../../lib/habits/offlineQueue';
+import { useOfflineCompletionSnapshot } from '../../lib/habits/offlineQueueClient';
+import {
+  registerOfflineCompletionSync,
+  requestOfflineCompletionSync,
+} from '../../lib/habits/offlineSync';
 import { orderHabitsByCompletion } from '../../lib/habits/ordering';
 import { type AchievementToastItem, AchievementToastStack } from '../achievements/AchievementToast';
 import { type ToastItem, ToastStack } from '../ui/Toast';
@@ -60,12 +69,29 @@ type AchievementsSnapshot = {
   byId: Map<string, AchievementSnapshotItem>;
 };
 
+function getOfflineValidationMessage(validation: OfflineQueueValidation): string {
+  if (validation.ok) return '';
+  switch (validation.reason) {
+    case 'invalid_date':
+      return 'Unable to queue this completion.';
+    case 'future':
+      return 'Future dates cannot be completed yet.';
+    case 'grace_expired':
+      return 'Yesterday can only be completed until 2:00 AM.';
+    case 'history_blocked':
+      return 'Past dates cannot be completed.';
+    default:
+      return 'Unable to queue this completion.';
+  }
+}
+
 type DailyCompletionPanelProps = {
   selectedDateKey: string | null;
   selectedLabel: string | null;
   habits: HabitSummary[];
   initialCompletedHabitIds: string[];
   isFuture: boolean;
+  timeZone: string;
   contextLabel?: string;
   keepCompletedAtBottom?: boolean;
 };
@@ -74,6 +100,7 @@ type HabitRowProps = {
   habit: HabitSummary;
   isCompleted: boolean;
   isPending: boolean;
+  isSyncing: boolean;
   isFuture: boolean;
   listId: string;
   onToggle: (habitId: string, wasCompleted: boolean) => void;
@@ -84,12 +111,13 @@ const HabitRow = memo(function HabitRow({
   habit,
   isCompleted,
   isPending,
+  isSyncing,
   isFuture,
   listId,
   onToggle,
   onKeyDown,
 }: HabitRowProps) {
-  const isDisabled = isFuture || isPending;
+  const isDisabled = isFuture || isSyncing;
   const descriptionId = habit.description ? `${listId}-${habit.id}` : undefined;
   const focusClasses = isCompleted
     ? 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black dark:focus-visible:ring-black/40 dark:focus-visible:ring-offset-white'
@@ -169,12 +197,18 @@ export function DailyCompletionPanel({
   habits,
   initialCompletedHabitIds,
   isFuture,
+  timeZone,
   contextLabel,
   keepCompletedAtBottom = true,
 }: DailyCompletionPanelProps) {
   const router = useRouter();
   const [completedIds, setCompletedIds] = useState<string[]>(initialCompletedHabitIds);
-  const [pendingIds, setPendingIds] = useState<string[]>([]);
+  const [syncingIds, setSyncingIds] = useState<string[]>([]);
+  const [isOnline, setIsOnline] = useState(() => {
+    if (typeof navigator === 'undefined') return true;
+    return navigator.onLine;
+  });
+  const offlineSnapshot = useOfflineCompletionSnapshot();
   const [toasts, setToasts] = useState<ToastItem[]>([]);
   const [achievementToasts, setAchievementToasts] = useState<AchievementToastItem[]>([]);
   const toastIdRef = useRef(0);
@@ -190,7 +224,18 @@ export function DailyCompletionPanel({
   const listId = useId();
   const resolvedContextLabel = contextLabel ?? 'Selected day';
   const completionSet = useMemo(() => new Set(completedIds), [completedIds]);
-  const pendingSet = useMemo(() => new Set(pendingIds), [pendingIds]);
+  const syncingSet = useMemo(() => new Set(syncingIds), [syncingIds]);
+  const offlinePendingSet = useMemo(() => {
+    if (!selectedDateKey) return new Set<string>();
+    return offlineSnapshot.pendingByDate.get(selectedDateKey) ?? new Set<string>();
+  }, [offlineSnapshot.pendingByDate, selectedDateKey]);
+  const pendingSet = useMemo(() => {
+    const merged = new Set<string>(offlinePendingSet);
+    for (const id of syncingSet) {
+      merged.add(id);
+    }
+    return merged;
+  }, [offlinePendingSet, syncingSet]);
   const orderedHabits = useMemo(
     () => orderHabitsByCompletion(habits, completionSet, keepCompletedAtBottom),
     [habits, completionSet, keepCompletedAtBottom],
@@ -239,8 +284,19 @@ export function DailyCompletionPanel({
   }, [orderedHabits]);
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const handleStatus = () => setIsOnline(navigator.onLine);
+    window.addEventListener('online', handleStatus);
+    window.addEventListener('offline', handleStatus);
+    return () => {
+      window.removeEventListener('online', handleStatus);
+      window.removeEventListener('offline', handleStatus);
+    };
+  }, []);
+
+  useEffect(() => {
     setCompletedIds(initialCompletedHabitIds);
-    setPendingIds([]);
+    setSyncingIds([]);
   }, [selectedDateKey, completionSignature]);
 
   useEffect(() => {
@@ -275,6 +331,17 @@ export function DailyCompletionPanel({
     },
     [setToasts],
   );
+
+  useEffect(() => {
+    const unsubscribe = registerOfflineCompletionSync({
+      onDrop: (event) => {
+        pushToast(event.message, 'error');
+      },
+    });
+    return () => {
+      unsubscribe();
+    };
+  }, [pushToast]);
 
   const pushAchievementToast = useCallback(
     (toast: Omit<AchievementToastItem, 'id' | 'state'>) => {
@@ -536,8 +603,37 @@ export function DailyCompletionPanel({
       }
 
       const alreadyCompleted = wasCompleted;
-      setPendingIds((prev) => [...prev, habitId]);
-      setCompletionState(habitId, !alreadyCompleted);
+      const nextCompleted = !alreadyCompleted;
+      setCompletionState(habitId, nextCompleted);
+
+      const queue = getOfflineCompletionQueue();
+      const enqueueOffline = async () => {
+        try {
+          const result = await queue.enqueue(
+            { habitId, dateKey: selectedDateKey, completed: nextCompleted },
+            { timeZone },
+          );
+          if (!result.ok) {
+            setCompletionState(habitId, alreadyCompleted);
+            pushToast(getOfflineValidationMessage(result), 'error');
+            return false;
+          }
+          pushToast('Saved offline. Will sync when back online.');
+          requestOfflineCompletionSync();
+          return true;
+        } catch {
+          setCompletionState(habitId, alreadyCompleted);
+          pushToast('Unable to save offline.', 'error');
+          return false;
+        }
+      };
+
+      if (!isOnline) {
+        await enqueueOffline();
+        return;
+      }
+
+      setSyncingIds((prev) => [...prev, habitId]);
 
       try {
         await ensureAchievementsSnapshot();
@@ -579,10 +675,9 @@ export function DailyCompletionPanel({
           await refreshAchievements(false);
         }
       } catch {
-        setCompletionState(habitId, alreadyCompleted);
-        pushToast('Unable to update completion.', 'error');
+        await enqueueOffline();
       } finally {
-        setPendingIds((prev) => prev.filter((id) => id !== habitId));
+        setSyncingIds((prev) => prev.filter((id) => id !== habitId));
       }
     },
     [
@@ -594,6 +689,8 @@ export function DailyCompletionPanel({
       router,
       refreshAchievements,
       playDing,
+      isOnline,
+      timeZone,
     ],
   );
 
@@ -643,7 +740,7 @@ export function DailyCompletionPanel({
     return (
       <ul
         className="space-y-3"
-        aria-busy={pendingIds.length > 0}
+        aria-busy={syncingIds.length > 0}
         aria-label="Daily habits"
         data-habit-list
         id={listId}
@@ -655,6 +752,7 @@ export function DailyCompletionPanel({
             habit={habit}
             isCompleted={completionSet.has(habit.id)}
             isPending={pendingSet.has(habit.id)}
+            isSyncing={syncingSet.has(habit.id)}
             isFuture={isFuture}
             listId={listId}
             onToggle={handleToggle}

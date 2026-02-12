@@ -78,16 +78,16 @@ the network is unavailable.
 
 ### Phase 2: Sync Engine
 
-- [ ] Attempt sync on network return and at startup when queue is non-empty.
-- [ ] Apply retry strategy with backoff for transient failures.
-- [ ] On server rejection (archived habit or schedule mismatch), drop item and
+- [x] Attempt sync on network return and at startup when queue is non-empty.
+- [x] Apply retry strategy with backoff for transient failures.
+- [x] On server rejection (archived habit or schedule mismatch), drop item and
       surface a toast.
 
 ### Phase 3: UI Indicators
 
-- [ ] Show pending sync state in Today list rows.
-- [ ] Show pending sync state in Calendar daily panel rows.
-- [ ] Reflect pending days in calendar tiles and progress indicators.
+- [x] Show pending sync state in Today list rows.
+- [x] Show pending sync state in Calendar daily panel rows.
+- [x] Reflect pending days in calendar tiles and progress indicators.
 
 ### Phase 4: Testing
 

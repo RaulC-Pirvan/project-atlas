@@ -64,6 +64,7 @@ export default async function TodayPage() {
         habits={todayHabits}
         initialCompletedHabitIds={Array.from(completedIds)}
         isFuture={false}
+        timeZone={timeZone}
         keepCompletedAtBottom={user.keepCompletedAtBottom}
       />
     </AppShell>

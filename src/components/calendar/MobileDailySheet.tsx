@@ -17,6 +17,7 @@ type MobileDailySheetProps = {
   habits: HabitSummary[];
   initialCompletedHabitIds: string[];
   isFuture: boolean;
+  timeZone: string;
   autoOpen?: boolean;
   keepCompletedAtBottom?: boolean;
 };
@@ -27,6 +28,7 @@ export function MobileDailySheet({
   habits,
   initialCompletedHabitIds,
   isFuture,
+  timeZone,
   autoOpen = true,
   keepCompletedAtBottom = true,
 }: MobileDailySheetProps) {
@@ -152,6 +154,7 @@ export function MobileDailySheet({
               habits={habits}
               initialCompletedHabitIds={initialCompletedHabitIds}
               isFuture={isFuture}
+              timeZone={timeZone}
               keepCompletedAtBottom={keepCompletedAtBottom}
             />
           </div>

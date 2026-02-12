@@ -15,7 +15,7 @@ export default async function HabitsPage() {
 
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
-    select: { weekStart: true },
+    select: { weekStart: true, timezone: true },
   });
 
   if (!user) {
@@ -30,7 +30,11 @@ export default async function HabitsPage() {
 
   return (
     <AppShell title="Habits" subtitle="Build routines that stay with you.">
-      <HabitsPanel initialHabits={habits} weekStart={user.weekStart} />
+      <HabitsPanel
+        initialHabits={habits}
+        weekStart={user.weekStart}
+        timezoneLabel={user.timezone}
+      />
     </AppShell>
   );
 }

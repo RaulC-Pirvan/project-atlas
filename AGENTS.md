@@ -79,6 +79,10 @@ A habit is defined independently of dates.
 - Pro upgrade entry points and preview states implemented (calendar and account surfaces), with a dedicated `/pro` page and mobile-first restore purchase placeholder.
 - Advanced Insights v1 implemented (Pro-gated): insights API, aggregated calculations, and Insights UI (cards + heatmap + summary panel).
 - Calendar now shows a Pro-only Insights snapshot card; Free users see an upgrade card.
+- Achievements System v1 implemented with expanded Free/Pro catalogue, per-habit milestones, and a trophy cabinet UI.
+- Achievements are persisted and locked on unlock (cannot regress), backed by `AchievementUnlock` and `HabitMilestoneUnlock`.
+- Achievements UI includes search, filters, tabs (Achievements/Milestones), and a "Next Up" panel.
+- Achievement progress/unlock toasts are shown on completion; unlocks play a distinct ding.
 - Test-only debug endpoints exist when `ENABLE_TEST_ENDPOINTS=true`: `/api/pro/debug/grant`, `/api/habits/debug/create`.
 
 ## Roadmap (high-level)
@@ -125,11 +129,14 @@ A habit is defined independently of dates.
 - `src/app/api/habits/debug/create/route.ts` - Test-only habit creation with explicit `createdAt`.
 - `src/app/api/insights/route.ts` - Insights API (Pro-gated, aggregated).
 - `src/app/insights/page.tsx` - Insights page (cards + heatmap + summary).
+- `src/app/api/achievements/route.ts` - Achievements API (summary + unlock persistence).
+- `src/app/achievements/page.tsx` - Achievements page (trophy cabinet + milestones).
 - `src/lib/auth` - Auth utilities (hashing, policy, credentials, rate limit, nextauth).
 - `src/lib/api` - Shared API error/response helpers, auth services, validation.
 - `src/lib/api/habits` - Habit API services and validation.
 - `src/lib/api/habits/__tests__` - Habit API service tests.
 - `src/lib/api/insights/summary.ts` - Insights data service (aggregated).
+- `src/lib/api/achievements/summary.ts` - Achievements data service (unlock persistence).
 - `src/components/habits` - Habit UI components and tests.
 - `src/components/calendar/CalendarMonth.tsx` - Calendar grid + progress indicators + completed-day styling.
 - `src/components/calendar/DailyCompletionPanel.tsx` - Selected-day habit list + completion toggles + completion sounds.
@@ -142,6 +149,7 @@ A habit is defined independently of dates.
 - `src/components/admin` - Admin UI components and tests.
 - `src/components/pro` - Pro upgrade entry points and preview cards.
 - `src/components/insights` - Insights UI components (dashboard, snapshot, upgrade card).
+- `src/components/achievements` - Achievements UI components (dashboard, upgrade card, toast).
 - `src/components/ui/ThemeToggle.tsx` - Light/dark theme toggle (system default + persistence).
 - `src/components/ui/Toast.tsx` - Toast notifications (no inline form errors).
 - `src/components/ui/Notice.tsx` - Inline notice/alert primitive.
@@ -158,6 +166,8 @@ A habit is defined independently of dates.
 - `src/lib/pro` - Pro entitlement helpers.
 - `src/lib/insights` - Insights domain helpers (summary, types, weekdays).
 - `src/lib/insights/__tests__` - Insights unit tests.
+- `src/lib/achievements` - Achievements domain helpers (catalogue, summary, types).
+- `src/lib/achievements/__tests__` - Achievements unit tests.
 - `src/infra/email` - Resend client, verification email sender, debug token store.
 - `src/lib/observability` - Structured logging + API logging wrapper.
 - `src/lib/http/securityHeaders.ts` - Shared security headers.
@@ -177,6 +187,7 @@ A habit is defined independently of dates.
 - `e2e/calendar-visual.spec.ts` - Playwright visual regression coverage for calendar tiles.
 - `e2e/marketing-homepage.spec.ts` - Marketing homepage E2E coverage.
 - `e2e/insights.spec.ts` - Insights gating E2E coverage.
+- `e2e/achievements.spec.ts` - Achievements unlock E2E coverage.
 - `e2e/streaks.spec.ts` - Streak UI E2E coverage.
 - `e2e` - Playwright auth + habits + calendar + daily completion + visual regression E2E tests.
 - `playwright.config.ts` - Playwright config (chromium + firefox + visual).
@@ -195,6 +206,8 @@ A habit is defined independently of dates.
 - `docs/test workflows/sprint-7.1-test-workflows.md` - Atlas Pro gating test workflows.
 - `docs/sprints/sprint-8.1.md` - Advanced Insights v1 sprint plan.
 - `docs/test workflows/sprint-8.1-test-workflows.md` - Advanced Insights v1 test workflows.
+- `docs/sprints/sprint-9.1.md` - Achievements System v1 sprint plan.
+- `docs/test workflows/sprint-9.1-test-workflows.md` - Achievements System v1 test workflows.
 - `docs/ops/staging.md` - Staging environment guide.
 - `docs/ops/backups.md` - Backup strategy and validation checklist.
 

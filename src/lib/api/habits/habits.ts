@@ -1,9 +1,15 @@
 import { listActiveWeekdays } from '../../habits/schedule';
 import type { HabitScheduleEntry } from '../../habits/types';
+import { MAX_REMINDERS_PER_HABIT } from '../../reminders/constants';
+import { isValidTimeMinutes } from '../../reminders/time';
 import { ApiError } from '../errors';
 
 type ScheduleRecord = {
   weekday: number;
+};
+
+type ReminderRecord = {
+  timeMinutes: number;
 };
 
 type EmptyFilter = Record<string, never>;
@@ -15,13 +21,17 @@ type HabitRecord = {
   archivedAt: Date | null;
   createdAt: Date;
   schedule: ScheduleRecord[];
+  reminders: ReminderRecord[];
 };
 
 type HabitListClient = {
   habit: {
     findMany: (args: {
       where: { userId: string; archivedAt?: Date | null };
-      include: { schedule: { select: { weekday: true } } };
+      include: {
+        schedule: { select: { weekday: true } };
+        reminders: { select: { timeMinutes: true } };
+      };
       orderBy?: { createdAt: 'asc' | 'desc' };
     }) => Promise<HabitRecord[]>;
   };
@@ -35,8 +45,12 @@ type HabitCreateClient = {
         title: string;
         description?: string | null;
         schedule: { create: ScheduleRecord[] };
+        reminders?: { create: ReminderRecord[] };
       };
-      include: { schedule: { select: { weekday: true } } };
+      include: {
+        schedule: { select: { weekday: true } };
+        reminders: { select: { timeMinutes: true } };
+      };
     }) => Promise<HabitRecord>;
   };
 };
@@ -53,11 +67,15 @@ type HabitUpdateClient = {
         description?: string | null;
         archivedAt?: Date | null;
         schedule?: { deleteMany: EmptyFilter; create: ScheduleRecord[] };
+        reminders?: { deleteMany: EmptyFilter; create: ReminderRecord[] };
       };
     }) => Promise<{ id: string }>;
     findUnique: (args: {
       where: { id: string };
-      include: { schedule: { select: { weekday: true } } };
+      include: {
+        schedule: { select: { weekday: true } };
+        reminders: { select: { timeMinutes: true } };
+      };
     }) => Promise<HabitRecord | null>;
   };
 };
@@ -80,6 +98,7 @@ export type HabitSummary = {
   archivedAt: Date | null;
   createdAt: Date;
   weekdays: number[];
+  reminderTimes: number[];
 };
 
 type ListHabitsArgs = {
@@ -94,6 +113,7 @@ type CreateHabitArgs = {
   title: string;
   description?: string;
   weekdays: number[];
+  reminderTimes?: number[];
 };
 
 type UpdateHabitArgs = {
@@ -103,6 +123,7 @@ type UpdateHabitArgs = {
   title?: string;
   description?: string | null;
   weekdays?: number[];
+  reminderTimes?: number[];
 };
 
 type ArchiveHabitArgs = {
@@ -139,7 +160,43 @@ function normalizeWeekdays(weekdays: number[]): number[] {
   return activeWeekdays;
 }
 
+function normalizeReminderTimes(reminderTimes?: number[]): number[] | undefined {
+  if (reminderTimes === undefined) return undefined;
+  if (reminderTimes.length === 0) return [];
+  if (reminderTimes.length > MAX_REMINDERS_PER_HABIT) {
+    throw new ApiError(
+      'invalid_request',
+      `No more than ${MAX_REMINDERS_PER_HABIT} reminders are allowed per habit.`,
+      400,
+    );
+  }
+
+  const normalized: number[] = [];
+  const seen = new Set<number>();
+
+  for (const timeMinutes of reminderTimes) {
+    if (!isValidTimeMinutes(timeMinutes)) {
+      throw new ApiError(
+        'invalid_request',
+        'Reminder time must be between 0 and 1439 minutes.',
+        400,
+      );
+    }
+    if (seen.has(timeMinutes)) {
+      throw new ApiError('invalid_request', 'Duplicate reminder times are not allowed.', 400);
+    }
+    seen.add(timeMinutes);
+    normalized.push(timeMinutes);
+  }
+
+  normalized.sort((a, b) => a - b);
+  return normalized;
+}
+
 function toHabitSummary(habit: HabitRecord): HabitSummary {
+  const reminderTimes = habit.reminders.map((reminder) => reminder.timeMinutes);
+  reminderTimes.sort((a, b) => a - b);
+
   return {
     id: habit.id,
     title: habit.title,
@@ -147,6 +204,7 @@ function toHabitSummary(habit: HabitRecord): HabitSummary {
     archivedAt: habit.archivedAt,
     createdAt: habit.createdAt,
     weekdays: listActiveWeekdays(habit.schedule),
+    reminderTimes,
   };
 }
 
@@ -156,7 +214,10 @@ export async function listHabits(args: ListHabitsArgs): Promise<HabitSummary[]> 
       userId: args.userId,
       ...(args.includeArchived ? {} : { archivedAt: null }),
     },
-    include: { schedule: { select: { weekday: true } } },
+    include: {
+      schedule: { select: { weekday: true } },
+      reminders: { select: { timeMinutes: true } },
+    },
     orderBy: { createdAt: 'asc' },
   });
 
@@ -167,6 +228,7 @@ export async function createHabit(args: CreateHabitArgs): Promise<HabitSummary> 
   const title = normalizeTitle(args.title);
   const description = normalizeDescription(args.description);
   const weekdays = normalizeWeekdays(args.weekdays);
+  const reminderTimes = normalizeReminderTimes(args.reminderTimes);
 
   const habit = await args.prisma.habit.create({
     data: {
@@ -174,8 +236,14 @@ export async function createHabit(args: CreateHabitArgs): Promise<HabitSummary> 
       title,
       description,
       schedule: { create: weekdays.map((weekday) => ({ weekday })) },
+      ...(reminderTimes && reminderTimes.length > 0
+        ? { reminders: { create: reminderTimes.map((timeMinutes) => ({ timeMinutes })) } }
+        : {}),
     },
-    include: { schedule: { select: { weekday: true } } },
+    include: {
+      schedule: { select: { weekday: true } },
+      reminders: { select: { timeMinutes: true } },
+    },
   });
 
   return toHabitSummary(habit);
@@ -194,6 +262,7 @@ export async function updateHabit(args: UpdateHabitArgs): Promise<HabitSummary> 
     title?: string;
     description?: string | null;
     schedule?: { deleteMany: EmptyFilter; create: ScheduleRecord[] };
+    reminders?: { deleteMany: EmptyFilter; create: ReminderRecord[] };
   } = {};
 
   if (args.title !== undefined) {
@@ -212,6 +281,14 @@ export async function updateHabit(args: UpdateHabitArgs): Promise<HabitSummary> 
     };
   }
 
+  if (args.reminderTimes !== undefined) {
+    const reminderTimes = normalizeReminderTimes(args.reminderTimes) ?? [];
+    data.reminders = {
+      deleteMany: {},
+      create: reminderTimes.map((timeMinutes) => ({ timeMinutes })),
+    };
+  }
+
   await args.prisma.habit.update({
     where: { id: args.habitId },
     data,
@@ -219,7 +296,10 @@ export async function updateHabit(args: UpdateHabitArgs): Promise<HabitSummary> 
 
   const updated = await args.prisma.habit.findUnique({
     where: { id: args.habitId },
-    include: { schedule: { select: { weekday: true } } },
+    include: {
+      schedule: { select: { weekday: true } },
+      reminders: { select: { timeMinutes: true } },
+    },
   });
 
   if (!updated) {

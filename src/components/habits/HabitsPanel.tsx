@@ -3,6 +3,7 @@
 import { useRef, useState } from 'react';
 
 import { getApiErrorMessage, parseJson } from '../../lib/api/client';
+import { minutesToTimeString } from '../../lib/reminders/time';
 import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
 import { type ToastItem, ToastStack } from '../ui/Toast';
@@ -15,6 +16,7 @@ type HabitSummary = {
   description: string | null;
   archivedAt: string | Date | null;
   weekdays: number[];
+  reminderTimes: number[];
 };
 
 type HabitsResponse = {
@@ -28,9 +30,10 @@ type HabitResponse = {
 type HabitsPanelProps = {
   initialHabits: HabitSummary[];
   weekStart: WeekStart;
+  timezoneLabel?: string;
 };
 
-export function HabitsPanel({ initialHabits, weekStart }: HabitsPanelProps) {
+export function HabitsPanel({ initialHabits, weekStart, timezoneLabel }: HabitsPanelProps) {
   const [habits, setHabits] = useState<HabitSummary[]>(initialHabits);
   const [loading, setLoading] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -86,6 +89,7 @@ export function HabitsPanel({ initialHabits, weekStart }: HabitsPanelProps) {
           title: payload.title,
           description: payload.description,
           weekdays: payload.weekdays,
+          reminderTimes: payload.reminderTimes,
         }),
       });
       const body = await parseJson<HabitResponse>(response);
@@ -109,6 +113,7 @@ export function HabitsPanel({ initialHabits, weekStart }: HabitsPanelProps) {
           title: payload.title,
           description: payload.description,
           weekdays: payload.weekdays,
+          reminderTimes: payload.reminderTimes,
         }),
       });
       const body = await parseJson<HabitResponse>(response);
@@ -145,7 +150,13 @@ export function HabitsPanel({ initialHabits, weekStart }: HabitsPanelProps) {
 
   return (
     <div className="space-y-10">
-      <HabitForm mode="create" weekStart={weekStart} onSubmit={handleCreate} resetOnSubmit />
+      <HabitForm
+        mode="create"
+        weekStart={weekStart}
+        timezoneLabel={timezoneLabel}
+        onSubmit={handleCreate}
+        resetOnSubmit
+      />
 
       <div className="space-y-4">
         <div className="flex items-center justify-between gap-4">
@@ -188,7 +199,9 @@ export function HabitsPanel({ initialHabits, weekStart }: HabitsPanelProps) {
                     title: habit.title,
                     description: habit.description ?? '',
                     weekdays: normalizeWeekdays(habit.weekdays),
+                    reminderTimes: habit.reminderTimes ?? [],
                   }}
+                  timezoneLabel={timezoneLabel}
                   onSubmit={(payload) => handleUpdate(habit.id, payload)}
                   onCancel={() => setEditingId(null)}
                 />
@@ -232,6 +245,21 @@ export function HabitsPanel({ initialHabits, weekStart }: HabitsPanelProps) {
                       </span>
                     ))}
                   </div>
+                  {habit.reminderTimes?.length ? (
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="text-xs font-semibold uppercase tracking-[0.3em] text-black/40 dark:text-white/40">
+                        Reminders
+                      </span>
+                      {habit.reminderTimes.map((time) => (
+                        <span
+                          key={`${habit.id}-${time}`}
+                          className="rounded-full border border-black/10 bg-black/5 px-3 py-1 text-xs font-medium text-black/70 dark:border-white/10 dark:bg-white/10 dark:text-white/70"
+                        >
+                          {minutesToTimeString(time)}
+                        </span>
+                      ))}
+                    </div>
+                  ) : null}
                 </div>
               )}
             </div>

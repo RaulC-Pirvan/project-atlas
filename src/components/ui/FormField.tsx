@@ -12,7 +12,7 @@ type FormFieldProps = {
 
 export function FormField({ id, label, hint, error, children }: FormFieldProps) {
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
       <Label htmlFor={id}>{label}</Label>
       {children}
       {hint ? <p className="text-xs text-black/50 dark:text-white/50">{hint}</p> : null}

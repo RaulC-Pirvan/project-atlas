@@ -91,9 +91,9 @@ the network is unavailable.
 
 ### Phase 4: Testing
 
-- [ ] Unit tests for queue logic, dedupe, and validation.
-- [ ] Component tests for pending sync UI indicators.
-- [ ] E2E tests that toggle offline mode, queue actions, and verify sync on return.
+- [x] Unit tests for queue logic, dedupe, and validation.
+- [x] Component tests for pending sync UI indicators.
+- [x] E2E tests that toggle offline mode, queue actions, and verify sync on return.
 
 ---
 

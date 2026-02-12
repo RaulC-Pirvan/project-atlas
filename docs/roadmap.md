@@ -283,11 +283,11 @@
 
 ### Sprint 11.2: Offline-first Completions
 
-- [ ] Implement offline queue for completion toggles
-- [ ] Sync queue when network returns
-- [ ] Add "pending sync" UI indicators
-- [ ] Add unit tests for offline queue logic
-- [ ] Add E2E coverage for flaky network scenarios
+- [x] Implement offline queue for completion toggles
+- [x] Sync queue when network returns
+- [x] Add "pending sync" UI indicators
+- [x] Add unit tests for offline queue logic
+- [x] Add E2E coverage for flaky network scenarios
 
 ---
 

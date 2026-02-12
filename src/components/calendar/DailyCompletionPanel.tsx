@@ -134,6 +134,8 @@ const HabitRow = memo(function HabitRow({
         aria-checked={isCompleted}
         aria-describedby={descriptionId}
         data-habit-id={habit.id}
+        data-pending={isPending ? 'true' : undefined}
+        data-syncing={isSyncing ? 'true' : undefined}
         disabled={isDisabled}
         onClick={() => onToggle(habit.id, isCompleted)}
         onKeyDown={onKeyDown}
@@ -184,6 +186,7 @@ const HabitRow = memo(function HabitRow({
             <span className="h-2 w-2 rounded-full bg-black" />
           ) : null}
         </span>
+        {isPending ? <span className="sr-only">Pending sync</span> : null}
       </button>
     </li>
   );

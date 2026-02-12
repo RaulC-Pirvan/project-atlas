@@ -1,6 +1,7 @@
-import { fireEvent, render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { fireEvent, render, screen, within } from '@testing-library/react';
+import { beforeEach, describe, expect, it } from 'vitest';
 
+import { buildQueueItem, getOfflineCompletionQueue } from '../../../lib/habits/offlineQueue';
 import { CalendarMonth, type CalendarWeekView } from '../CalendarMonth';
 
 function makeDay(
@@ -24,6 +25,12 @@ function makeDay(
 }
 
 describe('CalendarMonth', () => {
+  beforeEach(async () => {
+    const queue = getOfflineCompletionQueue();
+    await queue.hydrate();
+    await queue.replaceAll([]);
+  });
+
   it('renders a habit indicator for days with active habits', () => {
     const week: CalendarWeekView = [
       makeDay(1, false),
@@ -118,5 +125,41 @@ describe('CalendarMonth', () => {
 
     fireEvent.keyDown(day1, { key: 'End' });
     expect(day7).toHaveFocus();
+  });
+
+  it('shows pending sync indicator for queued days', async () => {
+    const queue = getOfflineCompletionQueue();
+    await queue.hydrate();
+    await queue.replaceAll([
+      buildQueueItem({
+        habitId: 'h1',
+        dateKey: '2026-02-05',
+        completed: true,
+        now: new Date('2026-02-05T10:00:00.000Z'),
+      }),
+    ]);
+
+    const week: CalendarWeekView = [
+      makeDay(5, true, { completedCount: 0, totalCount: 1 }),
+      makeDay(6, true, { completedCount: 0, totalCount: 1 }),
+    ];
+
+    render(
+      <CalendarMonth
+        monthLabel="February 2026"
+        weekStart="mon"
+        weeks={[week]}
+        prevHref="/calendar?month=2026-01"
+        nextHref="/calendar?month=2026-03"
+      />,
+    );
+
+    const pendingDay = screen.getByRole('link', {
+      name: /open daily view for February 5, 2026/i,
+    });
+
+    await screen.findByText(/pending sync/i);
+    expect(pendingDay).toHaveAttribute('data-pending', 'true');
+    expect(within(pendingDay).getByText(/pending sync/i)).toBeInTheDocument();
   });
 });

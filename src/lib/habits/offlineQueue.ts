@@ -72,8 +72,10 @@ function requestToPromise<T>(request: IDBRequest<T>): Promise<T> {
 function transactionDone(transaction: IDBTransaction): Promise<void> {
   return new Promise((resolve, reject) => {
     transaction.oncomplete = () => resolve();
-    transaction.onabort = () => reject(transaction.error ?? new Error('IndexedDB transaction aborted.'));
-    transaction.onerror = () => reject(transaction.error ?? new Error('IndexedDB transaction failed.'));
+    transaction.onabort = () =>
+      reject(transaction.error ?? new Error('IndexedDB transaction aborted.'));
+    transaction.onerror = () =>
+      reject(transaction.error ?? new Error('IndexedDB transaction failed.'));
   });
 }
 
@@ -148,9 +150,7 @@ export function createQueueKey(habitId: string, dateKey: string): string {
   return `${habitId}:${dateKey}`;
 }
 
-export function normalizeQueueItems(
-  items: OfflineCompletionAction[],
-): OfflineCompletionAction[] {
+export function normalizeQueueItems(items: OfflineCompletionAction[]): OfflineCompletionAction[] {
   const byKey = new Map<string, OfflineCompletionAction>();
 
   for (const item of items) {
@@ -192,9 +192,7 @@ export function buildQueueItem(input: {
   };
 }
 
-export function buildPendingIndex(
-  items: OfflineCompletionAction[],
-): Map<string, Set<string>> {
+export function buildPendingIndex(items: OfflineCompletionAction[]): Map<string, Set<string>> {
   const map = new Map<string, Set<string>>();
   for (const item of items) {
     const set = map.get(item.dateKey) ?? new Set<string>();

@@ -1,6 +1,7 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { buildQueueItem, getOfflineCompletionQueue } from '../../../lib/habits/offlineQueue';
 import { DailyCompletionPanel } from '../DailyCompletionPanel';
 
 vi.mock('next/navigation', () => ({
@@ -8,6 +9,12 @@ vi.mock('next/navigation', () => ({
 }));
 
 describe('DailyCompletionPanel', () => {
+  beforeEach(async () => {
+    const queue = getOfflineCompletionQueue();
+    await queue.hydrate();
+    await queue.replaceAll([]);
+  });
+
   it('renders a prompt when no day is selected', () => {
     render(
       <DailyCompletionPanel
@@ -143,5 +150,33 @@ describe('DailyCompletionPanel', () => {
 
     fireEvent.keyDown(walk, { key: 'ArrowUp' });
     expect(read).toHaveFocus();
+  });
+
+  it('shows a pending indicator for offline completions', async () => {
+    const queue = getOfflineCompletionQueue();
+    await queue.hydrate();
+    await queue.replaceAll([
+      buildQueueItem({
+        habitId: 'h1',
+        dateKey: '2026-02-05',
+        completed: true,
+        now: new Date('2026-02-05T10:00:00.000Z'),
+      }),
+    ]);
+
+    render(
+      <DailyCompletionPanel
+        selectedDateKey="2026-02-05"
+        selectedLabel="February 5, 2026"
+        habits={[{ id: 'h1', title: 'Read', description: 'Read daily' }]}
+        initialCompletedHabitIds={[]}
+        isFuture={false}
+        timeZone="UTC"
+      />,
+    );
+
+    const checkbox = screen.getByRole('checkbox', { name: /read/i });
+    await waitFor(() => expect(checkbox).toHaveAttribute('data-pending', 'true'));
+    expect(within(checkbox).getByText(/pending sync/i)).toBeInTheDocument();
   });
 });

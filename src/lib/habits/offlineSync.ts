@@ -23,7 +23,7 @@ type SyncListener = {
 const RETRY_BASE_MS = 1000;
 const RETRY_MAX_MS = 30000;
 
-let listeners = new Map<number, SyncListener>();
+const listeners = new Map<number, SyncListener>();
 let listenerId = 0;
 let started = false;
 let syncInFlight = false;

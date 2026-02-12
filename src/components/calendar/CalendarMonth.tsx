@@ -273,6 +273,7 @@ export function CalendarMonth({
                   data-date-key={day.key}
                   data-grid-index={gridIndex}
                   data-focusable="true"
+                  data-pending={hasPending ? 'true' : undefined}
                   scroll={false}
                   className={cellClasses}
                   aria-label={`Open daily view for ${day.label}`}

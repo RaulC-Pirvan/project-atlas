@@ -1,4 +1,12 @@
-# Project Atlas — Product & Engineering Roadmap (Updated)
+# Project Atlas - Product & Engineering Roadmap (Updated)
+
+---
+
+## Roadmap Constraints (Active)
+
+- No-cash constraint: defer paid mobile/store prerequisites (Apple/Google accounts, APNs/FCM setup).
+- Web-first launch: all work before launch must be web-only or mobile-friendly but not require paid accounts.
+- Mobile wrapper, native push, and store release happen after web launch and funding.
 
 ---
 
@@ -30,7 +38,7 @@
 
 ---
 
-## Phase 1: Core Domain & Auth MVP (Weeks 1–3) (Completed)
+## Phase 1: Core Domain & Auth MVP (Weeks 1-3) (Completed)
 
 ### Sprint 1.1: Authentication Foundation
 
@@ -59,14 +67,14 @@
 - [x] Run initial migration
 - [x] Seed database with sample users & habits
 - [x] Unit tests for domain logic (no UI)
-- [x] Validate weekday → date mapping logic
+- [x] Validate weekday -> date mapping logic
 
 ---
 
 ### Sprint 1.3: Habit CRUD
 
 - [x] Create habit creation UI
-- [x] Select active weekdays (Mon–Sun)
+- [x] Select active weekdays (Mon-Sun)
 - [x] Edit / delete habits
 - [x] Persist habits in DB
 - [x] Validate habit rules (no empty weekday selection)
@@ -75,14 +83,14 @@
 
 ---
 
-## Phase 2: Calendar & Daily Tracking (Weeks 4–6) (Completed)
+## Phase 2: Calendar & Daily Tracking (Weeks 4-6) (Completed)
 
 ### Sprint 2.1: Calendar Core
 
 - [x] Monthly calendar view
-- [x] Correct date ↔ weekday mapping
+- [x] Correct date <-> weekday mapping
 - [x] Display which days have active habits
-- [x] Click day → open daily view
+- [x] Click day -> open daily view
 - [x] Responsive layout (desktop-first, mobile-safe)
 - [x] Unit tests for calendar date logic
 - [x] E2E tests for calendar navigation
@@ -104,7 +112,7 @@
 ### Sprint 2.3: Visual Feedback & Delight
 
 - [x] Day tile progress indicator
-- [x] Fully completed day → golden state
+- [x] Fully completed day -> golden state
 - [x] Completion sound (configurable / subtle)
 - [x] Smooth UI transitions
 - [x] Accessibility considerations
@@ -112,7 +120,7 @@
 
 ---
 
-## Phase 3: Streaks & Engagement (Weeks 7–8) (Completed)
+## Phase 3: Streaks & Engagement (Weeks 7-8) (Completed)
 
 ### Sprint 3.1: Streak Logic
 
@@ -135,9 +143,9 @@
 
 ---
 
-## Phase 4: UX Polish & Mobile (Weeks 9–10) (Completed)
+## Phase 4: UX Polish & Responsiveness (Weeks 9-10) (Completed)
 
-### Sprint 4.1: Mobile & Responsiveness
+### Sprint 4.1: Responsive UX
 
 - [x] Mobile-optimized calendar view
 - [x] Touch-friendly interactions
@@ -163,12 +171,12 @@
 - [x] Define clear value prop and hero section
 - [x] Explain core benefits (schedule-based habits, daily completion, streaks)
 - [x] Add primary CTA (sign up / sign in)
-- [x] Auth-aware redirect: logged-in users go to `/calendar`
+- [x] Auth-aware redirect: logged-in users go to `/today`
 - [x] Keep styling aligned with minimalist black/white system
 
 ---
 
-## Phase 6: Production Hardening (Weeks 12–13) (Completed / In Progress)
+## Phase 6: Production Hardening (Weeks 12-13) (Completed / In Progress)
 
 ### Sprint 6.1: Observability & Safety
 
@@ -203,9 +211,9 @@
 
 ---
 
-## Phase 7: Monetisation & Pro Foundation (New)
+## Phase 7: Monetization & Pro Foundation (New)
 
-### Sprint 7.1: Atlas Pro — Product Strategy & Gating
+### Sprint 7.1: Atlas Pro - Product Strategy & Gating
 
 - [x] Define Free vs Pro feature matrix (one-time purchase)
 - [x] Add Pro entitlement model (server-side)
@@ -245,7 +253,7 @@
 
 ---
 
-## Phase 10: Smart Reminders + Push Notifications (Pro) (New)
+## Phase 10: Smart Reminders (Pro) (Web-first) (New)
 
 ### Sprint 10.1: Reminder Scheduling v1 (Web + Mobile Ready)
 
@@ -261,7 +269,51 @@
 
 ---
 
-### Sprint 10.2: Mobile Push Implementation (WebView)
+## Phase 11: Daily UX + Performance (Web-first) (New)
+
+### Sprint 11.1: Today View + Speed Improvements
+
+- [ ] Add "Today" screen (fast daily entry)
+- [ ] Add quick actions (complete/uncomplete + undo)
+- [ ] Add habit ordering/pinning/sorting
+- [ ] Add schedule presets (Weekdays / Every day / Weekend)
+- [ ] Improve daily panel performance on small screens
+
+---
+
+### Sprint 11.2: Offline-first Completions
+
+- [ ] Implement offline queue for completion toggles
+- [ ] Sync queue when network returns
+- [ ] Add "pending sync" UI indicators
+- [ ] Add unit tests for offline queue logic
+- [ ] Add E2E coverage for flaky network scenarios
+
+---
+
+## Phase 12: Grace Window Rule (Free) (New)
+
+### Sprint 12.1: Completion Grace Window Until 02:00
+
+- [ ] Implement Free grace window: allow completing "yesterday" until 02:00
+- [ ] Keep future-date guard intact
+- [ ] Ensure timezone-safe boundary handling
+- [ ] Update UI copy to explain grace window
+- [ ] Add unit tests + E2E tests for grace window edge cases
+
+---
+
+## Phase 13: Mobile + Store Launch (Deferred - Requires Funding) (New)
+
+### Prereqs (Paid / External)
+
+- Apple Developer Program membership
+- Google Play Console registration
+- Firebase project
+- iOS bundle ID + Android package name
+- APNs auth key (.p8)
+
+### Sprint 13.1: Mobile Push Implementation (WebView)
 
 - [ ] Wrap app using WebView (Capacitor recommended)
 - [ ] Setup Android push (FCM)
@@ -272,54 +324,7 @@
 
 ---
 
-## Phase 11: Notes & Reflection (Optional) (New)
-
-### Sprint 11.1: Habit Notes v1
-
-- [ ] Add habit notes (per habit) and/or daily notes (per date)
-- [ ] Add Notes UI (minimal, distraction-free)
-- [ ] Decide Free vs Pro gating for notes
-- [ ] Add unit tests + E2E tests for notes flows
-
----
-
-## Phase 12: Mobile Experience Enhancements (New)
-
-### Sprint 12.1: Today View + Speed Improvements
-
-- [ ] Add "Today" screen (fast daily entry)
-- [ ] Add quick actions (complete/uncomplete + undo)
-- [ ] Add habit ordering/pinning/sorting
-- [ ] Add schedule presets (Weekdays / Every day / Weekend)
-- [ ] Improve daily panel performance on mobile
-
----
-
-### Sprint 12.2: Offline-first Completions
-
-- [ ] Implement offline queue for completion toggles
-- [ ] Sync queue when network returns
-- [ ] Add "pending sync" UI indicators
-- [ ] Add unit tests for offline queue logic
-- [ ] Add E2E coverage for flaky network scenarios
-
----
-
-## Phase 13: Grace Window Rule (Free) (New)
-
-### Sprint 13.1: Completion Grace Window Until 02:00
-
-- [ ] Implement Free grace window: allow completing "yesterday" until 02:00
-- [ ] Keep future-date guard intact
-- [ ] Ensure timezone-safe boundary handling
-- [ ] Update UI copy to explain grace window
-- [ ] Add unit tests + E2E tests for grace window edge cases
-
----
-
-## Phase 14: Store Launch (Google Play + App Store) (New)
-
-### Sprint 14.1: Store Readiness & Compliance
+### Sprint 13.2: Store Readiness & Compliance
 
 - [ ] App icons, splash screens, store screenshots
 - [ ] Privacy policy + Terms pages (in-app + hosted)

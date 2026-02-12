@@ -7,7 +7,7 @@ export default async function Home() {
   const session = await getServerAuthSession();
 
   if (session?.user?.id) {
-    redirect('/calendar');
+    redirect('/today');
   }
 
   return <MarketingHome />;

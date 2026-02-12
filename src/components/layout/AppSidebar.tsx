@@ -6,16 +6,17 @@ import { usePathname } from 'next/navigation';
 import { SignOutButton } from '../auth/SignOutButton';
 
 const navItems = [
-  { href: '/habits', label: 'Habits', icon: 'habits', desktopOrder: 'md:order-4' },
+  { href: '/habits', label: 'Habits', icon: 'habits', desktopOrder: 'md:order-5' },
   { href: '/calendar', label: 'Calendar', icon: 'calendar', desktopOrder: 'md:order-1' },
-  { href: '/insights', label: 'Insights', icon: 'insights', desktopOrder: 'md:order-2' },
+  { href: '/today', label: 'Today', icon: 'today', desktopOrder: 'md:order-2' },
+  { href: '/insights', label: 'Insights', icon: 'insights', desktopOrder: 'md:order-3' },
   {
     href: '/achievements',
     label: 'Achievements',
     icon: 'achievements',
-    desktopOrder: 'md:order-3',
+    desktopOrder: 'md:order-4',
   },
-  { href: '/account', label: 'Account', icon: 'account', desktopOrder: 'md:order-5' },
+  { href: '/account', label: 'Account', icon: 'account', desktopOrder: 'md:order-6' },
 ];
 
 const baseClasses =
@@ -38,6 +39,25 @@ function NavIcon({ icon }: { icon: string }) {
       >
         <rect x="3.5" y="5" width="17" height="15" rx="2.5" />
         <path d="M8 3.5v3M16 3.5v3M3.5 9.5h17" />
+      </svg>
+    );
+  }
+
+  if (icon === 'today') {
+    return (
+      <svg
+        viewBox="0 0 24 24"
+        aria-hidden="true"
+        className="h-5 w-5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <circle cx="12" cy="12" r="3.5" />
+        <path d="M12 2.5v2.5M12 19v2.5M4.5 12h2.5M17 12h2.5" />
+        <path d="M6.4 6.4l1.8 1.8M15.8 15.8l1.8 1.8M17.6 6.4l-1.8 1.8M8.2 15.8l-1.8 1.8" />
       </svg>
     );
   }
@@ -137,7 +157,7 @@ function NavLink({
       aria-current={active ? 'page' : undefined}
       className={`${baseClasses} ${desktopOrder} ${
         active ? activeClasses : inactiveClasses
-      } ${active && icon === 'calendar' ? mobileCenterClasses : ''} md:justify-center`.trim()}
+      } ${active && (icon === 'calendar' || icon === 'today') ? mobileCenterClasses : ''} md:justify-center`.trim()}
     >
       <span className="md:hidden">
         <NavIcon icon={icon} />

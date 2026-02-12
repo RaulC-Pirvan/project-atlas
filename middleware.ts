@@ -42,7 +42,7 @@ export async function middleware(request: NextRequest) {
         return response;
       }
 
-      const response = NextResponse.redirect(new URL('/calendar', request.url));
+      const response = NextResponse.redirect(new URL('/today', request.url));
       applySecurityHeaders(response.headers);
       return response;
     }

@@ -10,7 +10,7 @@
 
 Sprint 5.1 delivers the marketing homepage: a clear explanation of Project Atlas,
 key benefits, and direct calls to action. Logged-in users should bypass the
-marketing page and land directly on `/calendar`.
+marketing page and land directly on `/today`.
 
 **Core Goal**: new users understand the product immediately, while existing
 users reach their dashboard without friction.
@@ -24,7 +24,7 @@ users reach their dashboard without friction.
 - [x] Define clear value prop and hero section
 - [x] Explain core benefits (schedule-based habits, daily completion, streaks)
 - [x] Add primary CTA (sign up / sign in)
-- [x] Auth-aware redirect: logged-in users go to `/calendar`
+- [x] Auth-aware redirect: logged-in users go to `/today`
 - [x] Keep styling aligned with minimalist black/white system
 
 ### Excluded (this sprint)
@@ -61,7 +61,7 @@ CI must remain green.
 
 ### Tasks (1)
 
-- [x] **Task 2.1**: Redirect authenticated users from `/` to `/calendar`
+- [x] **Task 2.1**: Redirect authenticated users from `/` to `/today`
 
 ---
 
@@ -96,7 +96,7 @@ CI must remain green.
 
 1. [x] Homepage clearly communicates value and key benefits
 2. [x] Primary CTA routes users to sign up or sign in
-3. [x] Authenticated users are redirected to `/calendar`
+3. [x] Authenticated users are redirected to `/today`
 4. [x] Accessibility checks pass for headings and focus flow
 5. [ ] CI passes from clean checkout
 

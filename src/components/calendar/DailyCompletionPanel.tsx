@@ -56,6 +56,7 @@ type DailyCompletionPanelProps = {
   habits: HabitSummary[];
   initialCompletedHabitIds: string[];
   isFuture: boolean;
+  contextLabel?: string;
 };
 
 export function DailyCompletionPanel({
@@ -64,6 +65,7 @@ export function DailyCompletionPanel({
   habits,
   initialCompletedHabitIds,
   isFuture,
+  contextLabel,
 }: DailyCompletionPanelProps) {
   const router = useRouter();
   const [completedIds, setCompletedIds] = useState<string[]>(initialCompletedHabitIds);
@@ -76,6 +78,7 @@ export function DailyCompletionPanel({
   const achievementsLoadingRef = useRef<Promise<AchievementsSnapshot | null> | null>(null);
   const completionSignature = initialCompletedHabitIds.join('|');
   const listId = useId();
+  const resolvedContextLabel = contextLabel ?? 'Selected day';
 
   useEffect(() => {
     setCompletedIds(initialCompletedHabitIds);
@@ -521,7 +524,7 @@ export function DailyCompletionPanel({
       <div className="flex items-center justify-between gap-4">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.3em] text-black/60 dark:text-white/60">
-            Selected day
+            {resolvedContextLabel}
           </p>
           <h3 className="text-lg font-semibold">{selectedLabel ?? 'Pick a day'}</h3>
         </div>

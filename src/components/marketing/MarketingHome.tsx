@@ -296,8 +296,8 @@ export function MarketingHome() {
               One workflow across every day.
             </h2>
             <p className="max-w-xl text-sm leading-relaxed text-black/60 dark:text-white/60">
-              Atlas keeps daily check-ins fast while preserving the monthly context needed for honest
-              progress.
+              Atlas keeps daily check-ins fast while preserving the monthly context needed for
+              honest progress.
             </p>
           </div>
 
@@ -345,10 +345,12 @@ export function MarketingHome() {
 
         <section className="space-y-8 border-t border-black/10 pt-12 opacity-0 translate-y-3 motion-reduce:translate-y-0 motion-reduce:opacity-100 motion-safe:animate-[rise-in_0.6s_ease-out_forwards] motion-safe:[animation-delay:600ms] dark:border-white/10">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-            <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">Free vs Pro at a glance.</h2>
+            <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+              Free vs Pro at a glance.
+            </h2>
             <p className="max-w-xl text-sm leading-relaxed text-black/60 dark:text-white/60">
-              Free remains fully useful for daily habit tracking. Pro is an optional one-time upgrade
-              for deeper analytics, motivation, and reminder intelligence.
+              Free remains fully useful for daily habit tracking. Pro is an optional one-time
+              upgrade for deeper analytics, motivation, and reminder intelligence.
             </p>
           </div>
 
@@ -356,7 +358,10 @@ export function MarketingHome() {
             <table className="min-w-full border-collapse text-left text-sm">
               <thead>
                 <tr className="border-b border-black/10 dark:border-white/10">
-                  <th scope="col" className="px-4 py-3 font-medium text-black/70 dark:text-white/70">
+                  <th
+                    scope="col"
+                    className="px-4 py-3 font-medium text-black/70 dark:text-white/70"
+                  >
                     Feature area
                   </th>
                   <th
@@ -404,8 +409,8 @@ export function MarketingHome() {
               Pro adds depth when you want it.
             </h2>
             <p className="max-w-xl text-sm leading-relaxed text-black/60 dark:text-white/60">
-              Core tracking remains complete in Free. Upgrade only if advanced insight and motivation
-              layers are useful for your routine.
+              Core tracking remains complete in Free. Upgrade only if advanced insight and
+              motivation layers are useful for your routine.
             </p>
           </div>
 
@@ -415,15 +420,32 @@ export function MarketingHome() {
                 key={callout.title}
                 className="rounded-2xl border border-black/10 bg-white/70 p-6 text-sm text-black/70 shadow-[0_10px_24px_rgba(0,0,0,0.06)] dark:border-white/10 dark:bg-black/60 dark:text-white/70 dark:shadow-[0_10px_24px_rgba(0,0,0,0.45)]"
               >
-                <h3 className="text-base font-semibold text-black dark:text-white">{callout.title}</h3>
+                <h3 className="text-base font-semibold text-black dark:text-white">
+                  {callout.title}
+                </h3>
                 <p className="mt-3 leading-relaxed">{callout.description}</p>
               </li>
             ))}
           </ul>
 
           <div className="rounded-2xl border border-black/10 bg-white/80 p-5 text-sm text-black/75 dark:border-white/10 dark:bg-black/70 dark:text-white/75">
-            Free always includes the complete daily tracking workflow: habits, calendar, completions,
-            streaks, and grace-window support.
+            Free always includes the complete daily tracking workflow: habits, calendar,
+            completions, streaks, and grace-window support.
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3">
+            <Link
+              href="/pro"
+              className={`inline-flex h-11 items-center justify-center rounded-full border border-black bg-black px-5 text-xs font-medium uppercase tracking-[0.2em] text-white transition hover:bg-black/90 dark:border-white dark:bg-white dark:text-black dark:hover:bg-white/90 ${focusRingClasses}`}
+            >
+              See Atlas Pro
+            </Link>
+            <Link
+              href="/sign-up"
+              className={`inline-flex h-11 items-center justify-center rounded-full border border-black/20 bg-white px-5 text-xs font-medium uppercase tracking-[0.2em] text-black transition hover:bg-black/5 dark:border-white/20 dark:bg-black dark:text-white dark:hover:bg-white/10 ${focusRingClasses}`}
+            >
+              Start free
+            </Link>
           </div>
         </section>
       </div>

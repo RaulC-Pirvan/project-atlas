@@ -27,16 +27,22 @@ describe('MarketingHome', () => {
     render(<MarketingHome />);
 
     expect(screen.getByRole('heading', { name: /schedule-based by design/i })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: /completion with guardrails/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: /completion with guardrails/i }),
+    ).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: /streaks that stay honest/i })).toBeInTheDocument();
   });
 
   it('renders the expanded Phase 1 narrative sections', () => {
     render(<MarketingHome />);
 
-    expect(screen.getByRole('heading', { name: /today \+ calendar workflow/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: /today \+ calendar workflow/i }),
+    ).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: /insights \(analytics\)/i })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: /achievements \+ milestones/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: /achievements \+ milestones/i }),
+    ).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: /^reminders$/i })).toBeInTheDocument();
     expect(
       screen.getByRole('heading', { name: /offline-first \+ sync indicators/i }),
@@ -50,14 +56,27 @@ describe('MarketingHome', () => {
     render(<MarketingHome />);
 
     expect(screen.getByRole('heading', { name: /free vs pro at a glance/i })).toBeInTheDocument();
-    expect(screen.getByText(/free remains fully useful for daily habit tracking/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/free remains fully useful for daily habit tracking/i),
+    ).toBeInTheDocument();
     expect(screen.getByText(/one-time purchase model/i)).toBeInTheDocument();
+    expect(screen.getByRole('columnheader', { name: /feature area/i })).toBeInTheDocument();
+    expect(
+      screen.getByText(/core habit tracking \(create, edit, archive, weekday schedules\)/i),
+    ).toBeInTheDocument();
 
-    expect(screen.getByRole('heading', { name: /pro adds depth when you want it/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: /pro adds depth when you want it/i }),
+    ).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: /advanced insights depth/i })).toBeInTheDocument();
     expect(
       screen.getByRole('heading', { name: /expanded achievements catalogue/i }),
     ).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: /smarter reminder intelligence/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: /smarter reminder intelligence/i }),
+    ).toBeInTheDocument();
+
+    expect(screen.getByRole('link', { name: /see atlas pro/i })).toHaveAttribute('href', '/pro');
+    expect(screen.getByRole('link', { name: /start free/i })).toHaveAttribute('href', '/sign-up');
   });
 });

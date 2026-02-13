@@ -76,9 +76,9 @@ CI must remain green.
 
 ### Tasks (3)
 
-- [ ] **Task 3.1**: Keep visual style aligned to existing black/white minimalist system
-- [ ] **Task 3.2**: Add/extend component tests for expanded marketing sections
-- [ ] **Task 3.3**: Add/extend E2E coverage for homepage content and CTA flows
+- [x] **Task 3.1**: Keep visual style aligned to existing black/white minimalist system
+- [x] **Task 3.2**: Add/extend component tests for expanded marketing sections
+- [x] **Task 3.3**: Add/extend E2E coverage for homepage content and CTA flows
 
 ---
 

@@ -71,12 +71,39 @@ test('marketing homepage introduces the product for signed-out visitors', async 
   await expect(page.getByRole('heading', { name: /insights \(analytics\)/i })).toBeVisible();
   await expect(page.getByRole('heading', { name: /achievements \+ milestones/i })).toBeVisible();
   await expect(page.getByRole('heading', { name: /^reminders$/i })).toBeVisible();
-  await expect(page.getByRole('heading', { name: /offline-first \+ sync indicators/i })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: /offline-first \+ sync indicators/i }),
+  ).toBeVisible();
   await expect(
     page.getByRole('heading', { name: /grace window rule \(yesterday until 02:00\)/i }),
   ).toBeVisible();
   await expect(page.getByRole('heading', { name: /free vs pro at a glance/i })).toBeVisible();
-  await expect(page.getByRole('heading', { name: /pro adds depth when you want it/i })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: /pro adds depth when you want it/i }),
+  ).toBeVisible();
+});
+
+test('marketing homepage CTA links navigate to sign-up, sign-in, and pro page', async ({
+  page,
+}) => {
+  await page.goto('/');
+
+  await page
+    .getByRole('link', { name: /create your account/i })
+    .first()
+    .click();
+  await expect(page).toHaveURL(/\/sign-up/, { timeout: 15_000 });
+
+  await page.goto('/');
+  await page
+    .getByRole('link', { name: /sign in/i })
+    .first()
+    .click();
+  await expect(page).toHaveURL(/\/sign-in/, { timeout: 15_000 });
+
+  await page.goto('/');
+  await page.getByRole('link', { name: /see atlas pro/i }).click();
+  await expect(page).toHaveURL(/\/sign-in$/, { timeout: 15_000 });
 });
 
 test('signed-in visitors are redirected to today', async ({ page, request }) => {

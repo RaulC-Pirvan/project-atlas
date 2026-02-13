@@ -16,7 +16,7 @@ type MobileDailySheetProps = {
   selectedLabel: string | null;
   habits: HabitSummary[];
   initialCompletedHabitIds: string[];
-  isFuture: boolean;
+  completionWindowLockReason: 'future' | 'grace_expired' | 'history_blocked' | null;
   timeZone: string;
   autoOpen?: boolean;
   keepCompletedAtBottom?: boolean;
@@ -27,7 +27,7 @@ export function MobileDailySheet({
   selectedLabel,
   habits,
   initialCompletedHabitIds,
-  isFuture,
+  completionWindowLockReason,
   timeZone,
   autoOpen = true,
   keepCompletedAtBottom = true,
@@ -153,7 +153,7 @@ export function MobileDailySheet({
               selectedLabel={selectedLabel}
               habits={habits}
               initialCompletedHabitIds={initialCompletedHabitIds}
-              isFuture={isFuture}
+              completionWindowLockReason={completionWindowLockReason}
               timeZone={timeZone}
               keepCompletedAtBottom={keepCompletedAtBottom}
             />

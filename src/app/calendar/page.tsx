@@ -13,6 +13,7 @@ import { getInsightsSummary } from '../../lib/api/insights/summary';
 import { getServerAuthSession } from '../../lib/auth/session';
 import { prisma } from '../../lib/db/prisma';
 import { getMonthGrid } from '../../lib/habits/calendar';
+import { validateCompletionWindowDate } from '../../lib/habits/completionWindow';
 import {
   getLocalDateParts,
   normalizeToUtcDate,
@@ -216,7 +217,14 @@ export default async function CalendarPage({
     ? await listCompletionsForDate({ prisma, userId: session.user.id, date: selectedDate })
     : [];
   const selectedCompletedIds = new Set(selectedCompletions.map((completion) => completion.habitId));
-  const isFuture = selectedDate ? selectedDate.getTime() > today.getTime() : false;
+  const selectedDateValidation = selectedDate
+    ? validateCompletionWindowDate(selectedDate, { timeZone, now })
+    : { ok: true as const };
+  const completionWindowLockReason = selectedDateValidation.ok
+    ? null
+    : selectedDateValidation.reason === 'invalid_date'
+      ? null
+      : selectedDateValidation.reason;
 
   const dateFormatter = new Intl.DateTimeFormat('en-US', {
     timeZone: 'UTC',
@@ -350,7 +358,7 @@ export default async function CalendarPage({
                   selectedLabel={selectedLabel}
                   habits={selectedHabits}
                   initialCompletedHabitIds={Array.from(selectedCompletedIds)}
-                  isFuture={isFuture}
+                  completionWindowLockReason={completionWindowLockReason}
                   timeZone={timeZone}
                   keepCompletedAtBottom={keepCompletedAtBottom}
                 />
@@ -364,7 +372,7 @@ export default async function CalendarPage({
           habits={selectedHabits}
           initialCompletedHabitIds={Array.from(selectedCompletedIds)}
           autoOpen={hasDateParam}
-          isFuture={isFuture}
+          completionWindowLockReason={completionWindowLockReason}
           timeZone={timeZone}
           keepCompletedAtBottom={keepCompletedAtBottom}
         />

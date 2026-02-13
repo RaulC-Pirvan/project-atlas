@@ -83,9 +83,9 @@ CI must remain green.
 
 ### Tasks (3)
 
-- [ ] **Task 2.1**: Disable completion toggles immediately when date is outside allowed window
-- [ ] **Task 2.2**: Update copy in daily completion surfaces to explain the grace window clearly
-- [ ] **Task 2.3**: Ensure offline queue validation uses the same shared rule semantics as API
+- [x] **Task 2.1**: Disable completion toggles immediately when date is outside allowed window
+- [x] **Task 2.2**: Update copy in daily completion surfaces to explain the grace window clearly
+- [x] **Task 2.3**: Ensure offline queue validation uses the same shared rule semantics as API
 
 ---
 

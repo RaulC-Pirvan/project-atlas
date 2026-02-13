@@ -56,6 +56,7 @@ A habit is defined independently of dates.
 - Tests in place: Vitest unit/API tests, auth + habit + calendar + marketing + admin component tests, Playwright auth + habits + today + calendar + daily completion + admin + marketing + visual regression E2E.
 - Playwright E2E runs use a Windows-safe temp dir setup via `playwright.global-setup.ts` to avoid chromium shutdown hangs.
 - Daily completion and streaks E2E include retry-safe habit creation to handle transient network resets in Firefox.
+- Daily completion E2E includes deterministic grace-window checks (`01:59` allow, `02:00` block) via a test-only time override.
 - Offline-first completion queue implemented with IndexedDB persistence, dedupe, and timezone-safe validation.
 - Offline sync engine implemented with online/startup triggers, backoff retry, and drop-on-rejection with toasts.
 - Pending sync indicators now appear in Today and Calendar daily lists plus calendar tiles.
@@ -70,7 +71,9 @@ A habit is defined independently of dates.
 - Today view implemented at `/today` for fast daily entry of today's due habits.
 - Calendar view implemented with monthly grid, month navigation, selected-day side panel (`?date=YYYY-MM-DD`), daily completion toggles via `/api/completions`, per-day progress indicators, and golden completed-day tiles (black text for contrast).
 - Calendar defaults to selecting today on `/calendar` (current month); mobile daily sheet only auto-opens when a `date` param is present.
-- Daily completion supports check/uncheck with server-side schedule validation, future-date guard, toast feedback, optimistic updates with rollback, per-row pending indicators, and motion-safe reorder animation.
+- Daily completion supports check/uncheck with server-side schedule validation, grace-window enforcement (today + yesterday until 02:00 local), blocked older history/future dates, toast feedback, optimistic updates with rollback, per-row pending indicators, and motion-safe reorder animation.
+- Completion-window rules are centralized in `src/lib/habits/completionWindow.ts` and reused by API and offline queue validation.
+- Daily completion surfaces now disable toggles immediately for locked dates (`future`, `grace_expired`, `history_blocked`) and show grace-window guidance copy.
 - Offline queue + sync integrates with completion toggles; pending state persists across reloads when the API is blocked.
 - Calendar polish includes motion-safe transitions, reduced-motion fallbacks, and subtle completion sounds on success.
 - Loading skeletons implemented for calendar and habits routes.
@@ -95,18 +98,14 @@ A habit is defined independently of dates.
 - Reminder delivery strategy documented (push-ready, polling window, dedupe rules).
 - Reminder unit tests and E2E tests added (`e2e/reminders.spec.ts`).
 - Offline completions E2E added (`e2e/offline-completions.spec.ts`) plus component tests for pending indicators.
+- `/api/completions` supports a test-only `x-atlas-test-now` header when `ENABLE_TEST_ENDPOINTS=true` for deterministic date-boundary E2E coverage.
 - Test-only debug endpoints exist when `ENABLE_TEST_ENDPOINTS=true`: `/api/pro/debug/grant`, `/api/habits/debug/create`.
 
 ## Roadmap (high-level)
 
 - Expand testing and launch readiness (coverage, staging, backups, CI audit).
-- Pro entitlement model, upgrade UX, and gating (one-time purchase).
-- Advanced insights and analytics (Pro).
-- Achievements and milestone system (Pro).
+- Marketing homepage expansion to cover full product breadth and clearer Free vs Pro positioning.
 - Smart reminders and push notifications (Pro).
-- Quick actions, schedule presets, and mobile performance work.
-- Offline-first completion queue with sync indicators.
-- Completion grace window enforcement until 02:00.
 - Store launch readiness (privacy, metadata, compliance assets).
 
 ## UI Direction (authoritative)
@@ -175,6 +174,7 @@ A habit is defined independently of dates.
 - `sentry.client.config.ts` / `sentry.server.config.ts` / `sentry.edge.config.ts` - Sentry SDK config.
 - `src/lib/db/prisma.ts` - Prisma singleton using adapter-pg + pg pool.
 - `src/lib/habits` - Habit domain helpers (date normalization, schedules, calendar grids, completions, query helpers, streaks, types).
+- `src/lib/habits/completionWindow.ts` - Shared completion-window policy (today/yesterday cutoff/future/history validation).
 - `src/lib/habits/ordering.ts` - Habit ordering helpers (manual order + completed-at-bottom logic).
 - `src/lib/habits/offlineQueue.ts` - Offline completion queue with IndexedDB persistence + validation.
 - `src/lib/habits/offlineQueueClient.ts` - Client hook for offline queue snapshot.
@@ -182,6 +182,7 @@ A habit is defined independently of dates.
 - `src/lib/habits/calendar.ts` - Month grid generation and weekday mapping.
 - `src/lib/habits/weekdays.ts` - Weekday ordering/labels for week start.
 - `src/lib/api/habits/completions.ts` - Completion toggle/list services (date/range).
+- `src/app/api/completions/__tests__/route.test.ts` - Completion route tests (including test-only time override behavior).
 - `src/lib/habits/__tests__` - Habit domain unit tests.
 - `src/lib/reminders` - Reminder domain helpers (time parsing, settings defaults, rules, validation, delivery strategy).
 - `src/lib/reminders/__tests__` - Reminder unit tests.
@@ -219,6 +220,7 @@ A habit is defined independently of dates.
 - `docs/context.md` - Canonical product context and constraints.
 - `docs/roadmap.md` - Product and engineering roadmap.
 - `docs/sprints/sprint-5.1.md` - Sprint plan for marketing homepage.
+- `docs/sprints/sprint-5.2.md` - Sprint plan for marketing homepage expansion.
 - `docs/test workflows/sprint-5.1-test-workflows.md` - Marketing homepage + theme test workflows.
 - `docs/test workflows/sprint-4.2-test-workflows.md` - UX refinement test workflows.
 - `docs/sprints/sprint-6.1.md` - Observability & safety sprint plan.
@@ -236,6 +238,8 @@ A habit is defined independently of dates.
 - `docs/sprints/sprint-11.1.md` - Today view + ordering sprint plan.
 - `docs/test workflows/sprint-11.1-test-workflows.md` - Today view + ordering test workflows.
 - `docs/test workflows/sprint-11.2-test-workflows.md` - Offline-first completions test workflows.
+- `docs/sprints/sprint-12.1.md` - Completion grace window sprint plan.
+- `docs/test workflows/sprint-12.1-test-workflows.md` - Completion grace window test workflows.
 - `docs/ops/staging.md` - Staging environment guide.
 - `docs/ops/backups.md` - Backup strategy and validation checklist.
 - `docs/ops/reminders-delivery.md` - Reminder delivery strategy (push-ready).

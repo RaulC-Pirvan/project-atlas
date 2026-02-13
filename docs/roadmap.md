@@ -164,7 +164,7 @@
 
 ---
 
-## Phase 5: Landing & Positioning (Week 11) (Completed)
+## Phase 5: Landing & Positioning (Week 11+) (Completed / In Progress)
 
 ### Sprint 5.1: Marketing Homepage
 
@@ -173,6 +173,24 @@
 - [x] Add primary CTA (sign up / sign in)
 - [x] Auth-aware redirect: logged-in users go to `/today`
 - [x] Keep styling aligned with minimalist black/white system
+
+---
+
+### Sprint 5.2: Marketing Homepage Expansion (New)
+
+- [ ] Expand landing page narrative to cover full product breadth
+- [ ] Add sections for:
+  - Today + Calendar workflow
+  - Insights (analytics)
+  - Achievements + milestones
+  - Reminders
+  - Offline-first + sync indicators
+  - Grace window rule (yesterday until 02:00)
+- [ ] Add clear Free vs Pro comparison block (non-intrusive, value-led)
+- [ ] Add Pro-focused callouts without degrading Free value messaging
+- [ ] Keep visual theme consistent with existing minimalist black/white system
+- [ ] Add/extend component tests for new marketing sections
+- [ ] Add/extend E2E coverage for landing page content and CTA flows
 
 ---
 

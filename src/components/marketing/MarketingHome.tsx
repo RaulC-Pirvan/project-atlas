@@ -2,7 +2,7 @@ import Link from 'next/link';
 
 import { ThemeToggle } from '../ui/ThemeToggle';
 
-const benefits = [
+const corePillars = [
   {
     title: 'Schedule-based by design',
     description: 'Define the weekdays once. Atlas surfaces every eligible day across the calendar.',
@@ -17,6 +17,55 @@ const benefits = [
   },
 ];
 
+const workflowSteps = [
+  {
+    title: 'Plan once, stay on schedule',
+    description:
+      'Set active weekdays per habit. Atlas applies them automatically across Today and Calendar.',
+  },
+  {
+    title: 'Use Today for fast daily execution',
+    description: 'Focus only on due habits and complete them with immediate, guarded toggles.',
+  },
+  {
+    title: 'Use Calendar for context and review',
+    description:
+      'Scan month progress, inspect any date, and keep completion history aligned with real schedules.',
+  },
+];
+
+const platformAreas = [
+  {
+    title: 'Today + Calendar workflow',
+    description:
+      'Switch between fast daily entry and month-level context without breaking consistency.',
+  },
+  {
+    title: 'Insights (analytics)',
+    description:
+      'Review completion trends, consistency windows, and weekday performance with clear summaries.',
+  },
+  {
+    title: 'Achievements + milestones',
+    description:
+      'Track streak milestones and unlocks that celebrate momentum without turning habits into noise.',
+  },
+  {
+    title: 'Reminders',
+    description: 'Configure per-habit times, daily digest, quiet hours, and snooze defaults.',
+  },
+  {
+    title: 'Offline-first + sync indicators',
+    description:
+      'Capture completions offline, then sync automatically with visible pending-state indicators.',
+  },
+  {
+    title: 'Grace window rule (yesterday until 02:00)',
+    description:
+      'Allow late-night catch-up for yesterday until 02:00 local time while keeping future dates blocked.',
+  },
+];
+
 const cadenceDays = [
   { label: 'Mon', active: true },
   { label: 'Tue', active: false },
@@ -28,8 +77,8 @@ const cadenceDays = [
 ];
 
 const sampleHabits = [
-  { title: 'Read 20 minutes', cadence: 'Mon · Wed · Fri' },
-  { title: 'Strength training', cadence: 'Tue · Thu' },
+  { title: 'Read 20 minutes', cadence: 'Mon / Wed / Fri' },
+  { title: 'Strength training', cadence: 'Tue / Thu' },
   { title: 'Evening review', cadence: 'Sun' },
 ];
 
@@ -77,9 +126,8 @@ export function MarketingHome() {
               Habits that follow your week, not the calendar.
             </h1>
             <p className="max-w-xl text-base leading-relaxed text-black/70 dark:text-white/70">
-              Set a schedule once, then track daily completions with guardrails that keep streaks
-              honest. Atlas keeps the habit model simple, consistent, and ready for every day that
-              matters.
+              Atlas connects daily execution, monthly visibility, analytics, milestones, reminders,
+              and reliable offline sync into one timezone-safe habit system built for real routines.
             </p>
             <div className="flex flex-wrap items-center gap-3">
               <Link
@@ -96,7 +144,7 @@ export function MarketingHome() {
               </Link>
             </div>
             <p className="text-xs uppercase tracking-[0.28em] text-black/60 dark:text-white/60">
-              No pricing tiers. No distractions. Just the habit loop.
+              Built for focused tracking and long-term consistency.
             </p>
           </div>
 
@@ -163,7 +211,7 @@ export function MarketingHome() {
         <section className="space-y-8 border-t border-black/10 pt-12 opacity-0 translate-y-3 motion-reduce:translate-y-0 motion-reduce:opacity-100 motion-safe:animate-[rise-in_0.6s_ease-out_forwards] motion-safe:[animation-delay:360ms] dark:border-white/10">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-              A habit model that stays consistent.
+              A foundation that stays consistent.
             </h2>
             <p className="max-w-xl text-sm leading-relaxed text-black/60 dark:text-white/60">
               Atlas keeps habits independent of dates so the calendar stays accurate, the daily view
@@ -172,7 +220,7 @@ export function MarketingHome() {
           </div>
 
           <ul className="grid gap-6 md:grid-cols-3" role="list">
-            {benefits.map((benefit) => (
+            {corePillars.map((benefit) => (
               <li
                 key={benefit.title}
                 className="rounded-2xl border border-black/10 bg-white/70 p-6 text-sm text-black/70 shadow-[0_10px_24px_rgba(0,0,0,0.06)] dark:border-white/10 dark:bg-black/60 dark:text-white/70 dark:shadow-[0_10px_24px_rgba(0,0,0,0.45)]"
@@ -181,6 +229,59 @@ export function MarketingHome() {
                   {benefit.title}
                 </h3>
                 <p className="mt-3 leading-relaxed">{benefit.description}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <section className="space-y-8 border-t border-black/10 pt-12 opacity-0 translate-y-3 motion-reduce:translate-y-0 motion-reduce:opacity-100 motion-safe:animate-[rise-in_0.6s_ease-out_forwards] motion-safe:[animation-delay:440ms] dark:border-white/10">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+              One workflow across every day.
+            </h2>
+            <p className="max-w-xl text-sm leading-relaxed text-black/60 dark:text-white/60">
+              Atlas keeps daily check-ins fast while preserving the monthly context needed for honest
+              progress.
+            </p>
+          </div>
+
+          <ol className="grid gap-6 md:grid-cols-3">
+            {workflowSteps.map((step, index) => (
+              <li
+                key={step.title}
+                className="rounded-2xl border border-black/10 bg-white/70 p-6 text-sm text-black/70 shadow-[0_10px_24px_rgba(0,0,0,0.06)] dark:border-white/10 dark:bg-black/60 dark:text-white/70 dark:shadow-[0_10px_24px_rgba(0,0,0,0.45)]"
+              >
+                <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-black/50 dark:text-white/50">
+                  Step {index + 1}
+                </p>
+                <h3 className="mt-2 text-base font-semibold text-black dark:text-white">
+                  {step.title}
+                </h3>
+                <p className="mt-3 leading-relaxed">{step.description}</p>
+              </li>
+            ))}
+          </ol>
+        </section>
+
+        <section className="space-y-8 border-t border-black/10 pt-12 opacity-0 translate-y-3 motion-reduce:translate-y-0 motion-reduce:opacity-100 motion-safe:animate-[rise-in_0.6s_ease-out_forwards] motion-safe:[animation-delay:520ms] dark:border-white/10">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+              Full platform coverage, same minimalist flow.
+            </h2>
+            <p className="max-w-xl text-sm leading-relaxed text-black/60 dark:text-white/60">
+              The core loop stays simple while Atlas layers analytics, reminders, resilience, and
+              completion-window guardrails where they add real value.
+            </p>
+          </div>
+
+          <ul className="grid gap-6 md:grid-cols-2 lg:grid-cols-3" role="list">
+            {platformAreas.map((area) => (
+              <li
+                key={area.title}
+                className="rounded-2xl border border-black/10 bg-white/70 p-6 text-sm text-black/70 shadow-[0_10px_24px_rgba(0,0,0,0.06)] dark:border-white/10 dark:bg-black/60 dark:text-white/70 dark:shadow-[0_10px_24px_rgba(0,0,0,0.45)]"
+              >
+                <h3 className="text-base font-semibold text-black dark:text-white">{area.title}</h3>
+                <p className="mt-3 leading-relaxed">{area.description}</p>
               </li>
             ))}
           </ul>

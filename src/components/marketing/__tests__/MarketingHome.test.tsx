@@ -30,4 +30,19 @@ describe('MarketingHome', () => {
     expect(screen.getByText(/completion with guardrails/i)).toBeInTheDocument();
     expect(screen.getByText(/streaks that stay honest/i)).toBeInTheDocument();
   });
+
+  it('renders the expanded Phase 1 narrative sections', () => {
+    render(<MarketingHome />);
+
+    expect(screen.getByRole('heading', { name: /today \+ calendar workflow/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /insights \(analytics\)/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /achievements \+ milestones/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /^reminders$/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: /offline-first \+ sync indicators/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: /grace window rule \(yesterday until 02:00\)/i }),
+    ).toBeInTheDocument();
+  });
 });

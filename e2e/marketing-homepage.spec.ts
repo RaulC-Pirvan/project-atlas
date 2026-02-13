@@ -67,6 +67,14 @@ test('marketing homepage introduces the product for signed-out visitors', async 
   await page.goto('/');
   await expect(page.getByRole('heading', { name: /habits that follow your week/i })).toBeVisible();
   await expect(page.getByRole('link', { name: /create your account/i })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /today \+ calendar workflow/i })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /insights \(analytics\)/i })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /achievements \+ milestones/i })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /^reminders$/i })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /offline-first \+ sync indicators/i })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: /grace window rule \(yesterday until 02:00\)/i }),
+  ).toBeVisible();
 });
 
 test('signed-in visitors are redirected to today', async ({ page, request }) => {

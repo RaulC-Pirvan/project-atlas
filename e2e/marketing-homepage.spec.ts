@@ -75,6 +75,8 @@ test('marketing homepage introduces the product for signed-out visitors', async 
   await expect(
     page.getByRole('heading', { name: /grace window rule \(yesterday until 02:00\)/i }),
   ).toBeVisible();
+  await expect(page.getByRole('heading', { name: /free vs pro at a glance/i })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /pro adds depth when you want it/i })).toBeVisible();
 });
 
 test('signed-in visitors are redirected to today', async ({ page, request }) => {

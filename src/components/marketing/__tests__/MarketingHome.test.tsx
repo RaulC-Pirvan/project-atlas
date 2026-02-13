@@ -26,9 +26,9 @@ describe('MarketingHome', () => {
   it('highlights the schedule, completion, and streak benefits', () => {
     render(<MarketingHome />);
 
-    expect(screen.getByText(/schedule-based by design/i)).toBeInTheDocument();
-    expect(screen.getByText(/completion with guardrails/i)).toBeInTheDocument();
-    expect(screen.getByText(/streaks that stay honest/i)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /schedule-based by design/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /completion with guardrails/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /streaks that stay honest/i })).toBeInTheDocument();
   });
 
   it('renders the expanded Phase 1 narrative sections', () => {
@@ -44,5 +44,20 @@ describe('MarketingHome', () => {
     expect(
       screen.getByRole('heading', { name: /grace window rule \(yesterday until 02:00\)/i }),
     ).toBeInTheDocument();
+  });
+
+  it('renders the Free vs Pro comparison and value-led Pro callouts', () => {
+    render(<MarketingHome />);
+
+    expect(screen.getByRole('heading', { name: /free vs pro at a glance/i })).toBeInTheDocument();
+    expect(screen.getByText(/free remains fully useful for daily habit tracking/i)).toBeInTheDocument();
+    expect(screen.getByText(/one-time purchase model/i)).toBeInTheDocument();
+
+    expect(screen.getByRole('heading', { name: /pro adds depth when you want it/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /advanced insights depth/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: /expanded achievements catalogue/i }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /smarter reminder intelligence/i })).toBeInTheDocument();
   });
 });

@@ -67,8 +67,8 @@ CI must remain green.
 
 ### Tasks (2)
 
-- [ ] **Task 2.1**: Add a Free vs Pro comparison block with clear, non-intrusive framing
-- [ ] **Task 2.2**: Add Pro callouts that highlight value without degrading Free-tier messaging
+- [x] **Task 2.1**: Add a Free vs Pro comparison block with clear, non-intrusive framing
+- [x] **Task 2.2**: Add Pro callouts that highlight value without degrading Free-tier messaging
 
 ---
 

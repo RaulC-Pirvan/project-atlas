@@ -66,6 +66,62 @@ const platformAreas = [
   },
 ];
 
+const freeVsProRows = [
+  {
+    feature: 'Core habit tracking (create, edit, archive, weekday schedules)',
+    free: 'Full',
+    pro: 'Full',
+  },
+  {
+    feature: 'Calendar + daily completion with guardrails',
+    free: 'Full',
+    pro: 'Full',
+  },
+  {
+    feature: 'Streaks + grace window (yesterday until 02:00)',
+    free: 'Full',
+    pro: 'Full',
+  },
+  {
+    feature: 'Offline-first queue + sync indicators',
+    free: 'Full',
+    pro: 'Full',
+  },
+  {
+    feature: 'Advanced insights (trends, consistency, weekday patterns)',
+    free: 'Preview',
+    pro: 'Full',
+  },
+  {
+    feature: 'Achievements + milestones',
+    free: 'Baseline',
+    pro: 'Expanded',
+  },
+  {
+    feature: 'Smart reminders + push-ready strategy',
+    free: 'Preview',
+    pro: 'Full',
+  },
+];
+
+const proCallouts = [
+  {
+    title: 'Advanced insights depth',
+    description:
+      'Go beyond snapshots with richer trends, consistency windows, and pattern-level guidance.',
+  },
+  {
+    title: 'Expanded achievements catalogue',
+    description:
+      'Keep the baseline milestone loop in Free, then unlock a broader catalogue when you want more challenge.',
+  },
+  {
+    title: 'Smarter reminder intelligence',
+    description:
+      'Build on reminder basics with more advanced scheduling and push-ready delivery workflows.',
+  },
+];
+
 const cadenceDays = [
   { label: 'Mon', active: true },
   { label: 'Tue', active: false },
@@ -285,6 +341,90 @@ export function MarketingHome() {
               </li>
             ))}
           </ul>
+        </section>
+
+        <section className="space-y-8 border-t border-black/10 pt-12 opacity-0 translate-y-3 motion-reduce:translate-y-0 motion-reduce:opacity-100 motion-safe:animate-[rise-in_0.6s_ease-out_forwards] motion-safe:[animation-delay:600ms] dark:border-white/10">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">Free vs Pro at a glance.</h2>
+            <p className="max-w-xl text-sm leading-relaxed text-black/60 dark:text-white/60">
+              Free remains fully useful for daily habit tracking. Pro is an optional one-time upgrade
+              for deeper analytics, motivation, and reminder intelligence.
+            </p>
+          </div>
+
+          <div className="overflow-x-auto rounded-2xl border border-black/10 bg-white/80 dark:border-white/10 dark:bg-black/70">
+            <table className="min-w-full border-collapse text-left text-sm">
+              <thead>
+                <tr className="border-b border-black/10 dark:border-white/10">
+                  <th scope="col" className="px-4 py-3 font-medium text-black/70 dark:text-white/70">
+                    Feature area
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-4 py-3 font-medium text-black/70 dark:text-white/70 sm:w-32"
+                  >
+                    Free
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-4 py-3 font-medium text-black/70 dark:text-white/70 sm:w-32"
+                  >
+                    Pro
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {freeVsProRows.map((row) => (
+                  <tr key={row.feature} className="border-t border-black/10 dark:border-white/10">
+                    <td className="px-4 py-3 text-black/75 dark:text-white/75">{row.feature}</td>
+                    <td className="px-4 py-3">
+                      <span className="inline-flex rounded-full border border-black/15 bg-white px-2.5 py-1 text-xs font-medium uppercase tracking-[0.16em] text-black/70 dark:border-white/15 dark:bg-black dark:text-white/70">
+                        {row.free}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className="inline-flex rounded-full border border-black/20 bg-black px-2.5 py-1 text-xs font-medium uppercase tracking-[0.16em] text-white dark:border-white/20 dark:bg-white dark:text-black">
+                        {row.pro}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <p className="text-sm leading-relaxed text-black/60 dark:text-white/60">
+            One-time purchase model. No subscriptions and no ads.
+          </p>
+        </section>
+
+        <section className="space-y-8 border-t border-black/10 pt-12 pb-10 opacity-0 translate-y-3 motion-reduce:translate-y-0 motion-reduce:opacity-100 motion-safe:animate-[rise-in_0.6s_ease-out_forwards] motion-safe:[animation-delay:680ms] dark:border-white/10">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+              Pro adds depth when you want it.
+            </h2>
+            <p className="max-w-xl text-sm leading-relaxed text-black/60 dark:text-white/60">
+              Core tracking remains complete in Free. Upgrade only if advanced insight and motivation
+              layers are useful for your routine.
+            </p>
+          </div>
+
+          <ul className="grid gap-6 md:grid-cols-3" role="list">
+            {proCallouts.map((callout) => (
+              <li
+                key={callout.title}
+                className="rounded-2xl border border-black/10 bg-white/70 p-6 text-sm text-black/70 shadow-[0_10px_24px_rgba(0,0,0,0.06)] dark:border-white/10 dark:bg-black/60 dark:text-white/70 dark:shadow-[0_10px_24px_rgba(0,0,0,0.45)]"
+              >
+                <h3 className="text-base font-semibold text-black dark:text-white">{callout.title}</h3>
+                <p className="mt-3 leading-relaxed">{callout.description}</p>
+              </li>
+            ))}
+          </ul>
+
+          <div className="rounded-2xl border border-black/10 bg-white/80 p-5 text-sm text-black/75 dark:border-white/10 dark:bg-black/70 dark:text-white/75">
+            Free always includes the complete daily tracking workflow: habits, calendar, completions,
+            streaks, and grace-window support.
+          </div>
         </section>
       </div>
     </main>

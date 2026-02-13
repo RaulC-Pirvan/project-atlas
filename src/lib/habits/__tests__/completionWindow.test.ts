@@ -1,9 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import {
-  validateCompletionWindowDate,
-  validateCompletionWindowDateKey,
-} from '../completionWindow';
+import { validateCompletionWindowDate, validateCompletionWindowDateKey } from '../completionWindow';
 import { utcDate } from './fixtures';
 
 describe('completion window rules', () => {

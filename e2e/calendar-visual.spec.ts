@@ -5,6 +5,8 @@ const password = 'AtlasTestPassword123!';
 const targetDate = '2026-01-05';
 const targetMonth = '2026-01';
 const targetWeekday = 1; // Monday
+const testNowHeader = 'x-atlas-test-now';
+const setupNowForTargetDate = '2026-01-05T12:00:00.000Z';
 
 function uniqueEmail(prefix: string) {
   const stamp = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
@@ -86,6 +88,7 @@ async function createCompletion(request: APIRequestContext, habitId: string, dat
   const payload = { habitId, date, completed: true };
   const response = await request.post('/api/completions', {
     data: payload,
+    headers: { [testNowHeader]: setupNowForTargetDate },
     timeout: 10_000,
   });
   expect(response.ok()).toBeTruthy();

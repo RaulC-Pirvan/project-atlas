@@ -295,11 +295,11 @@
 
 ### Sprint 12.1: Completion Grace Window Until 02:00
 
-- [ ] Implement Free grace window: allow completing "yesterday" until 02:00
-- [ ] Keep future-date guard intact
-- [ ] Ensure timezone-safe boundary handling
-- [ ] Update UI copy to explain grace window
-- [ ] Add unit tests + E2E tests for grace window edge cases
+- [x] Implement Free grace window: allow completing "yesterday" until 02:00
+- [x] Keep future-date guard intact
+- [x] Ensure timezone-safe boundary handling
+- [x] Update UI copy to explain grace window
+- [x] Add unit tests + E2E tests for grace window edge cases
 
 ---
 

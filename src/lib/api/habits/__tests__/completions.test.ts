@@ -5,6 +5,20 @@ import { ApiError } from '../../errors';
 import { listCompletionsForDate, toggleCompletion } from '../completions';
 
 const schedule = (weekday: number) => [{ weekday }];
+const basePrisma = (weekday: number) => ({
+  habit: {
+    findFirst: vi.fn().mockResolvedValue({
+      id: 'h1',
+      archivedAt: null,
+      schedule: schedule(weekday),
+    }),
+  },
+  habitCompletion: {
+    findFirst: vi.fn().mockResolvedValue(null),
+    create: vi.fn(),
+    delete: vi.fn(),
+  },
+});
 
 describe('completion api services', () => {
   it('creates a completion when missing', async () => {
@@ -154,20 +168,7 @@ describe('completion api services', () => {
 
   it('rejects future completions', async () => {
     const date = utcDate(2026, 1, 10);
-    const prisma = {
-      habit: {
-        findFirst: vi.fn().mockResolvedValue({
-          id: 'h1',
-          archivedAt: null,
-          schedule: schedule(5),
-        }),
-      },
-      habitCompletion: {
-        findFirst: vi.fn(),
-        create: vi.fn(),
-        delete: vi.fn(),
-      },
-    };
+    const prisma = basePrisma(6);
 
     await expect(
       toggleCompletion({
@@ -179,7 +180,88 @@ describe('completion api services', () => {
         timeZone: 'UTC',
         now: utcDate(2026, 1, 5),
       }),
-    ).rejects.toBeInstanceOf(ApiError);
+    ).rejects.toMatchObject({
+      message: 'Cannot complete future dates.',
+      status: 400,
+    } satisfies Partial<ApiError>);
+  });
+
+  it('rejects future uncheck requests', async () => {
+    const date = utcDate(2026, 1, 7);
+    const prisma = basePrisma(3);
+
+    await expect(
+      toggleCompletion({
+        prisma,
+        userId: 'u1',
+        habitId: 'h1',
+        date,
+        completed: false,
+        timeZone: 'UTC',
+        now: utcDate(2026, 1, 6),
+      }),
+    ).rejects.toMatchObject({
+      message: 'Cannot complete future dates.',
+      status: 400,
+    } satisfies Partial<ApiError>);
+  });
+
+  it('allows yesterday within grace window', async () => {
+    const date = utcDate(2026, 1, 5);
+    const prisma = basePrisma(1);
+
+    const result = await toggleCompletion({
+      prisma,
+      userId: 'u1',
+      habitId: 'h1',
+      date,
+      completed: true,
+      timeZone: 'UTC',
+      now: new Date('2026-01-06T01:59:00.000Z'),
+    });
+
+    expect(result.status).toBe('created');
+    expect(prisma.habitCompletion.create).toHaveBeenCalled();
+  });
+
+  it('rejects yesterday after grace window', async () => {
+    const date = utcDate(2026, 1, 5);
+    const prisma = basePrisma(1);
+
+    await expect(
+      toggleCompletion({
+        prisma,
+        userId: 'u1',
+        habitId: 'h1',
+        date,
+        completed: true,
+        timeZone: 'UTC',
+        now: new Date('2026-01-06T02:00:00.000Z'),
+      }),
+    ).rejects.toMatchObject({
+      message: 'Yesterday can only be completed until 2:00 AM.',
+      status: 400,
+    } satisfies Partial<ApiError>);
+  });
+
+  it('rejects history older than yesterday', async () => {
+    const date = utcDate(2026, 1, 4);
+    const prisma = basePrisma(7);
+
+    await expect(
+      toggleCompletion({
+        prisma,
+        userId: 'u1',
+        habitId: 'h1',
+        date,
+        completed: true,
+        timeZone: 'UTC',
+        now: new Date('2026-01-06T01:30:00.000Z'),
+      }),
+    ).rejects.toMatchObject({
+      message: 'Past dates cannot be completed.',
+      status: 400,
+    } satisfies Partial<ApiError>);
   });
 
   it('lists completions for a date', async () => {

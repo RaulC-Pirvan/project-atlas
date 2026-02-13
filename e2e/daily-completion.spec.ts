@@ -3,6 +3,8 @@ import { expect, test } from '@playwright/test';
 
 const password = 'AtlasTestPassword123!';
 const retryableNetworkErrors = ['econnreset', 'econnrefused', 'socket hang up'];
+const everyDayWeekdays = [1, 2, 3, 4, 5, 6, 7];
+const testNowHeader = 'x-atlas-test-now';
 
 function uniqueEmail(prefix: string) {
   const stamp = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
@@ -133,6 +135,21 @@ async function createHabit(page: Page, title: string, weekdays: number[]) {
   throw lastError ?? new Error('Unable to create habit.');
 }
 
+async function createDebugHabit(
+  page: Page,
+  title: string,
+  weekdays: number[],
+  createdAt: string,
+): Promise<{ id: string; title: string }> {
+  const response = await page.request.post('/api/habits/debug/create', {
+    data: { title, description: 'Completion test', weekdays, createdAt },
+    timeout: 10_000,
+  });
+  expect(response.ok()).toBeTruthy();
+  const body = await response.json();
+  return body.data.habit as { id: string; title: string };
+}
+
 test('complete a habit for a selected day', async ({ page, request }) => {
   await createVerifiedUser(page, request, 'daily-complete');
   const today = new Date();
@@ -194,4 +211,57 @@ test('prevent double completion', async ({ page, request }) => {
   );
 
   expect(matches).toHaveLength(1);
+});
+
+test('allows yesterday at 01:59 and blocks uncheck at 02:00', async ({ page, request }) => {
+  await createVerifiedUser(page, request, 'daily-grace-window');
+  const habitTitle = uniqueTitle('Grace');
+  const habit = await createDebugHabit(page, habitTitle, everyDayWeekdays, '2026-02-01');
+  const api = page.context().request;
+
+  const allowed = await api.post('/api/completions', {
+    data: { habitId: habit.id, date: '2026-02-11', completed: true },
+    headers: { [testNowHeader]: '2026-02-12T01:59:00.000Z' },
+  });
+  expect(allowed.ok()).toBeTruthy();
+
+  const blocked = await api.post('/api/completions', {
+    data: { habitId: habit.id, date: '2026-02-11', completed: false },
+    headers: { [testNowHeader]: '2026-02-12T02:00:00.000Z' },
+  });
+  expect(blocked.status()).toBe(400);
+  const blockedBody = await blocked.json();
+  expect(blockedBody.ok).toBe(false);
+  expect(blockedBody.error.code).toBe('invalid_request');
+  expect(blockedBody.error.message).toMatch(/yesterday can only be completed until 2:00 am/i);
+});
+
+test('keeps future-date guard and blocked-history guard with deterministic test time', async ({
+  page,
+  request,
+}) => {
+  await createVerifiedUser(page, request, 'daily-date-guards');
+  const habitTitle = uniqueTitle('Date guard');
+  const habit = await createDebugHabit(page, habitTitle, everyDayWeekdays, '2026-02-01');
+  const api = page.context().request;
+
+  const future = await api.post('/api/completions', {
+    data: { habitId: habit.id, date: '2026-02-13', completed: true },
+    headers: { [testNowHeader]: '2026-02-12T12:00:00.000Z' },
+  });
+  expect(future.status()).toBe(400);
+  const futureBody = await future.json();
+  expect(futureBody.ok).toBe(false);
+  expect(futureBody.error.code).toBe('invalid_request');
+  expect(futureBody.error.message).toMatch(/cannot complete future dates/i);
+
+  const history = await api.post('/api/completions', {
+    data: { habitId: habit.id, date: '2026-02-10', completed: true },
+    headers: { [testNowHeader]: '2026-02-12T01:59:00.000Z' },
+  });
+  expect(history.status()).toBe(400);
+  const historyBody = await history.json();
+  expect(historyBody.ok).toBe(false);
+  expect(historyBody.error.code).toBe('invalid_request');
+  expect(historyBody.error.message).toMatch(/past dates cannot be completed/i);
 });

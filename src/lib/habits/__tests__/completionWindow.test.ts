@@ -52,6 +52,29 @@ describe('completion window rules', () => {
     expect(validation).toEqual({ ok: false, reason: 'future' });
   });
 
+  it('uses local timezone day boundaries instead of raw UTC dates', () => {
+    const validation = validateCompletionWindowDate(utcDate(2026, 2, 12), {
+      timeZone: 'America/Los_Angeles',
+      now: new Date('2026-02-12T00:30:00.000Z'),
+    });
+
+    expect(validation).toEqual({ ok: false, reason: 'future' });
+  });
+
+  it('treats DST spring-forward cutoff as grace expired after 01:59 local time', () => {
+    const beforeJump = validateCompletionWindowDate(utcDate(2026, 3, 7), {
+      timeZone: 'America/New_York',
+      now: new Date('2026-03-08T06:59:00.000Z'),
+    });
+    const afterJump = validateCompletionWindowDate(utcDate(2026, 3, 7), {
+      timeZone: 'America/New_York',
+      now: new Date('2026-03-08T07:00:00.000Z'),
+    });
+
+    expect(beforeJump).toEqual({ ok: true });
+    expect(afterJump).toEqual({ ok: false, reason: 'grace_expired' });
+  });
+
   it('returns invalid_date for malformed date keys', () => {
     const validation = validateCompletionWindowDateKey('invalid', {
       timeZone: 'UTC',

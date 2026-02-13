@@ -1,6 +1,7 @@
 import { getServerSession } from 'next-auth/next';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import { ApiError } from '../../../../lib/api/errors';
 import { toggleCompletion } from '../../../../lib/api/habits/completions';
 import { POST } from '../route';
 
@@ -109,6 +110,44 @@ describe('POST /api/completions', () => {
     const body = await response.json();
     expect(body.ok).toBe(false);
     expect(body.error.code).toBe('invalid_request');
+
+    errorSpy.mockRestore();
+  });
+
+  it('returns invalid_request for blocked history dates', async () => {
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    process.env.ENABLE_TEST_ENDPOINTS = 'true';
+    mockedGetServerSession.mockResolvedValue({ user: { id: 'user-1' } });
+    mockedFindUnique.mockResolvedValue({ timezone: 'UTC' });
+    mockedToggleCompletion.mockRejectedValue(
+      new ApiError('invalid_request', 'Past dates cannot be completed.', 400),
+    );
+
+    const response = await POST(buildPostRequest('2026-02-12T12:30:00.000Z'));
+    expect(response.status).toBe(400);
+    const body = await response.json();
+    expect(body.ok).toBe(false);
+    expect(body.error.code).toBe('invalid_request');
+    expect(body.error.message).toBe('Past dates cannot be completed.');
+
+    errorSpy.mockRestore();
+  });
+
+  it('returns invalid_request for future dates', async () => {
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    process.env.ENABLE_TEST_ENDPOINTS = 'true';
+    mockedGetServerSession.mockResolvedValue({ user: { id: 'user-1' } });
+    mockedFindUnique.mockResolvedValue({ timezone: 'UTC' });
+    mockedToggleCompletion.mockRejectedValue(
+      new ApiError('invalid_request', 'Cannot complete future dates.', 400),
+    );
+
+    const response = await POST(buildPostRequest('2026-02-12T12:30:00.000Z'));
+    expect(response.status).toBe(400);
+    const body = await response.json();
+    expect(body.ok).toBe(false);
+    expect(body.error.code).toBe('invalid_request');
+    expect(body.error.message).toBe('Cannot complete future dates.');
 
     errorSpy.mockRestore();
   });

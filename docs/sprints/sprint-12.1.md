@@ -93,10 +93,10 @@ CI must remain green.
 
 ### Tasks (4)
 
-- [ ] **Task 3.1**: Add unit tests for cutoff boundaries and timezone transitions
-- [ ] **Task 3.2**: Add API/service tests for blocked history and future dates
-- [ ] **Task 3.3**: Add component tests for disabled toggles and grace-window messaging
-- [ ] **Task 3.4**: Add E2E tests for deterministic `01:59`/`02:00` behavior and guard regressions
+- [x] **Task 3.1**: Add unit tests for cutoff boundaries and timezone transitions
+- [x] **Task 3.2**: Add API/service tests for blocked history and future dates
+- [x] **Task 3.3**: Add component tests for disabled toggles and grace-window messaging
+- [x] **Task 3.4**: Add E2E tests for deterministic `01:59`/`02:00` behavior and guard regressions
 
 ---
 

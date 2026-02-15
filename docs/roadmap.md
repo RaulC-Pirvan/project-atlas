@@ -321,7 +321,128 @@
 
 ---
 
-## Phase 13: Mobile + Store Launch (Deferred - Requires Funding) (New)
+## Phase 13: Identity, Access & Account Security (Web-first) (Planned)
+
+### Sprint 13.1: Social Sign-in (Google OAuth)
+
+- [ ] Add Google provider to NextAuth with safe account-linking rules
+- [ ] Add `Continue with Google` on sign-in and sign-up
+- [ ] Keep email/password as fallback auth path
+- [ ] Add API/unit coverage for OAuth callback and account-link edge cases
+- [ ] Add E2E coverage for OAuth happy path + fallback login path
+
+---
+
+### Sprint 13.2: 2FA (TOTP) + Session Controls
+
+- [ ] Implement optional TOTP 2FA for all users
+- [ ] Require 2FA for admin accounts
+- [ ] Add backup/recovery codes (generate, rotate, revoke)
+- [ ] Add session management UI (active sessions + sign out all devices)
+- [ ] Add step-up auth prompts for sensitive actions (email/password change, delete account)
+- [ ] Add unit + E2E coverage for 2FA enable/disable, verification, and recovery
+
+---
+
+### Sprint 13.3: Passkey Readiness (Discovery + Rollout Plan)
+
+- [ ] Evaluate WebAuthn/passkeys and compatibility with current NextAuth setup
+- [ ] Define rollout strategy (opt-in beta -> general availability)
+- [ ] Document migration and fallback paths
+
+---
+
+## Phase 14: Support, Trust & Self-Service (Web-first) (Planned)
+
+### Sprint 14.1: Support Center + Contact Form
+
+- [ ] Add `/support` page with FAQ and contact form
+- [ ] Add ticket categories: billing, account, bug, feature request
+- [ ] Prefill known user context when authenticated
+- [ ] Add anti-spam controls (honeypot + rate limit; captcha only if needed)
+- [ ] Route submissions to support inbox/triage queue
+- [ ] Add E2E coverage for submit success/failure paths
+
+---
+
+### Sprint 14.2: Trust & Policy Surfaces
+
+- [ ] Publish Privacy Policy, Terms, and Refund Policy pages
+- [ ] Add support response-time expectations and help guidance
+- [ ] Link legal/support surfaces from landing, Pro page, and account
+- [ ] Add simple policy versioning/change-log notes
+
+---
+
+### Sprint 14.3: User Self-Service Data Export
+
+- [ ] Add user-scoped export endpoint (habits, completions, reminders, achievements)
+- [ ] Add account UI to request/download exports
+- [ ] Ensure strict auth checks and audit logging for exports
+- [ ] Add tests for export authorization and payload integrity
+
+---
+
+## Phase 15: Monetization Runtime (Web-first) (Planned)
+
+### Sprint 15.1: Billing Architecture + Entitlement Abstraction
+
+- [ ] Keep one-time Pro as launch default
+- [ ] Set formal launch pricing decision gate (one-time now, subscription considered post-launch)
+- [ ] Refactor entitlements to be provider-aware (`stripe`, `ios_iap`, `android_iap`)
+- [ ] Define canonical entitlement events and idempotency rules
+- [ ] Document migration path for future subscription support
+
+---
+
+### Sprint 15.2: Stripe Web Billing Integration
+
+- [ ] Add Stripe Checkout for one-time Pro upgrade on web
+- [ ] Implement secure webhook handling (signature verification + retry-safe processing)
+- [ ] Add billing history/invoice links in account
+- [ ] Add web restore/entitlement re-sync flow
+- [ ] Add API/unit/E2E coverage for checkout, webhook, and failure recovery
+
+---
+
+### Sprint 15.3: Mobile Billing Compliance Strategy
+
+- [ ] Define Apple/Google in-app billing compliance path before store launch
+- [ ] Define entitlement reconciliation across Stripe and store purchases
+- [ ] Document region/platform fallback behavior and support playbook
+
+---
+
+## Phase 16: Conversion UX & Growth Loop (Web-first) (Planned)
+
+### Sprint 16.1: Pro Upgrade Page Refresh
+
+- [ ] Redesign `/pro` with clearer feature hierarchy and concrete examples
+- [ ] Keep Free value explicit and non-degraded in all Pro messaging
+- [ ] Add upgrade FAQ, guarantee/refund copy, and trust details
+- [ ] Instrument Pro CTA and conversion events
+
+---
+
+### Sprint 16.2: Landing Walkthrough Narrative
+
+- [ ] Add guided `how Atlas works` walkthrough on landing
+- [ ] Use real UI examples/screenshots (`create -> remind -> complete -> review`)
+- [ ] Keep language non-technical and value-first
+- [ ] Add responsive and E2E coverage for walkthrough content + CTA flow
+
+---
+
+### Sprint 16.3: Product Analytics Baseline
+
+- [ ] Instrument funnel events (landing -> sign-up -> first habit -> first completion -> upgrade)
+- [ ] Add lightweight conversion dashboard
+- [ ] Define baseline KPIs and weekly review cadence
+- [ ] Ensure privacy-safe defaults and clear user-facing controls
+
+---
+
+## Phase 17: Mobile + Store Launch (Deferred - Requires Funding) (New)
 
 ### Prereqs (Paid / External)
 
@@ -331,7 +452,7 @@
 - iOS bundle ID + Android package name
 - APNs auth key (.p8)
 
-### Sprint 13.1: Mobile Push Implementation (WebView)
+### Sprint 17.1: Mobile Push Implementation (WebView)
 
 - [ ] Wrap app using WebView (Capacitor recommended)
 - [ ] Setup Android push (FCM)
@@ -342,7 +463,7 @@
 
 ---
 
-### Sprint 13.2: Store Readiness & Compliance
+### Sprint 17.2: Store Readiness & Compliance
 
 - [ ] App icons, splash screens, store screenshots
 - [ ] Privacy policy + Terms pages (in-app + hosted)

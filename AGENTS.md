@@ -55,6 +55,7 @@ A habit is defined independently of dates.
 - Email verification uses Resend client; debug token capture plus `/api/auth/debug/verification-token` for tests (shared token store for API routes).
 - Tests in place: Vitest unit/API tests, auth + habit + calendar + marketing + admin component tests, Playwright auth + habits + today + calendar + daily completion + admin + marketing + visual regression E2E.
 - Playwright E2E runs use a Windows-safe temp dir setup via `playwright.global-setup.ts` to avoid chromium shutdown hangs.
+- Auth and admin E2E flows include resilience improvements for current navigation and transient request resets (sidebar/mobile sign-out selectors and retry-safe admin API checks).
 - Daily completion and streaks E2E include retry-safe habit creation to handle transient network resets in Firefox.
 - Daily completion E2E includes deterministic grace-window checks (`01:59` allow, `02:00` block) via a test-only time override.
 - Offline-first completion queue implemented with IndexedDB persistence, dedupe, and timezone-safe validation.
@@ -65,9 +66,13 @@ A habit is defined independently of dates.
 - Habit CRUD API implemented (list/create/update/archive) plus manual ordering with a habits UI built around `HabitsPanel` and `HabitForm`.
 - Habit ordering supports manual order (`sortOrder`), reorder API, and an optional "keep completed at bottom" preference (default on) shared across Today and daily panels.
 - Habit scheduling now respects habit creation date: habits only appear on/after their creation date in Today, calendar, and insights.
-- Authenticated screens use `AppShell` + `AppSidebar` with Today-first navigation on desktop, plus Calendar/Habits/Account links and Sign out.
-- Marketing homepage built with hero, benefits, CTA, and auth-aware redirect to `/today`.
+- Habits page mobile actions are tuned for symmetry (2x2 action grid) and danger-forward delete affordances.
+- Authenticated screens use `AppShell` + `AppSidebar` with desktop `Home` (`/landing`) plus app routes, and mobile primary nav (`Today/Calendar/Habits`) with animated `More` actions (`Home/Insights/Achievements/Account/Sign out`).
+- Marketing homepage expansion is live with full product narrative, refined non-technical messaging, Free vs Pro comparison, and Pro value callouts.
+- Root routing is auth-aware: signed-out users visiting `/` are routed to canonical landing `/landing`, while signed-in users are routed to `/today`.
+- Signed-in users can access `/landing` and use two-way navigation (`Home` in app shell, `Go to dashboard` on landing).
 - Light/dark theme toggle (system default + localStorage persistence) available on marketing/auth/app shells.
+- Shared modal dialogs are rendered via portal to `document.body` so mobile confirmation dialogs stay viewport-centered even inside animated/transformed page containers.
 - Today view implemented at `/today` for fast daily entry of today's due habits.
 - Calendar view implemented with monthly grid, month navigation, selected-day side panel (`?date=YYYY-MM-DD`), daily completion toggles via `/api/completions`, per-day progress indicators, and golden completed-day tiles (black text for contrast).
 - Calendar defaults to selecting today on `/calendar` (current month); mobile daily sheet only auto-opens when a `date` param is present.
@@ -87,6 +92,7 @@ A habit is defined independently of dates.
 - Pro entitlement model implemented (server-side) with `ProEntitlement` table and `/api/pro/entitlement` endpoint.
 - Pro upgrade entry points and preview states implemented (calendar and account surfaces), with a dedicated `/pro` page and mobile-first restore purchase placeholder.
 - Advanced Insights v1 implemented (Pro-gated): insights API, aggregated calculations, and Insights UI (cards + heatmap + summary panel).
+- Insights heatmap mobile UX improved with horizontal row scrolling, clear Older/Newer direction, intensity legend, and overflow-safe card sizing.
 - Calendar now shows a Pro-only Insights snapshot card; Free users see an upgrade card.
 - Achievements System v1 implemented with expanded Free/Pro catalogue, per-habit milestones, and a trophy cabinet UI.
 - Achievements are persisted and locked on unlock (cannot regress), backed by `AchievementUnlock` and `HabitMilestoneUnlock`.
@@ -104,7 +110,7 @@ A habit is defined independently of dates.
 ## Roadmap (high-level)
 
 - Expand testing and launch readiness (coverage, staging, backups, CI audit).
-- Marketing homepage expansion to cover full product breadth and clearer Free vs Pro positioning.
+- Continue post-launch UX polish and reliability hardening (navigation ergonomics, responsive QA, E2E stability).
 - Smart reminders and push notifications (Pro).
 - Store launch readiness (privacy, metadata, compliance assets).
 
@@ -119,7 +125,8 @@ A habit is defined independently of dates.
 ## Codebase Map
 
 - `src/app` - App Router UI and API routes.
-- `src/app/page.tsx` - Marketing homepage with auth-aware redirect to `/today`.
+- `src/app/page.tsx` - Auth-aware root router (`/` -> `/landing` when signed out, `/today` when signed in).
+- `src/app/landing/page.tsx` - Canonical marketing landing page route (accessible signed-in and signed-out).
 - `src/app/api/auth/*/route.ts` - Auth API routes (signup, verify, resend, logout, debug, NextAuth).
 - `src/app/api/health/route.ts` - Health check endpoint.
 - `src/app/api/account/route.ts` - Account update (email/password/display name + daily ordering preference).
@@ -157,10 +164,10 @@ A habit is defined independently of dates.
 - `src/components/calendar/DailyCompletionPanel.tsx` - Selected-day habit list + completion toggles + completion ordering + completion sounds.
 - `src/components/calendar/__tests__` - Calendar UI tests.
 - `src/components/streaks/StreakSummaryPanel.tsx` - Streak summary panel (current/longest + empty states).
-- `src/components/layout` - App shell layout primitives (AppShell, AppSidebar).
+- `src/components/layout` - App shell layout primitives (AppShell, AppSidebar with desktop Home link and mobile More menu).
 - `src/components/auth/AccountPanel.tsx` - Account settings (including week start + daily ordering preference).
 - `src/components/auth/SignOutButton.tsx` - Sign-out button for authenticated layouts.
-- `src/components/marketing` - Marketing homepage layout and sections.
+- `src/components/marketing` - Marketing homepage layout and expanded sections (workflow, insights, achievements, reminders, offline reliability, grace window, Free vs Pro, Pro callouts).
 - `src/components/admin` - Admin UI components and tests.
 - `src/components/pro` - Pro upgrade entry points and preview cards.
 - `src/components/insights` - Insights UI components (dashboard, snapshot, upgrade card).
@@ -169,6 +176,7 @@ A habit is defined independently of dates.
 - `src/components/ui/ThemeToggle.tsx` - Light/dark theme toggle (system default + persistence).
 - `src/components/ui/Toast.tsx` - Toast notifications (no inline form errors).
 - `src/components/ui/Notice.tsx` - Inline notice/alert primitive.
+- `src/components/ui/Modal.tsx` - Shared modal primitive (portaled to `document.body` for viewport-anchored overlays).
 - `src/app/global-error.tsx` - Global error boundary (Sentry capture + fallback UI).
 - `src/instrumentation.ts` - Sentry instrumentation hook for Next.js.
 - `sentry.client.config.ts` / `sentry.server.config.ts` / `sentry.edge.config.ts` - Sentry SDK config.
@@ -206,8 +214,9 @@ A habit is defined independently of dates.
 - `src/app/account/page.tsx` - Account management page.
 - `src/app/pro/page.tsx` - Pro upgrade page and preview content.
 - `middleware.ts` - Route protection using NextAuth JWT.
+- `e2e/auth.spec.ts` - Auth flows E2E coverage (including shared sign-out helper for desktop/mobile nav variants).
 - `e2e/daily-completion.spec.ts` - Daily completion E2E flow coverage.
-- `e2e/admin.spec.ts` - Admin dashboard E2E coverage.
+- `e2e/admin.spec.ts` - Admin dashboard E2E coverage (including retry-safe API request assertions).
 - `e2e/calendar-visual.spec.ts` - Playwright visual regression coverage for calendar tiles.
 - `e2e/marketing-homepage.spec.ts` - Marketing homepage E2E coverage.
 - `e2e/insights.spec.ts` - Insights gating E2E coverage.
@@ -221,6 +230,7 @@ A habit is defined independently of dates.
 - `docs/roadmap.md` - Product and engineering roadmap.
 - `docs/sprints/sprint-5.1.md` - Sprint plan for marketing homepage.
 - `docs/sprints/sprint-5.2.md` - Sprint plan for marketing homepage expansion.
+- `docs/test workflows/sprint-5.2-test-workflows.md` - Marketing homepage expansion test workflows.
 - `docs/test workflows/sprint-5.1-test-workflows.md` - Marketing homepage + theme test workflows.
 - `docs/test workflows/sprint-4.2-test-workflows.md` - UX refinement test workflows.
 - `docs/sprints/sprint-6.1.md` - Observability & safety sprint plan.

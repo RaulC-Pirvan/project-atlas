@@ -103,7 +103,7 @@ test('marketing homepage CTA links navigate to sign-up, sign-in, and pro page', 
 
   await page.goto('/landing');
   await page.getByRole('link', { name: /see atlas pro/i }).click();
-  await expect(page).toHaveURL(/\/sign-in$/, { timeout: 15_000 });
+  await expect(page).toHaveURL(/\/sign-in(?:\?.*)?$/, { timeout: 15_000 });
 });
 
 test('signed-out visitors are routed from root to /landing', async ({ page }) => {

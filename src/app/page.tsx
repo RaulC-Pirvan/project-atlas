@@ -1,6 +1,5 @@
 import { redirect } from 'next/navigation';
 
-import { MarketingHome } from '../components/marketing/MarketingHome';
 import { getServerAuthSession } from '../lib/auth/session';
 
 export default async function Home() {
@@ -10,5 +9,5 @@ export default async function Home() {
     redirect('/today');
   }
 
-  return <MarketingHome />;
+  redirect('/landing');
 }

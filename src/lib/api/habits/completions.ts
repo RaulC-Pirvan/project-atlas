@@ -1,5 +1,6 @@
 import { planCompletionChange } from '../../habits/completions';
-import { normalizeToUtcDate, toUtcDateKey } from '../../habits/dates';
+import { validateCompletionWindowDate } from '../../habits/completionWindow';
+import { toUtcDateKey } from '../../habits/dates';
 import { isHabitActiveOnDate } from '../../habits/schedule';
 import type { HabitScheduleEntry } from '../../habits/types';
 import { ApiError } from '../errors';
@@ -85,9 +86,29 @@ type ListCompletionRangeArgs = {
   end: Date;
 };
 
-function isFutureDate(targetDate: Date, now: Date, timeZone: string): boolean {
-  const today = normalizeToUtcDate(now, timeZone);
-  return targetDate.getTime() > today.getTime();
+function assertCompletionWindowAllowed({
+  date,
+  timeZone,
+  now,
+}: {
+  date: Date;
+  timeZone: string;
+  now: Date;
+}): void {
+  const validation = validateCompletionWindowDate(date, { timeZone, now });
+  if (validation.ok) {
+    return;
+  }
+
+  if (validation.reason === 'future') {
+    throw new ApiError('invalid_request', 'Cannot complete future dates.', 400);
+  }
+
+  if (validation.reason === 'grace_expired') {
+    throw new ApiError('invalid_request', 'Yesterday can only be completed until 2:00 AM.', 400);
+  }
+
+  throw new ApiError('invalid_request', 'Past dates cannot be completed.', 400);
 }
 
 export async function toggleCompletion(
@@ -107,9 +128,7 @@ export async function toggleCompletion(
   }
 
   const now = args.now ?? new Date();
-  if (args.completed && isFutureDate(args.date, now, args.timeZone)) {
-    throw new ApiError('invalid_request', 'Cannot complete future dates.', 400);
-  }
+  assertCompletionWindowAllowed({ date: args.date, timeZone: args.timeZone, now });
 
   const existing = await args.prisma.habitCompletion.findFirst({
     where: { habitId: args.habitId, date: args.date },

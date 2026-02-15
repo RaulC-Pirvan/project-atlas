@@ -38,15 +38,18 @@ The goal is not to build a toy app, but a system that scales in complexity witho
 ## Tech Stack
 
 Frontend & Application Layer:
+
 - Next.js (App Router)
 - TypeScript (strict mode)
 - Tailwind CSS
 
 Data Layer:
+
 - PostgreSQL (Neon)
 - Prisma ORM
 
 Testing & Quality:
+
 - Vitest (unit testing)
 - Playwright (end-to-end testing)
 - ESLint + Prettier
@@ -86,13 +89,13 @@ Testing & Quality:
 
 ## Available Scripts
 
-- npm run dev        → Start development server
-- npm run lint       → Run ESLint
-- npm run typecheck  → TypeScript validation
-- npm test           → Run unit tests
-- npm run e2e        → Run end-to-end tests
-- npm run ci         → Run CI-equivalent checks
-- npm run ci:full    → Run extended CI checks
+- npm run dev → Start development server
+- npm run lint → Run ESLint
+- npm run typecheck → TypeScript validation
+- npm test → Run unit tests
+- npm run e2e → Run end-to-end tests
+- npm run ci → Run CI-equivalent checks
+- npm run ci:full → Run extended CI checks
 
 ---
 

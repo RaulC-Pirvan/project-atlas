@@ -69,6 +69,23 @@ type AchievementsSnapshot = {
   byId: Map<string, AchievementSnapshotItem>;
 };
 
+type CompletionWindowLockReason = 'future' | 'grace_expired' | 'history_blocked';
+
+const GRACE_WINDOW_COPY = 'You can complete today and yesterday until 2:00 AM local time.';
+
+function getCompletionWindowLockMessage(reason: CompletionWindowLockReason): string {
+  switch (reason) {
+    case 'future':
+      return 'Future dates cannot be completed yet.';
+    case 'grace_expired':
+      return 'Yesterday can only be completed until 2:00 AM.';
+    case 'history_blocked':
+      return 'Past dates cannot be completed.';
+    default:
+      return 'Past dates cannot be completed.';
+  }
+}
+
 function getOfflineValidationMessage(validation: OfflineQueueValidation): string {
   if (validation.ok) return '';
   switch (validation.reason) {
@@ -90,7 +107,7 @@ type DailyCompletionPanelProps = {
   selectedLabel: string | null;
   habits: HabitSummary[];
   initialCompletedHabitIds: string[];
-  isFuture: boolean;
+  completionWindowLockReason: CompletionWindowLockReason | null;
   timeZone: string;
   contextLabel?: string;
   keepCompletedAtBottom?: boolean;
@@ -101,7 +118,7 @@ type HabitRowProps = {
   isCompleted: boolean;
   isPending: boolean;
   isSyncing: boolean;
-  isFuture: boolean;
+  isLocked: boolean;
   listId: string;
   onToggle: (habitId: string, wasCompleted: boolean) => void;
   onKeyDown: (event: KeyboardEvent<HTMLButtonElement>) => void;
@@ -112,12 +129,12 @@ const HabitRow = memo(function HabitRow({
   isCompleted,
   isPending,
   isSyncing,
-  isFuture,
+  isLocked,
   listId,
   onToggle,
   onKeyDown,
 }: HabitRowProps) {
-  const isDisabled = isFuture || isSyncing;
+  const isDisabled = isLocked || isSyncing;
   const descriptionId = habit.description ? `${listId}-${habit.id}` : undefined;
   const focusClasses = isCompleted
     ? 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black dark:focus-visible:ring-black/40 dark:focus-visible:ring-offset-white'
@@ -199,7 +216,7 @@ export function DailyCompletionPanel({
   selectedLabel,
   habits,
   initialCompletedHabitIds,
-  isFuture,
+  completionWindowLockReason,
   timeZone,
   contextLabel,
   keepCompletedAtBottom = true,
@@ -226,6 +243,7 @@ export function DailyCompletionPanel({
   const completionSignature = initialCompletedHabitIds.join('|');
   const listId = useId();
   const resolvedContextLabel = contextLabel ?? 'Selected day';
+  const isLocked = completionWindowLockReason !== null;
   const completionSet = useMemo(() => new Set(completedIds), [completedIds]);
   const syncingSet = useMemo(() => new Set(syncingIds), [syncingIds]);
   const offlinePendingSet = useMemo(() => {
@@ -600,8 +618,8 @@ export function DailyCompletionPanel({
   const handleToggle = useCallback(
     async (habitId: string, wasCompleted: boolean) => {
       if (!selectedDateKey) return;
-      if (isFuture) {
-        pushToast('Future dates cannot be completed yet.', 'error');
+      if (completionWindowLockReason) {
+        pushToast(getCompletionWindowLockMessage(completionWindowLockReason), 'error');
         return;
       }
 
@@ -685,7 +703,7 @@ export function DailyCompletionPanel({
     },
     [
       selectedDateKey,
-      isFuture,
+      completionWindowLockReason,
       pushToast,
       ensureAchievementsSnapshot,
       setCompletionState,
@@ -756,7 +774,7 @@ export function DailyCompletionPanel({
             isCompleted={completionSet.has(habit.id)}
             isPending={pendingSet.has(habit.id)}
             isSyncing={syncingSet.has(habit.id)}
-            isFuture={isFuture}
+            isLocked={isLocked}
             listId={listId}
             onToggle={handleToggle}
             onKeyDown={handleHabitKeyDown}
@@ -778,9 +796,12 @@ export function DailyCompletionPanel({
       </div>
 
       <div className="mt-5 space-y-3 text-sm text-black/70 dark:text-white/70">
-        {isFuture && selectedDateKey ? (
+        {selectedDateKey ? (
+          <p className="text-xs text-black/60 dark:text-white/60">{GRACE_WINDOW_COPY}</p>
+        ) : null}
+        {completionWindowLockReason && selectedDateKey ? (
           <p className="text-xs uppercase tracking-[0.25em] text-black/50 dark:text-white/50">
-            Future dates cannot be completed yet.
+            {getCompletionWindowLockMessage(completionWindowLockReason)}
           </p>
         ) : null}
         {renderContent()}

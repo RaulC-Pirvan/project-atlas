@@ -63,7 +63,7 @@ export default async function TodayPage() {
         selectedLabel={todayLabel}
         habits={todayHabits}
         initialCompletedHabitIds={Array.from(completedIds)}
-        isFuture={false}
+        completionWindowLockReason={null}
         timeZone={timeZone}
         keepCompletedAtBottom={user.keepCompletedAtBottom}
       />

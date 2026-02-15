@@ -22,12 +22,15 @@ describe('DailyCompletionPanel', () => {
         selectedLabel={null}
         habits={[]}
         initialCompletedHabitIds={[]}
-        isFuture={false}
+        completionWindowLockReason={null}
         timeZone="UTC"
       />,
     );
 
     expect(screen.getByText('Select a day to see scheduled habits.')).toBeInTheDocument();
+    expect(
+      screen.queryByText(/you can complete today and yesterday until 2:00 am local time/i),
+    ).not.toBeInTheDocument();
   });
 
   it('toggles completion and calls the API', async () => {
@@ -46,7 +49,7 @@ describe('DailyCompletionPanel', () => {
         selectedLabel="February 5, 2026"
         habits={[{ id: 'h1', title: 'Read', description: 'Read daily' }]}
         initialCompletedHabitIds={[]}
-        isFuture={false}
+        completionWindowLockReason={null}
         timeZone="UTC"
       />,
     );
@@ -69,13 +72,51 @@ describe('DailyCompletionPanel', () => {
         selectedLabel="February 10, 2026"
         habits={[{ id: 'h1', title: 'Read', description: null }]}
         initialCompletedHabitIds={[]}
-        isFuture={true}
+        completionWindowLockReason="future"
         timeZone="UTC"
       />,
     );
 
     expect(screen.getByRole('checkbox', { name: /read/i })).toBeDisabled();
     expect(screen.getByText(/future dates cannot be completed yet/i)).toBeInTheDocument();
+  });
+
+  it('disables toggles after grace window and shows guidance copy', () => {
+    render(
+      <DailyCompletionPanel
+        selectedDateKey="2026-02-10"
+        selectedLabel="February 10, 2026"
+        habits={[{ id: 'h1', title: 'Read', description: null }]}
+        initialCompletedHabitIds={[]}
+        completionWindowLockReason="grace_expired"
+        timeZone="UTC"
+      />,
+    );
+
+    expect(screen.getByRole('checkbox', { name: /read/i })).toBeDisabled();
+    expect(screen.getByText(/yesterday can only be completed until 2:00 am/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/you can complete today and yesterday until 2:00 am local time/i),
+    ).toBeInTheDocument();
+  });
+
+  it('disables toggles for blocked history dates and shows history messaging', () => {
+    render(
+      <DailyCompletionPanel
+        selectedDateKey="2026-02-08"
+        selectedLabel="February 8, 2026"
+        habits={[{ id: 'h1', title: 'Read', description: null }]}
+        initialCompletedHabitIds={[]}
+        completionWindowLockReason="history_blocked"
+        timeZone="UTC"
+      />,
+    );
+
+    expect(screen.getByRole('checkbox', { name: /read/i })).toBeDisabled();
+    expect(screen.getByText(/past dates cannot be completed/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/you can complete today and yesterday until 2:00 am local time/i),
+    ).toBeInTheDocument();
   });
 
   it('rolls back optimistic updates when the request fails', async () => {
@@ -99,7 +140,7 @@ describe('DailyCompletionPanel', () => {
         selectedLabel="February 5, 2026"
         habits={[{ id: 'h1', title: 'Read', description: 'Read daily' }]}
         initialCompletedHabitIds={[]}
-        isFuture={false}
+        completionWindowLockReason={null}
         timeZone="UTC"
       />,
     );
@@ -134,7 +175,7 @@ describe('DailyCompletionPanel', () => {
           { id: 'h2', title: 'Walk', description: null },
         ]}
         initialCompletedHabitIds={[]}
-        isFuture={false}
+        completionWindowLockReason={null}
         timeZone="UTC"
       />,
     );
@@ -170,7 +211,7 @@ describe('DailyCompletionPanel', () => {
         selectedLabel="February 5, 2026"
         habits={[{ id: 'h1', title: 'Read', description: 'Read daily' }]}
         initialCompletedHabitIds={[]}
-        isFuture={false}
+        completionWindowLockReason={null}
         timeZone="UTC"
       />,
     );

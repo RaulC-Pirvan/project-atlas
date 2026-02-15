@@ -1,4 +1,8 @@
-import { addUtcDays, normalizeToUtcDate, parseUtcDateKey } from './dates';
+import {
+  type CompletionWindowPolicy,
+  type CompletionWindowValidation,
+  validateCompletionWindowDateKey,
+} from './completionWindow';
 
 export type OfflineCompletionAction = {
   key: string;
@@ -9,19 +13,9 @@ export type OfflineCompletionAction = {
   updatedAt: number;
 };
 
-export type OfflineQueueValidation =
-  | { ok: true }
-  | {
-      ok: false;
-      reason: 'invalid_date' | 'future' | 'grace_expired' | 'history_blocked';
-    };
+export type OfflineQueueValidation = CompletionWindowValidation;
 
-export type OfflineQueuePolicy = {
-  timeZone: string;
-  now?: Date;
-  graceHour?: number;
-  allowHistory?: boolean;
-};
+export type OfflineQueuePolicy = CompletionWindowPolicy;
 
 export type OfflineQueueSnapshot = {
   items: OfflineCompletionAction[];
@@ -31,8 +25,6 @@ export type OfflineQueueSnapshot = {
 
 export type OfflineQueueListener = (snapshot: OfflineQueueSnapshot) => void;
 
-const DEFAULT_GRACE_HOUR = 2;
-const DEFAULT_ALLOW_HISTORY = false;
 const DB_NAME = 'atlas-offline';
 const STORE_NAME = 'completionQueue';
 const DB_VERSION = 1;
@@ -128,24 +120,6 @@ async function clearStore(): Promise<void> {
   db.close();
 }
 
-function getLocalHour(date: Date, timeZone: string): number {
-  const formatter = new Intl.DateTimeFormat('en-US', {
-    timeZone,
-    hour: '2-digit',
-    hour12: false,
-  });
-  const parts = formatter.formatToParts(date);
-  const hourPart = parts.find((part) => part.type === 'hour')?.value;
-  if (!hourPart) {
-    throw new Error('Unable to resolve local hour.');
-  }
-  const parsed = Number(hourPart);
-  if (!Number.isFinite(parsed)) {
-    throw new Error('Invalid local hour value.');
-  }
-  return parsed === 24 ? 0 : parsed;
-}
-
 export function createQueueKey(habitId: string, dateKey: string): string {
   return `${habitId}:${dateKey}`;
 }
@@ -206,40 +180,7 @@ export function validateCompletionDate(
   dateKey: string,
   policy: OfflineQueuePolicy,
 ): OfflineQueueValidation {
-  const target = parseUtcDateKey(dateKey);
-  if (!target) return { ok: false, reason: 'invalid_date' };
-
-  const now = policy.now ?? new Date();
-  const timeZone = policy.timeZone;
-  const graceHour = policy.graceHour ?? DEFAULT_GRACE_HOUR;
-  const allowHistory = policy.allowHistory ?? DEFAULT_ALLOW_HISTORY;
-
-  const today = normalizeToUtcDate(now, timeZone);
-  if (target.getTime() > today.getTime()) {
-    return { ok: false, reason: 'future' };
-  }
-
-  const yesterday = addUtcDays(today, -1);
-  const isYesterday = target.getTime() === yesterday.getTime();
-
-  if (!allowHistory) {
-    const isToday = target.getTime() === today.getTime();
-    const hour = getLocalHour(now, timeZone);
-    const withinGrace = hour < graceHour;
-    if (isToday) return { ok: true };
-    if (isYesterday && withinGrace) return { ok: true };
-    if (isYesterday && !withinGrace) return { ok: false, reason: 'grace_expired' };
-    return { ok: false, reason: 'history_blocked' };
-  }
-
-  if (isYesterday) {
-    const hour = getLocalHour(now, timeZone);
-    if (hour >= graceHour) {
-      return { ok: true };
-    }
-  }
-
-  return { ok: true };
+  return validateCompletionWindowDateKey(dateKey, policy);
 }
 
 export class OfflineCompletionQueue {

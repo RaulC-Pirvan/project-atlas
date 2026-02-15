@@ -11,6 +11,26 @@ import { withApiLogging } from '../../../lib/observability/apiLogger';
 
 export const runtime = 'nodejs';
 
+const TEST_NOW_HEADER = 'x-atlas-test-now';
+
+function resolveTestNowOverride(request: Request): Date | undefined {
+  if (process.env.ENABLE_TEST_ENDPOINTS !== 'true') {
+    return undefined;
+  }
+
+  const raw = request.headers.get(TEST_NOW_HEADER);
+  if (!raw) {
+    return undefined;
+  }
+
+  const parsed = new Date(raw);
+  if (Number.isNaN(parsed.getTime())) {
+    throw new ApiError('invalid_request', 'Invalid test now override.', 400);
+  }
+
+  return parsed;
+}
+
 export async function GET(request: Request) {
   return withApiLogging(
     request,
@@ -84,6 +104,7 @@ export async function POST(request: Request) {
         date,
         completed: parsed.data.completed,
         timeZone: user.timezone ?? 'UTC',
+        now: resolveTestNowOverride(request),
       });
 
       return jsonOk({ result });

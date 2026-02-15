@@ -256,13 +256,14 @@ export function HabitsPanel({ initialHabits, weekStart, timezoneLabel }: HabitsP
                         </p>
                       ) : null}
                     </div>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
                       {habits.length > 1 ? (
                         <>
                           <Button
                             type="button"
                             variant="ghost"
                             size="sm"
+                            className="w-full sm:w-auto"
                             onClick={() => moveHabit(habit.id, -1)}
                             disabled={reordering || loading || index === 0}
                             aria-label={`Move ${habit.title} up`}
@@ -273,6 +274,7 @@ export function HabitsPanel({ initialHabits, weekStart, timezoneLabel }: HabitsP
                             type="button"
                             variant="ghost"
                             size="sm"
+                            className="w-full sm:w-auto"
                             onClick={() => moveHabit(habit.id, 1)}
                             disabled={reordering || loading || index === habits.length - 1}
                             aria-label={`Move ${habit.title} down`}
@@ -285,14 +287,16 @@ export function HabitsPanel({ initialHabits, weekStart, timezoneLabel }: HabitsP
                         type="button"
                         variant="outline"
                         size="sm"
+                        className="w-full sm:w-auto"
                         onClick={() => setEditingId(habit.id)}
                       >
                         Edit
                       </Button>
                       <Button
                         type="button"
-                        variant="ghost"
+                        variant="danger"
                         size="sm"
+                        className="w-full sm:w-auto"
                         onClick={() => setDeleteTarget(habit)}
                       >
                         Delete
@@ -340,7 +344,7 @@ export function HabitsPanel({ initialHabits, weekStart, timezoneLabel }: HabitsP
             <Button type="button" variant="outline" size="lg" onClick={() => setDeleteTarget(null)}>
               Cancel
             </Button>
-            <Button type="button" size="lg" onClick={handleDelete}>
+            <Button type="button" variant="danger" size="lg" onClick={handleDelete}>
               Delete habit
             </Button>
           </>

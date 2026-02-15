@@ -7,6 +7,7 @@ describe('isPublicPath', () => {
     expect(isPublicPath('/sign-in')).toBe(true);
     expect(isPublicPath('/sign-up')).toBe(true);
     expect(isPublicPath('/verify-email')).toBe(true);
+    expect(isPublicPath('/landing')).toBe(true);
     expect(isPublicPath('/api/auth/signin')).toBe(true);
   });
 

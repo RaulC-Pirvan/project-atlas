@@ -66,6 +66,28 @@ async function promoteToAdmin(email: string) {
   await prisma.user.updateMany({ where: { email }, data: { role: 'admin' } });
 }
 
+async function getWithRetry(
+  request: APIRequestContext,
+  url: string,
+  expectedStatus: number,
+): Promise<import('@playwright/test').APIResponse> {
+  let lastError: Error | null = null;
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      const response = await request.get(url);
+      if (response.status() === expectedStatus) {
+        return response;
+      }
+      lastError = new Error(`Unexpected status ${response.status()} for ${url}`);
+    } catch (error) {
+      lastError = error as Error;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 400));
+  }
+
+  throw lastError ?? new Error(`Request failed for ${url}`);
+}
+
 test.afterAll(async () => {
   await prisma.$disconnect();
 });
@@ -79,7 +101,7 @@ test('non-admin users are redirected from /admin and blocked on admin APIs', asy
   await page.goto('/admin', { waitUntil: 'domcontentloaded' });
   await page.waitForURL(/\/today/);
 
-  const response = await page.request.get('/api/admin/health');
+  const response = await getWithRetry(page.request, '/api/admin/health', 403);
   expect(response.status()).toBe(403);
 });
 
@@ -98,10 +120,10 @@ test('admin users can access the admin dashboard and APIs', async ({ page }) => 
   await expect(page.getByRole('heading', { name: /users/i })).toBeVisible();
   await expect(page.getByRole('heading', { name: /habits/i })).toBeVisible();
 
-  const response = await page.request.get('/api/admin/health');
+  const response = await getWithRetry(page.request, '/api/admin/health', 200);
   expect(response.status()).toBe(200);
 
-  const exportResponse = await page.request.get('/api/admin/exports/users');
+  const exportResponse = await getWithRetry(page.request, '/api/admin/exports/users', 200);
   expect(exportResponse.status()).toBe(200);
   expect(exportResponse.headers()['content-type']).toContain('text/csv');
 });

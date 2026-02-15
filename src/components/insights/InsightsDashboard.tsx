@@ -166,7 +166,7 @@ export function InsightsDashboard({
 
       <div className="grid gap-6 lg:grid-cols-2">
         <div
-          className={`rounded-2xl border border-black/10 px-5 py-4 dark:border-white/10 ${tone}`.trim()}
+          className={`min-w-0 rounded-2xl border border-black/10 px-5 py-4 dark:border-white/10 ${tone}`.trim()}
         >
           <div className="flex items-center justify-between">
             <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-black/50 dark:text-white/50">
@@ -178,34 +178,65 @@ export function InsightsDashboard({
               </span>
             ) : null}
           </div>
-          <div className="mt-4 space-y-2">
-            {weekdayOrder.map((weekday) => {
-              const rowIndex = weekday - 1;
-              const values = summary.heatmap.values[rowIndex] ?? [];
-              const label = getWeekdayLabel(weekday).slice(0, 3);
-              return (
-                <div key={weekday} className="flex items-center gap-2">
-                  <span className="w-8 text-[10px] font-semibold uppercase tracking-[0.2em] text-black/40 dark:text-white/40">
-                    {label}
-                  </span>
-                  <div className="flex flex-1 flex-wrap gap-1">
-                    {values.map((value, index) => (
-                      <span
-                        key={`${weekday}-${index}`}
-                        className={`h-4 w-4 rounded-md border border-black/10 dark:border-white/10 ${heatmapCellClass(
-                          value,
-                        )}`.trim()}
-                        aria-hidden="true"
-                      />
-                    ))}
+          <div className="mt-4 min-w-0 max-w-full overflow-x-auto pb-1">
+            <div className="w-max min-w-full space-y-2 pr-1">
+              {weekdayOrder.map((weekday) => {
+                const rowIndex = weekday - 1;
+                const values = summary.heatmap.values[rowIndex] ?? [];
+                const label = getWeekdayLabel(weekday).slice(0, 3);
+                return (
+                  <div key={weekday} className="flex items-center gap-2">
+                    <span className="w-9 text-[10px] font-semibold uppercase tracking-[0.2em] text-black/40 dark:text-white/40">
+                      {label}
+                    </span>
+                    <div className="flex gap-1">
+                      {values.map((value, index) => (
+                        <span
+                          key={`${weekday}-${index}`}
+                          className={`h-4 w-4 rounded-md border border-black/10 dark:border-white/10 ${heatmapCellClass(
+                            value,
+                          )}`.trim()}
+                          aria-hidden="true"
+                        />
+                      ))}
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
+          </div>
+          <div className="mt-3 flex items-center justify-between text-[10px] font-medium uppercase tracking-[0.2em] text-black/35 dark:text-white/35">
+            <span>Older</span>
+            <span>Newer</span>
+          </div>
+          <div className="mt-3 flex flex-wrap items-center gap-2 text-[10px] text-black/50 dark:text-white/50">
+            <span className="font-semibold uppercase tracking-[0.2em] text-black/40 dark:text-white/40">
+              Intensity
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <span className="h-3 w-3 rounded-sm border border-black/10 bg-transparent dark:border-white/10" />
+              None
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <span className="h-3 w-3 rounded-sm border border-black/10 bg-black/10 dark:border-white/10 dark:bg-white/10" />
+              Low
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <span className="h-3 w-3 rounded-sm border border-black/10 bg-black/20 dark:border-white/10 dark:bg-white/20" />
+              Medium
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <span className="h-3 w-3 rounded-sm border border-black/10 bg-black/40 dark:border-white/10 dark:bg-white/40" />
+              High
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <span className="h-3 w-3 rounded-sm border border-[#FAB95B] bg-[#FAB95B]" />
+              Full
+            </span>
           </div>
         </div>
         <div
-          className={`rounded-2xl border border-black/10 px-6 py-6 dark:border-white/10 ${tone}`.trim()}
+          className={`min-w-0 rounded-2xl border border-black/10 px-6 py-6 dark:border-white/10 ${tone}`.trim()}
         >
           <div className="flex items-center justify-between">
             <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-black/50 dark:text-white/50">

@@ -8,12 +8,14 @@ const corePillars = [
     description: 'Define the weekdays once. Atlas surfaces every eligible day across the calendar.',
   },
   {
-    title: 'Completion with guardrails',
-    description: 'Only scheduled days can be checked, and future dates stay protected by default.',
+    title: 'Clear daily boundaries',
+    description:
+      'Check off habits for the right day and keep future dates closed until they arrive.',
   },
   {
-    title: 'Streaks that stay honest',
-    description: 'Current and longest streaks are computed from real completions, not guesswork.',
+    title: 'Streaks you can trust',
+    description:
+      'See your current streak and your best streak so progress feels real and motivating.',
   },
 ];
 
@@ -21,11 +23,11 @@ const workflowSteps = [
   {
     title: 'Plan once, stay on schedule',
     description:
-      'Set active weekdays per habit. Atlas applies them automatically across Today and Calendar.',
+      'Choose active weekdays once, and Atlas shows the right habits each day and in your monthly view.',
   },
   {
-    title: 'Use Today for fast daily execution',
-    description: 'Focus only on due habits and complete them with immediate, guarded toggles.',
+    title: 'Start with a focused daily list',
+    description: 'Open Today to see what is due now and check habits off in seconds.',
   },
   {
     title: 'Use Calendar for context and review',
@@ -52,43 +54,43 @@ const platformAreas = [
   },
   {
     title: 'Reminders',
-    description: 'Configure per-habit times, daily digest, quiet hours, and snooze defaults.',
+    description: 'Set reminder times for each habit, plus quiet hours and snooze options.',
   },
   {
-    title: 'Offline-first + sync indicators',
+    title: 'Works even when your signal drops',
     description:
-      'Capture completions offline, then sync automatically with visible pending-state indicators.',
+      'Keep checking off habits without internet, then Atlas updates everything when you are back online.',
   },
   {
-    title: 'Grace window rule (yesterday until 02:00)',
+    title: 'Late-night grace window (until 02:00)',
     description:
-      'Allow late-night catch-up for yesterday until 02:00 local time while keeping future dates blocked.',
+      'If you finish after midnight, you can still mark yesterday until 02:00 local time.',
   },
 ];
 
 const freeVsProRows = [
   {
-    feature: 'Core habit tracking (create, edit, archive, weekday schedules)',
+    feature: 'Core habit tracking (create, edit, archive, schedules)',
     free: 'Full',
     pro: 'Full',
   },
   {
-    feature: 'Calendar + daily completion with guardrails',
+    feature: 'Daily check-ins + monthly view',
     free: 'Full',
     pro: 'Full',
   },
   {
-    feature: 'Streaks + grace window (yesterday until 02:00)',
+    feature: 'Streaks + late-night grace window',
     free: 'Full',
     pro: 'Full',
   },
   {
-    feature: 'Offline-first queue + sync indicators',
+    feature: 'Works offline',
     free: 'Full',
     pro: 'Full',
   },
   {
-    feature: 'Advanced insights (trends, consistency, weekday patterns)',
+    feature: 'Advanced insights',
     free: 'Preview',
     pro: 'Full',
   },
@@ -98,7 +100,7 @@ const freeVsProRows = [
     pro: 'Expanded',
   },
   {
-    feature: 'Smart reminders + push-ready strategy',
+    feature: 'Smart reminders',
     free: 'Preview',
     pro: 'Full',
   },
@@ -141,7 +143,11 @@ const sampleHabits = [
 const focusRingClasses =
   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/40 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-white/40 dark:focus-visible:ring-offset-black';
 
-export function MarketingHome() {
+type MarketingHomeProps = {
+  isAuthenticated?: boolean;
+};
+
+export function MarketingHome({ isAuthenticated = false }: MarketingHomeProps) {
   return (
     <main className="relative min-h-screen overflow-hidden bg-white text-black dark:bg-black dark:text-white">
       <div
@@ -163,12 +169,21 @@ export function MarketingHome() {
             </span>
           </div>
           <div className="flex items-center gap-3">
-            <Link
-              href="/sign-in"
-              className={`text-xs font-medium uppercase tracking-[0.25em] text-black/70 transition hover:text-black dark:text-white/70 dark:hover:text-white ${focusRingClasses}`}
-            >
-              Sign in
-            </Link>
+            {isAuthenticated ? (
+              <Link
+                href="/today"
+                className={`text-xs font-medium uppercase tracking-[0.25em] text-black/70 transition hover:text-black dark:text-white/70 dark:hover:text-white ${focusRingClasses}`}
+              >
+                Dashboard
+              </Link>
+            ) : (
+              <Link
+                href="/sign-in"
+                className={`text-xs font-medium uppercase tracking-[0.25em] text-black/70 transition hover:text-black dark:text-white/70 dark:hover:text-white ${focusRingClasses}`}
+              >
+                Sign in
+              </Link>
+            )}
             <ThemeToggle className="h-8 w-8" />
           </div>
         </header>
@@ -182,22 +197,41 @@ export function MarketingHome() {
               Habits that follow your week, not the calendar.
             </h1>
             <p className="max-w-xl text-base leading-relaxed text-black/70 dark:text-white/70">
-              Atlas connects daily execution, monthly visibility, analytics, milestones, reminders,
-              and reliable offline sync into one timezone-safe habit system built for real routines.
+              Atlas brings daily check-ins, monthly progress, insights, milestones, and reminders
+              into one simple habit app built for real routines.
             </p>
             <div className="flex flex-wrap items-center gap-3">
-              <Link
-                href="/sign-up"
-                className={`inline-flex h-12 items-center justify-center rounded-full border border-black bg-black px-6 text-sm font-medium text-white transition hover:bg-black/90 dark:border-white dark:bg-white dark:text-black dark:hover:bg-white/90 ${focusRingClasses}`}
-              >
-                Create your account
-              </Link>
-              <Link
-                href="/sign-in"
-                className={`inline-flex h-12 items-center justify-center rounded-full border border-black/20 bg-white px-6 text-sm font-medium text-black transition hover:bg-black/5 dark:border-white/20 dark:bg-black dark:text-white dark:hover:bg-white/10 ${focusRingClasses}`}
-              >
-                Sign in
-              </Link>
+              {isAuthenticated ? (
+                <>
+                  <Link
+                    href="/today"
+                    className={`inline-flex h-12 items-center justify-center rounded-full border border-black bg-black px-6 text-sm font-medium text-white transition hover:bg-black/90 dark:border-white dark:bg-white dark:text-black dark:hover:bg-white/90 ${focusRingClasses}`}
+                  >
+                    Go to dashboard
+                  </Link>
+                  <Link
+                    href="/calendar"
+                    className={`inline-flex h-12 items-center justify-center rounded-full border border-black/20 bg-white px-6 text-sm font-medium text-black transition hover:bg-black/5 dark:border-white/20 dark:bg-black dark:text-white dark:hover:bg-white/10 ${focusRingClasses}`}
+                  >
+                    Open calendar
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href="/sign-up"
+                    className={`inline-flex h-12 items-center justify-center rounded-full border border-black bg-black px-6 text-sm font-medium text-white transition hover:bg-black/90 dark:border-white dark:bg-white dark:text-black dark:hover:bg-white/90 ${focusRingClasses}`}
+                  >
+                    Create your account
+                  </Link>
+                  <Link
+                    href="/sign-in"
+                    className={`inline-flex h-12 items-center justify-center rounded-full border border-black/20 bg-white px-6 text-sm font-medium text-black transition hover:bg-black/5 dark:border-white/20 dark:bg-black dark:text-white dark:hover:bg-white/10 ${focusRingClasses}`}
+                  >
+                    Sign in
+                  </Link>
+                </>
+              )}
             </div>
             <p className="text-xs uppercase tracking-[0.28em] text-black/60 dark:text-white/60">
               Built for focused tracking and long-term consistency.
@@ -325,8 +359,8 @@ export function MarketingHome() {
               Full platform coverage, same minimalist flow.
             </h2>
             <p className="max-w-xl text-sm leading-relaxed text-black/60 dark:text-white/60">
-              The core loop stays simple while Atlas layers analytics, reminders, resilience, and
-              completion-window guardrails where they add real value.
+              The core loop stays simple while Atlas adds insights, reminders, and helpful
+              boundaries where they add real value.
             </p>
           </div>
 
@@ -349,30 +383,35 @@ export function MarketingHome() {
               Free vs Pro at a glance.
             </h2>
             <p className="max-w-xl text-sm leading-relaxed text-black/60 dark:text-white/60">
-              Free remains fully useful for daily habit tracking. Pro is an optional one-time
-              upgrade for deeper analytics, motivation, and reminder intelligence.
+              Free gives you everything you need for consistent daily tracking. Pro is a one-time
+              upgrade for deeper insight, extra milestones, and smarter reminders.
             </p>
           </div>
 
           <div className="overflow-x-auto rounded-2xl border border-black/10 bg-white/80 dark:border-white/10 dark:bg-black/70">
-            <table className="min-w-full border-collapse text-left text-sm">
+            <table className="w-full table-fixed border-collapse text-left text-sm">
+              <colgroup>
+                <col className="w-[58%]" />
+                <col className="w-[21%]" />
+                <col className="w-[21%]" />
+              </colgroup>
               <thead>
                 <tr className="border-b border-black/10 dark:border-white/10">
                   <th
                     scope="col"
-                    className="px-4 py-3 font-medium text-black/70 dark:text-white/70"
+                    className="px-2 py-3 font-medium text-black/70 dark:text-white/70 sm:px-4"
                   >
                     Feature area
                   </th>
                   <th
                     scope="col"
-                    className="px-4 py-3 font-medium text-black/70 dark:text-white/70 sm:w-32"
+                    className="px-2 py-3 text-center font-medium text-black/70 dark:text-white/70 sm:px-4"
                   >
                     Free
                   </th>
                   <th
                     scope="col"
-                    className="px-4 py-3 font-medium text-black/70 dark:text-white/70 sm:w-32"
+                    className="px-2 py-3 text-center font-medium text-black/70 dark:text-white/70 sm:px-4"
                   >
                     Pro
                   </th>
@@ -381,14 +420,16 @@ export function MarketingHome() {
               <tbody>
                 {freeVsProRows.map((row) => (
                   <tr key={row.feature} className="border-t border-black/10 dark:border-white/10">
-                    <td className="px-4 py-3 text-black/75 dark:text-white/75">{row.feature}</td>
-                    <td className="px-4 py-3">
-                      <span className="inline-flex rounded-full border border-black/15 bg-white px-2.5 py-1 text-xs font-medium uppercase tracking-[0.16em] text-black/70 dark:border-white/15 dark:bg-black dark:text-white/70">
+                    <td className="px-2 py-3 text-black/75 dark:text-white/75 sm:px-4">
+                      {row.feature}
+                    </td>
+                    <td className="px-2 py-3 text-center sm:px-4">
+                      <span className="mx-auto inline-flex w-full max-w-[4.75rem] items-center justify-center rounded-full border border-black/15 bg-white px-2 py-1 text-[11px] font-medium leading-none text-black/70 dark:border-white/15 dark:bg-black dark:text-white/70 sm:max-w-[5.5rem] sm:text-xs">
                         {row.free}
                       </span>
                     </td>
-                    <td className="px-4 py-3">
-                      <span className="inline-flex rounded-full border border-black/20 bg-black px-2.5 py-1 text-xs font-medium uppercase tracking-[0.16em] text-white dark:border-white/20 dark:bg-white dark:text-black">
+                    <td className="px-2 py-3 text-center sm:px-4">
+                      <span className="mx-auto inline-flex w-full max-w-[4.75rem] items-center justify-center rounded-full border border-black/20 bg-black px-2 py-1 text-[11px] font-medium leading-none text-white dark:border-white/20 dark:bg-white dark:text-black sm:max-w-[5.5rem] sm:text-xs">
                         {row.pro}
                       </span>
                     </td>
@@ -441,10 +482,10 @@ export function MarketingHome() {
               See Atlas Pro
             </Link>
             <Link
-              href="/sign-up"
+              href={isAuthenticated ? '/today' : '/sign-up'}
               className={`inline-flex h-11 items-center justify-center rounded-full border border-black/20 bg-white px-5 text-xs font-medium uppercase tracking-[0.2em] text-black transition hover:bg-black/5 dark:border-white/20 dark:bg-black dark:text-white dark:hover:bg-white/10 ${focusRingClasses}`}
             >
-              Start free
+              {isAuthenticated ? 'Go to dashboard' : 'Start free'}
             </Link>
           </div>
         </section>

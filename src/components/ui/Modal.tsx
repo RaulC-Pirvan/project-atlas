@@ -1,7 +1,8 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { useId } from 'react';
+import { useEffect, useId, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 import { Card } from './Card';
 
@@ -15,10 +16,15 @@ type ModalProps = {
 
 export function Modal({ open, title, eyebrow = 'Account update', children, footer }: ModalProps) {
   const titleId = useId();
+  const [mounted, setMounted] = useState(false);
 
-  if (!open) return null;
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
-  return (
+  if (!open || !mounted) return null;
+
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-6 py-8 backdrop-blur-sm">
       <div role="dialog" aria-modal="true" aria-labelledby={titleId} className="w-full max-w-md">
         <Card className="space-y-6">
@@ -36,6 +42,7 @@ export function Modal({ open, title, eyebrow = 'Account update', children, foote
           ) : null}
         </Card>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

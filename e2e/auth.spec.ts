@@ -25,6 +25,32 @@ async function signIn(page: Page, email: string, pass: string) {
   await page.getByRole('button', { name: /sign in/i }).click();
 }
 
+async function signOut(page: Page) {
+  const sidebarSignOut = page
+    .getByRole('complementary')
+    .getByRole('button', { name: /sign out/i })
+    .first();
+  if (await sidebarSignOut.isVisible({ timeout: 1_000 }).catch(() => false)) {
+    await sidebarSignOut.click();
+    return;
+  }
+
+  const moreButton = page.getByRole('button', { name: /more/i });
+  if (await moreButton.isVisible({ timeout: 1_000 }).catch(() => false)) {
+    await moreButton.click();
+    await page
+      .getByRole('button', { name: /sign out/i })
+      .first()
+      .click();
+    return;
+  }
+
+  await page
+    .getByRole('button', { name: /sign out/i })
+    .first()
+    .click();
+}
+
 async function fetchVerificationToken(request: APIRequestContext, email: string): Promise<string> {
   let lastError: Error | null = null;
   for (let attempt = 0; attempt < 5; attempt += 1) {
@@ -116,10 +142,7 @@ test('logout ends session', async ({ page, request }) => {
   await signIn(page, email, password);
   await expect(page).toHaveURL(/\/today/, { timeout: 15_000 });
 
-  await page
-    .getByRole('navigation')
-    .getByRole('button', { name: /sign out/i })
-    .click();
+  await signOut(page);
   await expect(page).toHaveURL(/\/sign-in/);
 
   await page.goto('/account');
@@ -161,10 +184,7 @@ test('account update works', async ({ page, request }) => {
   await page.getByRole('button', { name: /update password/i }).click();
   await expect(page.getByText('Password updated.')).toBeVisible();
 
-  await page
-    .getByRole('navigation')
-    .getByRole('button', { name: /sign out/i })
-    .click();
+  await signOut(page);
   await expect(page).toHaveURL(/\/sign-in/);
 
   await signIn(page, email, newPassword);

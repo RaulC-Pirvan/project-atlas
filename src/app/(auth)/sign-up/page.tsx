@@ -4,6 +4,10 @@ import { AuthShell } from '../../../components/auth/AuthShell';
 import { SignUpForm } from '../../../components/auth/SignUpForm';
 
 export default function SignUpPage() {
+  const showGoogleSignIn = Boolean(
+    process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET,
+  );
+
   return (
     <AuthShell
       title="Create your account"
@@ -17,7 +21,7 @@ export default function SignUpPage() {
         </p>
       }
     >
-      <SignUpForm />
+      <SignUpForm showGoogleSignIn={showGoogleSignIn} />
     </AuthShell>
   );
 }

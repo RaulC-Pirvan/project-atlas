@@ -9,12 +9,17 @@ import { Button } from '../ui/Button';
 import { FormField } from '../ui/FormField';
 import { Input } from '../ui/Input';
 import { type ToastItem, ToastStack } from '../ui/Toast';
+import { OAuthActionButton } from './OAuthActionButton';
 
 type SignupResponse = {
   userId: string;
 };
 
-export function SignUpForm() {
+type SignUpFormProps = {
+  showGoogleSignIn?: boolean;
+};
+
+export function SignUpForm({ showGoogleSignIn = false }: SignUpFormProps) {
   const [displayName, setDisplayName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -161,6 +166,23 @@ export function SignUpForm() {
 
   return (
     <form className="space-y-6" onSubmit={handleSubmit}>
+      {showGoogleSignIn ? (
+        <>
+          <OAuthActionButton
+            provider="google"
+            callbackUrl="/today"
+            label="Continue with Google"
+            onError={(message) => pushToast(message, 'error')}
+          />
+          <div className="flex items-center gap-3">
+            <div className="h-px flex-1 bg-black/10 dark:bg-white/10" />
+            <p className="text-xs uppercase tracking-[0.2em] text-black/50 dark:text-white/50">
+              Or create with email
+            </p>
+            <div className="h-px flex-1 bg-black/10 dark:bg-white/10" />
+          </div>
+        </>
+      ) : null}
       <FormField id="displayName" label="Display name" hint="Minimum 2 characters." error={null}>
         <Input
           id="displayName"

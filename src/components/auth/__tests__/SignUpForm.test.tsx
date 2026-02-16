@@ -1,9 +1,19 @@
-import { fireEvent, render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { SignUpForm } from '../SignUpForm';
 
+const signInMock = vi.fn();
+
+vi.mock('next-auth/react', () => ({
+  signIn: (...args: unknown[]) => signInMock(...args),
+}));
+
 describe('SignUpForm', () => {
+  beforeEach(() => {
+    signInMock.mockReset();
+  });
+
   it('shows an error when passwords do not match', () => {
     render(<SignUpForm />);
 
@@ -23,5 +33,17 @@ describe('SignUpForm', () => {
     fireEvent.submit(screen.getByRole('button', { name: /create account/i }));
 
     expect(screen.getByText('Passwords do not match.')).toBeInTheDocument();
+  });
+
+  it('starts Google auth when the OAuth button is used', async () => {
+    signInMock.mockResolvedValueOnce(undefined);
+
+    render(<SignUpForm showGoogleSignIn />);
+
+    fireEvent.click(screen.getByRole('button', { name: /continue with google/i }));
+
+    await waitFor(() => {
+      expect(signInMock).toHaveBeenCalledWith('google', { callbackUrl: '/today' });
+    });
   });
 });

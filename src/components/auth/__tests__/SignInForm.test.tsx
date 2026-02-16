@@ -1,5 +1,5 @@
-import { fireEvent, render, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { SignInForm } from '../SignInForm';
 
@@ -17,6 +17,10 @@ vi.mock('next/navigation', () => ({
 }));
 
 describe('SignInForm', () => {
+  beforeEach(() => {
+    signInMock.mockReset();
+  });
+
   it('shows an error for invalid credentials', async () => {
     signInMock.mockResolvedValueOnce({ ok: false, error: 'CredentialsSignin' });
 
@@ -51,5 +55,17 @@ describe('SignInForm', () => {
     expect(
       await screen.findByText('Account not verified. Check your email for the verification link.'),
     ).toBeInTheDocument();
+  });
+
+  it('starts Google auth when the OAuth button is used', async () => {
+    signInMock.mockResolvedValueOnce(undefined);
+
+    render(<SignInForm showGoogleSignIn />);
+
+    fireEvent.click(screen.getByRole('button', { name: /continue with google/i }));
+
+    await waitFor(() => {
+      expect(signInMock).toHaveBeenCalledWith('google', { callbackUrl: '/today' });
+    });
   });
 });

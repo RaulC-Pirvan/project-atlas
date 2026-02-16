@@ -4,6 +4,10 @@ import { AuthShell } from '../../../components/auth/AuthShell';
 import { SignInForm } from '../../../components/auth/SignInForm';
 
 export default function SignInPage() {
+  const showGoogleSignIn = Boolean(
+    process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET,
+  );
+
   return (
     <AuthShell
       title="Welcome back"
@@ -27,7 +31,7 @@ export default function SignInPage() {
         </div>
       }
     >
-      <SignInForm />
+      <SignInForm showGoogleSignIn={showGoogleSignIn} />
     </AuthShell>
   );
 }

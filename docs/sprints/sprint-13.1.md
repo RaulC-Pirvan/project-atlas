@@ -123,9 +123,9 @@ usually cannot use Google OAuth unless explicitly registered.
 
 ### Tasks (3)
 
-- [ ] **Task 2.1**: Add reusable OAuth action button component for auth screens
-- [ ] **Task 2.2**: Add `Continue with Google` to sign-in page
-- [ ] **Task 2.3**: Add `Continue with Google` to sign-up page
+- [x] **Task 2.1**: Add reusable OAuth action button component for auth screens
+- [x] **Task 2.2**: Add `Continue with Google` to sign-in page
+- [x] **Task 2.3**: Add `Continue with Google` to sign-up page
 
 ---
 

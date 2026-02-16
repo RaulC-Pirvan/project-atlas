@@ -25,6 +25,37 @@ afterEach(() => {
 });
 
 describe('authOptions', () => {
+  it('includes google provider only when credentials are configured', async () => {
+    const withoutGoogle = await loadAuthOptions({
+      NODE_ENV: 'test',
+      GOOGLE_CLIENT_ID: undefined,
+      GOOGLE_CLIENT_SECRET: undefined,
+    });
+    const withoutGoogleIds = withoutGoogle.providers.map((provider) => provider.id);
+    expect(withoutGoogleIds).toEqual(['credentials']);
+
+    const withGoogle = await loadAuthOptions({
+      NODE_ENV: 'test',
+      GOOGLE_CLIENT_ID: 'google-client-id',
+      GOOGLE_CLIENT_SECRET: 'google-client-secret',
+    });
+    const withGoogleIds = withGoogle.providers.map((provider) => provider.id);
+    expect(withGoogleIds).toEqual(['credentials', 'google']);
+  });
+
+  it('does not affect credentials sign-in callback path', async () => {
+    const authOptions = await loadAuthOptions({ NODE_ENV: 'test' });
+    const result = await authOptions.callbacks?.signIn?.({
+      user: { id: 'u1', email: 'user@example.com' },
+      account: { provider: 'credentials', type: 'credentials', providerAccountId: 'u1' },
+      profile: undefined,
+      email: undefined,
+      credentials: undefined,
+    } as never);
+
+    expect(result).toBe(true);
+  });
+
   it('populates jwt token fields from user data', async () => {
     const authOptions = await loadAuthOptions({ NODE_ENV: 'test' });
     const jwt = await authOptions.callbacks?.jwt?.({

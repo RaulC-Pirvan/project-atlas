@@ -68,4 +68,23 @@ describe('SignInForm', () => {
       expect(signInMock).toHaveBeenCalledWith('google', { callbackUrl: '/today' });
     });
   });
+
+  it('hides Google button by default and keeps credentials fallback visible', () => {
+    render(<SignInForm />);
+
+    expect(screen.queryByRole('button', { name: /continue with google/i })).not.toBeInTheDocument();
+    expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /sign in/i })).toBeInTheDocument();
+  });
+
+  it('shows Google button and keeps credentials fallback visible when enabled', () => {
+    render(<SignInForm showGoogleSignIn />);
+
+    expect(screen.getByRole('button', { name: /continue with google/i })).toBeInTheDocument();
+    expect(screen.getByText(/or continue with email/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /sign in/i })).toBeInTheDocument();
+  });
 });

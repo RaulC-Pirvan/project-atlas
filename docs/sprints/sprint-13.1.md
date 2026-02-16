@@ -133,12 +133,12 @@ usually cannot use Google OAuth unless explicitly registered.
 
 ### Tasks (6)
 
-- [ ] **Task 3.1**: Unit tests for linking rules (new user, existing user, conflict, deleted user)
-- [ ] **Task 3.2**: Unit test: reject unverified Google email profile
-- [ ] **Task 3.3**: Unit test: normalized email matching and linking
-- [ ] **Task 3.4**: NextAuth callback tests for JWT/session fields in OAuth path
-- [ ] **Task 3.5**: API-level test coverage for callback handling edge cases
-- [ ] **Task 3.6**: Component tests for Google button visibility + credentials fallback presence
+- [x] **Task 3.1**: Unit tests for linking rules (new user, existing user, conflict, deleted user)
+- [x] **Task 3.2**: Unit test: reject unverified Google email profile
+- [x] **Task 3.3**: Unit test: normalized email matching and linking
+- [x] **Task 3.4**: NextAuth callback tests for JWT/session fields in OAuth path
+- [x] **Task 3.5**: API-level test coverage for callback handling edge cases
+- [x] **Task 3.6**: Component tests for Google button visibility + credentials fallback presence
 
 ---
 

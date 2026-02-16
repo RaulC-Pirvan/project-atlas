@@ -64,6 +64,11 @@ describe('resolveGoogleOAuthSignIn', () => {
     });
     expect(prisma.user.update).toHaveBeenCalledOnce();
     expect(prisma.account.create).toHaveBeenCalledOnce();
+    expect(prisma.user.findUnique).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { email: 'user@example.com' },
+      }),
+    );
   });
 
   it('rejects Google profiles without verified email', async () => {
@@ -193,5 +198,38 @@ describe('resolveGoogleOAuthSignIn', () => {
     });
 
     expect(result).toEqual({ ok: false, reason: 'account_conflict' });
+  });
+
+  it('blocks sign-in when an already-linked Google account belongs to a deleted user', async () => {
+    const now = new Date('2026-02-16T14:00:00.000Z');
+    const prisma = createPrismaMock();
+
+    prisma.account.findUnique.mockResolvedValueOnce({
+      userId: 'deleted-linked-user',
+      user: {
+        id: 'deleted-linked-user',
+        email: 'deleted-linked@example.com',
+        emailVerified: now,
+        displayName: 'Deleted Linked User',
+        role: 'user',
+        deletedAt: new Date('2026-02-16T13:00:00.000Z'),
+      },
+    });
+
+    const result = await resolveGoogleOAuthSignIn({
+      prisma,
+      input: {
+        providerAccountId: 'google-sub-deleted-linked',
+        email: 'deleted-linked@example.com',
+        emailVerified: true,
+        name: 'Deleted Linked User',
+        account: { type: 'oauth' },
+        now,
+      },
+    });
+
+    expect(result).toEqual({ ok: false, reason: 'deleted_user' });
+    expect(prisma.user.findUnique).not.toHaveBeenCalled();
+    expect(prisma.account.create).not.toHaveBeenCalled();
   });
 });

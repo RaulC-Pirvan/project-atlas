@@ -1,6 +1,10 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('../../db/prisma', () => ({ prisma: {} }));
+const resolveGoogleOAuthSignInMock = vi.hoisted(() => vi.fn());
+vi.mock('../googleOAuth', () => ({
+  resolveGoogleOAuthSignIn: (...args: unknown[]) => resolveGoogleOAuthSignInMock(...args),
+}));
 
 const originalEnv = { ...process.env };
 
@@ -21,6 +25,7 @@ const loadAuthOptions = async (env: Record<string, string | undefined>) => {
 
 afterEach(() => {
   process.env = { ...originalEnv };
+  resolveGoogleOAuthSignInMock.mockReset();
   vi.restoreAllMocks();
 });
 
@@ -54,6 +59,163 @@ describe('authOptions', () => {
     } as never);
 
     expect(result).toBe(true);
+    expect(resolveGoogleOAuthSignInMock).not.toHaveBeenCalled();
+  });
+
+  it('accepts Google sign-in and hydrates JWT/session fields for OAuth user data', async () => {
+    const emailVerified = new Date('2026-02-11T00:00:00.000Z');
+    resolveGoogleOAuthSignInMock.mockResolvedValueOnce({
+      ok: true,
+      user: {
+        id: 'oauth-user-1',
+        email: 'oauth@example.com',
+        emailVerified,
+        name: 'OAuth User',
+        isAdmin: true,
+      },
+    });
+
+    const authOptions = await loadAuthOptions({
+      NODE_ENV: 'test',
+      GOOGLE_CLIENT_ID: 'google-client-id',
+      GOOGLE_CLIENT_SECRET: 'google-client-secret',
+    });
+
+    const user: {
+      id: string;
+      email: string | null;
+      name: string | null;
+      emailVerified?: Date | null;
+      isAdmin?: boolean;
+    } = { id: 'temp', email: 'temp@example.com', name: 'Temp User' };
+    const signInResult = await authOptions.callbacks?.signIn?.({
+      user,
+      account: {
+        provider: 'google',
+        providerAccountId: 'google-sub-1',
+        type: 'oauth',
+        access_token: 'access',
+        refresh_token: 'refresh',
+        expires_at: 1_735_000_000,
+        token_type: 'Bearer',
+        scope: 'openid email profile',
+      },
+      profile: {
+        email: 'OAuth@Example.com',
+        name: 'OAuth User',
+        email_verified: true,
+      },
+      email: undefined,
+      credentials: undefined,
+    } as never);
+
+    expect(signInResult).toBe(true);
+    expect(resolveGoogleOAuthSignInMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        input: expect.objectContaining({
+          providerAccountId: 'google-sub-1',
+          email: 'OAuth@Example.com',
+          emailVerified: true,
+          name: 'OAuth User',
+        }),
+      }),
+    );
+    expect(user.id).toBe('oauth-user-1');
+    expect(user.email).toBe('oauth@example.com');
+    expect(user.name).toBe('OAuth User');
+    expect(user.emailVerified).toEqual(emailVerified);
+    expect(user.isAdmin).toBe(true);
+
+    const token = await authOptions.callbacks?.jwt?.({ token: {}, user } as never);
+    expect(token?.userId).toBe('oauth-user-1');
+    expect(token?.email).toBe('oauth@example.com');
+    expect(token?.name).toBe('OAuth User');
+    expect(token?.emailVerifiedAt).toBe('2026-02-11T00:00:00.000Z');
+    expect(token?.isAdmin).toBe(true);
+
+    const session = (await authOptions.callbacks?.session?.({
+      session: { user: { name: null } },
+      token: token ?? {},
+    } as never)) as
+      | {
+          user?: {
+            id?: string;
+            emailVerifiedAt?: string | null;
+            name?: string | null;
+            isAdmin?: boolean;
+          };
+        }
+      | undefined;
+    expect(session?.user?.id).toBe('oauth-user-1');
+    expect(session?.user?.emailVerifiedAt).toBe('2026-02-11T00:00:00.000Z');
+    expect(session?.user?.name).toBe('OAuth User');
+    expect(session?.user?.isAdmin).toBe(true);
+  });
+
+  it('rejects Google sign-in when callback policy denies the account', async () => {
+    resolveGoogleOAuthSignInMock.mockResolvedValueOnce({
+      ok: false,
+      reason: 'deleted_user',
+    });
+
+    const authOptions = await loadAuthOptions({
+      NODE_ENV: 'test',
+      GOOGLE_CLIENT_ID: 'google-client-id',
+      GOOGLE_CLIENT_SECRET: 'google-client-secret',
+    });
+
+    const result = await authOptions.callbacks?.signIn?.({
+      user: { id: 'u-denied', email: 'denied@example.com' },
+      account: {
+        provider: 'google',
+        providerAccountId: 'google-sub-denied',
+        type: 'oauth',
+      },
+      profile: {
+        email: 'denied@example.com',
+        email_verified: true,
+      },
+      email: undefined,
+      credentials: undefined,
+    } as never);
+
+    expect(result).toBe(false);
+  });
+
+  it('passes email_verified=false into callback policy for Google edge cases', async () => {
+    resolveGoogleOAuthSignInMock.mockResolvedValueOnce({
+      ok: false,
+      reason: 'email_not_verified',
+    });
+
+    const authOptions = await loadAuthOptions({
+      NODE_ENV: 'test',
+      GOOGLE_CLIENT_ID: 'google-client-id',
+      GOOGLE_CLIENT_SECRET: 'google-client-secret',
+    });
+
+    await authOptions.callbacks?.signIn?.({
+      user: { id: 'u-edge', email: 'edge@example.com' },
+      account: {
+        provider: 'google',
+        providerAccountId: 'google-sub-edge',
+        type: 'oauth',
+      },
+      profile: {
+        email: 'edge@example.com',
+        email_verified: false,
+      },
+      email: undefined,
+      credentials: undefined,
+    } as never);
+
+    expect(resolveGoogleOAuthSignInMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        input: expect.objectContaining({
+          emailVerified: false,
+        }),
+      }),
+    );
   });
 
   it('populates jwt token fields from user data', async () => {

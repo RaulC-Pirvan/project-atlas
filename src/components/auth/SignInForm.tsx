@@ -5,6 +5,7 @@ import { signIn } from 'next-auth/react';
 import { useRef, useState } from 'react';
 
 import { signInSchema } from '../../lib/api/auth/validation';
+import { GOOGLE_PROVIDER_ID } from '../../lib/auth/oauthProviders';
 import { Button } from '../ui/Button';
 import { FormField } from '../ui/FormField';
 import { Input } from '../ui/Input';
@@ -18,9 +19,13 @@ type SignInResponse = {
 
 type SignInFormProps = {
   showGoogleSignIn?: boolean;
+  googleProviderId?: string;
 };
 
-export function SignInForm({ showGoogleSignIn = false }: SignInFormProps) {
+export function SignInForm({
+  showGoogleSignIn = false,
+  googleProviderId = GOOGLE_PROVIDER_ID,
+}: SignInFormProps) {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -136,6 +141,7 @@ export function SignInForm({ showGoogleSignIn = false }: SignInFormProps) {
           </div>
           <OAuthActionButton
             provider="google"
+            providerId={googleProviderId}
             callbackUrl="/today"
             label="Continue with Google"
             onError={(message) => pushToast(message, 'error')}

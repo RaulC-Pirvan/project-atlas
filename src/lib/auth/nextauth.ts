@@ -5,6 +5,7 @@ import GoogleProvider from 'next-auth/providers/google';
 import { prisma } from '../db/prisma';
 import { authorizeCredentials } from './credentials';
 import { resolveGoogleOAuthSignIn } from './googleOAuth';
+import { TEST_GOOGLE_PROVIDER_ID } from './oauthProviders';
 import { generateToken } from './tokens';
 
 const shouldUseSecureCookies =
@@ -15,8 +16,6 @@ const shouldUseSecureCookies =
 const testGoogleProviderEnabled =
   process.env.ENABLE_TEST_ENDPOINTS === 'true' &&
   process.env.ENABLE_TEST_GOOGLE_OAUTH_PROVIDER === 'true';
-
-const testGoogleProviderId = process.env.NEXT_PUBLIC_ATLAS_GOOGLE_PROVIDER_ID || 'google-test';
 
 export const authOptions: NextAuthOptions = {
   session: {
@@ -51,7 +50,7 @@ export const authOptions: NextAuthOptions = {
     ...(testGoogleProviderEnabled
       ? [
           CredentialsProvider({
-            id: testGoogleProviderId,
+            id: TEST_GOOGLE_PROVIDER_ID,
             name: 'Google (Test)',
             credentials: {
               email: { label: 'Email', type: 'email' },

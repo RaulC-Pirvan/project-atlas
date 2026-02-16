@@ -3,12 +3,14 @@
 import { signIn } from 'next-auth/react';
 import { useState } from 'react';
 
+import { GOOGLE_PROVIDER_ID } from '../../lib/auth/oauthProviders';
 import { Button } from '../ui/Button';
 
 type OAuthProvider = 'google';
 
 type OAuthActionButtonProps = {
   provider: OAuthProvider;
+  providerId?: string;
   callbackUrl: string;
   label: string;
   disabled?: boolean;
@@ -19,10 +21,6 @@ type OAuthActionButtonProps = {
 const providerText: Record<OAuthProvider, string> = {
   google: 'Google',
 };
-
-const providerIdOverride = process.env.NEXT_PUBLIC_ATLAS_GOOGLE_PROVIDER_ID?.trim();
-const resolvedGoogleProviderId =
-  providerIdOverride && providerIdOverride.length > 0 ? providerIdOverride : 'google';
 
 function GoogleIcon() {
   return (
@@ -49,6 +47,7 @@ function GoogleIcon() {
 
 export function OAuthActionButton({
   provider,
+  providerId = GOOGLE_PROVIDER_ID,
   callbackUrl,
   label,
   disabled = false,
@@ -60,28 +59,7 @@ export function OAuthActionButton({
   const handleClick = async () => {
     setSubmitting(true);
     try {
-      const providerId = provider === 'google' ? resolvedGoogleProviderId : provider;
-      const testEmail = process.env.NEXT_PUBLIC_ATLAS_GOOGLE_TEST_EMAIL?.trim();
-      const testName = process.env.NEXT_PUBLIC_ATLAS_GOOGLE_TEST_NAME?.trim();
-      const testProviderAccountId =
-        process.env.NEXT_PUBLIC_ATLAS_GOOGLE_TEST_PROVIDER_ACCOUNT_ID?.trim();
-      const nonce = `${Date.now()}-${Math.random().toString(16).slice(2, 10)}`;
-
-      const providerParams =
-        providerId !== 'google'
-          ? {
-              ...(testEmail
-                ? { email: testEmail.replace('@', `+${nonce}@`) }
-                : { email: `oauth-e2e-${nonce}@example.com` }),
-              ...(testName ? { name: testName } : {}),
-              ...(testProviderAccountId
-                ? { providerAccountId: `${testProviderAccountId}-${nonce}` }
-                : { providerAccountId: `oauth-e2e-sub-${nonce}` }),
-              emailVerified: 'true',
-            }
-          : {};
-
-      const result = await signIn(providerId, { callbackUrl, ...providerParams });
+      const result = await signIn(providerId, { callbackUrl });
       if (result?.error) {
         onError?.(`Unable to continue with ${providerText[provider]}. Try again.`);
       }

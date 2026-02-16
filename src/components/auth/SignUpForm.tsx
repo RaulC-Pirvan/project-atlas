@@ -5,6 +5,7 @@ import { useRef, useState } from 'react';
 
 import { signupSchema } from '../../lib/api/auth/validation';
 import { getApiErrorMessage, parseJson } from '../../lib/api/client';
+import { GOOGLE_PROVIDER_ID } from '../../lib/auth/oauthProviders';
 import { Button } from '../ui/Button';
 import { FormField } from '../ui/FormField';
 import { Input } from '../ui/Input';
@@ -17,9 +18,13 @@ type SignupResponse = {
 
 type SignUpFormProps = {
   showGoogleSignIn?: boolean;
+  googleProviderId?: string;
 };
 
-export function SignUpForm({ showGoogleSignIn = false }: SignUpFormProps) {
+export function SignUpForm({
+  showGoogleSignIn = false,
+  googleProviderId = GOOGLE_PROVIDER_ID,
+}: SignUpFormProps) {
   const [displayName, setDisplayName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -237,6 +242,7 @@ export function SignUpForm({ showGoogleSignIn = false }: SignUpFormProps) {
           </div>
           <OAuthActionButton
             provider="google"
+            providerId={googleProviderId}
             callbackUrl="/today"
             label="Continue with Google"
             onError={(message) => pushToast(message, 'error')}

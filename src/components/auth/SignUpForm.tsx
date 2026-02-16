@@ -166,23 +166,6 @@ export function SignUpForm({ showGoogleSignIn = false }: SignUpFormProps) {
 
   return (
     <form className="space-y-6" onSubmit={handleSubmit}>
-      {showGoogleSignIn ? (
-        <>
-          <OAuthActionButton
-            provider="google"
-            callbackUrl="/today"
-            label="Continue with Google"
-            onError={(message) => pushToast(message, 'error')}
-          />
-          <div className="flex items-center gap-3">
-            <div className="h-px flex-1 bg-black/10 dark:bg-white/10" />
-            <p className="text-xs uppercase tracking-[0.2em] text-black/50 dark:text-white/50">
-              Or create with email
-            </p>
-            <div className="h-px flex-1 bg-black/10 dark:bg-white/10" />
-          </div>
-        </>
-      ) : null}
       <FormField id="displayName" label="Display name" hint="Minimum 2 characters." error={null}>
         <Input
           id="displayName"
@@ -243,6 +226,23 @@ export function SignUpForm({ showGoogleSignIn = false }: SignUpFormProps) {
       <Button type="submit" size="lg" className="w-full" disabled={submitting}>
         {submitting ? 'Creating account...' : 'Create account'}
       </Button>
+      {showGoogleSignIn ? (
+        <>
+          <div className="flex items-center gap-3">
+            <div className="h-px flex-1 bg-black/10 dark:bg-white/10" />
+            <p className="text-xs uppercase tracking-[0.2em] text-black/50 dark:text-white/50">
+              Or continue with Google
+            </p>
+            <div className="h-px flex-1 bg-black/10 dark:bg-white/10" />
+          </div>
+          <OAuthActionButton
+            provider="google"
+            callbackUrl="/today"
+            label="Continue with Google"
+            onError={(message) => pushToast(message, 'error')}
+          />
+        </>
+      ) : null}
       <ToastStack toasts={toasts} />
     </form>
   );

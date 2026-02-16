@@ -272,8 +272,22 @@ export async function resolveGoogleOAuthSignIn({
       return { ok: false, reason: 'deleted_user' };
     }
 
-    const verifiedUser = await ensureVerified(prisma, linkedAccount.user, now);
-    return { ok: true, user: asAuthorizedUser(verifiedUser) };
+    // Keep the app's email-verification policy authoritative after account changes.
+    // If app email is unverified (e.g. email update pending verification), deny OAuth sign-in.
+    if (!linkedAccount.user.emailVerified) {
+      return { ok: false, reason: 'email_not_verified' };
+    }
+
+    return {
+      ok: true,
+      user: {
+        id: linkedAccount.user.id,
+        email: linkedAccount.user.email,
+        emailVerified: linkedAccount.user.emailVerified,
+        name: linkedAccount.user.displayName,
+        isAdmin: linkedAccount.user.role === 'admin',
+      },
+    };
   }
 
   const normalizedEmail = normalizeEmail(input.email);
@@ -327,9 +341,9 @@ export async function resolveGoogleOAuthSignIn({
     account: input.account,
   });
 
-    if (linkResult === 'conflict') {
-      return { ok: false, reason: 'account_conflict' };
-    }
+  if (linkResult === 'conflict') {
+    return { ok: false, reason: 'account_conflict' };
+  }
 
   const verifiedCreatedUser = await ensureVerified(prisma, createdUser, now);
   return { ok: true, user: asAuthorizedUser(verifiedCreatedUser) };

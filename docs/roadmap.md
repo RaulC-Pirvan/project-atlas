@@ -325,11 +325,11 @@
 
 ### Sprint 13.1: Social Sign-in (Google OAuth)
 
-- [ ] Add Google provider to NextAuth with safe account-linking rules
-- [ ] Add `Continue with Google` on sign-in and sign-up
-- [ ] Keep email/password as fallback auth path
-- [ ] Add API/unit coverage for OAuth callback and account-link edge cases
-- [ ] Add E2E coverage for OAuth happy path + fallback login path
+- [x] Add Google provider to NextAuth with safe account-linking rules
+- [x] Add `Continue with Google` on sign-in and sign-up
+- [x] Keep email/password as fallback auth path
+- [x] Add API/unit coverage for OAuth callback and account-link edge cases
+- [x] Add E2E coverage for OAuth happy path + fallback login path
 
 ---
 

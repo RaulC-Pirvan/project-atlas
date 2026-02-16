@@ -5,11 +5,18 @@ import GoogleProvider from 'next-auth/providers/google';
 import { prisma } from '../db/prisma';
 import { authorizeCredentials } from './credentials';
 import { resolveGoogleOAuthSignIn } from './googleOAuth';
+import { generateToken } from './tokens';
 
 const shouldUseSecureCookies =
   process.env.ENABLE_TEST_ENDPOINTS !== 'true' &&
   process.env.NODE_ENV === 'production' &&
   !!process.env.NEXTAUTH_URL?.startsWith('https://');
+
+const testGoogleProviderEnabled =
+  process.env.ENABLE_TEST_ENDPOINTS === 'true' &&
+  process.env.ENABLE_TEST_GOOGLE_OAUTH_PROVIDER === 'true';
+
+const testGoogleProviderId = process.env.NEXT_PUBLIC_ATLAS_GOOGLE_PROVIDER_ID || 'google-test';
 
 export const authOptions: NextAuthOptions = {
   session: {
@@ -38,6 +45,64 @@ export const authOptions: NextAuthOptions = {
           GoogleProvider({
             clientId: process.env.GOOGLE_CLIENT_ID,
             clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+          }),
+        ]
+      : []),
+    ...(testGoogleProviderEnabled
+      ? [
+          CredentialsProvider({
+            id: testGoogleProviderId,
+            name: 'Google (Test)',
+            credentials: {
+              email: { label: 'Email', type: 'email' },
+              name: { label: 'Name', type: 'text' },
+              providerAccountId: { label: 'Provider Account ID', type: 'text' },
+              emailVerified: { label: 'Email Verified', type: 'text' },
+            },
+            authorize: async (credentials) => {
+              const rawProviderAccountId =
+                typeof credentials?.providerAccountId === 'string'
+                  ? credentials.providerAccountId.trim()
+                  : '';
+              const providerAccountId = rawProviderAccountId || `google-test-${generateToken(8)}`;
+
+              const rawEmail =
+                typeof credentials?.email === 'string'
+                  ? credentials.email.trim().toLowerCase()
+                  : '';
+              const email = rawEmail || `${providerAccountId}@example.com`;
+              const name =
+                typeof credentials?.name === 'string' && credentials.name.trim().length > 0
+                  ? credentials.name.trim()
+                  : 'Atlas OAuth Tester';
+              const emailVerified =
+                typeof credentials?.emailVerified === 'string'
+                  ? credentials.emailVerified !== 'false'
+                  : true;
+
+              const result = await resolveGoogleOAuthSignIn({
+                prisma,
+                input: {
+                  providerAccountId,
+                  email,
+                  emailVerified,
+                  name,
+                  account: { type: 'oauth' },
+                },
+              });
+
+              if (!result.ok) {
+                return null;
+              }
+
+              return {
+                id: result.user.id,
+                email: result.user.email,
+                name: result.user.name,
+                emailVerified: result.user.emailVerified,
+                isAdmin: result.user.isAdmin,
+              };
+            },
           }),
         ]
       : []),
@@ -74,8 +139,7 @@ export const authOptions: NextAuthOptions = {
             tokenType: typeof account.token_type === 'string' ? account.token_type : null,
             scope: typeof account.scope === 'string' ? account.scope : null,
             idToken: typeof account.id_token === 'string' ? account.id_token : null,
-            sessionState:
-              typeof account.session_state === 'string' ? account.session_state : null,
+            sessionState: typeof account.session_state === 'string' ? account.session_state : null,
           },
         },
       });

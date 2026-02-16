@@ -45,6 +45,7 @@ model User {
   email         String    @unique
   emailVerified DateTime?
   passwordHash  String
+  passwordSetAt DateTime?
   displayName   String
   role          UserRole  @default(user)
   timezone      String    @default("UTC")

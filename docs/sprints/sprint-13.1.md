@@ -146,10 +146,10 @@ usually cannot use Google OAuth unless explicitly registered.
 
 ### Tasks (4)
 
-- [ ] **Task 4.1**: Add E2E OAuth happy path coverage (test-mode deterministic flow)
-- [ ] **Task 4.2**: Add E2E credentials fallback login path coverage
-- [ ] **Task 4.3**: Add manual smoke checklist for real Google consent flow
-- [ ] **Task 4.4**: CI stability check across Chromium + Firefox
+- [x] **Task 4.1**: Add E2E OAuth happy path coverage (test-mode deterministic flow)
+- [x] **Task 4.2**: Add E2E credentials fallback login path coverage
+- [x] **Task 4.3**: Add manual smoke checklist for real Google consent flow
+- [x] **Task 4.4**: CI stability check across Chromium + Firefox
 
 ---
 

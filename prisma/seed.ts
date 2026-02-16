@@ -58,6 +58,7 @@ async function main() {
     create: {
       email: 'verified@example.com',
       passwordHash: verifiedHash,
+      passwordSetAt: new Date(),
       emailVerified: new Date(),
       displayName: 'Verified User',
       timezone: 'America/Los_Angeles',
@@ -79,6 +80,7 @@ async function main() {
     create: {
       email: 'unverified@example.com',
       passwordHash: unverifiedHash,
+      passwordSetAt: new Date(),
       emailVerified: null,
       displayName: 'Unverified User',
       timezone: 'UTC',

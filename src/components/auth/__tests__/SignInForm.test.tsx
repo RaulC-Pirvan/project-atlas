@@ -82,7 +82,7 @@ describe('SignInForm', () => {
     render(<SignInForm showGoogleSignIn />);
 
     expect(screen.getByRole('button', { name: /continue with google/i })).toBeInTheDocument();
-    expect(screen.getByText(/or continue with email/i)).toBeInTheDocument();
+    expect(screen.getByText(/or continue with google/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /sign in/i })).toBeInTheDocument();

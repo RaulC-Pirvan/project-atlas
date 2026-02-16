@@ -8,6 +8,7 @@ import { Button } from '../ui/Button';
 import { FormField } from '../ui/FormField';
 import { Input } from '../ui/Input';
 import { Modal } from '../ui/Modal';
+import { Notice } from '../ui/Notice';
 import { type ToastItem, ToastStack } from '../ui/Toast';
 import { SignOutButton } from './SignOutButton';
 
@@ -16,6 +17,7 @@ type AccountPanelProps = {
   displayName: string;
   weekStart: WeekStart;
   keepCompletedAtBottom: boolean;
+  hasPassword: boolean;
 };
 
 type AccountResponse = {
@@ -27,6 +29,7 @@ export function AccountPanel({
   displayName,
   weekStart,
   keepCompletedAtBottom,
+  hasPassword,
 }: AccountPanelProps) {
   const [nextEmail, setNextEmail] = useState(email);
   const [displayNameInput, setDisplayNameInput] = useState(displayName);
@@ -49,6 +52,7 @@ export function AccountPanel({
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteConfirmError, setDeleteConfirmError] = useState(false);
   const [currentPasswordError, setCurrentPasswordError] = useState(false);
+  const [hasPasswordSet, setHasPasswordSet] = useState(hasPassword);
   const [baselineDisplayName, setBaselineDisplayName] = useState(displayName);
   const [baselineWeekStart, setBaselineWeekStart] = useState<WeekStart>(weekStart);
   const [baselineKeepCompletedAtBottom, setBaselineKeepCompletedAtBottom] =
@@ -136,6 +140,11 @@ export function AccountPanel({
 
     if (normalizedEmail === email.toLowerCase()) {
       pushToast('No changes to update.', 'neutral');
+      return;
+    }
+
+    if (!hasPasswordSet) {
+      pushToast('Set a password first, then update your email.', 'error');
       return;
     }
 
@@ -295,6 +304,7 @@ export function AccountPanel({
 
       setPassword('');
       setConfirm('');
+      setHasPasswordSet(true);
       pushToast('Password updated.', 'success');
     } catch {
       pushToast('Password update is not available yet.', 'error');
@@ -471,7 +481,9 @@ export function AccountPanel({
             Email
           </p>
           <p className="text-sm text-black/60 dark:text-white/60">
-            Changing email requires confirmation.
+            {hasPasswordSet
+              ? 'Changing email requires password confirmation.'
+              : 'Set a password before changing email.'}
           </p>
         </div>
         <FormField id="account-email" label="Email" error={null}>
@@ -490,27 +502,41 @@ export function AccountPanel({
             }}
           />
         </FormField>
-        <FormField
-          id="account-current-password"
-          label="Confirm password for email"
-          hint="Required to change email."
-          error={null}
-        >
-          <Input
+        {hasPasswordSet ? (
+          <FormField
             id="account-current-password"
-            name="current-password"
-            type="password"
-            autoComplete="current-password"
-            value={currentPassword}
-            className={currentPasswordError ? 'border-rose-400 focus-visible:ring-rose-400/30' : ''}
-            onChange={(event) => {
-              setCurrentPassword(event.target.value);
-              if (currentPasswordError) setCurrentPasswordError(false);
-            }}
-          />
-        </FormField>
-        <Button type="submit" variant="outline" className="w-full" disabled={updatingEmail}>
-          {updatingEmail ? 'Updating...' : 'Update email'}
+            label="Confirm password for email"
+            hint="Required to change email."
+            error={null}
+          >
+            <Input
+              id="account-current-password"
+              name="current-password"
+              type="password"
+              autoComplete="current-password"
+              value={currentPassword}
+              className={
+                currentPasswordError ? 'border-rose-400 focus-visible:ring-rose-400/30' : ''
+              }
+              onChange={(event) => {
+                setCurrentPassword(event.target.value);
+                if (currentPasswordError) setCurrentPasswordError(false);
+              }}
+            />
+          </FormField>
+        ) : (
+          <Notice tone="neutral">
+            This account currently uses Google sign-in without a local password. Set a password
+            below, then return here to change your email.
+          </Notice>
+        )}
+        <Button
+          type="submit"
+          variant="outline"
+          className="w-full"
+          disabled={!hasPasswordSet || updatingEmail}
+        >
+          {hasPasswordSet ? (updatingEmail ? 'Updating...' : 'Update email') : 'Set password first'}
         </Button>
       </form>
 

@@ -17,6 +17,48 @@ function createPrismaMock() {
 }
 
 describe('resolveGoogleOAuthSignIn', () => {
+  it('allows sign-in for an already linked active and verified user', async () => {
+    const now = new Date('2026-02-16T09:00:00.000Z');
+    const prisma = createPrismaMock();
+
+    prisma.account.findUnique.mockResolvedValueOnce({
+      userId: 'linked-user-1',
+      user: {
+        id: 'linked-user-1',
+        email: 'linked@example.com',
+        emailVerified: now,
+        displayName: 'Linked User',
+        role: 'user',
+        deletedAt: null,
+      },
+    });
+
+    const result = await resolveGoogleOAuthSignIn({
+      prisma,
+      input: {
+        providerAccountId: 'google-linked-sub-1',
+        email: 'linked@example.com',
+        emailVerified: true,
+        name: 'Linked User',
+        account: { type: 'oauth' },
+        now,
+      },
+    });
+
+    expect(result).toEqual({
+      ok: true,
+      user: {
+        id: 'linked-user-1',
+        email: 'linked@example.com',
+        emailVerified: now,
+        name: 'Linked User',
+        isAdmin: false,
+      },
+    });
+    expect(prisma.user.update).not.toHaveBeenCalled();
+    expect(prisma.account.create).not.toHaveBeenCalled();
+  });
+
   it('links Google account to an existing active user and verifies email when needed', async () => {
     const now = new Date('2026-02-16T10:00:00.000Z');
     const prisma = createPrismaMock();
@@ -230,6 +272,37 @@ describe('resolveGoogleOAuthSignIn', () => {
 
     expect(result).toEqual({ ok: false, reason: 'deleted_user' });
     expect(prisma.user.findUnique).not.toHaveBeenCalled();
+    expect(prisma.account.create).not.toHaveBeenCalled();
+  });
+
+  it('blocks linked Google sign-in when app email is pending verification', async () => {
+    const prisma = createPrismaMock();
+
+    prisma.account.findUnique.mockResolvedValueOnce({
+      userId: 'linked-user-unverified',
+      user: {
+        id: 'linked-user-unverified',
+        email: 'updated-email@example.com',
+        emailVerified: null,
+        displayName: 'Linked Unverified',
+        role: 'user',
+        deletedAt: null,
+      },
+    });
+
+    const result = await resolveGoogleOAuthSignIn({
+      prisma,
+      input: {
+        providerAccountId: 'google-linked-sub-unverified',
+        email: 'old-google-email@example.com',
+        emailVerified: true,
+        name: 'Linked Unverified',
+        account: { type: 'oauth' },
+      },
+    });
+
+    expect(result).toEqual({ ok: false, reason: 'email_not_verified' });
+    expect(prisma.user.update).not.toHaveBeenCalled();
     expect(prisma.account.create).not.toHaveBeenCalled();
   });
 });

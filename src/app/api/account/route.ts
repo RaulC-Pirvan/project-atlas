@@ -36,6 +36,7 @@ export async function PUT(request: Request) {
           id: true,
           email: true,
           passwordHash: true,
+          passwordSetAt: true,
           displayName: true,
           weekStart: true,
           keepCompletedAtBottom: true,
@@ -48,6 +49,7 @@ export async function PUT(request: Request) {
       const updates: {
         email?: string;
         passwordHash?: string;
+        passwordSetAt?: Date | null;
         emailVerified?: Date | null;
         displayName?: string;
         weekStart?: 'sun' | 'mon';
@@ -55,6 +57,10 @@ export async function PUT(request: Request) {
       } = {};
 
       if (parsed.data.email && parsed.data.email !== user.email) {
+        if (!user.passwordSetAt) {
+          throw new ApiError('invalid_request', 'Set a password before changing your email.', 400);
+        }
+
         if (!parsed.data.currentPassword) {
           throw new ApiError(
             'invalid_request',
@@ -82,6 +88,7 @@ export async function PUT(request: Request) {
 
       if (parsed.data.password) {
         updates.passwordHash = await hashPassword(parsed.data.password);
+        updates.passwordSetAt = new Date();
       }
 
       if (parsed.data.displayName !== undefined) {

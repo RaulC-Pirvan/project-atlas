@@ -18,7 +18,7 @@ export default async function AccountPage() {
 
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
-    select: { weekStart: true, timezone: true, keepCompletedAtBottom: true },
+    select: { weekStart: true, timezone: true, keepCompletedAtBottom: true, passwordSetAt: true },
   });
 
   if (!user) {
@@ -53,6 +53,7 @@ export default async function AccountPage() {
           displayName={session.user.name ?? session.user.email ?? 'User'}
           weekStart={user.weekStart}
           keepCompletedAtBottom={user.keepCompletedAtBottom}
+          hasPassword={Boolean(user.passwordSetAt)}
         />
         <ReminderSettingsPanel initialSettings={reminderSettings} timezoneLabel={user.timezone} />
       </div>

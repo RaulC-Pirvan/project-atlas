@@ -4,8 +4,11 @@ import { AuthShell } from '../../../components/auth/AuthShell';
 import { SignInForm } from '../../../components/auth/SignInForm';
 
 export default function SignInPage() {
+  const testGoogleProviderEnabled =
+    process.env.ENABLE_TEST_ENDPOINTS === 'true' &&
+    process.env.ENABLE_TEST_GOOGLE_OAUTH_PROVIDER === 'true';
   const showGoogleSignIn = Boolean(
-    process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET,
+    (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) || testGoogleProviderEnabled,
   );
 
   return (

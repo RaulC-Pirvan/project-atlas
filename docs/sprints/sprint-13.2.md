@@ -101,12 +101,12 @@ password/OAuth, recover access safely, and manage active sessions across devices
 
 ### Tasks (6)
 
-- [ ] **Task 1.1**: Add Prisma models/fields for TOTP settings, recovery codes, and step-up challenge state
-- [ ] **Task 1.2**: Implement TOTP service (secret generation, otpauth URI, verify, skew tolerance) as pure/testable domain logic
-- [ ] **Task 1.3**: Implement recovery code service (secure generation, hashing, one-time consume, rotation)
-- [ ] **Task 1.4**: Add auth guards for admin 2FA requirement in NextAuth + DB-session checks
-- [ ] **Task 1.5**: Add attempt rate limiting and lockout cooldowns for 2FA challenge endpoints
-- [ ] **Task 1.6**: Ensure secrets are encrypted/hashed at rest and never logged
+- [x] **Task 1.1**: Add Prisma models/fields for TOTP settings, recovery codes, and step-up challenge state
+- [x] **Task 1.2**: Implement TOTP service (secret generation, otpauth URI, verify, skew tolerance) as pure/testable domain logic
+- [x] **Task 1.3**: Implement recovery code service (secure generation, hashing, one-time consume, rotation)
+- [x] **Task 1.4**: Add auth guards for admin 2FA requirement in NextAuth + DB-session checks
+- [x] **Task 1.5**: Add attempt rate limiting and lockout cooldowns for 2FA challenge endpoints
+- [x] **Task 1.6**: Ensure secrets are encrypted/hashed at rest and never logged
 
 ---
 

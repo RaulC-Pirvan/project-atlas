@@ -14,7 +14,7 @@ export default async function AdminPage() {
   const session = await getServerSession(authOptions);
 
   try {
-    requireAdminSession(session);
+    await requireAdminSession(session);
   } catch {
     redirect('/today');
   }

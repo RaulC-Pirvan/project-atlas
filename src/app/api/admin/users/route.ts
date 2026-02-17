@@ -22,7 +22,7 @@ export async function GET(request: Request) {
     { route: '/api/admin/users' },
     async () => {
       const session = await getServerSession(authOptions);
-      requireAdminSession(session);
+      await requireAdminSession(session);
 
       const { searchParams } = new URL(request.url);
       const search = searchParams.get('search');

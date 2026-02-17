@@ -1,6 +1,13 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock('../../db/prisma', () => ({ prisma: {} }));
+const findUserForPolicyMock = vi.hoisted(() => vi.fn());
+vi.mock('../../db/prisma', () => ({
+  prisma: {
+    user: {
+      findUnique: (...args: unknown[]) => findUserForPolicyMock(...args),
+    },
+  },
+}));
 const resolveGoogleOAuthSignInMock = vi.hoisted(() => vi.fn());
 vi.mock('../googleOAuth', () => ({
   resolveGoogleOAuthSignIn: (...args: unknown[]) => resolveGoogleOAuthSignInMock(...args),
@@ -26,6 +33,7 @@ const loadAuthOptions = async (env: Record<string, string | undefined>) => {
 afterEach(() => {
   process.env = { ...originalEnv };
   resolveGoogleOAuthSignInMock.mockReset();
+  findUserForPolicyMock.mockReset();
   vi.restoreAllMocks();
 });
 
@@ -83,6 +91,7 @@ describe('authOptions', () => {
         isAdmin: true,
       },
     });
+    findUserForPolicyMock.mockResolvedValueOnce({ role: 'admin', twoFactorEnabled: true });
 
     const authOptions = await loadAuthOptions({
       NODE_ENV: 'test',
@@ -96,6 +105,7 @@ describe('authOptions', () => {
       name: string | null;
       emailVerified?: Date | null;
       isAdmin?: boolean;
+      twoFactorEnabled?: boolean;
     } = { id: 'temp', email: 'temp@example.com', name: 'Temp User' };
     const signInResult = await authOptions.callbacks?.signIn?.({
       user,
@@ -134,6 +144,7 @@ describe('authOptions', () => {
     expect(user.name).toBe('OAuth User');
     expect(user.emailVerified).toEqual(emailVerified);
     expect(user.isAdmin).toBe(true);
+    expect(user.twoFactorEnabled).toBe(true);
 
     const token = await authOptions.callbacks?.jwt?.({ token: {}, user } as never);
     expect(token?.userId).toBe('oauth-user-1');
@@ -141,6 +152,7 @@ describe('authOptions', () => {
     expect(token?.name).toBe('OAuth User');
     expect(token?.emailVerifiedAt).toBe('2026-02-11T00:00:00.000Z');
     expect(token?.isAdmin).toBe(true);
+    expect(token?.twoFactorEnabled).toBe(true);
 
     const session = (await authOptions.callbacks?.session?.({
       session: { user: { name: null } },
@@ -152,6 +164,7 @@ describe('authOptions', () => {
             emailVerifiedAt?: string | null;
             name?: string | null;
             isAdmin?: boolean;
+            twoFactorEnabled?: boolean;
           };
         }
       | undefined;
@@ -159,6 +172,7 @@ describe('authOptions', () => {
     expect(session?.user?.emailVerifiedAt).toBe('2026-02-11T00:00:00.000Z');
     expect(session?.user?.name).toBe('OAuth User');
     expect(session?.user?.isAdmin).toBe(true);
+    expect(session?.user?.twoFactorEnabled).toBe(true);
   });
 
   it('rejects Google sign-in when callback policy denies the account', async () => {
@@ -237,6 +251,7 @@ describe('authOptions', () => {
         name: 'Atlas Tester',
         emailVerified: new Date('2026-02-03T00:00:00.000Z'),
         isAdmin: true,
+        twoFactorEnabled: true,
       },
     } as never);
 
@@ -245,6 +260,7 @@ describe('authOptions', () => {
     expect(jwt?.name).toBe('Atlas Tester');
     expect(jwt?.emailVerifiedAt).toBe('2026-02-03T00:00:00.000Z');
     expect(jwt?.isAdmin).toBe(true);
+    expect(jwt?.twoFactorEnabled).toBe(true);
   });
 
   it('hydrates session from token data', async () => {
@@ -255,6 +271,7 @@ describe('authOptions', () => {
       emailVerifiedAt: '2026-02-04T00:00:00.000Z',
       name: 'Atlas Updated',
       isAdmin: false,
+      twoFactorEnabled: false,
     };
 
     const result = (await authOptions.callbacks?.session?.({ session, token } as never)) as
@@ -264,6 +281,7 @@ describe('authOptions', () => {
             emailVerifiedAt?: string | null;
             name?: string | null;
             isAdmin?: boolean;
+            twoFactorEnabled?: boolean;
           };
         }
       | undefined;
@@ -272,6 +290,7 @@ describe('authOptions', () => {
     expect(result?.user?.emailVerifiedAt).toBe('2026-02-04T00:00:00.000Z');
     expect(result?.user?.name).toBe('Atlas Updated');
     expect(result?.user?.isAdmin).toBe(false);
+    expect(result?.user?.twoFactorEnabled).toBe(false);
   });
 
   it('uses secure cookies only for production https without test endpoints', async () => {

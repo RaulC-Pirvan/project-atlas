@@ -2,7 +2,6 @@ import { PrismaAdapter } from '@next-auth/prisma-adapter';
 import type { NextAuthOptions } from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
 
-import { isAdminEmail } from '../admin/access';
 import { prisma } from '../db/prisma';
 import { resolveGoogleOAuthSignIn } from './googleOAuth';
 import {
@@ -10,6 +9,7 @@ import {
   AUTH_SESSION_UPDATE_AGE_SECONDS,
   shouldUseSecureAuthCookies,
 } from './sessionConfig';
+import { isAdminPrincipal, shouldEnforceAdminTwoFactor } from './twoFactorPolicy';
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
@@ -69,11 +69,24 @@ export const authOptions: NextAuthOptions = {
         return false;
       }
 
+      const policyUser = await prisma.user.findUnique({
+        where: { id: result.user.id },
+        select: { role: true, twoFactorEnabled: true },
+      });
+      const twoFactorEnabled = policyUser?.twoFactorEnabled ?? false;
+      const isAdmin = isAdminPrincipal({
+        email: result.user.email,
+        role: policyUser?.role,
+        sessionIsAdmin: result.user.isAdmin ?? false,
+      });
+      const canUseAdminAccess = !isAdmin || !shouldEnforceAdminTwoFactor() || twoFactorEnabled;
+
       user.id = result.user.id;
       user.email = result.user.email;
       user.name = result.user.name;
       user.emailVerified = result.user.emailVerified;
-      user.isAdmin = result.user.isAdmin;
+      user.isAdmin = canUseAdminAccess && isAdmin;
+      user.twoFactorEnabled = twoFactorEnabled;
       return true;
     },
     async jwt({ token, user }) {
@@ -84,6 +97,8 @@ export const authOptions: NextAuthOptions = {
         token.name = typeof user.name === 'string' ? user.name : null;
         token.email = typeof user.email === 'string' ? user.email : null;
         token.isAdmin = typeof user.isAdmin === 'boolean' ? user.isAdmin : false;
+        token.twoFactorEnabled =
+          typeof user.twoFactorEnabled === 'boolean' ? user.twoFactorEnabled : false;
       }
       return token;
     },
@@ -95,6 +110,7 @@ export const authOptions: NextAuthOptions = {
               emailVerifiedAt?: string | null;
               name?: string | null;
               isAdmin?: boolean;
+              twoFactorEnabled?: boolean;
             }
           | undefined;
         const dbUser = user as
@@ -104,6 +120,7 @@ export const authOptions: NextAuthOptions = {
               emailVerified?: Date | null;
               displayName?: string | null;
               role?: 'user' | 'admin';
+              twoFactorEnabled?: boolean;
             }
           | undefined;
         const tokenUserId = typeof jwtToken?.userId === 'string' ? jwtToken.userId : null;
@@ -119,10 +136,21 @@ export const authOptions: NextAuthOptions = {
         session.user.name = dbName ?? jwtToken?.name ?? session.user.name ?? null;
 
         const email = dbUser?.email ?? session.user.email ?? null;
+        const isAdmin = isAdminPrincipal({
+          role: dbUser?.role,
+          email,
+          sessionIsAdmin: typeof jwtToken?.isAdmin === 'boolean' ? jwtToken.isAdmin : false,
+        });
+        const twoFactorEnabled =
+          typeof dbUser?.twoFactorEnabled === 'boolean'
+            ? dbUser.twoFactorEnabled
+            : typeof jwtToken?.twoFactorEnabled === 'boolean'
+              ? jwtToken.twoFactorEnabled
+              : false;
+
+        session.user.twoFactorEnabled = twoFactorEnabled;
         session.user.isAdmin =
-          dbUser?.role === 'admin' ||
-          (typeof jwtToken?.isAdmin === 'boolean' ? jwtToken.isAdmin : false) ||
-          isAdminEmail(email);
+          !isAdmin || !shouldEnforceAdminTwoFactor() ? isAdmin : isAdmin && twoFactorEnabled;
       }
       return session;
     },

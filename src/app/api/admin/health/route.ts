@@ -15,7 +15,7 @@ export async function GET(request: Request) {
     { route: '/api/admin/health' },
     async () => {
       const session = await getServerSession(authOptions);
-      requireAdminSession(session);
+      await requireAdminSession(session);
 
       return jsonOk({
         status: 'ok',

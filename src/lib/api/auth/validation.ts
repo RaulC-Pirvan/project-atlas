@@ -39,3 +39,22 @@ export const resendVerificationSchema = z.object({
 export const verifyEmailSchema = z.object({
   token: z.string().min(1),
 });
+
+export const stepUpActionSchema = z.enum([
+  'account_email_change',
+  'account_password_change',
+  'account_delete',
+  'admin_access',
+]);
+
+export const createTwoFactorChallengeSchema = z.object({
+  action: stepUpActionSchema,
+});
+
+export const verifyTwoFactorChallengeSchema = z
+  .object({
+    challengeToken: z.string().min(1),
+    method: z.enum(['totp', 'recovery_code']),
+    code: z.string().min(1).max(64),
+  })
+  .strict();

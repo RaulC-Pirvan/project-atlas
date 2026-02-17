@@ -48,6 +48,7 @@ model User {
   passwordSetAt DateTime?
   displayName   String
   role          UserRole  @default(user)
+  twoFactorEnabled Boolean @default(false)
   timezone      String    @default("UTC")
   weekStart     WeekStart @default(mon)
   keepCompletedAtBottom Boolean @default(true)
@@ -61,6 +62,9 @@ model User {
   reminderSettings UserReminderSettings?
   emailVerificationTokens EmailVerificationToken[]
   passwordResetTokens PasswordResetToken[]
+  twoFactor UserTwoFactor?
+  recoveryCodes UserRecoveryCode[]
+  stepUpChallenges AuthStepUpChallenge[]
   proEntitlement ProEntitlement?
   achievementUnlocks AchievementUnlock[]
   habitMilestoneUnlocks HabitMilestoneUnlock[]
@@ -193,6 +197,71 @@ model PasswordResetToken {
 }
 
 /**
+ * UserTwoFactor stores encrypted TOTP secret material and audit timestamps.
+ *
+ * Security:
+ * - TOTP secrets are encrypted at rest.
+ * - User.twoFactorEnabled remains the authoritative enrollment flag.
+ */
+model UserTwoFactor {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  secretEncrypted String
+  enabledAt       DateTime?
+  lastVerifiedAt  DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+/**
+ * UserRecoveryCode stores one-time recovery code hashes.
+ *
+ * Security:
+ * - Only hashes are persisted; raw recovery codes are shown once to the user.
+ */
+model UserRecoveryCode {
+  id         String    @id @default(cuid())
+  userId     String
+  codeHash   String
+  consumedAt DateTime?
+  revokedAt  DateTime?
+  createdAt  DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, codeHash])
+  @@index([userId, consumedAt, revokedAt])
+}
+
+/**
+ * AuthStepUpChallenge tracks short-lived challenges for sensitive actions.
+ */
+model AuthStepUpChallenge {
+  id                 String       @id @default(cuid())
+  userId             String
+  action             StepUpAction
+  challengeTokenHash String       @unique
+  expiresAt          DateTime
+  consumedAt         DateTime?
+  verifiedAt         DateTime?
+  verifiedMethod     StepUpMethod?
+  failedAttempts     Int          @default(0)
+  lastAttemptAt      DateTime?
+  lockedUntil        DateTime?
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, action, expiresAt])
+  @@index([expiresAt])
+}
+
+/**
  * WeekStart controls the UI week layout preference.
  *
  * This does not change stored weekday encoding, which remains ISO (Mon=1..Sun=7).
@@ -210,6 +279,19 @@ enum WeekStart {
 enum UserRole {
   user
   admin
+}
+
+enum StepUpAction {
+  account_email_change
+  account_password_change
+  account_delete
+  admin_access
+}
+
+enum StepUpMethod {
+  totp
+  recovery_code
+  password
 }
 
 /**

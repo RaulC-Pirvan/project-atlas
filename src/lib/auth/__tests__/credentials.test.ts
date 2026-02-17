@@ -17,6 +17,7 @@ describe('authorizeCredentials', () => {
           deletedAt: null,
           displayName: 'User',
           role: 'user',
+          twoFactorEnabled: false,
         }),
       },
     };
@@ -45,6 +46,7 @@ describe('authorizeCredentials', () => {
           deletedAt: null,
           displayName: null,
           role: 'user',
+          twoFactorEnabled: false,
         }),
       },
     };
@@ -72,6 +74,7 @@ describe('authorizeCredentials', () => {
           deletedAt: null,
           displayName: null,
           role: 'user',
+          twoFactorEnabled: false,
         }),
       },
     };

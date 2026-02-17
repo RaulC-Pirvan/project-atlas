@@ -3,12 +3,9 @@ import { NextResponse } from 'next/server';
 import { AUTH_RATE_LIMIT, shouldBypassAuthRateLimit } from '../../../../lib/auth/authRateLimit';
 import { revokeDatabaseSessionByToken } from '../../../../lib/auth/databaseSession';
 import {
-  CALLBACK_COOKIE_NAMES,
-  CSRF_COOKIE_NAMES,
   readSessionTokenFromCookieHeader,
-  SESSION_TOKEN_COOKIE_NAMES,
-  shouldUseSecureAuthCookies,
 } from '../../../../lib/auth/sessionConfig';
+import { clearAuthCookies } from '../../../../lib/auth/sessionCookies';
 import { prisma } from '../../../../lib/db/prisma';
 import {
   applyRateLimitHeaders,
@@ -18,9 +15,6 @@ import {
 import { withApiLogging } from '../../../../lib/observability/apiLogger';
 
 export const runtime = 'nodejs';
-
-const HTTP_ONLY_COOKIES = [...SESSION_TOKEN_COOKIE_NAMES, ...CSRF_COOKIE_NAMES];
-const NON_HTTP_ONLY_COOKIES = [...CALLBACK_COOKIE_NAMES];
 
 export async function POST(request: Request) {
   return withApiLogging(request, { route: '/api/auth/logout' }, async () => {
@@ -49,33 +43,7 @@ export async function POST(request: Request) {
     }
 
     const response = NextResponse.json({ ok: true });
-    const isSecure = shouldUseSecureAuthCookies();
-
-    for (const name of HTTP_ONLY_COOKIES) {
-      response.cookies.set({
-        name,
-        value: '',
-        path: '/',
-        maxAge: 0,
-        expires: new Date(0),
-        httpOnly: true,
-        sameSite: 'lax',
-        secure: isSecure,
-      });
-    }
-
-    for (const name of NON_HTTP_ONLY_COOKIES) {
-      response.cookies.set({
-        name,
-        value: '',
-        path: '/',
-        maxAge: 0,
-        expires: new Date(0),
-        httpOnly: false,
-        sameSite: 'lax',
-        secure: isSecure,
-      });
-    }
+    clearAuthCookies(response);
 
     return response;
   });

@@ -114,11 +114,11 @@ password/OAuth, recover access safely, and manage active sessions across devices
 
 ### Tasks (5)
 
-- [ ] **Task 2.1**: Add account UI for 2FA setup (QR/manual key + verification code confirm)
-- [ ] **Task 2.2**: Add 2FA disable flow with strong confirmation + re-auth guard
-- [ ] **Task 2.3**: Add login challenge UI for TOTP when user has 2FA enabled
-- [ ] **Task 2.4**: Add recovery-code challenge fallback during login/step-up
-- [ ] **Task 2.5**: Enforce admin-first setup path (admins cannot proceed without enrolling 2FA)
+- [x] **Task 2.1**: Add account UI for 2FA setup (QR/manual key + verification code confirm)
+- [x] **Task 2.2**: Add 2FA disable flow with strong confirmation + re-auth guard
+- [x] **Task 2.3**: Add login challenge UI for TOTP when user has 2FA enabled
+- [x] **Task 2.4**: Add recovery-code challenge fallback during login/step-up
+- [x] **Task 2.5**: Enforce admin-first setup path (admins cannot proceed without enrolling 2FA)
 
 ---
 
@@ -126,11 +126,11 @@ password/OAuth, recover access safely, and manage active sessions across devices
 
 ### Tasks (5)
 
-- [ ] **Task 3.1**: Add account sessions API for listing active DB sessions
-- [ ] **Task 3.2**: Add account sessions API for revoke-one / revoke-all / sign-out-all-devices
-- [ ] **Task 3.3**: Build session management UI in account settings with current-session labeling
-- [ ] **Task 3.4**: Implement reusable step-up challenge flow for email/password change + delete account
-- [ ] **Task 3.5**: Wire sensitive APIs to require fresh step-up proof before state-changing actions
+- [x] **Task 3.1**: Add account sessions API for listing active DB sessions
+- [x] **Task 3.2**: Add account sessions API for revoke-one / revoke-all / sign-out-all-devices
+- [x] **Task 3.3**: Build session management UI in account settings with current-session labeling
+- [x] **Task 3.4**: Implement reusable step-up challenge flow for email/password change + delete account
+- [x] **Task 3.5**: Wire sensitive APIs to require fresh step-up proof before state-changing actions
 
 ---
 

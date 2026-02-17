@@ -16,6 +16,7 @@ export const updateAccountSchema = z
     email: z.string().email().optional(),
     password: z.string().min(8).max(72).optional(),
     currentPassword: z.string().min(8).max(72).optional(),
+    stepUpChallengeToken: z.string().min(1).max(512).optional(),
     displayName: z.string().min(2).max(80).optional(),
     weekStart: z.enum(['sun', 'mon']).optional(),
     keepCompletedAtBottom: z.boolean().optional(),
@@ -51,10 +52,72 @@ export const createTwoFactorChallengeSchema = z.object({
   action: stepUpActionSchema,
 });
 
+export const accountStepUpActionSchema = z.enum([
+  'account_email_change',
+  'account_password_change',
+  'account_delete',
+]);
+
+export const createAccountStepUpChallengeSchema = z
+  .object({
+    action: accountStepUpActionSchema,
+  })
+  .strict();
+
+export const verifyAccountStepUpChallengeSchema = z
+  .object({
+    challengeToken: z.string().min(1),
+    method: z.enum(['totp', 'recovery_code', 'password']),
+    code: z.string().min(1).max(128),
+  })
+  .strict();
+
 export const verifyTwoFactorChallengeSchema = z
   .object({
     challengeToken: z.string().min(1),
     method: z.enum(['totp', 'recovery_code']),
     code: z.string().min(1).max(64),
+  })
+  .strict();
+
+export const verifySignInTwoFactorSchema = z
+  .object({
+    challengeToken: z.string().min(1),
+    method: z.enum(['totp', 'recovery_code']),
+    code: z.string().min(1).max(64),
+  })
+  .strict();
+
+export const enableTwoFactorSchema = z
+  .object({
+    code: z.string().min(1).max(16),
+  })
+  .strict();
+
+export const disableTwoFactorSchema = z
+  .object({
+    confirmation: z.string().min(1).max(32),
+    currentPassword: z.string().min(8).max(72).optional(),
+    method: z.enum(['totp', 'recovery_code']),
+    code: z.string().min(1).max(64),
+  })
+  .strict();
+
+export const rotateRecoveryCodesSchema = z
+  .object({
+    method: z.enum(['totp', 'recovery_code']),
+    code: z.string().min(1).max(64),
+  })
+  .strict();
+
+export const manageSessionsSchema = z
+  .object({
+    scope: z.enum(['others', 'all']),
+  })
+  .strict();
+
+export const deleteAccountRequestSchema = z
+  .object({
+    stepUpChallengeToken: z.string().min(1).max(512),
   })
   .strict();

@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
-import { isLegacyJwtSessionToken, readSessionTokenFromCookieHeader } from '../sessionConfig';
+import {
+  isAdminTwoFactorEnrollmentRequiredCookie,
+  isLegacyJwtSessionToken,
+  readSessionTokenFromCookieHeader,
+} from '../sessionConfig';
 
 describe('sessionConfig helpers', () => {
   it('detects legacy JWT-looking session tokens', () => {
@@ -14,5 +18,11 @@ describe('sessionConfig helpers', () => {
     );
 
     expect(token).toBe('session-123');
+  });
+
+  it('detects admin enrollment gating cookie values', () => {
+    expect(isAdminTwoFactorEnrollmentRequiredCookie('required')).toBe(true);
+    expect(isAdminTwoFactorEnrollmentRequiredCookie('')).toBe(false);
+    expect(isAdminTwoFactorEnrollmentRequiredCookie(null)).toBe(false);
   });
 });

@@ -5,9 +5,12 @@ import { AUTH_RATE_LIMIT, shouldBypassAuthRateLimit } from '../../../../lib/auth
 import { authorizeCredentials } from '../../../../lib/auth/credentials';
 import { createDatabaseSession } from '../../../../lib/auth/databaseSession';
 import {
+  ADMIN_2FA_ENROLLMENT_COOKIE_NAME,
   getSessionTokenCookieName,
   shouldUseSecureAuthCookies,
 } from '../../../../lib/auth/sessionConfig';
+import { createStepUpChallenge } from '../../../../lib/auth/stepUpChallenges';
+import { shouldEnforceAdminTwoFactor } from '../../../../lib/auth/twoFactorPolicy';
 import { prisma } from '../../../../lib/db/prisma';
 import {
   applyRateLimitHeaders,
@@ -17,6 +20,34 @@ import {
 import { withApiLogging } from '../../../../lib/observability/apiLogger';
 
 export const runtime = 'nodejs';
+
+function clearAdminTwoFactorEnrollmentCookie(response: Response, secure: boolean) {
+  const nextResponse = response as Response & {
+    cookies?: {
+      set: (args: {
+        name: string;
+        value: string;
+        path: string;
+        maxAge: number;
+        expires: Date;
+        httpOnly: boolean;
+        sameSite: 'lax';
+        secure: boolean;
+      }) => void;
+    };
+  };
+
+  nextResponse.cookies?.set({
+    name: ADMIN_2FA_ENROLLMENT_COOKIE_NAME,
+    value: '',
+    path: '/',
+    maxAge: 0,
+    expires: new Date(0),
+    httpOnly: true,
+    sameSite: 'lax',
+    secure,
+  });
+}
 
 export async function POST(request: Request) {
   return withApiLogging(
@@ -64,6 +95,66 @@ export async function POST(request: Request) {
         throw new ApiError('invalid_credentials', 'Invalid email or password.', 401);
       }
 
+      const secure = shouldUseSecureAuthCookies();
+      const adminRequiresEnrollment =
+        authorizedUser.isAdmin && shouldEnforceAdminTwoFactor() && !authorizedUser.twoFactorEnabled;
+
+      if (adminRequiresEnrollment) {
+        const { sessionToken, expires } = await createDatabaseSession({
+          prisma,
+          userId: authorizedUser.id,
+          request,
+        });
+
+        const response = jsonOk({ ok: true, requiresAdminTwoFactorEnrollment: true });
+        response.cookies.set({
+          name: getSessionTokenCookieName(),
+          value: sessionToken,
+          path: '/',
+          httpOnly: true,
+          sameSite: 'lax',
+          secure,
+          expires,
+        });
+        response.cookies.set({
+          name: ADMIN_2FA_ENROLLMENT_COOKIE_NAME,
+          value: 'required',
+          path: '/',
+          httpOnly: true,
+          sameSite: 'lax',
+          secure,
+          maxAge: 60 * 60 * 24,
+        });
+
+        if (decision) {
+          applyRateLimitHeaders(response.headers, decision);
+        }
+
+        return response;
+      }
+
+      if (authorizedUser.twoFactorEnabled) {
+        const challenge = await createStepUpChallenge({
+          prisma,
+          userId: authorizedUser.id,
+          action: 'sign_in',
+        });
+
+        const response = jsonOk({
+          ok: true,
+          requiresTwoFactor: true,
+          challengeToken: challenge.challengeToken,
+          methods: ['totp', 'recovery_code'] as const,
+        });
+        clearAdminTwoFactorEnrollmentCookie(response, secure);
+
+        if (decision) {
+          applyRateLimitHeaders(response.headers, decision);
+        }
+
+        return response;
+      }
+
       const { sessionToken, expires } = await createDatabaseSession({
         prisma,
         userId: authorizedUser.id,
@@ -77,9 +168,10 @@ export async function POST(request: Request) {
         path: '/',
         httpOnly: true,
         sameSite: 'lax',
-        secure: shouldUseSecureAuthCookies(),
+        secure,
         expires,
       });
+      clearAdminTwoFactorEnrollmentCookie(response, secure);
 
       if (decision) {
         applyRateLimitHeaders(response.headers, decision);

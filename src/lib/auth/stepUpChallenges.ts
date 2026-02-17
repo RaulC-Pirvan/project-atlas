@@ -1,6 +1,7 @@
 import { generateToken, hashToken, isExpired } from './tokens';
 
 export type StepUpAction =
+  | 'sign_in'
   | 'account_email_change'
   | 'account_password_change'
   | 'account_delete'
@@ -19,6 +20,8 @@ export type StepUpChallengeRecord = {
   challengeTokenHash: string;
   expiresAt: Date;
   consumedAt: Date | null;
+  verifiedAt?: Date | null;
+  verifiedMethod?: StepUpMethod | null;
   failedAttempts: number;
   lockedUntil: Date | null;
 };
@@ -43,6 +46,8 @@ type PrismaLike = {
         challengeTokenHash: true;
         expiresAt: true;
         consumedAt: true;
+        verifiedAt: true;
+        verifiedMethod: true;
         failedAttempts: true;
         lockedUntil: true;
       };
@@ -144,6 +149,8 @@ export async function getStepUpChallengeByToken(args: {
       challengeTokenHash: true,
       expiresAt: true,
       consumedAt: true,
+      verifiedAt: true,
+      verifiedMethod: true,
       failedAttempts: true,
       lockedUntil: true,
     },

@@ -282,6 +282,7 @@ enum UserRole {
 }
 
 enum StepUpAction {
+  sign_in
   account_email_change
   account_password_change
   account_delete

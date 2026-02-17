@@ -10,6 +10,7 @@ export const SESSION_TOKEN_COOKIE_NAMES = [
 export const CSRF_COOKIE_NAMES = ['next-auth.csrf-token', '__Host-next-auth.csrf-token'] as const;
 
 export const CALLBACK_COOKIE_NAMES = ['next-auth.callback-url'] as const;
+export const ADMIN_2FA_ENROLLMENT_COOKIE_NAME = 'atlas.admin-2fa-enrollment-required';
 
 export function shouldUseSecureAuthCookies() {
   return (
@@ -27,6 +28,10 @@ export function getSessionTokenCookieName() {
 
 export function isLegacyJwtSessionToken(value: string): boolean {
   return /^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(value);
+}
+
+export function isAdminTwoFactorEnrollmentRequiredCookie(value: string | null | undefined) {
+  return value === 'required';
 }
 
 export function readSessionTokenFromCookieHeader(cookieHeader: string | null): string | null {

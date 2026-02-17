@@ -1,0 +1,1 @@
+ALTER TYPE "StepUpAction" ADD VALUE IF NOT EXISTS 'sign_in';

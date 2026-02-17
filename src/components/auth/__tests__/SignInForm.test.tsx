@@ -111,6 +111,73 @@ describe('SignInForm', () => {
     });
   });
 
+  it('transitions to 2FA verification when required and verifies sign-in', async () => {
+    fetchMock
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          ok: true,
+          data: { ok: true, requiresTwoFactor: true, challengeToken: 'challenge-token' },
+        }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ ok: true, data: { ok: true } }),
+      });
+
+    render(<SignInForm />);
+
+    fireEvent.change(screen.getByLabelText(/email/i), {
+      target: { value: 'user@example.com' },
+    });
+    fireEvent.change(screen.getByLabelText(/password/i), {
+      target: { value: 'password123' },
+    });
+    fireEvent.submit(screen.getByRole('button', { name: /sign in/i }));
+
+    expect(await screen.findByText(/two-factor verification is required/i)).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText(/verification code/i), {
+      target: { value: '123456' },
+    });
+    fireEvent.submit(screen.getByRole('button', { name: /verify and sign in/i }));
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenNthCalledWith(2, '/api/auth/sign-in/2fa/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          challengeToken: 'challenge-token',
+          method: 'totp',
+          code: '123456',
+        }),
+      });
+      expect(pushMock).toHaveBeenCalledWith('/today');
+    });
+  });
+
+  it('redirects admin users to enrollment path when required', async () => {
+    fetchMock.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ ok: true, data: { ok: true, requiresAdminTwoFactorEnrollment: true } }),
+    });
+
+    render(<SignInForm />);
+
+    fireEvent.change(screen.getByLabelText(/email/i), {
+      target: { value: 'admin@example.com' },
+    });
+    fireEvent.change(screen.getByLabelText(/password/i), {
+      target: { value: 'password123' },
+    });
+    fireEvent.submit(screen.getByRole('button', { name: /sign in/i }));
+
+    await waitFor(() => {
+      expect(pushMock).toHaveBeenCalledWith('/account?admin2fa=required');
+      expect(refreshMock).toHaveBeenCalled();
+    });
+  });
+
   it('starts Google auth when the OAuth button is used', async () => {
     signInMock.mockResolvedValueOnce(undefined);
 

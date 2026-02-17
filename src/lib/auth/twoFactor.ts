@@ -55,10 +55,17 @@ type PrismaLike = {
     update: (args: {
       where: { userId: string };
       data: {
-        enabledAt?: Date;
-        lastVerifiedAt?: Date;
+        enabledAt?: Date | null;
+        lastVerifiedAt?: Date | null;
       };
     }) => Promise<{ id: string }>;
+    updateMany: (args: {
+      where: { userId: string };
+      data: {
+        enabledAt?: Date | null;
+        lastVerifiedAt?: Date | null;
+      };
+    }) => Promise<{ count: number }>;
   };
 };
 
@@ -150,6 +157,14 @@ export async function enableUserTwoFactor(args: {
 }
 
 export async function disableUserTwoFactor(args: { prisma: PrismaLike; userId: string }) {
+  await args.prisma.userTwoFactor.updateMany({
+    where: { userId: args.userId },
+    data: {
+      enabledAt: null,
+      lastVerifiedAt: null,
+    },
+  });
+
   await args.prisma.user.update({
     where: { id: args.userId },
     data: {

@@ -93,6 +93,12 @@ async function waitForNewVerificationToken(
   return token;
 }
 
+async function completePasswordStepUp(page: Page, pass: string) {
+  await expect(page.getByRole('heading', { name: /security verification/i })).toBeVisible();
+  await page.getByLabel(/^current password$/i).fill(pass);
+  await page.getByRole('button', { name: /verify and continue/i }).click();
+}
+
 test('signup creates unverified account', async ({ page }) => {
   const email = uniqueEmail('signup');
 
@@ -182,6 +188,7 @@ test('account update works', async ({ page, request }) => {
   await page.getByLabel(/^new password$/i).fill(newPassword);
   await page.getByLabel(/confirm new password/i).fill(newPassword);
   await page.getByRole('button', { name: /update password/i }).click();
+  await completePasswordStepUp(page, password);
   await expect(page.getByText('Password updated.')).toBeVisible();
 
   await signOut(page);
@@ -242,8 +249,8 @@ test('email update requires re-verification', async ({ page, request }) => {
   await page.goto('/account');
 
   await page.getByLabel(/^email$/i).fill(newEmail);
-  await page.getByLabel(/confirm password for email/i).fill(password);
   await page.getByRole('button', { name: /update email/i }).click();
+  await completePasswordStepUp(page, password);
   await expect(page.getByRole('heading', { name: /email updated/i })).toBeVisible();
   await page.getByRole('button', { name: /sign in again/i }).click();
   await expect(page).toHaveURL(/\/sign-in/);
@@ -272,6 +279,7 @@ test('account delete removes access', async ({ page, request }) => {
 
   await page.getByLabel(/^confirm$/i).fill('delete');
   await page.getByRole('button', { name: /request delete/i }).click();
+  await completePasswordStepUp(page, password);
   await expect(page.getByRole('heading', { name: /account deleted/i })).toBeVisible();
   await page.getByRole('button', { name: /create a new account/i }).click();
   await expect(page).toHaveURL(/\/sign-up/);

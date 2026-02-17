@@ -2,9 +2,7 @@ import { NextResponse } from 'next/server';
 
 import { AUTH_RATE_LIMIT, shouldBypassAuthRateLimit } from '../../../../lib/auth/authRateLimit';
 import { revokeDatabaseSessionByToken } from '../../../../lib/auth/databaseSession';
-import {
-  readSessionTokenFromCookieHeader,
-} from '../../../../lib/auth/sessionConfig';
+import { readSessionTokenFromCookieHeader } from '../../../../lib/auth/sessionConfig';
 import { clearAuthCookies } from '../../../../lib/auth/sessionCookies';
 import { prisma } from '../../../../lib/db/prisma';
 import {

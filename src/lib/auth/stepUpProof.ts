@@ -59,10 +59,7 @@ export async function requireFreshStepUpProof({
   return challenge;
 }
 
-export async function consumeStepUpProof(args: {
-  prisma: PrismaLike;
-  challengeId: string;
-}) {
+export async function consumeStepUpProof(args: { prisma: PrismaLike; challengeId: string }) {
   await args.prisma.authStepUpChallenge.delete({
     where: { id: args.challengeId },
   });

@@ -84,4 +84,58 @@ describe('/api/auth/2fa/challenge', () => {
     const body = await response.json();
     expect(body.data.challengeToken).toBe('challenge-token');
   });
+
+  it('denies admin_access challenge for non-admin users', async () => {
+    mockedGetServerSession.mockResolvedValue({ user: { id: 'user-1', isAdmin: false } });
+    mockedGetUserTwoFactorState.mockResolvedValue({
+      userId: 'user-1',
+      email: 'user@example.com',
+      role: 'user',
+      twoFactorEnabled: true,
+      hasTotpSecret: true,
+    });
+
+    const response = await POST(
+      new Request('http://localhost:3000/api/auth/2fa/challenge', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'admin_access' }),
+      }),
+    );
+
+    expect(response.status).toBe(403);
+    expect(mockedCreateStepUpChallenge).not.toHaveBeenCalled();
+  });
+
+  it('allows admin_access challenge for admin users', async () => {
+    mockedGetServerSession.mockResolvedValue({ user: { id: 'admin-1', isAdmin: true } });
+    mockedGetUserTwoFactorState.mockResolvedValue({
+      userId: 'admin-1',
+      email: 'admin@example.com',
+      role: 'admin',
+      twoFactorEnabled: true,
+      hasTotpSecret: true,
+    });
+    mockedCreateStepUpChallenge.mockResolvedValue({
+      challengeId: 'challenge-admin',
+      challengeToken: 'challenge-token-admin',
+      expiresAt: new Date('2026-02-17T13:00:00.000Z'),
+    });
+
+    const response = await POST(
+      new Request('http://localhost:3000/api/auth/2fa/challenge', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'admin_access' }),
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(mockedCreateStepUpChallenge).toHaveBeenCalledWith(
+      expect.objectContaining({
+        userId: 'admin-1',
+        action: 'admin_access',
+      }),
+    );
+  });
 });

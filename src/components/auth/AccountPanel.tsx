@@ -159,9 +159,7 @@ export function AccountPanel({
 
   const deleteConfirmInvalid = deleteConfirmError;
   const toastIdRef = useRef(0);
-  const stepUpCompleteRef = useRef<((stepUpChallengeToken: string) => Promise<void>) | null>(
-    null,
-  );
+  const stepUpCompleteRef = useRef<((stepUpChallengeToken: string) => Promise<void>) | null>(null);
   const adminEnrollmentRequired =
     role === 'admin' && adminTwoFactorEnforced && !twoFactorEnabledState;
 
@@ -1247,7 +1245,11 @@ export function AccountPanel({
           className="w-full"
           disabled={updatingEmail || stepUpStarting}
         >
-          {updatingEmail ? 'Updating...' : stepUpStarting ? 'Starting verification...' : 'Update email'}
+          {updatingEmail
+            ? 'Updating...'
+            : stepUpStarting
+              ? 'Starting verification...'
+              : 'Update email'}
         </Button>
       </form>
 
@@ -1323,7 +1325,11 @@ export function AccountPanel({
           className="w-full"
           disabled={deleting || stepUpStarting}
         >
-          {deleting ? 'Submitting...' : stepUpStarting ? 'Starting verification...' : 'Request delete'}
+          {deleting
+            ? 'Submitting...'
+            : stepUpStarting
+              ? 'Starting verification...'
+              : 'Request delete'}
         </Button>
       </form>
 

@@ -4,6 +4,7 @@ import {
   consumeRecoveryCode,
   generateRecoveryCodes,
   hashRecoveryCode,
+  revokeRecoveryCodes,
   rotateRecoveryCodes,
 } from '../recoveryCodes';
 
@@ -41,6 +42,64 @@ describe('recoveryCodes', () => {
 
     expect(consumed).toBe(true);
     expect(updateMany).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not consume the same code twice', async () => {
+    const updateMany = vi
+      .fn()
+      .mockResolvedValueOnce({ count: 1 })
+      .mockResolvedValueOnce({ count: 0 });
+
+    const prisma = {
+      userRecoveryCode: {
+        updateMany,
+        createMany: vi.fn(),
+      },
+    };
+
+    const first = await consumeRecoveryCode({
+      prisma,
+      userId: 'user-1',
+      recoveryCode: 'ABCD-1234-ABCD-1234-ABCD',
+      now: new Date('2026-02-17T12:00:00.000Z'),
+    });
+    const second = await consumeRecoveryCode({
+      prisma,
+      userId: 'user-1',
+      recoveryCode: 'ABCD-1234-ABCD-1234-ABCD',
+      now: new Date('2026-02-17T12:01:00.000Z'),
+    });
+
+    expect(first).toBe(true);
+    expect(second).toBe(false);
+    expect(updateMany).toHaveBeenCalledTimes(2);
+  });
+
+  it('revokes all active recovery codes', async () => {
+    const updateMany = vi.fn().mockResolvedValue({ count: 4 });
+
+    const result = await revokeRecoveryCodes({
+      prisma: {
+        userRecoveryCode: {
+          updateMany,
+          createMany: vi.fn(),
+        },
+      },
+      userId: 'user-1',
+      now: new Date('2026-02-17T12:00:00.000Z'),
+    });
+
+    expect(result).toEqual({ revokedCount: 4 });
+    expect(updateMany).toHaveBeenCalledWith({
+      where: {
+        userId: 'user-1',
+        consumedAt: null,
+        revokedAt: null,
+      },
+      data: {
+        revokedAt: new Date('2026-02-17T12:00:00.000Z'),
+      },
+    });
   });
 
   it('rotates codes by revoking current and creating new hashes', async () => {

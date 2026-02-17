@@ -69,7 +69,11 @@ export async function POST(request: Request) {
         prisma,
         challengeToken: parsed.data.challengeToken,
       });
-      if (!challenge || challenge.userId !== userId || !ACCOUNT_STEP_UP_ACTIONS.has(challenge.action)) {
+      if (
+        !challenge ||
+        challenge.userId !== userId ||
+        !ACCOUNT_STEP_UP_ACTIONS.has(challenge.action)
+      ) {
         throw new ApiError('unauthorized', 'Invalid challenge.', 401);
       }
 
@@ -112,7 +116,11 @@ export async function POST(request: Request) {
       let valid = false;
       if (user.twoFactorEnabled) {
         if (parsed.data.method === 'password') {
-          throw new ApiError('invalid_request', 'Password verification is not allowed for this user.', 400);
+          throw new ApiError(
+            'invalid_request',
+            'Password verification is not allowed for this user.',
+            400,
+          );
         }
         valid = (
           await verifyTwoFactorMethod({

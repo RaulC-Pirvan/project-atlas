@@ -3,6 +3,7 @@ import 'dotenv/config';
 import type { APIRequestContext, Page } from '@playwright/test';
 import { expect, test } from '@playwright/test';
 
+import { generateTotpCode } from '../src/lib/auth/totp';
 import { prisma } from '../src/lib/db/prisma';
 
 const password = 'AtlasTestPassword123!';
@@ -27,7 +28,6 @@ async function signIn(page: Page, email: string, pass: string) {
   await page.getByLabel('Email').fill(email);
   await page.getByLabel('Password').fill(pass);
   await page.getByRole('button', { name: /sign in/i }).click();
-  await expect(page).toHaveURL(/\/today/, { timeout: 15_000 });
 }
 
 async function fetchVerificationToken(request: APIRequestContext, email: string): Promise<string> {
@@ -88,6 +88,34 @@ async function getWithRetry(
   throw lastError ?? new Error(`Request failed for ${url}`);
 }
 
+async function waitForStableTotpCode(secret: string) {
+  for (let attempt = 0; attempt < 8; attempt += 1) {
+    const timestampMs = Date.now();
+    const secondInStep = Math.floor(timestampMs / 1000) % 30;
+    if (secondInStep <= 24) {
+      return generateTotpCode(secret, { timestampMs });
+    }
+    await new Promise((resolve) => setTimeout(resolve, 800));
+  }
+
+  return generateTotpCode(secret, { timestampMs: Date.now() });
+}
+
+async function completeAdminTwoFactorEnrollment(page: Page) {
+  await expect(page).toHaveURL(/\/account\?admin2fa=required/, { timeout: 15_000 });
+  await page.getByRole('button', { name: /set up 2fa/i }).click();
+  await expect(page.getByText(/scan qr code with your authenticator app/i)).toBeVisible();
+
+  const secret = await page.locator('#manual-secret').inputValue();
+  const setupCode = await waitForStableTotpCode(secret);
+  await page.locator('#setup-code').fill(setupCode);
+  await page.getByRole('button', { name: /enable 2fa/i }).click();
+
+  const recoveryModal = page.getByRole('dialog', { name: /recovery codes/i });
+  await expect(recoveryModal).toBeVisible();
+  await recoveryModal.getByRole('button', { name: /i saved these codes/i }).click();
+}
+
 test.afterAll(async () => {
   await prisma.$disconnect();
 });
@@ -98,6 +126,7 @@ test('non-admin users are redirected from /admin and blocked on admin APIs', asy
   await signUp(page, email);
   await verifyAccount(page, page.request, email);
   await signIn(page, email, password);
+  await expect(page).toHaveURL(/\/today/, { timeout: 15_000 });
   await page.goto('/admin', { waitUntil: 'domcontentloaded' });
   await page.waitForURL(/\/today/);
 
@@ -113,6 +142,7 @@ test('admin users can access the admin dashboard and APIs', async ({ page }) => 
   await promoteToAdmin(email);
 
   await signIn(page, email, password);
+  await completeAdminTwoFactorEnrollment(page);
 
   await page.goto('/admin');
   await expect(page.getByRole('heading', { name: /admin dashboard/i })).toBeVisible();

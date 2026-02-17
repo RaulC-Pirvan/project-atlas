@@ -138,12 +138,12 @@ password/OAuth, recover access safely, and manage active sessions across devices
 
 ### Tasks (6)
 
-- [ ] **Task 4.1**: Unit tests for TOTP generation/verification boundaries and drift handling
-- [ ] **Task 4.2**: Unit tests for recovery code one-time use, rotation, and revoke behavior
-- [ ] **Task 4.3**: Auth/API tests for admin enforcement, session revocation, and challenge denial cases
-- [ ] **Task 4.4**: Component tests for enable/disable flows and step-up prompt UI states
-- [ ] **Task 4.5**: E2E coverage for 2FA enable, login verify, disable, recovery fallback, and sign-out-all
-- [ ] **Task 4.6**: CI stability pass across Chromium + Firefox for new auth flows
+- [x] **Task 4.1**: Unit tests for TOTP generation/verification boundaries and drift handling
+- [x] **Task 4.2**: Unit tests for recovery code one-time use, rotation, and revoke behavior
+- [x] **Task 4.3**: Auth/API tests for admin enforcement, session revocation, and challenge denial cases
+- [x] **Task 4.4**: Component tests for enable/disable flows and step-up prompt UI states
+- [x] **Task 4.5**: E2E coverage for 2FA enable, login verify, disable, recovery fallback, and sign-out-all
+- [x] **Task 4.6**: CI stability pass across Chromium + Firefox for new auth flows
 
 ---
 

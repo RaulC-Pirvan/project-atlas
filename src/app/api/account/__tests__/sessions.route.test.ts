@@ -1,7 +1,10 @@
 import { getServerSession } from 'next-auth/next';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { listActiveUserSessions, revokeAllUserSessions } from '../../../../lib/auth/sessionManagement';
+import {
+  listActiveUserSessions,
+  revokeAllUserSessions,
+} from '../../../../lib/auth/sessionManagement';
 import { DELETE, GET } from '../sessions/route';
 
 vi.mock('next-auth/next', () => ({ getServerSession: vi.fn() }));

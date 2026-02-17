@@ -1,10 +1,7 @@
 import { getServerSession } from 'next-auth/next';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import {
-  findUserSessionById,
-  revokeUserSessionById,
-} from '../../../../lib/auth/sessionManagement';
+import { findUserSessionById, revokeUserSessionById } from '../../../../lib/auth/sessionManagement';
 
 vi.mock('next-auth/next', () => ({ getServerSession: vi.fn() }));
 vi.mock('../../../../lib/auth/nextauth', () => ({ authOptions: {} }));
@@ -69,5 +66,22 @@ describe('/api/account/sessions/[sessionId]', () => {
     const body = await response.json();
     expect(body.data.signedOutCurrent).toBe(true);
     expect(response.headers.get('set-cookie')).toContain('next-auth.session-token=');
+  });
+
+  it('returns not found when session does not belong to the user', async () => {
+    mockedGetServerSession.mockResolvedValue({ user: { id: 'user-1' } });
+    mockedFindUserSessionById.mockResolvedValue(null);
+
+    const { DELETE } = await import('../sessions/[sessionId]/route');
+    const response = await DELETE(
+      new Request('http://localhost:3000/api/account/sessions/session-missing', {
+        method: 'DELETE',
+      }),
+      { params: Promise.resolve({ sessionId: 'session-missing' }) },
+    );
+
+    expect(response.status).toBe(404);
+    const body = await response.json();
+    expect(body.error.code).toBe('not_found');
   });
 });

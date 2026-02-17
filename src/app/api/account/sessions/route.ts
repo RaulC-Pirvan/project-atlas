@@ -6,7 +6,10 @@ import { jsonError, jsonOk } from '../../../../lib/api/response';
 import { authOptions } from '../../../../lib/auth/nextauth';
 import { readSessionTokenFromCookieHeader } from '../../../../lib/auth/sessionConfig';
 import { clearAuthCookies } from '../../../../lib/auth/sessionCookies';
-import { listActiveUserSessions, revokeAllUserSessions } from '../../../../lib/auth/sessionManagement';
+import {
+  listActiveUserSessions,
+  revokeAllUserSessions,
+} from '../../../../lib/auth/sessionManagement';
 import { prisma } from '../../../../lib/db/prisma';
 import { withApiLogging } from '../../../../lib/observability/apiLogger';
 

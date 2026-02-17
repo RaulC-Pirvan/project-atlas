@@ -202,4 +202,33 @@ describe('/api/account/step-up/verify', () => {
     expect(mockedVerifyTwoFactorMethod).toHaveBeenCalledTimes(1);
     expect(mockedVerifyPassword).not.toHaveBeenCalled();
   });
+
+  it('denies challenges outside account step-up action scope', async () => {
+    mockedGetServerSession.mockResolvedValue({ user: { id: 'user-1' } });
+    mockedGetStepUpChallengeByToken.mockResolvedValue({
+      id: 'challenge-1',
+      userId: 'user-1',
+      action: 'admin_access',
+      challengeTokenHash: 'hash',
+      expiresAt: new Date('2026-02-17T13:00:00.000Z'),
+      consumedAt: null,
+      failedAttempts: 0,
+      lockedUntil: null,
+    });
+
+    const response = await POST(
+      new Request('http://localhost:3000/api/account/step-up/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          challengeToken: 'challenge-token',
+          method: 'password',
+          code: 'password123!',
+        }),
+      }),
+    );
+
+    expect(response.status).toBe(401);
+    expect(mockedFindUnique).not.toHaveBeenCalled();
+  });
 });

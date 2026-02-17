@@ -1,107 +1,29 @@
+import { PrismaAdapter } from '@next-auth/prisma-adapter';
 import type { NextAuthOptions } from 'next-auth';
-import CredentialsProvider from 'next-auth/providers/credentials';
 import GoogleProvider from 'next-auth/providers/google';
 
+import { isAdminEmail } from '../admin/access';
 import { prisma } from '../db/prisma';
-import { authorizeCredentials } from './credentials';
 import { resolveGoogleOAuthSignIn } from './googleOAuth';
-import { TEST_GOOGLE_PROVIDER_ID } from './oauthProviders';
-import { generateToken } from './tokens';
-
-const shouldUseSecureCookies =
-  process.env.ENABLE_TEST_ENDPOINTS !== 'true' &&
-  process.env.NODE_ENV === 'production' &&
-  !!process.env.NEXTAUTH_URL?.startsWith('https://');
-
-const testGoogleProviderEnabled =
-  process.env.ENABLE_TEST_ENDPOINTS === 'true' &&
-  process.env.ENABLE_TEST_GOOGLE_OAUTH_PROVIDER === 'true';
+import {
+  AUTH_SESSION_MAX_AGE_SECONDS,
+  AUTH_SESSION_UPDATE_AGE_SECONDS,
+  shouldUseSecureAuthCookies,
+} from './sessionConfig';
 
 export const authOptions: NextAuthOptions = {
+  adapter: PrismaAdapter(prisma),
   session: {
-    strategy: 'jwt',
+    strategy: 'database',
+    maxAge: AUTH_SESSION_MAX_AGE_SECONDS,
+    updateAge: AUTH_SESSION_UPDATE_AGE_SECONDS,
   },
   providers: [
-    CredentialsProvider({
-      name: 'Credentials',
-      credentials: {
-        email: { label: 'Email', type: 'email' },
-        password: { label: 'Password', type: 'password' },
-      },
-      authorize: async (credentials) => {
-        const email =
-          typeof credentials?.email === 'string' ? credentials.email.toLowerCase() : 'unknown';
-
-        return authorizeCredentials({
-          prisma,
-          credentials,
-          rateLimitKey: email,
-        });
-      },
-    }),
     ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
       ? [
           GoogleProvider({
             clientId: process.env.GOOGLE_CLIENT_ID,
             clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-          }),
-        ]
-      : []),
-    ...(testGoogleProviderEnabled
-      ? [
-          CredentialsProvider({
-            id: TEST_GOOGLE_PROVIDER_ID,
-            name: 'Google (Test)',
-            credentials: {
-              email: { label: 'Email', type: 'email' },
-              name: { label: 'Name', type: 'text' },
-              providerAccountId: { label: 'Provider Account ID', type: 'text' },
-              emailVerified: { label: 'Email Verified', type: 'text' },
-            },
-            authorize: async (credentials) => {
-              const rawProviderAccountId =
-                typeof credentials?.providerAccountId === 'string'
-                  ? credentials.providerAccountId.trim()
-                  : '';
-              const providerAccountId = rawProviderAccountId || `google-test-${generateToken(8)}`;
-
-              const rawEmail =
-                typeof credentials?.email === 'string'
-                  ? credentials.email.trim().toLowerCase()
-                  : '';
-              const email = rawEmail || `${providerAccountId}@example.com`;
-              const name =
-                typeof credentials?.name === 'string' && credentials.name.trim().length > 0
-                  ? credentials.name.trim()
-                  : 'Atlas OAuth Tester';
-              const emailVerified =
-                typeof credentials?.emailVerified === 'string'
-                  ? credentials.emailVerified !== 'false'
-                  : true;
-
-              const result = await resolveGoogleOAuthSignIn({
-                prisma,
-                input: {
-                  providerAccountId,
-                  email,
-                  emailVerified,
-                  name,
-                  account: { type: 'oauth' },
-                },
-              });
-
-              if (!result.ok) {
-                return null;
-              }
-
-              return {
-                id: result.user.id,
-                email: result.user.email,
-                name: result.user.name,
-                emailVerified: result.user.emailVerified,
-                isAdmin: result.user.isAdmin,
-              };
-            },
           }),
         ]
       : []),
@@ -165,16 +87,46 @@ export const authOptions: NextAuthOptions = {
       }
       return token;
     },
-    async session({ session, token }) {
+    async session({ session, token, user }) {
       if (session.user) {
-        session.user.id = token.userId as string;
-        session.user.emailVerifiedAt = (token.emailVerifiedAt as string | null) ?? null;
-        session.user.name = (token.name as string | null) ?? session.user.name ?? null;
-        session.user.isAdmin = (token.isAdmin as boolean | undefined) ?? false;
+        const jwtToken = token as
+          | {
+              userId?: string;
+              emailVerifiedAt?: string | null;
+              name?: string | null;
+              isAdmin?: boolean;
+            }
+          | undefined;
+        const dbUser = user as
+          | {
+              id?: string;
+              email?: string | null;
+              emailVerified?: Date | null;
+              displayName?: string | null;
+              role?: 'user' | 'admin';
+            }
+          | undefined;
+        const tokenUserId = typeof jwtToken?.userId === 'string' ? jwtToken.userId : null;
+        const userId = dbUser?.id ?? tokenUserId ?? null;
+        if (userId) {
+          session.user.id = userId;
+        }
+
+        const dbEmailVerifiedAt = dbUser?.emailVerified ? dbUser.emailVerified.toISOString() : null;
+        session.user.emailVerifiedAt = dbEmailVerifiedAt ?? jwtToken?.emailVerifiedAt ?? null;
+
+        const dbName = dbUser?.displayName ?? null;
+        session.user.name = dbName ?? jwtToken?.name ?? session.user.name ?? null;
+
+        const email = dbUser?.email ?? session.user.email ?? null;
+        session.user.isAdmin =
+          dbUser?.role === 'admin' ||
+          (typeof jwtToken?.isAdmin === 'boolean' ? jwtToken.isAdmin : false) ||
+          isAdminEmail(email);
       }
       return session;
     },
   },
-  useSecureCookies: shouldUseSecureCookies,
+  useSecureCookies: shouldUseSecureAuthCookies(),
   secret: process.env.NEXTAUTH_SECRET,
 };

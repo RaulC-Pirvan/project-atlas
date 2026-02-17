@@ -1,6 +1,15 @@
 import { NextResponse } from 'next/server';
 
 import { AUTH_RATE_LIMIT, shouldBypassAuthRateLimit } from '../../../../lib/auth/authRateLimit';
+import { revokeDatabaseSessionByToken } from '../../../../lib/auth/databaseSession';
+import {
+  CALLBACK_COOKIE_NAMES,
+  CSRF_COOKIE_NAMES,
+  readSessionTokenFromCookieHeader,
+  SESSION_TOKEN_COOKIE_NAMES,
+  shouldUseSecureAuthCookies,
+} from '../../../../lib/auth/sessionConfig';
+import { prisma } from '../../../../lib/db/prisma';
 import {
   applyRateLimitHeaders,
   consumeRateLimit,
@@ -10,15 +19,8 @@ import { withApiLogging } from '../../../../lib/observability/apiLogger';
 
 export const runtime = 'nodejs';
 
-const HTTP_ONLY_COOKIES = [
-  'next-auth.session-token',
-  '__Secure-next-auth.session-token',
-  '__Host-next-auth.session-token',
-  'next-auth.csrf-token',
-  '__Host-next-auth.csrf-token',
-];
-
-const NON_HTTP_ONLY_COOKIES = ['next-auth.callback-url'];
+const HTTP_ONLY_COOKIES = [...SESSION_TOKEN_COOKIE_NAMES, ...CSRF_COOKIE_NAMES];
+const NON_HTTP_ONLY_COOKIES = [...CALLBACK_COOKIE_NAMES];
 
 export async function POST(request: Request) {
   return withApiLogging(request, { route: '/api/auth/logout' }, async () => {
@@ -41,8 +43,13 @@ export async function POST(request: Request) {
       }
     }
 
+    const sessionToken = readSessionTokenFromCookieHeader(request.headers.get('cookie'));
+    if (sessionToken) {
+      await revokeDatabaseSessionByToken(prisma, sessionToken);
+    }
+
     const response = NextResponse.json({ ok: true });
-    const isSecure = process.env.NODE_ENV === 'production';
+    const isSecure = shouldUseSecureAuthCookies();
 
     for (const name of HTTP_ONLY_COOKIES) {
       response.cookies.set({

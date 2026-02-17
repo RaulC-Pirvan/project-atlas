@@ -3,7 +3,8 @@
 import { signIn } from 'next-auth/react';
 import { useState } from 'react';
 
-import { GOOGLE_PROVIDER_ID } from '../../lib/auth/oauthProviders';
+import { getApiErrorMessage, parseJson } from '../../lib/api/client';
+import { GOOGLE_PROVIDER_ID, TEST_GOOGLE_PROVIDER_ID } from '../../lib/auth/oauthProviders';
 import { Button } from '../ui/Button';
 
 type OAuthProvider = 'google';
@@ -59,6 +60,18 @@ export function OAuthActionButton({
   const handleClick = async () => {
     setSubmitting(true);
     try {
+      if (providerId === TEST_GOOGLE_PROVIDER_ID) {
+        const response = await fetch('/api/auth/debug/google-sign-in', { method: 'POST' });
+        const body = await parseJson<{ ok: boolean }>(response);
+        if (!response.ok || !body?.ok) {
+          onError?.(getApiErrorMessage(response, body));
+          return;
+        }
+
+        window.location.href = callbackUrl;
+        return;
+      }
+
       const result = await signIn(providerId, { callbackUrl });
       if (result?.error) {
         onError?.(`Unable to continue with ${providerText[provider]}. Try again.`);

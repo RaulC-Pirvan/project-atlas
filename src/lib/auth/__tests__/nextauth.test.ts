@@ -30,6 +30,15 @@ afterEach(() => {
 });
 
 describe('authOptions', () => {
+  it('uses database sessions with explicit lifetimes', async () => {
+    const authOptions = await loadAuthOptions({ NODE_ENV: 'test' });
+
+    expect(authOptions.adapter).toBeDefined();
+    expect(authOptions.session?.strategy).toBe('database');
+    expect(authOptions.session?.maxAge).toBe(30 * 24 * 60 * 60);
+    expect(authOptions.session?.updateAge).toBe(24 * 60 * 60);
+  });
+
   it('includes google provider only when credentials are configured', async () => {
     const withoutGoogle = await loadAuthOptions({
       NODE_ENV: 'test',
@@ -37,7 +46,7 @@ describe('authOptions', () => {
       GOOGLE_CLIENT_SECRET: undefined,
     });
     const withoutGoogleIds = withoutGoogle.providers.map((provider) => provider.id);
-    expect(withoutGoogleIds).toEqual(['credentials']);
+    expect(withoutGoogleIds).toEqual([]);
 
     const withGoogle = await loadAuthOptions({
       NODE_ENV: 'test',
@@ -45,7 +54,7 @@ describe('authOptions', () => {
       GOOGLE_CLIENT_SECRET: 'google-client-secret',
     });
     const withGoogleIds = withGoogle.providers.map((provider) => provider.id);
-    expect(withGoogleIds).toEqual(['credentials', 'google']);
+    expect(withGoogleIds).toEqual(['google']);
   });
 
   it('does not affect credentials sign-in callback path', async () => {

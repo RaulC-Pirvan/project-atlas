@@ -1,10 +1,67 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
-import { getToken } from 'next-auth/jwt';
 
-import { isAdminApiPath, isAdminEmail, isAdminPath } from './src/lib/admin/access';
 import { isPublicPath } from './src/lib/auth/middleware';
+import {
+  CALLBACK_COOKIE_NAMES,
+  CSRF_COOKIE_NAMES,
+  isLegacyJwtSessionToken,
+  SESSION_TOKEN_COOKIE_NAMES,
+  shouldUseSecureAuthCookies,
+} from './src/lib/auth/sessionConfig';
 import { applySecurityHeaders } from './src/lib/http/securityHeaders';
+
+function clearAuthCookies(response: NextResponse, secure: boolean) {
+  for (const name of SESSION_TOKEN_COOKIE_NAMES) {
+    response.cookies.set({
+      name,
+      value: '',
+      path: '/',
+      maxAge: 0,
+      expires: new Date(0),
+      httpOnly: true,
+      sameSite: 'lax',
+      secure,
+    });
+  }
+
+  for (const name of CSRF_COOKIE_NAMES) {
+    response.cookies.set({
+      name,
+      value: '',
+      path: '/',
+      maxAge: 0,
+      expires: new Date(0),
+      httpOnly: true,
+      sameSite: 'lax',
+      secure,
+    });
+  }
+
+  for (const name of CALLBACK_COOKIE_NAMES) {
+    response.cookies.set({
+      name,
+      value: '',
+      path: '/',
+      maxAge: 0,
+      expires: new Date(0),
+      httpOnly: false,
+      sameSite: 'lax',
+      secure,
+    });
+  }
+}
+
+function getSessionToken(request: NextRequest): string | null {
+  for (const name of SESSION_TOKEN_COOKIE_NAMES) {
+    const value = request.cookies.get(name)?.value;
+    if (value) {
+      return value;
+    }
+  }
+
+  return null;
+}
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -15,9 +72,23 @@ export async function middleware(request: NextRequest) {
     return response;
   }
 
-  const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
+  const secure = shouldUseSecureAuthCookies();
+  const sessionToken = getSessionToken(request);
+  const isApiRoute = pathname.startsWith('/api/');
 
-  if (!token) {
+  if (!sessionToken) {
+    if (isApiRoute) {
+      const response = NextResponse.json(
+        {
+          error: 'Unauthorized',
+          recovery: 'Sign in to continue.',
+        },
+        { status: 401 },
+      );
+      applySecurityHeaders(response.headers);
+      return response;
+    }
+
     const signInUrl = new URL('/sign-in', request.url);
     signInUrl.searchParams.set('from', pathname);
     const response = NextResponse.redirect(signInUrl);
@@ -25,27 +96,27 @@ export async function middleware(request: NextRequest) {
     return response;
   }
 
-  if (isAdminPath(pathname) || isAdminApiPath(pathname)) {
-    const email = typeof token.email === 'string' ? token.email : null;
-    const isAdmin = typeof token.isAdmin === 'boolean' ? token.isAdmin : false;
-
-    if (!isAdmin && !isAdminEmail(email)) {
-      if (isAdminApiPath(pathname)) {
-        const response = NextResponse.json(
-          {
-            error: 'Forbidden',
-            recovery: 'Admin access is restricted to the configured allowlist.',
-          },
-          { status: 403 },
-        );
-        applySecurityHeaders(response.headers);
-        return response;
-      }
-
-      const response = NextResponse.redirect(new URL('/today', request.url));
+  if (isLegacyJwtSessionToken(sessionToken)) {
+    if (isApiRoute) {
+      const response = NextResponse.json(
+        {
+          error: 'Unauthorized',
+          recovery: 'Session upgraded. Sign in again.',
+        },
+        { status: 401 },
+      );
+      clearAuthCookies(response, secure);
       applySecurityHeaders(response.headers);
       return response;
     }
+
+    const signInUrl = new URL('/sign-in', request.url);
+    signInUrl.searchParams.set('from', pathname);
+    signInUrl.searchParams.set('reason', 'session-upgrade');
+    const response = NextResponse.redirect(signInUrl);
+    clearAuthCookies(response, secure);
+    applySecurityHeaders(response.headers);
+    return response;
   }
 
   const response = NextResponse.next();

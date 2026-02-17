@@ -1,10 +1,10 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { signIn } from 'next-auth/react';
 import { useRef, useState } from 'react';
 
 import { signInSchema } from '../../lib/api/auth/validation';
+import { parseJson } from '../../lib/api/client';
 import { GOOGLE_PROVIDER_ID } from '../../lib/auth/oauthProviders';
 import { Button } from '../ui/Button';
 import { FormField } from '../ui/FormField';
@@ -14,7 +14,6 @@ import { OAuthActionButton } from './OAuthActionButton';
 
 type SignInResponse = {
   ok: boolean;
-  error?: string | null;
 };
 
 type SignInFormProps = {
@@ -73,19 +72,25 @@ export function SignInForm({
     setSubmitting(true);
 
     try {
-      const result = (await signIn('credentials', {
-        redirect: false,
-        email,
-        password,
-      })) as SignInResponse | undefined;
+      const response = await fetch('/api/auth/sign-in', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      });
+      const body = await parseJson<SignInResponse>(response);
 
-      if (!result || !result.ok) {
+      if (!response.ok || !body?.ok) {
         setEmailError(false);
         setPasswordError(false);
-        if (result?.error === 'EMAIL_NOT_VERIFIED') {
+        if (body && !body.ok && body.error.code === 'email_not_verified') {
           pushToast('Account not verified. Check your email for the verification link.', 'error');
-        } else {
+        } else if (body && !body.ok && body.error.code === 'invalid_credentials') {
           pushToast('Invalid email or password.', 'error');
+        } else {
+          pushToast('Unable to sign in. Try again.', 'error');
         }
         return;
       }

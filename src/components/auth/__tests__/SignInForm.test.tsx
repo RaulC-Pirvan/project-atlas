@@ -1,9 +1,12 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { SignInForm } from '../SignInForm';
 
 const signInMock = vi.fn();
+const fetchMock = vi.fn();
+const pushMock = vi.fn();
+const refreshMock = vi.fn();
 
 vi.mock('next-auth/react', () => ({
   signIn: (...args: unknown[]) => signInMock(...args),
@@ -11,18 +14,32 @@ vi.mock('next-auth/react', () => ({
 
 vi.mock('next/navigation', () => ({
   useRouter: () => ({
-    push: vi.fn(),
-    refresh: vi.fn(),
+    push: pushMock,
+    refresh: refreshMock,
   }),
 }));
 
 describe('SignInForm', () => {
   beforeEach(() => {
     signInMock.mockReset();
+    fetchMock.mockReset();
+    pushMock.mockReset();
+    refreshMock.mockReset();
+    vi.stubGlobal('fetch', fetchMock);
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
   });
 
   it('shows an error for invalid credentials', async () => {
-    signInMock.mockResolvedValueOnce({ ok: false, error: 'CredentialsSignin' });
+    fetchMock.mockResolvedValueOnce({
+      ok: false,
+      json: async () => ({
+        ok: false,
+        error: { code: 'invalid_credentials', message: 'Invalid email or password.' },
+      }),
+    });
 
     render(<SignInForm />);
 
@@ -39,7 +56,16 @@ describe('SignInForm', () => {
   });
 
   it('shows an error for unverified accounts', async () => {
-    signInMock.mockResolvedValueOnce({ ok: false, error: 'EMAIL_NOT_VERIFIED' });
+    fetchMock.mockResolvedValueOnce({
+      ok: false,
+      json: async () => ({
+        ok: false,
+        error: {
+          code: 'email_not_verified',
+          message: 'Account not verified. Check your email for the verification link.',
+        },
+      }),
+    });
 
     render(<SignInForm />);
 
@@ -55,6 +81,34 @@ describe('SignInForm', () => {
     expect(
       await screen.findByText('Account not verified. Check your email for the verification link.'),
     ).toBeInTheDocument();
+  });
+
+  it('signs in with server credentials flow', async () => {
+    fetchMock.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ ok: true, data: { ok: true } }),
+    });
+
+    render(<SignInForm />);
+
+    fireEvent.change(screen.getByLabelText(/email/i), {
+      target: { value: 'user@example.com' },
+    });
+    fireEvent.change(screen.getByLabelText(/password/i), {
+      target: { value: 'password123' },
+    });
+
+    fireEvent.submit(screen.getByRole('button', { name: /sign in/i }));
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith('/api/auth/sign-in', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: 'user@example.com', password: 'password123' }),
+      });
+      expect(pushMock).toHaveBeenCalledWith('/today');
+      expect(refreshMock).toHaveBeenCalled();
+    });
   });
 
   it('starts Google auth when the OAuth button is used', async () => {

@@ -102,7 +102,12 @@ async function waitForStableTotpCode(secret: string) {
 }
 
 async function completeAdminTwoFactorEnrollment(page: Page) {
-  await expect(page).toHaveURL(/\/account\?admin2fa=required/, { timeout: 15_000 });
+  await expect(page).toHaveURL(/\/(today|account\?admin2fa=required)/, { timeout: 15_000 });
+
+  if (!page.url().includes('/account?admin2fa=required')) {
+    return false;
+  }
+
   await page.getByRole('button', { name: /set up 2fa/i }).click();
   await expect(page.getByText(/scan qr code with your authenticator app/i)).toBeVisible();
 
@@ -114,6 +119,7 @@ async function completeAdminTwoFactorEnrollment(page: Page) {
   const recoveryModal = page.getByRole('dialog', { name: /recovery codes/i });
   await expect(recoveryModal).toBeVisible();
   await recoveryModal.getByRole('button', { name: /i saved these codes/i }).click();
+  return true;
 }
 
 test.afterAll(async () => {

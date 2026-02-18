@@ -335,12 +335,12 @@
 
 ### Sprint 13.2: 2FA (TOTP) + Session Controls
 
-- [ ] Implement optional TOTP 2FA for all users
-- [ ] Require 2FA for admin accounts
-- [ ] Add backup/recovery codes (generate, rotate, revoke)
-- [ ] Add session management UI (active sessions + sign out all devices)
-- [ ] Add step-up auth prompts for sensitive actions (email/password change, delete account)
-- [ ] Add unit + E2E coverage for 2FA enable/disable, verification, and recovery
+- [x] Implement optional TOTP 2FA for all users
+- [x] Require 2FA for admin accounts
+- [x] Add backup/recovery codes (generate, rotate, revoke)
+- [x] Add session management UI (active sessions + sign out all devices)
+- [x] Add step-up auth prompts for sensitive actions (email/password change, delete account)
+- [x] Add unit + E2E coverage for 2FA enable/disable, verification, and recovery
 
 ---
 

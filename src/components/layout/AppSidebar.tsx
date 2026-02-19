@@ -26,6 +26,7 @@ const desktopNavItems: NavItem[] = [
     desktopOrder: 'md:order-6',
   },
   { href: '/account', label: 'Account', icon: 'account', desktopOrder: 'md:order-7' },
+  { href: '/support', label: 'Support', icon: 'support', desktopOrder: 'md:order-8' },
 ];
 
 const mobilePrimaryItems: NavItem[] = [
@@ -39,6 +40,7 @@ const mobileMoreItems: NavItem[] = [
   { href: '/insights', label: 'Insights', icon: 'insights' },
   { href: '/achievements', label: 'Achievements', icon: 'achievements' },
   { href: '/account', label: 'Account', icon: 'account' },
+  { href: '/support', label: 'Support', icon: 'support' },
 ];
 
 const desktopBaseClasses =
@@ -172,6 +174,25 @@ function NavIcon({ icon }: { icon: string }) {
         <circle cx="6" cy="12" r="1.8" />
         <circle cx="12" cy="12" r="1.8" />
         <circle cx="18" cy="12" r="1.8" />
+      </svg>
+    );
+  }
+
+  if (icon === 'support') {
+    return (
+      <svg
+        viewBox="0 0 24 24"
+        aria-hidden="true"
+        className="h-5 w-5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M4 12a8 8 0 0 1 8-8h0a8 8 0 0 1 8 8v3.5a2.5 2.5 0 0 1-2.5 2.5H15" />
+        <path d="M9 16h6" />
+        <path d="M12 20h0" />
       </svg>
     );
   }

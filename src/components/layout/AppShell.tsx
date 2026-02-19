@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import type { ReactNode } from 'react';
 
 import { Card } from '../ui/Card';
@@ -40,8 +41,14 @@ export function AppShell({ title, subtitle, children }: AppShellProps) {
               </div>
             </main>
           </div>
-          <footer className="border-t border-black/10 px-6 py-6 text-center text-xs uppercase tracking-[0.3em] text-black/40 dark:border-white/10 dark:text-white/40 mb-[calc(56px+env(safe-area-inset-bottom))] md:mb-0">
-            (c) 2026 Project Atlas
+          <footer className="mb-[calc(56px+env(safe-area-inset-bottom))] border-t border-black/10 px-6 py-6 text-center text-xs uppercase tracking-[0.3em] text-black/40 dark:border-white/10 dark:text-white/40 md:mb-0">
+            <div className="flex items-center justify-center gap-3">
+              <span>(c) 2026 Project Atlas</span>
+              <span aria-hidden="true">|</span>
+              <Link href="/support" className="transition hover:text-black dark:hover:text-white">
+                Support
+              </Link>
+            </div>
           </footer>
         </div>
       </div>

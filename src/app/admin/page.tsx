@@ -6,6 +6,7 @@ import { AdminExportPanel } from '@/components/admin/AdminExportPanel';
 import { AdminHabitsPanel } from '@/components/admin/AdminHabitsPanel';
 import { AdminHealthPanel } from '@/components/admin/AdminHealthPanel';
 import { AdminShell } from '@/components/admin/AdminShell';
+import { AdminSupportPanel } from '@/components/admin/AdminSupportPanel';
 import { AdminUsersPanel } from '@/components/admin/AdminUsersPanel';
 import { requireAdminSession } from '@/lib/admin/auth';
 import { authOptions } from '@/lib/auth/nextauth';
@@ -25,7 +26,7 @@ export default async function AdminPage() {
       subtitle="Read-only visibility for internal health, users, habits, and activity."
     >
       <div className="space-y-10">
-        <section id="health" aria-labelledby="admin-health" className="space-y-3">
+        <section id="health" aria-labelledby="admin-health" className="scroll-mt-20 space-y-3">
           <div className="space-y-1">
             <h2 id="admin-health" className="text-lg font-semibold">
               Health status
@@ -37,7 +38,7 @@ export default async function AdminPage() {
           <AdminHealthPanel />
         </section>
 
-        <section id="users" aria-labelledby="admin-users" className="space-y-3">
+        <section id="users" aria-labelledby="admin-users" className="scroll-mt-20 space-y-3">
           <div className="space-y-1">
             <h2 id="admin-users" className="text-lg font-semibold">
               Users
@@ -49,7 +50,7 @@ export default async function AdminPage() {
           <AdminUsersPanel />
         </section>
 
-        <section id="habits" aria-labelledby="admin-habits" className="space-y-3">
+        <section id="habits" aria-labelledby="admin-habits" className="scroll-mt-20 space-y-3">
           <div className="space-y-1">
             <h2 id="admin-habits" className="text-lg font-semibold">
               Habits
@@ -61,7 +62,7 @@ export default async function AdminPage() {
           <AdminHabitsPanel />
         </section>
 
-        <section id="activity" aria-labelledby="admin-activity" className="space-y-3">
+        <section id="activity" aria-labelledby="admin-activity" className="scroll-mt-20 space-y-3">
           <div className="space-y-1">
             <h2 id="admin-activity" className="text-lg font-semibold">
               Recent activity
@@ -73,7 +74,19 @@ export default async function AdminPage() {
           <AdminActivityPanel />
         </section>
 
-        <section id="export" aria-labelledby="admin-export" className="space-y-3">
+        <section id="support" aria-labelledby="admin-support" className="scroll-mt-20 space-y-3">
+          <div className="space-y-1">
+            <h2 id="admin-support" className="text-lg font-semibold">
+              Support
+            </h2>
+            <p className="text-sm text-black/60 dark:text-white/60">
+              Triage submitted support tickets and update status.
+            </p>
+          </div>
+          <AdminSupportPanel />
+        </section>
+
+        <section id="export" aria-labelledby="admin-export" className="scroll-mt-20 space-y-3">
           <div className="space-y-1">
             <h2 id="admin-export" className="text-lg font-semibold">
               Export

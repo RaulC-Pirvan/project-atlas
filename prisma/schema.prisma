@@ -69,6 +69,7 @@ model User {
   achievementUnlocks AchievementUnlock[]
   habitMilestoneUnlocks HabitMilestoneUnlock[]
   habitReminderSnoozes HabitReminderSnooze[]
+  supportTickets SupportTicket[]
 
   @@index([email])
 }
@@ -293,6 +294,74 @@ enum StepUpMethod {
   totp
   recovery_code
   password
+}
+
+enum SupportTicketCategory {
+  billing
+  account
+  bug
+  feature_request
+}
+
+enum SupportTicketStatus {
+  open
+  in_progress
+  resolved
+}
+
+enum SupportAbuseSignalType {
+  submission_attempt
+  honeypot_hit
+  rate_limited
+  captcha_required
+  captcha_failed
+}
+
+model SupportTicket {
+  id                String                @id @default(cuid())
+  userId            String?
+  category          SupportTicketCategory
+  status            SupportTicketStatus   @default(open)
+  name              String
+  email             String
+  emailHash         String?
+  subject           String
+  message           String
+  ipHash            String
+  userAgent         String?
+  inProgressAt      DateTime?
+  resolvedAt        DateTime?
+  retentionExpiresAt DateTime
+  legalHoldUntil    DateTime?
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @updatedAt
+
+  user         User?               @relation(fields: [userId], references: [id], onDelete: SetNull)
+  abuseSignals SupportAbuseSignal[]
+
+  @@index([userId])
+  @@index([status, createdAt])
+  @@index([retentionExpiresAt])
+  @@index([legalHoldUntil])
+  @@index([ipHash, createdAt])
+  @@index([emailHash, createdAt])
+}
+
+model SupportAbuseSignal {
+  id         String                @id @default(cuid())
+  ticketId   String?
+  signalType SupportAbuseSignalType
+  ipHash     String
+  emailHash  String?
+  userAgent  String?
+  createdAt  DateTime              @default(now())
+
+  ticket SupportTicket? @relation(fields: [ticketId], references: [id], onDelete: SetNull)
+
+  @@index([ticketId])
+  @@index([signalType, createdAt])
+  @@index([ipHash, createdAt])
+  @@index([emailHash, createdAt])
 }
 
 /**

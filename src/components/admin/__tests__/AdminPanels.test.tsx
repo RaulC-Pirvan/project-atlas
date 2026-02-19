@@ -5,6 +5,7 @@ import { AdminActivityPanel } from '../AdminActivityPanel';
 import { AdminExportPanel } from '../AdminExportPanel';
 import { AdminHabitsPanel } from '../AdminHabitsPanel';
 import { AdminHealthPanel } from '../AdminHealthPanel';
+import { AdminSupportPanel } from '../AdminSupportPanel';
 import { AdminUsersPanel } from '../AdminUsersPanel';
 
 describe('admin panels', () => {
@@ -119,6 +120,44 @@ describe('admin panels', () => {
 
     expect(await screen.findByText('API request')).toBeInTheDocument();
     expect(screen.getByText('GET | /api/health | 200 | 12ms')).toBeInTheDocument();
+
+    vi.unstubAllGlobals();
+  });
+
+  it('renders support tickets from the admin support endpoint', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        ok: true,
+        data: {
+          tickets: [
+            {
+              id: 'ticket-1',
+              category: 'bug',
+              status: 'open',
+              name: 'Atlas User',
+              subject: 'Cannot save habit',
+              message: 'The save button does nothing when I submit my updated habit schedule.',
+              email: 'user@example.com',
+              createdAt: '2026-02-19T00:00:00.000Z',
+              updatedAt: '2026-02-19T00:00:00.000Z',
+              inProgressAt: null,
+              resolvedAt: null,
+            },
+          ],
+          counts: { total: 1, open: 1, inProgress: 0, resolved: 0 },
+          nextCursor: null,
+        },
+      }),
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    render(<AdminSupportPanel />);
+
+    expect(await screen.findByText('Cannot save habit')).toBeInTheDocument();
+    expect(screen.getByText(/atlas user \| user@example.com/i)).toBeInTheDocument();
+    expect(screen.getByText(/save button does nothing/i)).toBeInTheDocument();
+    expect(screen.getByText(/1 total/i)).toBeInTheDocument();
 
     vi.unstubAllGlobals();
   });

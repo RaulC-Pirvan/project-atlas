@@ -8,7 +8,9 @@ describe('isPublicPath', () => {
     expect(isPublicPath('/sign-up')).toBe(true);
     expect(isPublicPath('/verify-email')).toBe(true);
     expect(isPublicPath('/landing')).toBe(true);
+    expect(isPublicPath('/support')).toBe(true);
     expect(isPublicPath('/api/auth/signin')).toBe(true);
+    expect(isPublicPath('/api/support/tickets')).toBe(true);
   });
 
   it('blocks private pages', () => {

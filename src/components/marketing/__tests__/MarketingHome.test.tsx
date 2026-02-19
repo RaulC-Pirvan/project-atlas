@@ -21,6 +21,8 @@ describe('MarketingHome', () => {
     signInLinks.forEach((link) => {
       expect(link).toHaveAttribute('href', '/sign-in');
     });
+
+    expect(screen.getByRole('link', { name: /^support$/i })).toHaveAttribute('href', '/support');
   });
 
   it('highlights the schedule, completion, and streak benefits', () => {
@@ -76,6 +78,10 @@ describe('MarketingHome', () => {
 
     expect(screen.getByRole('link', { name: /see atlas pro/i })).toHaveAttribute('href', '/pro');
     expect(screen.getByRole('link', { name: /start free/i })).toHaveAttribute('href', '/sign-up');
+    expect(screen.getByRole('link', { name: /open support center/i })).toHaveAttribute(
+      'href',
+      '/support',
+    );
   });
 
   it('shows dashboard actions when the viewer is authenticated', () => {
@@ -91,6 +97,7 @@ describe('MarketingHome', () => {
       'href',
       '/calendar',
     );
+    expect(screen.getByRole('link', { name: /^support$/i })).toHaveAttribute('href', '/support');
     expect(screen.queryByRole('link', { name: /create your account/i })).not.toBeInTheDocument();
   });
 });

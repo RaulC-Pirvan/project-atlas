@@ -170,19 +170,35 @@ export function MarketingHome({ isAuthenticated = false }: MarketingHomeProps) {
           </div>
           <div className="flex items-center gap-3">
             {isAuthenticated ? (
-              <Link
-                href="/today"
-                className={`text-xs font-medium uppercase tracking-[0.25em] text-black/70 transition hover:text-black dark:text-white/70 dark:hover:text-white ${focusRingClasses}`}
-              >
-                Dashboard
-              </Link>
+              <>
+                <Link
+                  href="/today"
+                  className={`text-xs font-medium uppercase tracking-[0.25em] text-black/70 transition hover:text-black dark:text-white/70 dark:hover:text-white ${focusRingClasses}`}
+                >
+                  Dashboard
+                </Link>
+                <Link
+                  href="/support"
+                  className={`text-xs font-medium uppercase tracking-[0.25em] text-black/70 transition hover:text-black dark:text-white/70 dark:hover:text-white ${focusRingClasses}`}
+                >
+                  Support
+                </Link>
+              </>
             ) : (
-              <Link
-                href="/sign-in"
-                className={`text-xs font-medium uppercase tracking-[0.25em] text-black/70 transition hover:text-black dark:text-white/70 dark:hover:text-white ${focusRingClasses}`}
-              >
-                Sign in
-              </Link>
+              <>
+                <Link
+                  href="/support"
+                  className={`text-xs font-medium uppercase tracking-[0.25em] text-black/70 transition hover:text-black dark:text-white/70 dark:hover:text-white ${focusRingClasses}`}
+                >
+                  Support
+                </Link>
+                <Link
+                  href="/sign-in"
+                  className={`text-xs font-medium uppercase tracking-[0.25em] text-black/70 transition hover:text-black dark:text-white/70 dark:hover:text-white ${focusRingClasses}`}
+                >
+                  Sign in
+                </Link>
+              </>
             )}
             <ThemeToggle className="h-8 w-8" />
           </div>
@@ -472,6 +488,18 @@ export function MarketingHome({ isAuthenticated = false }: MarketingHomeProps) {
           <div className="rounded-2xl border border-black/10 bg-white/80 p-5 text-sm text-black/75 dark:border-white/10 dark:bg-black/70 dark:text-white/75">
             Free always includes the complete daily tracking workflow: habits, calendar,
             completions, streaks, and grace-window support.
+          </div>
+
+          <div className="rounded-2xl border border-black/10 bg-white/80 p-5 text-sm text-black/75 dark:border-white/10 dark:bg-black/70 dark:text-white/75">
+            Need help with billing, account access, bug reports, or feature requests?
+            <div className="mt-3">
+              <Link
+                href="/support"
+                className={`inline-flex h-10 items-center justify-center rounded-full border border-black/20 bg-white px-4 text-xs font-medium uppercase tracking-[0.2em] text-black transition hover:bg-black/5 dark:border-white/20 dark:bg-black dark:text-white dark:hover:bg-white/10 ${focusRingClasses}`}
+              >
+                Open support center
+              </Link>
+            </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-3">

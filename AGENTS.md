@@ -50,10 +50,11 @@ A habit is defined independently of dates.
 
 - Next.js App Router + TypeScript + Tailwind CSS (v4).
 - PostgreSQL (Neon) + Prisma with `@prisma/adapter-pg` and `pg` pool.
-- Auth foundation implemented: signup, verify-email, resend-verification, logout, NextAuth Credentials (JWT sessions), middleware protection.
+- Auth foundation implemented: signup, verify-email, resend-verification, logout, NextAuth Credentials + Google OAuth, Prisma-backed DB sessions, and middleware protection.
+- Security hardening implemented: optional TOTP 2FA for all users, admin 2FA enforcement path, recovery codes (rotate/revoke/consume), active session controls (list/revoke/revoke-all), and step-up verification for sensitive account actions.
 - Account management API + UI: update email/password/display name/week start + daily ordering preference; delete account.
 - Email verification uses Resend client; debug token capture plus `/api/auth/debug/verification-token` for tests (shared token store for API routes).
-- Tests in place: Vitest unit/API tests, auth + habit + calendar + marketing + admin component tests, Playwright auth + habits + today + calendar + daily completion + admin + marketing + visual regression E2E.
+- Tests in place: Vitest unit/API tests, auth + habit + calendar + marketing + admin component tests, Playwright auth + oauth + two-factor + habits + today + calendar + daily completion + admin + marketing + visual regression E2E.
 - Playwright E2E runs use a Windows-safe temp dir setup via `playwright.global-setup.ts` to avoid chromium shutdown hangs.
 - Auth and admin E2E flows include resilience improvements for current navigation and transient request resets (sidebar/mobile sign-out selectors and retry-safe admin API checks).
 - Daily completion and streaks E2E include retry-safe habit creation to handle transient network resets in Firefox.
@@ -129,8 +130,11 @@ A habit is defined independently of dates.
 - `src/app/landing/page.tsx` - Canonical marketing landing page route (accessible signed-in and signed-out).
 - `src/app/api/auth/*/route.ts` - Auth API routes (signup, verify, resend, logout, debug, NextAuth).
 - `src/app/api/health/route.ts` - Health check endpoint.
-- `src/app/api/account/route.ts` - Account update (email/password/display name + daily ordering preference).
-- `src/app/api/account/delete-request/route.ts` - Account deletion request (hard delete).
+- `src/app/api/account/route.ts` - Account update (email/password/display name + daily ordering preference) with step-up proof requirements for sensitive changes.
+- `src/app/api/account/delete-request/route.ts` - Account deletion request (hard delete) with step-up proof requirement.
+- `src/app/api/account/2fa/*` - Account 2FA APIs (setup/enable/disable/recovery rotate/state).
+- `src/app/api/account/sessions/*` - Active session list + revoke one/revoke others/revoke all APIs.
+- `src/app/api/account/step-up/*` - Step-up challenge + verification APIs for sensitive account actions.
 - `src/app/api/habits/route.ts` - Habit list/create API.
 - `src/app/api/habits/[id]/route.ts` - Habit update/archive API.
 - `src/app/api/habits/order/route.ts` - Habit reorder API.
@@ -142,6 +146,9 @@ A habit is defined independently of dates.
 - `src/app/habits/page.tsx` - Habits page (list/create/edit/archive).
 - `src/app/habits/loading.tsx` - Habits route loading skeleton.
 - `src/app/api/auth/[...nextauth]/route.ts` - NextAuth handler.
+- `src/app/api/auth/sign-in/route.ts` - Credentials sign-in orchestration with 2FA/admin-enrollment gating.
+- `src/app/api/auth/sign-in/2fa/verify/route.ts` - Credentials sign-in 2FA verification endpoint.
+- `src/app/api/auth/2fa/challenge/*` - Generic 2FA challenge verification endpoints.
 - `src/app/admin/page.tsx` - Admin dashboard UI (server-authenticated).
 - `src/app/api/admin/*/route.ts` - Admin APIs (health, users, habits, activity, exports).
 - `src/app/api/pro/entitlement/route.ts` - Pro entitlement API (read-only summary).
@@ -152,7 +159,7 @@ A habit is defined independently of dates.
 - `src/app/api/achievements/route.ts` - Achievements API (summary + unlock persistence).
 - `src/app/achievements/page.tsx` - Achievements page (trophy cabinet + milestones).
 - `src/app/api/reminders/settings/route.ts` - Reminder settings API (read/update).
-- `src/lib/auth` - Auth utilities (hashing, policy, credentials, rate limit, nextauth).
+- `src/lib/auth` - Auth utilities (hashing, policy, credentials, Google OAuth linking, NextAuth, DB session services, 2FA/recovery, step-up, and rate limits).
 - `src/lib/api` - Shared API error/response helpers, auth services, validation.
 - `src/lib/api/habits` - Habit API services and validation.
 - `src/lib/api/habits/__tests__` - Habit API service tests.
@@ -165,7 +172,7 @@ A habit is defined independently of dates.
 - `src/components/calendar/__tests__` - Calendar UI tests.
 - `src/components/streaks/StreakSummaryPanel.tsx` - Streak summary panel (current/longest + empty states).
 - `src/components/layout` - App shell layout primitives (AppShell, AppSidebar with desktop Home link and mobile More menu).
-- `src/components/auth/AccountPanel.tsx` - Account settings (including week start + daily ordering preference).
+- `src/components/auth/AccountPanel.tsx` - Account settings (profile + ordering + 2FA enrollment/disable/recovery + session management + step-up prompts).
 - `src/components/auth/SignOutButton.tsx` - Sign-out button for authenticated layouts.
 - `src/components/marketing` - Marketing homepage layout and expanded sections (workflow, insights, achievements, reminders, offline reliability, grace window, Free vs Pro, Pro callouts).
 - `src/components/admin` - Admin UI components and tests.
@@ -213,8 +220,10 @@ A habit is defined independently of dates.
 - `src/app/(auth)` - Auth pages (sign-in, sign-up, verify-email).
 - `src/app/account/page.tsx` - Account management page.
 - `src/app/pro/page.tsx` - Pro upgrade page and preview content.
-- `middleware.ts` - Route protection using NextAuth JWT.
+- `middleware.ts` - Route protection using DB session cookies, legacy JWT-session cutover invalidation, and admin 2FA enrollment gating.
 - `e2e/auth.spec.ts` - Auth flows E2E coverage (including shared sign-out helper for desktop/mobile nav variants).
+- `e2e/oauth.spec.ts` - Google OAuth and credentials fallback E2E coverage.
+- `e2e/two-factor.spec.ts` - 2FA enrollment/challenge/recovery/session-revocation E2E coverage.
 - `e2e/daily-completion.spec.ts` - Daily completion E2E flow coverage.
 - `e2e/admin.spec.ts` - Admin dashboard E2E coverage (including retry-safe API request assertions).
 - `e2e/calendar-visual.spec.ts` - Playwright visual regression coverage for calendar tiles.
@@ -250,6 +259,10 @@ A habit is defined independently of dates.
 - `docs/test workflows/sprint-11.2-test-workflows.md` - Offline-first completions test workflows.
 - `docs/sprints/sprint-12.1.md` - Completion grace window sprint plan.
 - `docs/test workflows/sprint-12.1-test-workflows.md` - Completion grace window test workflows.
+- `docs/sprints/sprint-13.1.md` - Social sign-in (Google OAuth) sprint plan.
+- `docs/test workflows/sprint-13.1-test-workflows.md` - Social sign-in (Google OAuth) test workflows.
+- `docs/sprints/sprint-13.2.md` - 2FA (TOTP) + session controls sprint plan.
+- `docs/test workflows/sprint-13.2-test-workflow.md` - 2FA (TOTP) + session controls test workflow.
 - `docs/ops/staging.md` - Staging environment guide.
 - `docs/ops/backups.md` - Backup strategy and validation checklist.
 - `docs/ops/reminders-delivery.md` - Reminder delivery strategy (push-ready).
@@ -278,7 +291,10 @@ A habit is defined independently of dates.
 - Debug verification tokens are stored in-memory and exposed via `/api/auth/debug/verification-token` in non-prod or when `ENABLE_TEST_ENDPOINTS=true`.
 - `ENABLE_TEST_ENDPOINTS=true` skips sending real emails.
 - `/api/auth/logout` clears NextAuth cookies.
-- NextAuth uses JWT sessions and requires `NEXTAUTH_SECRET` in production.
+- NextAuth uses Prisma adapter with DB-backed sessions (`session.strategy='database'`) and requires `NEXTAUTH_SECRET` in production.
+- Middleware invalidates legacy JWT-shaped session cookies from pre-migration sessions and forces one-time re-login.
+- TOTP secrets are encrypted at rest and require `TOTP_ENCRYPTION_KEY` (32-byte key material in hex/base64).
+- Admin 2FA enforcement is controlled by `ENABLE_ADMIN_2FA_ENFORCEMENT`, `ADMIN_2FA_ENFORCE_FROM`, and `DISABLE_ADMIN_2FA_ENFORCEMENT`.
 
 ## Expectations for AI Assistance
 

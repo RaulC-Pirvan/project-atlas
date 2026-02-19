@@ -5,7 +5,8 @@ import { updateAccountSchema } from '../../../lib/api/auth/validation';
 import { ApiError, asApiError } from '../../../lib/api/errors';
 import { jsonError, jsonOk } from '../../../lib/api/response';
 import { authOptions } from '../../../lib/auth/nextauth';
-import { hashPassword, verifyPassword } from '../../../lib/auth/password';
+import { hashPassword } from '../../../lib/auth/password';
+import { consumeStepUpProof, requireFreshStepUpProof } from '../../../lib/auth/stepUpProof';
 import { generateToken, hashToken } from '../../../lib/auth/tokens';
 import { prisma } from '../../../lib/db/prisma';
 import { withApiLogging } from '../../../lib/observability/apiLogger';
@@ -36,6 +37,7 @@ export async function PUT(request: Request) {
           id: true,
           email: true,
           passwordHash: true,
+          passwordSetAt: true,
           displayName: true,
           weekStart: true,
           keepCompletedAtBottom: true,
@@ -48,40 +50,66 @@ export async function PUT(request: Request) {
       const updates: {
         email?: string;
         passwordHash?: string;
+        passwordSetAt?: Date | null;
         emailVerified?: Date | null;
         displayName?: string;
         weekStart?: 'sun' | 'mon';
         keepCompletedAtBottom?: boolean;
       } = {};
+      let stepUpChallengeIdToConsume: string | null = null;
 
-      if (parsed.data.email && parsed.data.email !== user.email) {
-        if (!parsed.data.currentPassword) {
-          throw new ApiError(
-            'invalid_request',
-            'Password confirmation required to change email.',
-            400,
-          );
+      const normalizedIncomingEmail = parsed.data.email?.toLowerCase();
+      const emailWillChange = !!normalizedIncomingEmail && normalizedIncomingEmail !== user.email;
+      const passwordWillChange = !!parsed.data.password;
+
+      if (emailWillChange && passwordWillChange) {
+        throw new ApiError(
+          'invalid_request',
+          'Update email and password separately so each change can be verified.',
+          400,
+        );
+      }
+
+      if (emailWillChange) {
+        if (!normalizedIncomingEmail) {
+          throw new ApiError('invalid_request', 'Email is required.', 400);
         }
 
-        const passwordOk = await verifyPassword(parsed.data.currentPassword, user.passwordHash);
-        if (!passwordOk) {
-          throw new ApiError('invalid_request', 'Password confirmation does not match.', 400);
-        }
+        const proof = await requireFreshStepUpProof({
+          prisma,
+          userId: user.id,
+          action: 'account_email_change',
+          stepUpChallengeToken: parsed.data.stepUpChallengeToken,
+        });
+        stepUpChallengeIdToConsume = proof.id;
 
         const existing = await prisma.user.findUnique({
-          where: { email: parsed.data.email.toLowerCase() },
+          where: { email: normalizedIncomingEmail },
           select: { id: true },
         });
         if (existing && existing.id !== user.id) {
           throw new ApiError('email_taken', 'Email already in use.', 409);
         }
 
-        updates.email = parsed.data.email.toLowerCase();
+        updates.email = normalizedIncomingEmail;
         updates.emailVerified = null;
       }
 
-      if (parsed.data.password) {
+      if (passwordWillChange) {
+        if (!parsed.data.password) {
+          throw new ApiError('invalid_request', 'Password is required.', 400);
+        }
+
+        const proof = await requireFreshStepUpProof({
+          prisma,
+          userId: user.id,
+          action: 'account_password_change',
+          stepUpChallengeToken: parsed.data.stepUpChallengeToken,
+        });
+        stepUpChallengeIdToConsume = proof.id;
+
         updates.passwordHash = await hashPassword(parsed.data.password);
+        updates.passwordSetAt = new Date();
       }
 
       if (parsed.data.displayName !== undefined) {
@@ -107,6 +135,12 @@ export async function PUT(request: Request) {
         where: { id: user.id },
         data: updates,
       });
+      if (stepUpChallengeIdToConsume) {
+        await consumeStepUpProof({
+          prisma,
+          challengeId: stepUpChallengeIdToConsume,
+        });
+      }
 
       if (updates.email) {
         const rawToken = generateToken();

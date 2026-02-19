@@ -2,8 +2,19 @@ import Link from 'next/link';
 
 import { AuthShell } from '../../../components/auth/AuthShell';
 import { SignInForm } from '../../../components/auth/SignInForm';
+import { GOOGLE_PROVIDER_ID, TEST_GOOGLE_PROVIDER_ID } from '../../../lib/auth/oauthProviders';
+
+export const dynamic = 'force-dynamic';
 
 export default function SignInPage() {
+  const testGoogleProviderEnabled =
+    process.env.ENABLE_TEST_ENDPOINTS === 'true' &&
+    process.env.ENABLE_TEST_GOOGLE_OAUTH_PROVIDER === 'true';
+  const googleProviderId = testGoogleProviderEnabled ? TEST_GOOGLE_PROVIDER_ID : GOOGLE_PROVIDER_ID;
+  const showGoogleSignIn = Boolean(
+    (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) || testGoogleProviderEnabled,
+  );
+
   return (
     <AuthShell
       title="Welcome back"
@@ -27,7 +38,7 @@ export default function SignInPage() {
         </div>
       }
     >
-      <SignInForm />
+      <SignInForm showGoogleSignIn={showGoogleSignIn} googleProviderId={googleProviderId} />
     </AuthShell>
   );
 }

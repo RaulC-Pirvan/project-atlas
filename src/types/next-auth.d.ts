@@ -6,6 +6,7 @@ declare module 'next-auth' {
       id: string;
       emailVerifiedAt?: string | null;
       isAdmin?: boolean;
+      twoFactorEnabled?: boolean;
     };
   }
 
@@ -13,6 +14,7 @@ declare module 'next-auth' {
     id: string;
     emailVerified?: Date | null;
     isAdmin?: boolean;
+    twoFactorEnabled?: boolean;
   }
 }
 
@@ -22,5 +24,6 @@ declare module 'next-auth/jwt' {
     emailVerifiedAt?: string | null;
     email?: string | null;
     isAdmin?: boolean;
+    twoFactorEnabled?: boolean;
   }
 }

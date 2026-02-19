@@ -1,5 +1,7 @@
 export type ApiErrorCode =
   | 'invalid_request'
+  | 'invalid_credentials'
+  | 'email_not_verified'
   | 'email_taken'
   | 'rate_limited'
   | 'token_invalid'
@@ -38,6 +40,8 @@ export function asApiError(error: unknown): ApiError {
 export function getApiErrorRecovery(code: ApiErrorCode, status: number): ApiErrorRecovery {
   if (code === 'rate_limited' || status === 429) return 'retry_later';
   if (code === 'unauthorized' || status === 401) return 'reauth';
+  if (code === 'email_not_verified') return 'resend';
+  if (code === 'invalid_credentials') return 'update_input';
   if (code === 'forbidden' || status === 403) return 'none';
   if (code === 'email_taken' || code === 'invalid_request') return 'update_input';
   if (code === 'token_invalid' || code === 'token_expired') return 'resend';

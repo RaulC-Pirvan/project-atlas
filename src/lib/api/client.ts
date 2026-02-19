@@ -44,6 +44,8 @@ function fallbackMessageForStatus(status: number): string {
 function inferRecovery(code?: string, status?: number): ApiErrorRecovery {
   if (code === 'rate_limited' || status === 429) return 'retry_later';
   if (code === 'unauthorized' || status === 401) return 'reauth';
+  if (code === 'email_not_verified') return 'resend';
+  if (code === 'invalid_credentials') return 'update_input';
   if (code === 'email_taken' || code === 'invalid_request') return 'update_input';
   if (code === 'token_invalid' || code === 'token_expired') return 'resend';
   if (code === 'internal_error' || (status !== undefined && status >= 500)) return 'retry';
@@ -52,6 +54,8 @@ function inferRecovery(code?: string, status?: number): ApiErrorRecovery {
 
 function recoveryHintForCode(code: string | undefined, recovery: ApiErrorRecovery): string {
   if (code === 'email_taken') return 'Try a different email.';
+  if (code === 'invalid_credentials') return 'Check your email and password.';
+  if (code === 'email_not_verified') return 'Request a new verification link.';
   if (code === 'token_invalid' || code === 'token_expired') return 'Request a new link.';
   return recoveryHints[recovery] ?? '';
 }

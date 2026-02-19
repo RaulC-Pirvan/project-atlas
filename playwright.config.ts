@@ -3,8 +3,12 @@ import { defineConfig, devices } from '@playwright/test';
 const webServerEnv = {
   ...process.env,
   ENABLE_TEST_ENDPOINTS: 'true',
+  ENABLE_TEST_GOOGLE_OAUTH_PROVIDER: process.env.ENABLE_TEST_GOOGLE_OAUTH_PROVIDER ?? 'true',
   NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET ?? 'test-secret',
   NEXTAUTH_URL: process.env.NEXTAUTH_URL ?? 'http://localhost:3000',
+  TOTP_ENCRYPTION_KEY:
+    process.env.TOTP_ENCRYPTION_KEY ??
+    '00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff',
 };
 const isWindows = process.platform === 'win32';
 const devCommand = isWindows ? 'node ./node_modules/next/dist/bin/next dev -p 3000' : 'npm run dev';

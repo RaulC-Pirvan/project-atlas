@@ -22,9 +22,7 @@ describe('AdminPage', () => {
 
   it('redirects non-admin users to /today', async () => {
     mockedGetServerSession.mockResolvedValue({ user: { id: 'u1' } });
-    mockedRequireAdminSession.mockImplementation(() => {
-      throw new Error('Not allowed');
-    });
+    mockedRequireAdminSession.mockRejectedValue(new Error('Not allowed'));
 
     await AdminPage();
 
@@ -33,7 +31,11 @@ describe('AdminPage', () => {
 
   it('renders for admin users', async () => {
     mockedGetServerSession.mockResolvedValue({ user: { id: 'u1', email: 'admin@example.com' } });
-    mockedRequireAdminSession.mockReturnValue({ userId: 'u1', email: 'admin@example.com' });
+    mockedRequireAdminSession.mockResolvedValue({
+      userId: 'u1',
+      email: 'admin@example.com',
+      twoFactorEnabled: true,
+    });
 
     const result = await AdminPage();
 

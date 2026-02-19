@@ -5,16 +5,26 @@ import { useRef, useState } from 'react';
 
 import { signupSchema } from '../../lib/api/auth/validation';
 import { getApiErrorMessage, parseJson } from '../../lib/api/client';
+import { GOOGLE_PROVIDER_ID } from '../../lib/auth/oauthProviders';
 import { Button } from '../ui/Button';
 import { FormField } from '../ui/FormField';
 import { Input } from '../ui/Input';
 import { type ToastItem, ToastStack } from '../ui/Toast';
+import { OAuthActionButton } from './OAuthActionButton';
 
 type SignupResponse = {
   userId: string;
 };
 
-export function SignUpForm() {
+type SignUpFormProps = {
+  showGoogleSignIn?: boolean;
+  googleProviderId?: string;
+};
+
+export function SignUpForm({
+  showGoogleSignIn = false,
+  googleProviderId = GOOGLE_PROVIDER_ID,
+}: SignUpFormProps) {
   const [displayName, setDisplayName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -221,6 +231,24 @@ export function SignUpForm() {
       <Button type="submit" size="lg" className="w-full" disabled={submitting}>
         {submitting ? 'Creating account...' : 'Create account'}
       </Button>
+      {showGoogleSignIn ? (
+        <>
+          <div className="flex items-center gap-3">
+            <div className="h-px flex-1 bg-black/10 dark:bg-white/10" />
+            <p className="text-xs uppercase tracking-[0.2em] text-black/50 dark:text-white/50">
+              Or continue with Google
+            </p>
+            <div className="h-px flex-1 bg-black/10 dark:bg-white/10" />
+          </div>
+          <OAuthActionButton
+            provider="google"
+            providerId={googleProviderId}
+            callbackUrl="/today"
+            label="Continue with Google"
+            onError={(message) => pushToast(message, 'error')}
+          />
+        </>
+      ) : null}
       <ToastStack toasts={toasts} />
     </form>
   );

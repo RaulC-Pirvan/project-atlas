@@ -22,7 +22,7 @@ export async function GET(request: Request) {
     { route: '/api/admin/exports/users' },
     async () => {
       const session = await getServerSession(authOptions);
-      requireAdminSession(session);
+      await requireAdminSession(session);
 
       const rows = await listExportUsers(prisma);
 

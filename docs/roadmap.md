@@ -325,22 +325,22 @@
 
 ### Sprint 13.1: Social Sign-in (Google OAuth)
 
-- [ ] Add Google provider to NextAuth with safe account-linking rules
-- [ ] Add `Continue with Google` on sign-in and sign-up
-- [ ] Keep email/password as fallback auth path
-- [ ] Add API/unit coverage for OAuth callback and account-link edge cases
-- [ ] Add E2E coverage for OAuth happy path + fallback login path
+- [x] Add Google provider to NextAuth with safe account-linking rules
+- [x] Add `Continue with Google` on sign-in and sign-up
+- [x] Keep email/password as fallback auth path
+- [x] Add API/unit coverage for OAuth callback and account-link edge cases
+- [x] Add E2E coverage for OAuth happy path + fallback login path
 
 ---
 
 ### Sprint 13.2: 2FA (TOTP) + Session Controls
 
-- [ ] Implement optional TOTP 2FA for all users
-- [ ] Require 2FA for admin accounts
-- [ ] Add backup/recovery codes (generate, rotate, revoke)
-- [ ] Add session management UI (active sessions + sign out all devices)
-- [ ] Add step-up auth prompts for sensitive actions (email/password change, delete account)
-- [ ] Add unit + E2E coverage for 2FA enable/disable, verification, and recovery
+- [x] Implement optional TOTP 2FA for all users
+- [x] Require 2FA for admin accounts
+- [x] Add backup/recovery codes (generate, rotate, revoke)
+- [x] Add session management UI (active sessions + sign out all devices)
+- [x] Add step-up auth prompts for sensitive actions (email/password change, delete account)
+- [x] Add unit + E2E coverage for 2FA enable/disable, verification, and recovery
 
 ---
 

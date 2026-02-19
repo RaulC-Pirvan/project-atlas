@@ -54,7 +54,7 @@ A habit is defined independently of dates.
 - Security hardening implemented: optional TOTP 2FA for all users, admin 2FA enforcement path, recovery codes (rotate/revoke/consume), active session controls (list/revoke/revoke-all), and step-up verification for sensitive account actions.
 - Account management API + UI: update email/password/display name/week start + daily ordering preference; delete account.
 - Email verification uses Resend client; debug token capture plus `/api/auth/debug/verification-token` for tests (shared token store for API routes).
-- Tests in place: Vitest unit/API tests, auth + habit + calendar + marketing + admin component tests, Playwright auth + oauth + two-factor + habits + today + calendar + daily completion + admin + marketing + visual regression E2E.
+- Tests in place: Vitest unit/API tests, auth + habit + calendar + marketing + support + admin component tests, Playwright auth + oauth + two-factor + habits + today + calendar + daily completion + support + admin + marketing + visual regression E2E.
 - Playwright E2E runs use a Windows-safe temp dir setup via `playwright.global-setup.ts` to avoid chromium shutdown hangs.
 - Auth and admin E2E flows include resilience improvements for current navigation and transient request resets (sidebar/mobile sign-out selectors and retry-safe admin API checks).
 - Daily completion and streaks E2E include retry-safe habit creation to handle transient network resets in Firefox.
@@ -68,12 +68,15 @@ A habit is defined independently of dates.
 - Habit ordering supports manual order (`sortOrder`), reorder API, and an optional "keep completed at bottom" preference (default on) shared across Today and daily panels.
 - Habit scheduling now respects habit creation date: habits only appear on/after their creation date in Today, calendar, and insights.
 - Habits page mobile actions are tuned for symmetry (2x2 action grid) and danger-forward delete affordances.
-- Authenticated screens use `AppShell` + `AppSidebar` with desktop `Home` (`/landing`) plus app routes, and mobile primary nav (`Today/Calendar/Habits`) with animated `More` actions (`Home/Insights/Achievements/Account/Sign out`).
-- Marketing homepage expansion is live with full product narrative, refined non-technical messaging, Free vs Pro comparison, and Pro value callouts.
+- Authenticated screens use `AppShell` + `AppSidebar` with desktop `Home` (`/landing`) plus app routes (including `Support`), and mobile primary nav (`Today/Calendar/Habits`) with animated `More` actions (`Home/Insights/Achievements/Account/Support/Sign out`).
+- Marketing homepage expansion is live with full product narrative, refined non-technical messaging, Free vs Pro comparison, Pro value callouts, and support discoverability entry points.
 - Root routing is auth-aware: signed-out users visiting `/` are routed to canonical landing `/landing`, while signed-in users are routed to `/today`.
 - Signed-in users can access `/landing` and use two-way navigation (`Home` in app shell, `Go to dashboard` on landing).
 - Light/dark theme toggle (system default + localStorage persistence) available on marketing/auth/app shells.
 - Shared modal dialogs are rendered via portal to `document.body` so mobile confirmation dialogs stay viewport-centered even inside animated/transformed page containers.
+- Public Support Center is implemented at `/support` with FAQ + support form for signed-out and signed-in users, signed-in prefill, motion-safe entrance animations, and route loading skeleton.
+- Support intake is implemented via `POST /api/support/tickets` with strict payload validation, honeypot handling, per-IP/per-email rate limits, conditional CAPTCHA policy, DB-authoritative ticket storage, and support inbox email notification routing.
+- Support form validation remains toast-first (no inline error text), with field-specific error toasts and invalid-field highlighting.
 - Today view implemented at `/today` for fast daily entry of today's due habits.
 - Calendar view implemented with monthly grid, month navigation, selected-day side panel (`?date=YYYY-MM-DD`), daily completion toggles via `/api/completions`, per-day progress indicators, and golden completed-day tiles (black text for contrast).
 - Calendar defaults to selecting today on `/calendar` (current month); mobile daily sheet only auto-opens when a `date` param is present.
@@ -89,7 +92,9 @@ A habit is defined independently of dates.
 - User profile tracks `weekStart` (sun/mon), `timezone` (defaults to UTC, no UI yet), and `keepCompletedAtBottom` for daily ordering.
 - Post-login redirect lands on `/today` (tests and flows expect Today as the default landing page).
 - Observability & safety in place: Sentry error tracking (with tunnel), structured API logging, `/api/health` endpoint, global security headers, and auth route rate limiting.
-- Admin dashboard implemented with allowlist access, health status panel, user/habit lists, activity log, and admin-safe CSV exports.
+- Admin dashboard implemented with allowlist access, health status panel, user/habit lists, activity log, support triage panel, and admin-safe CSV exports.
+- Admin support triage supports status filtering/pagination, status transitions (`open`/`in_progress`/`resolved`), and ticket context display (requester name/email, subject, message) while avoiding infrastructure-sensitive leakage.
+- Admin one-page navigation supports smooth scrolling for section anchors (`Health`, `Users`, `Habits`, `Activity`, `Support`, `Export`) with reduced-motion fallback.
 - Pro entitlement model implemented (server-side) with `ProEntitlement` table and `/api/pro/entitlement` endpoint.
 - Pro upgrade entry points and preview states implemented (calendar and account surfaces), with a dedicated `/pro` page and mobile-first restore purchase placeholder.
 - Advanced Insights v1 implemented (Pro-gated): insights API, aggregated calculations, and Insights UI (cards + heatmap + summary panel).
@@ -128,6 +133,8 @@ A habit is defined independently of dates.
 - `src/app` - App Router UI and API routes.
 - `src/app/page.tsx` - Auth-aware root router (`/` -> `/landing` when signed out, `/today` when signed in).
 - `src/app/landing/page.tsx` - Canonical marketing landing page route (accessible signed-in and signed-out).
+- `src/app/support/page.tsx` - Public support center route (FAQ + support form).
+- `src/app/support/loading.tsx` - Support route loading skeleton.
 - `src/app/api/auth/*/route.ts` - Auth API routes (signup, verify, resend, logout, debug, NextAuth).
 - `src/app/api/health/route.ts` - Health check endpoint.
 - `src/app/api/account/route.ts` - Account update (email/password/display name + daily ordering preference) with step-up proof requirements for sensitive changes.
@@ -150,7 +157,10 @@ A habit is defined independently of dates.
 - `src/app/api/auth/sign-in/2fa/verify/route.ts` - Credentials sign-in 2FA verification endpoint.
 - `src/app/api/auth/2fa/challenge/*` - Generic 2FA challenge verification endpoints.
 - `src/app/admin/page.tsx` - Admin dashboard UI (server-authenticated).
-- `src/app/api/admin/*/route.ts` - Admin APIs (health, users, habits, activity, exports).
+- `src/app/api/admin/*/route.ts` - Admin APIs (health, users, habits, activity, support, exports).
+- `src/app/api/admin/support/route.ts` - Admin support ticket list API (filter + cursor pagination).
+- `src/app/api/admin/support/[id]/route.ts` - Admin support ticket status update API.
+- `src/app/api/support/tickets/route.ts` - Public support ticket submit API.
 - `src/app/api/pro/entitlement/route.ts` - Pro entitlement API (read-only summary).
 - `src/app/api/pro/debug/grant/route.ts` - Test-only Pro entitlement grant.
 - `src/app/api/habits/debug/create/route.ts` - Test-only habit creation with explicit `createdAt`.
@@ -163,6 +173,7 @@ A habit is defined independently of dates.
 - `src/lib/api` - Shared API error/response helpers, auth services, validation.
 - `src/lib/api/habits` - Habit API services and validation.
 - `src/lib/api/habits/__tests__` - Habit API service tests.
+- `src/lib/api/support/validation.ts` - Support API validation schemas.
 - `src/lib/api/reminders/validation.ts` - Reminder settings validation schema.
 - `src/lib/api/insights/summary.ts` - Insights data service (aggregated).
 - `src/lib/api/achievements/summary.ts` - Achievements data service (unlock persistence).
@@ -176,6 +187,8 @@ A habit is defined independently of dates.
 - `src/components/auth/SignOutButton.tsx` - Sign-out button for authenticated layouts.
 - `src/components/marketing` - Marketing homepage layout and expanded sections (workflow, insights, achievements, reminders, offline reliability, grace window, Free vs Pro, Pro callouts).
 - `src/components/admin` - Admin UI components and tests.
+- `src/components/admin/AdminSupportPanel.tsx` - Admin support triage UI panel.
+- `src/components/support` - Support center UI components and tests.
 - `src/components/pro` - Pro upgrade entry points and preview cards.
 - `src/components/insights` - Insights UI components (dashboard, snapshot, upgrade card).
 - `src/components/achievements` - Achievements UI components (dashboard, upgrade card, toast).
@@ -201,19 +214,25 @@ A habit is defined independently of dates.
 - `src/lib/habits/__tests__` - Habit domain unit tests.
 - `src/lib/reminders` - Reminder domain helpers (time parsing, settings defaults, rules, validation, delivery strategy).
 - `src/lib/reminders/__tests__` - Reminder unit tests.
-- `src/lib/admin` - Admin access/auth and data services (users, habits, exports).
+- `src/lib/admin` - Admin access/auth and data services (users, habits, support, exports).
+- `src/lib/admin/support.ts` - Admin support ticket query/update services.
+- `src/lib/support` - Support domain helpers (policy, retention, hashing, lifecycle, types).
 - `src/lib/pro` - Pro entitlement helpers.
 - `src/lib/insights` - Insights domain helpers (summary, types, weekdays).
 - `src/lib/insights/__tests__` - Insights unit tests.
 - `src/lib/achievements` - Achievements domain helpers (catalogue, summary, types).
 - `src/lib/achievements/__tests__` - Achievements unit tests.
 - `src/infra/email` - Resend client, verification email sender, debug token store.
+- `src/infra/email/sendSupportTicketEmail.ts` - Support inbox notification email sender.
 - `src/lib/observability` - Structured logging + API logging wrapper.
 - `src/lib/http/securityHeaders.ts` - Shared security headers.
 - `src/lib/http/rateLimit.ts` - In-memory rate limiting helper.
 - `src/types/next-auth.d.ts` - NextAuth session/JWT type extensions.
 - `prisma/schema.prisma` - DB models; migrations in `prisma/migrations`; seed in `prisma/seed.ts`.
 - `src/app/api/auth/__tests__` - API auth tests.
+- `src/app/api/support/__tests__` - Support submit API tests.
+- `src/app/api/admin/__tests__/support.route.test.ts` - Admin support list route tests.
+- `src/app/api/admin/__tests__/support-id.route.test.ts` - Admin support status route tests.
 - `src/lib/auth/__tests__` - Auth unit tests (password, tokens, policy, credentials).
 - `src/components/auth` - Auth/account UI panels and tests.
 - `src/components/ui` - Shared UI primitives.
@@ -226,6 +245,7 @@ A habit is defined independently of dates.
 - `e2e/two-factor.spec.ts` - 2FA enrollment/challenge/recovery/session-revocation E2E coverage.
 - `e2e/daily-completion.spec.ts` - Daily completion E2E flow coverage.
 - `e2e/admin.spec.ts` - Admin dashboard E2E coverage (including retry-safe API request assertions).
+- `e2e/support.spec.ts` - Support center submit/prefill/abuse-path E2E coverage.
 - `e2e/calendar-visual.spec.ts` - Playwright visual regression coverage for calendar tiles.
 - `e2e/marketing-homepage.spec.ts` - Marketing homepage E2E coverage.
 - `e2e/insights.spec.ts` - Insights gating E2E coverage.
@@ -263,6 +283,8 @@ A habit is defined independently of dates.
 - `docs/test workflows/sprint-13.1-test-workflows.md` - Social sign-in (Google OAuth) test workflows.
 - `docs/sprints/sprint-13.2.md` - 2FA (TOTP) + session controls sprint plan.
 - `docs/test workflows/sprint-13.2-test-workflow.md` - 2FA (TOTP) + session controls test workflow.
+- `docs/sprints/sprint-14.1.md` - Support Center + Contact Form sprint plan.
+- `docs/test workflows/sprint-14.1-test-workflow.md` - Support Center + Contact Form test workflow.
 - `docs/ops/staging.md` - Staging environment guide.
 - `docs/ops/backups.md` - Backup strategy and validation checklist.
 - `docs/ops/reminders-delivery.md` - Reminder delivery strategy (push-ready).

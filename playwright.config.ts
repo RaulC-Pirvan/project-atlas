@@ -6,6 +6,7 @@ const webServerEnv = {
   ENABLE_TEST_GOOGLE_OAUTH_PROVIDER: process.env.ENABLE_TEST_GOOGLE_OAUTH_PROVIDER ?? 'true',
   NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET ?? 'test-secret',
   NEXTAUTH_URL: process.env.NEXTAUTH_URL ?? 'http://localhost:3000',
+  SUPPORT_IP_HASH_SECRET: process.env.SUPPORT_IP_HASH_SECRET ?? 'test-support-ip-hash-secret',
   TOTP_ENCRYPTION_KEY:
     process.env.TOTP_ENCRYPTION_KEY ??
     '00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff',
@@ -46,7 +47,16 @@ export default defineConfig({
     },
     {
       name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
+      use: {
+        ...devices['Desktop Firefox'],
+        launchOptions: {
+          firefoxUserPrefs: {
+            'browser.sessionstore.resume_from_crash': false,
+            'browser.sessionstore.restore_on_demand': false,
+          },
+        },
+      },
+      workers: process.env.CI ? 1 : undefined,
       testIgnore: /calendar-visual\.spec\.ts/,
     },
     {

@@ -72,7 +72,13 @@ describe('legal pages', () => {
     render(<LegalChangesPage />);
 
     expect(screen.getByRole('heading', { name: /policy changes/i })).toBeInTheDocument();
-    expect(screen.getByText(/initial legal surface scaffold published/i)).toBeInTheDocument();
+    expect(screen.getByText(/initial publication baseline/i)).toBeInTheDocument();
+    expect(screen.getByText(/policy update procedure/i)).toBeInTheDocument();
+    expect(screen.getByText(/draft -> review -> legal sign-off -> publish/i)).toBeInTheDocument();
+    expect(screen.getByText(/release-note template fields/i)).toBeInTheDocument();
+    expect(screen.getByText(/^Approver$/i)).toBeInTheDocument();
+    expect(screen.getByText(/^Date$/i)).toBeInTheDocument();
+    expect(screen.getByText(/^Policy version$/i)).toBeInTheDocument();
     expect(screen.getByText(/publish status: blocked/i)).toBeInTheDocument();
   });
 });

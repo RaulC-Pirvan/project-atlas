@@ -46,8 +46,19 @@ export const LEGAL_CHANGES_METADATA: LegalPolicyMetadata = {
 export const LEGAL_CHANGE_LOG: LegalChangeLogEntry[] = [
   {
     date: '2026-02-20',
+    summary: 'Initial publication baseline for Privacy, Terms, and Refund policy pages.',
+    policyIds: ['privacy', 'terms', 'refunds'],
+  },
+  {
+    date: '2026-02-20',
     summary:
-      'Initial legal surface scaffold published for Privacy, Terms, Refunds, and policy change tracking.',
+      'Policy text aligned with product behavior: hard-delete account removal, 16+ eligibility, and support response expectations.',
+    policyIds: ['privacy', 'terms', 'refunds'],
+  },
+  {
+    date: '2026-02-20',
+    summary:
+      'Cross-surface legal discoverability added to landing, Pro, and account surfaces with explicit policy link labels.',
     policyIds: ['privacy', 'terms', 'refunds'],
   },
 ];

@@ -131,11 +131,11 @@ production publish until finalized:
 
 ### Tasks (5)
 
-- [ ] **Task 3.1**: Implement `/legal/changes` with dated, short-form policy update entries
-- [ ] **Task 3.2**: Add initial change-log entries for first publication baseline
-- [ ] **Task 3.3**: Add lightweight policy update procedure note (draft -> review -> legal sign-off -> publish)
-- [ ] **Task 3.4**: Add release-note template fields (`approver`, `date`, `policy version`)
-- [ ] **Task 3.5**: Document production publish blockers for missing legal entity details
+- [x] **Task 3.1**: Implement `/legal/changes` with dated, short-form policy update entries
+- [x] **Task 3.2**: Add initial change-log entries for first publication baseline
+- [x] **Task 3.3**: Add lightweight policy update procedure note (draft -> review -> legal sign-off -> publish)
+- [x] **Task 3.4**: Add release-note template fields (`approver`, `date`, `policy version`)
+- [x] **Task 3.5**: Document production publish blockers for missing legal entity details
 
 ---
 

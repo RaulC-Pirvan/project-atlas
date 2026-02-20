@@ -26,6 +26,22 @@ export type LegalChangeLogEntry = {
   policyIds: LegalPolicyId[];
 };
 
+export type LegalProcedureStepId = 'draft' | 'review' | 'legal_sign_off' | 'publish';
+
+export type LegalUpdateProcedureStep = {
+  id: LegalProcedureStepId;
+  label: string;
+  description: string;
+};
+
+export type LegalReleaseNoteTemplateFieldId = 'approver' | 'date' | 'policyVersion';
+
+export type LegalReleaseNoteTemplateField = {
+  id: LegalReleaseNoteTemplateFieldId;
+  label: string;
+  description: string;
+};
+
 export type LegalEntityField =
   | 'entityName'
   | 'registeredAddress'

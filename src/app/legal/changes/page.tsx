@@ -1,4 +1,8 @@
 import { LegalPageLayout } from '../../../components/legal/LegalPageLayout';
+import {
+  LEGAL_RELEASE_NOTE_TEMPLATE_FIELDS,
+  LEGAL_UPDATE_PROCEDURE_STEPS,
+} from '../../../lib/legal/governance';
 import { LEGAL_CHANGE_LOG, LEGAL_CHANGES_METADATA } from '../../../lib/legal/policies';
 import {
   buildLegalPublishChecklist,
@@ -25,6 +29,38 @@ export default function LegalChangesPage() {
                 {entry.date}
               </p>
               <p>{entry.summary}</p>
+              <p className="text-xs text-black/55 dark:text-white/55">
+                Policies: {entry.policyIds.join(', ')}
+              </p>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="text-base font-semibold">Policy update procedure</h2>
+        <p>Draft -&gt; review -&gt; legal sign-off -&gt; publish.</p>
+        <ol className="space-y-2">
+          {LEGAL_UPDATE_PROCEDURE_STEPS.map((step) => (
+            <li key={step.id}>
+              <p className="text-sm font-medium">{step.label}</p>
+              <p className="text-xs text-black/60 dark:text-white/60">{step.description}</p>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="text-base font-semibold">Release-note template fields</h2>
+        <p>Each policy release note must include the fields below.</p>
+        <ul className="space-y-2">
+          {LEGAL_RELEASE_NOTE_TEMPLATE_FIELDS.map((field) => (
+            <li
+              key={field.id}
+              className="rounded-xl border border-black/10 px-4 py-3 dark:border-white/10"
+            >
+              <p className="text-sm font-medium">{field.label}</p>
+              <p className="text-xs text-black/60 dark:text-white/60">{field.description}</p>
             </li>
           ))}
         </ul>

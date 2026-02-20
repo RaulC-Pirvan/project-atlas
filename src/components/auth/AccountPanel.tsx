@@ -97,6 +97,25 @@ type AccountSessionBulkRevokeResponse = {
   signedOutCurrent: boolean;
 };
 
+const EXPORT_FALLBACK_FILENAME = 'atlas-data-export.json';
+
+function parseAttachmentFilename(disposition: string | null): string | null {
+  if (!disposition) return null;
+
+  const utf8Match = disposition.match(/filename\*=UTF-8''([^;]+)/i);
+  if (utf8Match?.[1]) {
+    try {
+      return decodeURIComponent(utf8Match[1].trim());
+    } catch {
+      return utf8Match[1].trim();
+    }
+  }
+
+  const plainMatch = disposition.match(/filename="?([^";]+)"?/i);
+  if (!plainMatch?.[1]) return null;
+  return plainMatch[1].trim();
+}
+
 export function AccountPanel({
   email,
   displayName,
@@ -156,6 +175,7 @@ export function AccountPanel({
   const [sessionRowLoadingId, setSessionRowLoadingId] = useState<string | null>(null);
   const [revokeOthersLoading, setRevokeOthersLoading] = useState(false);
   const [signOutAllLoading, setSignOutAllLoading] = useState(false);
+  const [downloadingDataExport, setDownloadingDataExport] = useState(false);
   const [showStepUpModal, setShowStepUpModal] = useState(false);
   const [stepUpAction, setStepUpAction] = useState<SensitiveStepUpAction | null>(null);
   const [stepUpChallengeToken, setStepUpChallengeToken] = useState<string | null>(null);
@@ -412,6 +432,41 @@ export function AccountPanel({
       pushToast('Unable to sign out all devices right now.', 'error');
     } finally {
       setSignOutAllLoading(false);
+    }
+  };
+
+  const handleDownloadDataExport = async () => {
+    setDownloadingDataExport(true);
+
+    try {
+      const response = await fetch('/api/account/exports/self', {
+        method: 'GET',
+      });
+      const errorBody = !response.ok ? await parseJson<Record<string, never>>(response) : null;
+
+      if (!response.ok) {
+        pushToast(getApiErrorMessage(response, errorBody), 'error');
+        return;
+      }
+
+      const fileContents = await response.text();
+      const filename =
+        parseAttachmentFilename(response.headers.get('Content-Disposition')) ??
+        EXPORT_FALLBACK_FILENAME;
+      const encoded = encodeURIComponent(fileContents);
+      const link = document.createElement('a');
+      link.href = `data:application/json;charset=utf-8,${encoded}`;
+      link.download = filename;
+      link.style.display = 'none';
+      document.body.append(link);
+      link.click();
+      link.remove();
+
+      pushToast('Data export downloaded.', 'success');
+    } catch {
+      pushToast('Unable to download your data right now.', 'error');
+    } finally {
+      setDownloadingDataExport(false);
     }
   };
 
@@ -1305,6 +1360,27 @@ export function AccountPanel({
             {signOutAllLoading ? 'Signing out all...' : 'Sign out all devices'}
           </Button>
         </div>
+      </section>
+
+      <section className="space-y-5 border-t border-black/10 pt-6 dark:border-white/10">
+        <div className="space-y-1">
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-black/80 dark:text-white/80">
+            Data export
+          </p>
+          <p className="text-sm text-black/60 dark:text-white/60">
+            Download a JSON copy of your data only, including habits, completions, reminders, and
+            achievements.
+          </p>
+        </div>
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full"
+          disabled={downloadingDataExport}
+          onClick={() => void handleDownloadDataExport()}
+        >
+          {downloadingDataExport ? 'Preparing download...' : 'Download my data (JSON)'}
+        </Button>
       </section>
 
       <form

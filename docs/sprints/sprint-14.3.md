@@ -114,11 +114,11 @@ a simple, secure JSON export flow with robust authorization and audit logging.
 
 ### Tasks (5)
 
-- [ ] **Task 2.1**: Add `Data export` section in `/account`
-- [ ] **Task 2.2**: Add `Download my data (JSON)` action
-- [ ] **Task 2.3**: Add pending/loading/error UX with toast-based feedback
-- [ ] **Task 2.4**: Keep UX copy explicit on scope ("your data only")
-- [ ] **Task 2.5**: Place section near account-management actions without clutter
+- [x] **Task 2.1**: Add `Data export` section in `/account`
+- [x] **Task 2.2**: Add `Download my data (JSON)` action
+- [x] **Task 2.3**: Add pending/loading/error UX with toast-based feedback
+- [x] **Task 2.4**: Keep UX copy explicit on scope ("your data only")
+- [x] **Task 2.5**: Place section near account-management actions without clutter
 
 ---
 

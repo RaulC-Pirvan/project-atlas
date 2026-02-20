@@ -10,6 +10,14 @@ function jsonResponse(body: unknown, status = 200) {
   });
 }
 
+function createDeferred<T>() {
+  let resolve: (value: T) => void = () => {};
+  const promise = new Promise<T>((nextResolve) => {
+    resolve = nextResolve;
+  });
+  return { promise, resolve };
+}
+
 const baseProps = {
   email: 'user@example.com',
   displayName: 'User',
@@ -91,6 +99,14 @@ describe('AccountPanel', () => {
     );
   });
 
+  it('renders a data export section with explicit user-scoped copy', () => {
+    render(<AccountPanel {...baseProps} />);
+
+    expect(screen.getByText(/^data export$/i)).toBeInTheDocument();
+    expect(screen.getByText(/your data only/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /download my data \(json\)/i })).toBeInTheDocument();
+  });
+
   it('renders account sections in a logical top-to-bottom order', () => {
     render(<AccountPanel {...baseProps} />);
 
@@ -103,6 +119,7 @@ describe('AccountPanel', () => {
       /^reminders$/i,
       /^two-factor authentication$/i,
       /^active sessions$/i,
+      /^data export$/i,
       /^delete request$/i,
       /^legal and support$/i,
     ];
@@ -114,6 +131,85 @@ describe('AccountPanel', () => {
       const position = currentNode.compareDocumentPosition(nextNode);
       expect(position & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     }
+  });
+
+  it('shows pending and success feedback for data export downloads', async () => {
+    const anchorClickSpy = vi
+      .spyOn(HTMLAnchorElement.prototype, 'click')
+      .mockImplementation(() => {});
+    const exportRequest = createDeferred<Response>();
+    const fetchMock = vi.spyOn(global, 'fetch').mockImplementation(async (input, init) => {
+      const url = typeof input === 'string' ? input : input.toString();
+      const method = init?.method ?? 'GET';
+
+      if (url === '/api/account/sessions' && method === 'GET') {
+        return jsonResponse({ ok: true, data: { sessions: [] } });
+      }
+
+      if (url === '/api/account/exports/self' && method === 'GET') {
+        return await exportRequest.promise;
+      }
+
+      return jsonResponse({ ok: true, data: {} });
+    });
+
+    render(<AccountPanel {...baseProps} />);
+
+    fireEvent.click(screen.getByRole('button', { name: /download my data \(json\)/i }));
+    expect(screen.getByRole('button', { name: /preparing download/i })).toBeDisabled();
+
+    exportRequest.resolve(
+      new Response(JSON.stringify({ schemaVersion: 1, generatedAt: '2026-02-20T10:00:00.000Z' }), {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/json; charset=utf-8',
+          'Content-Disposition': 'attachment; filename="20260220T100000Z-atlas-data-export.json"',
+        },
+      }),
+    );
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith('/api/account/exports/self', { method: 'GET' });
+    });
+
+    expect(await screen.findByText(/data export downloaded/i)).toBeInTheDocument();
+    expect(anchorClickSpy).toHaveBeenCalled();
+  });
+
+  it('shows error toast when data export download fails', async () => {
+    const fetchMock = vi.spyOn(global, 'fetch').mockImplementation(async (input, init) => {
+      const url = typeof input === 'string' ? input : input.toString();
+      const method = init?.method ?? 'GET';
+
+      if (url === '/api/account/sessions' && method === 'GET') {
+        return jsonResponse({ ok: true, data: { sessions: [] } });
+      }
+
+      if (url === '/api/account/exports/self' && method === 'GET') {
+        return jsonResponse(
+          {
+            ok: false,
+            error: {
+              code: 'rate_limited',
+              message: 'Too many requests.',
+              recovery: 'retry_later',
+            },
+          },
+          429,
+        );
+      }
+
+      return jsonResponse({ ok: true, data: {} });
+    });
+
+    render(<AccountPanel {...baseProps} />);
+
+    fireEvent.click(screen.getByRole('button', { name: /download my data \(json\)/i }));
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith('/api/account/exports/self', { method: 'GET' });
+    });
+    expect(await screen.findByText(/too many requests/i)).toBeInTheDocument();
   });
 
   it('shows admin enrollment notice when admin 2FA is required', () => {

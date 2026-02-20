@@ -126,12 +126,12 @@ a simple, secure JSON export flow with robust authorization and audit logging.
 
 ### Tasks (6)
 
-- [ ] **Task 3.1**: Write success/failure audit entries for each export request
-- [ ] **Task 3.2**: Include request correlation id in audit metadata
-- [ ] **Task 3.3**: Ensure failure paths do not leak sensitive internals
-- [ ] **Task 3.4**: Add explicit rate-limit error handling for export endpoint
-- [ ] **Task 3.5**: Verify endpoint uses API logging wrapper and consistent error responses
-- [ ] **Task 3.6**: Validate record-count metadata aligns with exported payload sections
+- [x] **Task 3.1**: Write success/failure audit entries for each export request
+- [x] **Task 3.2**: Include request correlation id in audit metadata
+- [x] **Task 3.3**: Ensure failure paths do not leak sensitive internals
+- [x] **Task 3.4**: Add explicit rate-limit error handling for export endpoint
+- [x] **Task 3.5**: Verify endpoint uses API logging wrapper and consistent error responses
+- [x] **Task 3.6**: Validate record-count metadata aligns with exported payload sections
 
 ---
 

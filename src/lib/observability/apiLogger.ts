@@ -9,10 +9,16 @@ type ApiErrorResult = {
   errorCode?: string;
 };
 
-function getRequestId(request: Request) {
+const requestIdStore = new WeakMap<Request, string>();
+
+export function getRequestId(request: Request) {
+  const existing = requestIdStore.get(request);
+  if (existing) return existing;
+
   const headerId = request.headers.get('x-request-id') ?? request.headers.get('x-correlation-id');
-  if (headerId && headerId.length <= 128) return headerId;
-  return crypto.randomUUID();
+  const generated = headerId && headerId.length <= 128 ? headerId : crypto.randomUUID();
+  requestIdStore.set(request, generated);
+  return generated;
 }
 
 function getBaseContext(request: Request, options?: ApiLogOptions): LogContext {

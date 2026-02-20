@@ -1,3 +1,5 @@
+import { Prisma } from '@prisma/client';
+
 import {
   USER_DATA_EXPORT_FORMAT,
   type UserDataExportFormat,
@@ -11,7 +13,7 @@ type UserDataExportAuditCreateInput = {
   requestedAt: Date;
   status: UserDataExportAuditStatus;
   format: UserDataExportFormat;
-  recordCounts: UserDataExportRecordCounts | null;
+  recordCounts: Prisma.InputJsonValue | Prisma.NullableJsonNullValueInput;
   requestId: string;
   errorCode?: string | null;
 };
@@ -70,7 +72,7 @@ export async function createUserDataExportAuditFailure(
       requestedAt: args.requestedAt ?? new Date(),
       status: 'failure',
       format: args.format ?? USER_DATA_EXPORT_FORMAT,
-      recordCounts: args.recordCounts ?? null,
+      recordCounts: args.recordCounts ?? Prisma.DbNull,
       requestId: normalizeRequestId(args.requestId),
       errorCode: args.errorCode ?? null,
     },

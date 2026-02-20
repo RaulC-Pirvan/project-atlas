@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { withApiLogging } from '../apiLogger';
+import { getRequestId, withApiLogging } from '../apiLogger';
 
 describe('withApiLogging', () => {
   it('logs successful responses with status', async () => {
@@ -51,5 +51,24 @@ describe('withApiLogging', () => {
     expect(payload.errorMessage).toBe('boom');
 
     errorSpy.mockRestore();
+  });
+});
+
+describe('getRequestId', () => {
+  it('reuses a stable generated request id for the same Request instance', () => {
+    const request = new Request('https://example.com/api/test');
+
+    const first = getRequestId(request);
+    const second = getRequestId(request);
+
+    expect(first).toBe(second);
+  });
+
+  it('uses request id headers when present', () => {
+    const request = new Request('https://example.com/api/test', {
+      headers: { 'x-correlation-id': 'corr-123' },
+    });
+
+    expect(getRequestId(request)).toBe('corr-123');
   });
 });

@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client';
 import { describe, expect, it, vi } from 'vitest';
 
 import { createUserDataExportAuditFailure, createUserDataExportAuditSuccess } from '../audit';
@@ -66,7 +67,7 @@ describe('user data export audit helpers', () => {
         requestedAt,
         status: 'failure',
         format: 'json',
-        recordCounts: null,
+        recordCounts: Prisma.DbNull,
         requestId: 'unknown',
         errorCode: 'rate_limited',
       },

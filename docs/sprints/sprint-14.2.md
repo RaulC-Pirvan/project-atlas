@@ -143,12 +143,12 @@ production publish until finalized:
 
 ### Tasks (6)
 
-- [ ] **Task 4.1**: Route-level tests for legal page accessibility and canonical metadata rendering
-- [ ] **Task 4.2**: Component tests for shared legal layout and policy metadata block
-- [ ] **Task 4.3**: Tests for landing/pro/account legal-support links
-- [ ] **Task 4.4**: E2E smoke coverage for legal page navigation and support/legal discoverability
-- [ ] **Task 4.5**: Add checks that prevent placeholder publish in production config/release checklist
-- [ ] **Task 4.6**: CI stability pass for new legal/trust surfaces
+- [x] **Task 4.1**: Route-level tests for legal page accessibility and canonical metadata rendering
+- [x] **Task 4.2**: Component tests for shared legal layout and policy metadata block
+- [x] **Task 4.3**: Tests for landing/pro/account legal-support links
+- [x] **Task 4.4**: E2E smoke coverage for legal page navigation and support/legal discoverability
+- [x] **Task 4.5**: Add checks that prevent placeholder publish in production config/release checklist
+- [x] **Task 4.6**: CI stability pass for new legal/trust surfaces
 
 ---
 
@@ -174,6 +174,7 @@ Pre-publish content placeholders must be finalized before production rollout:
 - `LEGAL_ENTITY_ADDRESS`
 - `LEGAL_VENUE_CITY`
 - `LEGAL_COMPANY_REGISTRATION` (or VAT/CUI equivalent)
+- `ENFORCE_LEGAL_PUBLISH_READY=true` in production config to block builds when placeholders remain
 
 ---
 

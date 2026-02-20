@@ -344,33 +344,25 @@
 
 ---
 
-### Sprint 13.3: Passkey Readiness (Discovery + Rollout Plan)
-
-- [ ] Evaluate WebAuthn/passkeys and compatibility with current NextAuth setup
-- [ ] Define rollout strategy (opt-in beta -> general availability)
-- [ ] Document migration and fallback paths
-
----
-
 ## Phase 14: Support, Trust & Self-Service (Web-first) (Planned)
 
 ### Sprint 14.1: Support Center + Contact Form
 
-- [ ] Add `/support` page with FAQ and contact form
-- [ ] Add ticket categories: billing, account, bug, feature request
-- [ ] Prefill known user context when authenticated
-- [ ] Add anti-spam controls (honeypot + rate limit; captcha only if needed)
-- [ ] Route submissions to support inbox/triage queue
-- [ ] Add E2E coverage for submit success/failure paths
+- [x] Add `/support` page with FAQ and contact form
+- [x] Add ticket categories: billing, account, bug, feature request
+- [x] Prefill known user context when authenticated
+- [x] Add anti-spam controls (honeypot + rate limit; captcha only if needed)
+- [x] Route submissions to support inbox/triage queue
+- [x] Add E2E coverage for submit success/failure paths
 
 ---
 
 ### Sprint 14.2: Trust & Policy Surfaces
 
-- [ ] Publish Privacy Policy, Terms, and Refund Policy pages
-- [ ] Add support response-time expectations and help guidance
-- [ ] Link legal/support surfaces from landing, Pro page, and account
-- [ ] Add simple policy versioning/change-log notes
+- [x] Publish Privacy Policy, Terms, and Refund Policy pages
+- [x] Add support response-time expectations and help guidance
+- [x] Link legal/support surfaces from landing, Pro page, and account
+- [x] Add simple policy versioning/change-log notes
 
 ---
 

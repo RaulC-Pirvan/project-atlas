@@ -10,6 +10,35 @@ function jsonResponse(body: unknown, status = 200) {
   });
 }
 
+function createDeferred<T>() {
+  let resolve: (value: T) => void = () => {};
+  const promise = new Promise<T>((nextResolve) => {
+    resolve = nextResolve;
+  });
+  return { promise, resolve };
+}
+
+const baseProps = {
+  email: 'user@example.com',
+  displayName: 'User',
+  role: 'user' as const,
+  twoFactorEnabled: false,
+  recoveryCodesRemaining: 0,
+  adminTwoFactorEnforced: false,
+  weekStart: 'mon' as const,
+  keepCompletedAtBottom: true,
+  hasPassword: true,
+  reminderSettings: {
+    dailyDigestEnabled: true,
+    dailyDigestTimeMinutes: 1200,
+    quietHoursEnabled: false,
+    quietHoursStartMinutes: 1320,
+    quietHoursEndMinutes: 420,
+    snoozeDefaultMinutes: 10,
+  },
+  timezoneLabel: 'UTC',
+};
+
 describe('AccountPanel', () => {
   beforeEach(() => {
     vi.spyOn(global, 'fetch').mockImplementation(async () => {
@@ -29,14 +58,9 @@ describe('AccountPanel', () => {
   it('renders security-check messaging for email updates', () => {
     render(
       <AccountPanel
+        {...baseProps}
         email="oauth@example.com"
         displayName="OAuth User"
-        role="user"
-        twoFactorEnabled={false}
-        recoveryCodesRemaining={0}
-        adminTwoFactorEnforced={false}
-        weekStart="mon"
-        keepCompletedAtBottom
         hasPassword={false}
       />,
     );
@@ -47,37 +71,155 @@ describe('AccountPanel', () => {
   });
 
   it('renders session controls section', () => {
-    render(
-      <AccountPanel
-        email="user@example.com"
-        displayName="User"
-        role="user"
-        twoFactorEnabled={false}
-        recoveryCodesRemaining={0}
-        adminTwoFactorEnforced={false}
-        weekStart="mon"
-        keepCompletedAtBottom
-        hasPassword
-      />,
-    );
+    render(<AccountPanel {...baseProps} />);
 
     expect(screen.getByText(/^active sessions$/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /sign out other devices/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /sign out all devices/i })).toBeInTheDocument();
   });
 
+  it('renders legal and support links section', () => {
+    render(<AccountPanel {...baseProps} />);
+
+    expect(screen.getByText(/^legal and support$/i)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /privacy policy/i })).toHaveAttribute(
+      'href',
+      '/legal/privacy',
+    );
+    expect(screen.getByRole('link', { name: /terms of service/i })).toHaveAttribute(
+      'href',
+      '/legal/terms',
+    );
+    expect(screen.getByRole('link', { name: /refund policy/i })).toHaveAttribute(
+      'href',
+      '/legal/refunds',
+    );
+    expect(screen.getAllByRole('link', { name: /support center/i }).length).toBeGreaterThanOrEqual(
+      1,
+    );
+  });
+
+  it('renders a data export section with explicit user-scoped copy', () => {
+    render(<AccountPanel {...baseProps} />);
+
+    expect(screen.getByText(/^data export$/i)).toBeInTheDocument();
+    expect(screen.getByText(/your data only/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /download my data \(json\)/i })).toBeInTheDocument();
+  });
+
+  it('renders account sections in a logical top-to-bottom order', () => {
+    render(<AccountPanel {...baseProps} />);
+
+    const orderedLabels = [
+      /^display name$/i,
+      /^email$/i,
+      /^password$/i,
+      /^week start$/i,
+      /^daily ordering$/i,
+      /^reminders$/i,
+      /^two-factor authentication$/i,
+      /^active sessions$/i,
+      /^data export$/i,
+      /^delete request$/i,
+      /^legal and support$/i,
+    ];
+
+    const nodes = orderedLabels.map((label) => screen.getByText(label, { selector: 'p' }));
+    for (let index = 0; index < nodes.length - 1; index += 1) {
+      const currentNode = nodes[index];
+      const nextNode = nodes[index + 1];
+      const position = currentNode.compareDocumentPosition(nextNode);
+      expect(position & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    }
+  });
+
+  it('shows pending and success feedback for data export downloads', async () => {
+    const anchorClickSpy = vi
+      .spyOn(HTMLAnchorElement.prototype, 'click')
+      .mockImplementation(() => {});
+    const exportRequest = createDeferred<Response>();
+    const fetchMock = vi.spyOn(global, 'fetch').mockImplementation(async (input, init) => {
+      const url = typeof input === 'string' ? input : input.toString();
+      const method = init?.method ?? 'GET';
+
+      if (url === '/api/account/sessions' && method === 'GET') {
+        return jsonResponse({ ok: true, data: { sessions: [] } });
+      }
+
+      if (url === '/api/account/exports/self' && method === 'GET') {
+        return await exportRequest.promise;
+      }
+
+      return jsonResponse({ ok: true, data: {} });
+    });
+
+    render(<AccountPanel {...baseProps} />);
+
+    fireEvent.click(screen.getByRole('button', { name: /download my data \(json\)/i }));
+    expect(screen.getByRole('button', { name: /preparing download/i })).toBeDisabled();
+
+    exportRequest.resolve(
+      new Response(JSON.stringify({ schemaVersion: 1, generatedAt: '2026-02-20T10:00:00.000Z' }), {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/json; charset=utf-8',
+          'Content-Disposition': 'attachment; filename="20260220T100000Z-atlas-data-export.json"',
+        },
+      }),
+    );
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith('/api/account/exports/self', { method: 'GET' });
+    });
+
+    expect(await screen.findByText(/data export downloaded/i)).toBeInTheDocument();
+    expect(anchorClickSpy).toHaveBeenCalled();
+  });
+
+  it('shows error toast when data export download fails', async () => {
+    const fetchMock = vi.spyOn(global, 'fetch').mockImplementation(async (input, init) => {
+      const url = typeof input === 'string' ? input : input.toString();
+      const method = init?.method ?? 'GET';
+
+      if (url === '/api/account/sessions' && method === 'GET') {
+        return jsonResponse({ ok: true, data: { sessions: [] } });
+      }
+
+      if (url === '/api/account/exports/self' && method === 'GET') {
+        return jsonResponse(
+          {
+            ok: false,
+            error: {
+              code: 'rate_limited',
+              message: 'Too many requests.',
+              recovery: 'retry_later',
+            },
+          },
+          429,
+        );
+      }
+
+      return jsonResponse({ ok: true, data: {} });
+    });
+
+    render(<AccountPanel {...baseProps} />);
+
+    fireEvent.click(screen.getByRole('button', { name: /download my data \(json\)/i }));
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith('/api/account/exports/self', { method: 'GET' });
+    });
+    expect(await screen.findByText(/too many requests/i)).toBeInTheDocument();
+  });
+
   it('shows admin enrollment notice when admin 2FA is required', () => {
     render(
       <AccountPanel
+        {...baseProps}
         email="admin@example.com"
         displayName="Admin"
         role="admin"
-        twoFactorEnabled={false}
-        recoveryCodesRemaining={0}
         adminTwoFactorEnforced
-        weekStart="mon"
-        keepCompletedAtBottom
-        hasPassword
       />,
     );
 
@@ -119,19 +261,7 @@ describe('AccountPanel', () => {
       return jsonResponse({ ok: true, data: {} });
     });
 
-    render(
-      <AccountPanel
-        email="user@example.com"
-        displayName="User"
-        role="user"
-        twoFactorEnabled={false}
-        recoveryCodesRemaining={0}
-        adminTwoFactorEnforced={false}
-        weekStart="mon"
-        keepCompletedAtBottom
-        hasPassword
-      />,
-    );
+    render(<AccountPanel {...baseProps} />);
 
     fireEvent.click(screen.getByRole('button', { name: /set up 2fa/i }));
     expect(await screen.findByLabelText(/manual setup key/i)).toBeInTheDocument();
@@ -187,19 +317,7 @@ describe('AccountPanel', () => {
       return jsonResponse({ ok: true, data: {} });
     });
 
-    render(
-      <AccountPanel
-        email="user@example.com"
-        displayName="User"
-        role="user"
-        twoFactorEnabled={false}
-        recoveryCodesRemaining={0}
-        adminTwoFactorEnforced={false}
-        weekStart="mon"
-        keepCompletedAtBottom
-        hasPassword
-      />,
-    );
+    render(<AccountPanel {...baseProps} />);
 
     fireEvent.change(screen.getByLabelText(/^new password$/i), {
       target: { value: 'AtlasUpdatedPassword123!' },
@@ -244,19 +362,7 @@ describe('AccountPanel', () => {
       return jsonResponse({ ok: true, data: {} });
     });
 
-    render(
-      <AccountPanel
-        email="user@example.com"
-        displayName="User"
-        role="user"
-        twoFactorEnabled
-        recoveryCodesRemaining={10}
-        adminTwoFactorEnforced={false}
-        weekStart="mon"
-        keepCompletedAtBottom
-        hasPassword
-      />,
-    );
+    render(<AccountPanel {...baseProps} twoFactorEnabled recoveryCodesRemaining={10} />);
 
     fireEvent.change(screen.getByLabelText(/type "disable 2fa"/i), {
       target: { value: 'DISABLE 2FA' },

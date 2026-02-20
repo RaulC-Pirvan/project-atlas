@@ -30,6 +30,10 @@ describe('AdminSidebar', () => {
       'href',
       '/admin#activity',
     );
+    expect(screen.getByRole('link', { name: /support/i })).toHaveAttribute(
+      'href',
+      '/admin#support',
+    );
     expect(screen.getByRole('link', { name: /export/i })).toHaveAttribute('href', '/admin#export');
 
     expect(screen.getByRole('button', { name: /sign out/i })).toBeInTheDocument();

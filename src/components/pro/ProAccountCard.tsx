@@ -32,7 +32,9 @@ export function ProAccountCard({ isPro }: ProAccountCardProps) {
 
       <div className="mt-4 space-y-4 text-sm text-black/70 dark:text-white/70">
         {isPro ? (
-          <p>Thanks for supporting Atlas. Your Pro access is active.</p>
+          <>
+            <p>Thanks for supporting Atlas. Your Pro access is active.</p>
+          </>
         ) : (
           <>
             <p>Pro adds depth and motivation without blocking core habit tracking.</p>

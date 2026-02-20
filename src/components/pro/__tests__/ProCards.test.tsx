@@ -13,6 +13,7 @@ describe('ProAccountCard', () => {
 
     const restore = screen.getByRole('button', { name: /restore purchase/i });
     expect(restore).toBeDisabled();
+    expect(screen.queryByText(/legal and support/i)).toBeNull();
   });
 
   it('shows active state for pro users', () => {
@@ -20,6 +21,7 @@ describe('ProAccountCard', () => {
 
     expect(screen.getByText(/pro active/i)).toBeInTheDocument();
     expect(screen.queryByRole('link', { name: /upgrade to pro/i })).toBeNull();
+    expect(screen.queryByText(/legal and support/i)).toBeNull();
   });
 });
 

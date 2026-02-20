@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
 import { MarketingHome } from '../MarketingHome';
@@ -21,6 +21,25 @@ describe('MarketingHome', () => {
     signInLinks.forEach((link) => {
       expect(link).toHaveAttribute('href', '/sign-in');
     });
+
+    expect(screen.getByRole('link', { name: /^support$/i })).toHaveAttribute('href', '/support');
+    const legalNav = screen.getByRole('navigation', { name: /landing legal and support links/i });
+    expect(within(legalNav).getByRole('link', { name: /privacy policy/i })).toHaveAttribute(
+      'href',
+      '/legal/privacy',
+    );
+    expect(within(legalNav).getByRole('link', { name: /terms of service/i })).toHaveAttribute(
+      'href',
+      '/legal/terms',
+    );
+    expect(within(legalNav).getByRole('link', { name: /refund policy/i })).toHaveAttribute(
+      'href',
+      '/legal/refunds',
+    );
+    expect(within(legalNav).getByRole('link', { name: /support center/i })).toHaveAttribute(
+      'href',
+      '/support',
+    );
   });
 
   it('highlights the schedule, completion, and streak benefits', () => {
@@ -76,6 +95,10 @@ describe('MarketingHome', () => {
 
     expect(screen.getByRole('link', { name: /see atlas pro/i })).toHaveAttribute('href', '/pro');
     expect(screen.getByRole('link', { name: /start free/i })).toHaveAttribute('href', '/sign-up');
+    expect(screen.getByRole('link', { name: /open support center/i })).toHaveAttribute(
+      'href',
+      '/support',
+    );
   });
 
   it('shows dashboard actions when the viewer is authenticated', () => {
@@ -90,6 +113,12 @@ describe('MarketingHome', () => {
     expect(screen.getByRole('link', { name: /open calendar/i })).toHaveAttribute(
       'href',
       '/calendar',
+    );
+    expect(screen.getByRole('link', { name: /^support$/i })).toHaveAttribute('href', '/support');
+    const legalNav = screen.getByRole('navigation', { name: /landing legal and support links/i });
+    expect(within(legalNav).getByRole('link', { name: /privacy policy/i })).toHaveAttribute(
+      'href',
+      '/legal/privacy',
     );
     expect(screen.queryByRole('link', { name: /create your account/i })).not.toBeInTheDocument();
   });

@@ -1,5 +1,6 @@
 import Link from 'next/link';
 
+import { LegalSupportLinks } from '../legal/LegalSupportLinks';
 import { ThemeToggle } from '../ui/ThemeToggle';
 
 const corePillars = [
@@ -170,19 +171,35 @@ export function MarketingHome({ isAuthenticated = false }: MarketingHomeProps) {
           </div>
           <div className="flex items-center gap-3">
             {isAuthenticated ? (
-              <Link
-                href="/today"
-                className={`text-xs font-medium uppercase tracking-[0.25em] text-black/70 transition hover:text-black dark:text-white/70 dark:hover:text-white ${focusRingClasses}`}
-              >
-                Dashboard
-              </Link>
+              <>
+                <Link
+                  href="/support"
+                  className={`text-xs font-medium uppercase tracking-[0.25em] text-black/70 transition hover:text-black dark:text-white/70 dark:hover:text-white ${focusRingClasses}`}
+                >
+                  Support
+                </Link>
+                <Link
+                  href="/today"
+                  className={`text-xs font-medium uppercase tracking-[0.25em] text-black/70 transition hover:text-black dark:text-white/70 dark:hover:text-white ${focusRingClasses}`}
+                >
+                  Dashboard
+                </Link>
+              </>
             ) : (
-              <Link
-                href="/sign-in"
-                className={`text-xs font-medium uppercase tracking-[0.25em] text-black/70 transition hover:text-black dark:text-white/70 dark:hover:text-white ${focusRingClasses}`}
-              >
-                Sign in
-              </Link>
+              <>
+                <Link
+                  href="/support"
+                  className={`text-xs font-medium uppercase tracking-[0.25em] text-black/70 transition hover:text-black dark:text-white/70 dark:hover:text-white ${focusRingClasses}`}
+                >
+                  Support
+                </Link>
+                <Link
+                  href="/sign-in"
+                  className={`text-xs font-medium uppercase tracking-[0.25em] text-black/70 transition hover:text-black dark:text-white/70 dark:hover:text-white ${focusRingClasses}`}
+                >
+                  Sign in
+                </Link>
+              </>
             )}
             <ThemeToggle className="h-8 w-8" />
           </div>
@@ -474,6 +491,18 @@ export function MarketingHome({ isAuthenticated = false }: MarketingHomeProps) {
             completions, streaks, and grace-window support.
           </div>
 
+          <div className="rounded-2xl border border-black/10 bg-white/80 p-5 text-sm text-black/75 dark:border-white/10 dark:bg-black/70 dark:text-white/75">
+            Need help with billing, account access, bug reports, or feature requests?
+            <div className="mt-3">
+              <Link
+                href="/support"
+                className={`inline-flex h-10 items-center justify-center rounded-full border border-black/20 bg-white px-4 text-xs font-medium uppercase tracking-[0.2em] text-black transition hover:bg-black/5 dark:border-white/20 dark:bg-black dark:text-white dark:hover:bg-white/10 ${focusRingClasses}`}
+              >
+                Open support center
+              </Link>
+            </div>
+          </div>
+
           <div className="flex flex-wrap items-center gap-3">
             <Link
               href="/pro"
@@ -489,6 +518,13 @@ export function MarketingHome({ isAuthenticated = false }: MarketingHomeProps) {
             </Link>
           </div>
         </section>
+
+        <footer className="border-t border-black/10 pt-8 text-sm text-black/65 dark:border-white/10 dark:text-white/65">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <p>Policy and support resources</p>
+            <LegalSupportLinks ariaLabel="Landing legal and support links" />
+          </div>
+        </footer>
       </div>
     </main>
   );

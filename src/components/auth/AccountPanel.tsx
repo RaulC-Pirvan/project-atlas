@@ -1,10 +1,14 @@
 ﻿'use client';
 
 import Image from 'next/image';
+import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { getApiErrorMessage, parseJson } from '../../lib/api/client';
+import type { UserReminderSettings } from '../../lib/reminders/types';
 import type { WeekStart } from '../habits/weekdays';
+import { LegalSupportLinks } from '../legal/LegalSupportLinks';
+import { ReminderSettingsPanel } from '../reminders/ReminderSettingsPanel';
 import { Button } from '../ui/Button';
 import { FormField } from '../ui/FormField';
 import { Input } from '../ui/Input';
@@ -23,6 +27,8 @@ type AccountPanelProps = {
   weekStart: WeekStart;
   keepCompletedAtBottom: boolean;
   hasPassword: boolean;
+  reminderSettings: UserReminderSettings;
+  timezoneLabel: string;
 };
 
 type AccountResponse = {
@@ -91,6 +97,25 @@ type AccountSessionBulkRevokeResponse = {
   signedOutCurrent: boolean;
 };
 
+const EXPORT_FALLBACK_FILENAME = 'atlas-data-export.json';
+
+function parseAttachmentFilename(disposition: string | null): string | null {
+  if (!disposition) return null;
+
+  const utf8Match = disposition.match(/filename\*=UTF-8''([^;]+)/i);
+  if (utf8Match?.[1]) {
+    try {
+      return decodeURIComponent(utf8Match[1].trim());
+    } catch {
+      return utf8Match[1].trim();
+    }
+  }
+
+  const plainMatch = disposition.match(/filename="?([^";]+)"?/i);
+  if (!plainMatch?.[1]) return null;
+  return plainMatch[1].trim();
+}
+
 export function AccountPanel({
   email,
   displayName,
@@ -101,6 +126,8 @@ export function AccountPanel({
   weekStart,
   keepCompletedAtBottom,
   hasPassword,
+  reminderSettings,
+  timezoneLabel,
 }: AccountPanelProps) {
   const [nextEmail, setNextEmail] = useState(email);
   const [displayNameInput, setDisplayNameInput] = useState(displayName);
@@ -148,6 +175,7 @@ export function AccountPanel({
   const [sessionRowLoadingId, setSessionRowLoadingId] = useState<string | null>(null);
   const [revokeOthersLoading, setRevokeOthersLoading] = useState(false);
   const [signOutAllLoading, setSignOutAllLoading] = useState(false);
+  const [downloadingDataExport, setDownloadingDataExport] = useState(false);
   const [showStepUpModal, setShowStepUpModal] = useState(false);
   const [stepUpAction, setStepUpAction] = useState<SensitiveStepUpAction | null>(null);
   const [stepUpChallengeToken, setStepUpChallengeToken] = useState<string | null>(null);
@@ -404,6 +432,41 @@ export function AccountPanel({
       pushToast('Unable to sign out all devices right now.', 'error');
     } finally {
       setSignOutAllLoading(false);
+    }
+  };
+
+  const handleDownloadDataExport = async () => {
+    setDownloadingDataExport(true);
+
+    try {
+      const response = await fetch('/api/account/exports/self', {
+        method: 'GET',
+      });
+      const errorBody = !response.ok ? await parseJson<Record<string, never>>(response) : null;
+
+      if (!response.ok) {
+        pushToast(getApiErrorMessage(response, errorBody), 'error');
+        return;
+      }
+
+      const fileContents = await response.text();
+      const filename =
+        parseAttachmentFilename(response.headers.get('Content-Disposition')) ??
+        EXPORT_FALLBACK_FILENAME;
+      const encoded = encodeURIComponent(fileContents);
+      const link = document.createElement('a');
+      link.href = `data:application/json;charset=utf-8,${encoded}`;
+      link.download = filename;
+      link.style.display = 'none';
+      document.body.append(link);
+      link.click();
+      link.remove();
+
+      pushToast('Data export downloaded.', 'success');
+    } catch {
+      pushToast('Unable to download your data right now.', 'error');
+    } finally {
+      setDownloadingDataExport(false);
     }
   };
 
@@ -881,6 +944,89 @@ export function AccountPanel({
 
       <form
         className="space-y-6 border-t border-black/10 pt-6 dark:border-white/10"
+        onSubmit={handleEmailUpdate}
+      >
+        <div className="space-y-1">
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-black/80 dark:text-white/80">
+            Email
+          </p>
+          <p className="text-sm text-black/60 dark:text-white/60">
+            Email changes require a fresh security check (password or 2FA).
+          </p>
+        </div>
+        <FormField id="account-email" label="Email" error={null}>
+          <Input
+            id="account-email"
+            name="email"
+            type="email"
+            autoComplete="email"
+            value={nextEmail}
+            onChange={(event) => {
+              const value = event.target.value;
+              setNextEmail(value);
+            }}
+          />
+        </FormField>
+        <Button
+          type="submit"
+          variant="outline"
+          className="w-full"
+          disabled={updatingEmail || stepUpStarting}
+        >
+          {updatingEmail
+            ? 'Updating...'
+            : stepUpStarting
+              ? 'Starting verification...'
+              : 'Update email'}
+        </Button>
+      </form>
+
+      <form
+        className="space-y-6 border-t border-black/10 pt-6 dark:border-white/10"
+        onSubmit={handlePasswordUpdate}
+      >
+        <div className="space-y-1">
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-black/80 dark:text-white/80">
+            Password
+          </p>
+          <p className="text-sm text-black/60 dark:text-white/60">Choose a new password.</p>
+        </div>
+        <FormField id="account-password" label="New password" error={null}>
+          <Input
+            id="account-password"
+            name="password"
+            type="password"
+            autoComplete="new-password"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+          />
+        </FormField>
+        <FormField id="account-confirm" label="Confirm new password" error={null}>
+          <Input
+            id="account-confirm"
+            name="confirm"
+            type="password"
+            autoComplete="new-password"
+            value={confirm}
+            onChange={(event) => setConfirm(event.target.value)}
+          />
+        </FormField>
+        <Button
+          type="submit"
+          variant="outline"
+          className="w-full"
+          disabled={updatingPassword || stepUpStarting}
+        >
+          {updatingPassword
+            ? 'Updating...'
+            : stepUpStarting
+              ? 'Starting verification...'
+              : 'Update password'}
+        </Button>
+      </form>
+
+      <form
+        className="space-y-6 border-t border-black/10 pt-6 dark:border-white/10"
         onSubmit={handleWeekStartUpdate}
       >
         <div className="space-y-1">
@@ -952,6 +1098,8 @@ export function AccountPanel({
           {updatingOrdering ? 'Updating...' : 'Update ordering'}
         </Button>
       </form>
+
+      <ReminderSettingsPanel initialSettings={reminderSettings} timezoneLabel={timezoneLabel} />
 
       <section className="space-y-6 border-t border-black/10 pt-6 dark:border-white/10">
         <div className="space-y-1">
@@ -1214,90 +1362,31 @@ export function AccountPanel({
         </div>
       </section>
 
-      <form
-        className="space-y-6 border-t border-black/10 pt-6 dark:border-white/10"
-        onSubmit={handleEmailUpdate}
-      >
+      <section className="space-y-5 border-t border-black/10 pt-6 dark:border-white/10">
         <div className="space-y-1">
           <p className="text-xs font-semibold uppercase tracking-[0.3em] text-black/80 dark:text-white/80">
-            Email
+            Data export
           </p>
           <p className="text-sm text-black/60 dark:text-white/60">
-            Email changes require a fresh security check (password or 2FA).
+            Download a JSON copy of your data only, including habits, completions, reminders, and
+            achievements.
           </p>
         </div>
-        <FormField id="account-email" label="Email" error={null}>
-          <Input
-            id="account-email"
-            name="email"
-            type="email"
-            autoComplete="email"
-            value={nextEmail}
-            onChange={(event) => {
-              const value = event.target.value;
-              setNextEmail(value);
-            }}
-          />
-        </FormField>
         <Button
-          type="submit"
+          type="button"
           variant="outline"
           className="w-full"
-          disabled={updatingEmail || stepUpStarting}
+          disabled={downloadingDataExport}
+          onClick={() => void handleDownloadDataExport()}
         >
-          {updatingEmail
-            ? 'Updating...'
-            : stepUpStarting
-              ? 'Starting verification...'
-              : 'Update email'}
+          {downloadingDataExport ? 'Preparing download...' : 'Download my data (JSON)'}
         </Button>
-      </form>
+      </section>
 
       <form
         className="space-y-6 border-t border-black/10 pt-6 dark:border-white/10"
-        onSubmit={handlePasswordUpdate}
+        onSubmit={handleDelete}
       >
-        <div className="space-y-1">
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-black/80 dark:text-white/80">
-            Password
-          </p>
-          <p className="text-sm text-black/60 dark:text-white/60">Choose a new password.</p>
-        </div>
-        <FormField id="account-password" label="New password" error={null}>
-          <Input
-            id="account-password"
-            name="password"
-            type="password"
-            autoComplete="new-password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-          />
-        </FormField>
-        <FormField id="account-confirm" label="Confirm new password" error={null}>
-          <Input
-            id="account-confirm"
-            name="confirm"
-            type="password"
-            autoComplete="new-password"
-            value={confirm}
-            onChange={(event) => setConfirm(event.target.value)}
-          />
-        </FormField>
-        <Button
-          type="submit"
-          variant="outline"
-          className="w-full"
-          disabled={updatingPassword || stepUpStarting}
-        >
-          {updatingPassword
-            ? 'Updating...'
-            : stepUpStarting
-              ? 'Starting verification...'
-              : 'Update password'}
-        </Button>
-      </form>
-
-      <form className="space-y-6" onSubmit={handleDelete}>
         <div className="space-y-1">
           <p className="text-xs font-semibold uppercase tracking-[0.3em] text-black/80 dark:text-white/80">
             Delete request
@@ -1332,6 +1421,25 @@ export function AccountPanel({
               : 'Request delete'}
         </Button>
       </form>
+
+      <section className="space-y-4 border-t border-black/10 pt-6 dark:border-white/10">
+        <div className="space-y-1">
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-black/80 dark:text-white/80">
+            Legal and support
+          </p>
+          <p className="text-sm text-black/60 dark:text-white/60">
+            Review privacy, terms, refunds, and support guidance.
+          </p>
+        </div>
+        <LegalSupportLinks ariaLabel="Account legal and support links" />
+        <p className="text-xs text-black/55 dark:text-white/55">
+          Need detailed support guidance?{' '}
+          <Link href="/support" className="underline underline-offset-2">
+            Open the Support Center
+          </Link>
+          .
+        </p>
+      </section>
 
       <Modal open={showStepUpModal} title="Security verification" eyebrow="Step-up auth">
         <form className="space-y-4" onSubmit={handleStepUpVerify}>

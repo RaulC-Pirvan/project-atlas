@@ -24,6 +24,8 @@ describe('SupportCenter', () => {
     expect(screen.getByLabelText(/name/i)).toHaveValue('Atlas User');
     expect(screen.getByLabelText(/email/i)).toHaveValue('user@example.com');
     expect(screen.getByText(/what should i include to get faster help/i)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /response expectations/i })).toBeInTheDocument();
+    expect(screen.getAllByText(/target first responses within 2 business days/i).length).toBe(2);
   });
 
   it('submits support form and shows success toast', async () => {

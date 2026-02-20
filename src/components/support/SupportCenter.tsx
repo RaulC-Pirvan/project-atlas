@@ -33,6 +33,11 @@ const FAQ_ITEMS = [
       'No. The support center is public, so you can submit billing, account, bug, and feature requests while signed out.',
   },
   {
+    question: 'How long does support take to reply?',
+    answer:
+      'We target first responses within 2 business days for most requests. Timing can vary based on queue volume and issue complexity.',
+  },
+  {
     question: 'What happens after I submit a request?',
     answer:
       'Your request is saved to our support queue and sent to our support inbox for triage. We reply by email when follow-up is needed.',
@@ -225,6 +230,18 @@ export function SupportCenter({ initialName, initialEmail, isAuthenticated }: Su
           <p className="max-w-2xl text-sm leading-relaxed text-black/65 dark:text-white/65">
             Use this form for billing, account, bug, or feature questions. Include enough detail so
             we can help without back-and-forth.
+          </p>
+        </section>
+
+        <section className="mt-6 rounded-3xl border border-black/10 bg-white p-5 text-sm text-black/75 dark:border-white/10 dark:bg-black dark:text-white/75">
+          <h2 className="text-base font-semibold">Response expectations</h2>
+          <p className="mt-2 leading-relaxed">
+            We target first responses within 2 business days for most requests. Timing can vary with
+            queue volume and issue complexity.
+          </p>
+          <p className="mt-2 leading-relaxed">
+            Fastest path: include exact steps, expected behavior, actual behavior, and any purchase
+            details (email, platform, order info) for billing cases.
           </p>
         </section>
 

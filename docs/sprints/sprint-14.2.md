@@ -104,13 +104,13 @@ production publish until finalized:
 
 ### Tasks (7)
 
-- [ ] **Task 1.1**: Publish Privacy Policy page with required sections and policy metadata
-- [ ] **Task 1.2**: Publish Terms page with Romania governing-law + consumer-rights carve-out
-- [ ] **Task 1.3**: Publish Refund Policy page with 14-day web goodwill + app-store carve-out
-- [ ] **Task 1.4**: Ensure policy text aligns with actual account deletion behavior (hard delete)
-- [ ] **Task 1.5**: Add 16+ age eligibility and underage-removal clause where applicable
-- [ ] **Task 1.6**: Add support response-time expectation copy and help-quality guidance
-- [ ] **Task 1.7**: Validate policy copy avoids claims unsupported by current product behavior
+- [x] **Task 1.1**: Publish Privacy Policy page with required sections and policy metadata
+- [x] **Task 1.2**: Publish Terms page with Romania governing-law + consumer-rights carve-out
+- [x] **Task 1.3**: Publish Refund Policy page with 14-day web goodwill + app-store carve-out
+- [x] **Task 1.4**: Ensure policy text aligns with actual account deletion behavior (hard delete)
+- [x] **Task 1.5**: Add 16+ age eligibility and underage-removal clause where applicable
+- [x] **Task 1.6**: Add support response-time expectation copy and help-quality guidance
+- [x] **Task 1.7**: Validate policy copy avoids claims unsupported by current product behavior
 
 ---
 

@@ -26,6 +26,26 @@ export default function TermsPage() {
           Atlas tracks habit completions by schedule and date boundaries. History backfill beyond
           the grace window is blocked to preserve consistent records.
         </p>
+        <p>
+          Completion rules are limited to today and yesterday (until 02:00 local time). Future dates
+          remain blocked.
+        </p>
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="text-base font-semibold">Account deletion behavior (hard delete)</h2>
+        <p>
+          If you request account deletion, account and habit data are permanently removed. Deleted
+          accounts are not recoverable by support.
+        </p>
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="text-base font-semibold">Support response expectations</h2>
+        <p>
+          We target first support responses within 2 business days for most requests. Response times
+          may vary based on ticket volume and complexity.
+        </p>
       </section>
 
       <section className="space-y-3">

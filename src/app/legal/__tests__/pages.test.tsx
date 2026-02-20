@@ -32,6 +32,11 @@ describe('legal pages', () => {
       'href',
       '/legal/changes',
     );
+    expect(
+      screen.getByRole('heading', { name: /account deletion behavior \(hard delete\)/i }),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/operation is irreversible/i)).toBeInTheDocument();
+    expect(screen.getByText(/target a first response within 2 business days/i)).toBeInTheDocument();
   });
 
   it('renders locked terms clauses for jurisdiction and consumer rights', () => {
@@ -45,6 +50,10 @@ describe('legal pages', () => {
       screen.getByText(/nothing in these terms limits your rights under mandatory consumer law/i),
     ).toBeInTheDocument();
     expect(screen.getByText(/at least 16 years old/i)).toBeInTheDocument();
+    expect(screen.getByText(/account and habit data are permanently removed/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/target first support responses within 2 business days/i),
+    ).toBeInTheDocument();
   });
 
   it('renders refund policy carve-outs for web and app stores', () => {

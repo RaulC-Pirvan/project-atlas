@@ -30,6 +30,10 @@ export default function RefundsPage() {
           Use the Support Center with purchase email, platform, order details, and a short request
           summary so billing review can be completed faster.
         </p>
+        <p>
+          We target first billing responses within 2 business days for most requests, with timing
+          depending on queue volume and case complexity.
+        </p>
       </section>
     </LegalPageLayout>
   );

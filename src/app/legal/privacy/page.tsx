@@ -28,10 +28,35 @@ export default function PrivacyPolicyPage() {
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-base font-semibold">Account deletion behavior</h2>
+        <h2 className="text-base font-semibold">Support handling and response expectations</h2>
+        <p>
+          Support requests are stored in our support system for triage and follow-up. We target a
+          first response within 2 business days for most requests, but response times can vary based
+          on queue volume and issue complexity.
+        </p>
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="text-base font-semibold">How to get help faster</h2>
+        <p>
+          Include exact steps, expected behavior, and actual behavior. For billing help, include the
+          purchase email and platform (web, Apple App Store, or Google Play).
+        </p>
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="text-base font-semibold">Account deletion behavior (hard delete)</h2>
         <p>
           Deleting your account from Account settings permanently removes account and habit data.
           This operation is irreversible and support cannot restore deleted accounts.
+        </p>
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="text-base font-semibold">Children and age policy</h2>
+        <p>
+          Project Atlas is not directed to children under 16. If we discover underage use, we may
+          remove the account and related data.
         </p>
       </section>
 

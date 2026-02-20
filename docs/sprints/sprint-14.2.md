@@ -91,12 +91,12 @@ production publish until finalized:
 
 ### Tasks (6)
 
-- [ ] **Task 0.1**: Add shared legal content metadata model (`version`, `effectiveDate`, `updatedAt`)
-- [ ] **Task 0.2**: Add shared legal page layout component for consistent structure
-- [ ] **Task 0.3**: Add legal routes scaffold: `/legal/privacy`, `/legal/terms`, `/legal/refunds`, `/legal/changes`
-- [ ] **Task 0.4**: Keep legal pages publicly accessible in middleware/public-path rules
-- [ ] **Task 0.5**: Add policy constants/types to avoid hard-coded metadata duplication
-- [ ] **Task 0.6**: Add placeholder guard checklist for pre-publish legal entity fields
+- [x] **Task 0.1**: Add shared legal content metadata model (`version`, `effectiveDate`, `updatedAt`)
+- [x] **Task 0.2**: Add shared legal page layout component for consistent structure
+- [x] **Task 0.3**: Add legal routes scaffold: `/legal/privacy`, `/legal/terms`, `/legal/refunds`, `/legal/changes`
+- [x] **Task 0.4**: Keep legal pages publicly accessible in middleware/public-path rules
+- [x] **Task 0.5**: Add policy constants/types to avoid hard-coded metadata duplication
+- [x] **Task 0.6**: Add placeholder guard checklist for pre-publish legal entity fields
 
 ---
 

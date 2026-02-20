@@ -9,6 +9,10 @@ describe('isPublicPath', () => {
     expect(isPublicPath('/verify-email')).toBe(true);
     expect(isPublicPath('/landing')).toBe(true);
     expect(isPublicPath('/support')).toBe(true);
+    expect(isPublicPath('/legal/privacy')).toBe(true);
+    expect(isPublicPath('/legal/terms')).toBe(true);
+    expect(isPublicPath('/legal/refunds')).toBe(true);
+    expect(isPublicPath('/legal/changes')).toBe(true);
     expect(isPublicPath('/api/auth/signin')).toBe(true);
     expect(isPublicPath('/api/support/tickets')).toBe(true);
   });

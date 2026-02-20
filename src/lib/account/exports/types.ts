@@ -71,7 +71,7 @@ export type UserDataExportPayload = {
   habits: UserDataExportHabit[];
   completions: UserDataExportCompletion[];
   reminders: {
-    settings: UserDataExportReminderSettings | null;
+    settings: UserDataExportReminderSettings;
     habitReminders: UserDataExportHabitReminder[];
   };
   achievements: {

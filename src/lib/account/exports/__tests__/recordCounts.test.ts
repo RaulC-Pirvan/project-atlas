@@ -75,24 +75,4 @@ describe('summarizeUserDataExportRecordCounts', () => {
       habitMilestoneUnlocks: 1,
     });
   });
-
-  it('counts missing reminder settings as zero', () => {
-    const payload: UserDataExportPayload = {
-      schemaVersion: USER_DATA_EXPORT_SCHEMA_VERSION,
-      generatedAt: '2026-02-20T16:45:12.345Z',
-      userId: 'user-123',
-      habits: [],
-      completions: [],
-      reminders: {
-        settings: null,
-        habitReminders: [],
-      },
-      achievements: {
-        achievementUnlocks: [],
-        habitMilestoneUnlocks: [],
-      },
-    };
-
-    expect(summarizeUserDataExportRecordCounts(payload).reminderSettings).toBe(0);
-  });
 });

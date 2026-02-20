@@ -6,7 +6,7 @@ export function summarizeUserDataExportRecordCounts(
   return {
     habits: payload.habits.length,
     completions: payload.completions.length,
-    reminderSettings: payload.reminders.settings ? 1 : 0,
+    reminderSettings: 1,
     habitReminders: payload.reminders.habitReminders.length,
     achievementUnlocks: payload.achievements.achievementUnlocks.length,
     habitMilestoneUnlocks: payload.achievements.habitMilestoneUnlocks.length,

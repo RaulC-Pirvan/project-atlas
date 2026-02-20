@@ -100,13 +100,13 @@ a simple, secure JSON export flow with robust authorization and audit logging.
 
 ### Tasks (7)
 
-- [ ] **Task 1.1**: Implement `GET /api/account/exports/self` (authenticated)
-- [ ] **Task 1.2**: Enforce strict session-bound user scoping for all export queries
-- [ ] **Task 1.3**: Query and assemble habits + schedules export section
-- [ ] **Task 1.4**: Query and assemble completions export section
-- [ ] **Task 1.5**: Query and assemble reminders export section (settings + habit reminder times)
-- [ ] **Task 1.6**: Query and assemble achievements export section (unlock tables)
-- [ ] **Task 1.7**: Return downloadable JSON with `no-store` and attachment headers
+- [x] **Task 1.1**: Implement `GET /api/account/exports/self` (authenticated)
+- [x] **Task 1.2**: Enforce strict session-bound user scoping for all export queries
+- [x] **Task 1.3**: Query and assemble habits + schedules export section
+- [x] **Task 1.4**: Query and assemble completions export section
+- [x] **Task 1.5**: Query and assemble reminders export section (settings + habit reminder times)
+- [x] **Task 1.6**: Query and assemble achievements export section (unlock tables)
+- [x] **Task 1.7**: Return downloadable JSON with `no-store` and attachment headers
 
 ---
 

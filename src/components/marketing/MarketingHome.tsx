@@ -1,5 +1,6 @@
 import Link from 'next/link';
 
+import { LegalSupportLinks } from '../legal/LegalSupportLinks';
 import { ThemeToggle } from '../ui/ThemeToggle';
 
 const corePillars = [
@@ -517,6 +518,13 @@ export function MarketingHome({ isAuthenticated = false }: MarketingHomeProps) {
             </Link>
           </div>
         </section>
+
+        <footer className="border-t border-black/10 pt-8 text-sm text-black/65 dark:border-white/10 dark:text-white/65">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <p>Policy and support resources</p>
+            <LegalSupportLinks ariaLabel="Landing legal and support links" />
+          </div>
+        </footer>
       </div>
     </main>
   );

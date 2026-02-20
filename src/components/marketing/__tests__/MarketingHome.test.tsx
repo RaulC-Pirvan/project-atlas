@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
 import { MarketingHome } from '../MarketingHome';
@@ -23,6 +23,23 @@ describe('MarketingHome', () => {
     });
 
     expect(screen.getByRole('link', { name: /^support$/i })).toHaveAttribute('href', '/support');
+    const legalNav = screen.getByRole('navigation', { name: /landing legal and support links/i });
+    expect(within(legalNav).getByRole('link', { name: /privacy policy/i })).toHaveAttribute(
+      'href',
+      '/legal/privacy',
+    );
+    expect(within(legalNav).getByRole('link', { name: /terms of service/i })).toHaveAttribute(
+      'href',
+      '/legal/terms',
+    );
+    expect(within(legalNav).getByRole('link', { name: /refund policy/i })).toHaveAttribute(
+      'href',
+      '/legal/refunds',
+    );
+    expect(within(legalNav).getByRole('link', { name: /support center/i })).toHaveAttribute(
+      'href',
+      '/support',
+    );
   });
 
   it('highlights the schedule, completion, and streak benefits', () => {
@@ -98,6 +115,11 @@ describe('MarketingHome', () => {
       '/calendar',
     );
     expect(screen.getByRole('link', { name: /^support$/i })).toHaveAttribute('href', '/support');
+    const legalNav = screen.getByRole('navigation', { name: /landing legal and support links/i });
+    expect(within(legalNav).getByRole('link', { name: /privacy policy/i })).toHaveAttribute(
+      'href',
+      '/legal/privacy',
+    );
     expect(screen.queryByRole('link', { name: /create your account/i })).not.toBeInTheDocument();
   });
 });

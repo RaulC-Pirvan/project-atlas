@@ -66,6 +66,39 @@ describe('AccountPanel', () => {
     expect(screen.getByRole('button', { name: /sign out all devices/i })).toBeInTheDocument();
   });
 
+  it('renders legal and support links section', () => {
+    render(
+      <AccountPanel
+        email="user@example.com"
+        displayName="User"
+        role="user"
+        twoFactorEnabled={false}
+        recoveryCodesRemaining={0}
+        adminTwoFactorEnforced={false}
+        weekStart="mon"
+        keepCompletedAtBottom
+        hasPassword
+      />,
+    );
+
+    expect(screen.getByText(/^legal and support$/i)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /privacy policy/i })).toHaveAttribute(
+      'href',
+      '/legal/privacy',
+    );
+    expect(screen.getByRole('link', { name: /terms of service/i })).toHaveAttribute(
+      'href',
+      '/legal/terms',
+    );
+    expect(screen.getByRole('link', { name: /refund policy/i })).toHaveAttribute(
+      'href',
+      '/legal/refunds',
+    );
+    expect(screen.getAllByRole('link', { name: /support center/i }).length).toBeGreaterThanOrEqual(
+      1,
+    );
+  });
+
   it('shows admin enrollment notice when admin 2FA is required', () => {
     render(
       <AccountPanel

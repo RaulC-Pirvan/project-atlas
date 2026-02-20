@@ -118,12 +118,12 @@ production publish until finalized:
 
 ### Tasks (6)
 
-- [ ] **Task 2.1**: Add legal/support links to landing footer (`Privacy`, `Terms`, `Refunds`, `Support`)
-- [ ] **Task 2.2**: Add legal links near upgrade/purchase context on `/pro`
-- [ ] **Task 2.3**: Add "Legal & Support" section on `/account`
-- [ ] **Task 2.4**: Keep app sidebar lean (Support only; no legal-link overload)
-- [ ] **Task 2.5**: Ensure mobile and desktop parity for legal/support link availability
-- [ ] **Task 2.6**: Ensure link labels are explicit and accessibility-friendly
+- [x] **Task 2.1**: Add legal/support links to landing footer (`Privacy`, `Terms`, `Refunds`, `Support`)
+- [x] **Task 2.2**: Add legal links near upgrade/purchase context on `/pro`
+- [x] **Task 2.3**: Add "Legal & Support" section on `/account`
+- [x] **Task 2.4**: Keep app sidebar lean (Support only; no legal-link overload)
+- [x] **Task 2.5**: Ensure mobile and desktop parity for legal/support link availability
+- [x] **Task 2.6**: Ensure link labels are explicit and accessibility-friendly
 
 ---
 

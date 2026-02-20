@@ -1,10 +1,12 @@
 ﻿'use client';
 
 import Image from 'next/image';
+import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { getApiErrorMessage, parseJson } from '../../lib/api/client';
 import type { WeekStart } from '../habits/weekdays';
+import { LegalSupportLinks } from '../legal/LegalSupportLinks';
 import { Button } from '../ui/Button';
 import { FormField } from '../ui/FormField';
 import { Input } from '../ui/Input';
@@ -1296,6 +1298,25 @@ export function AccountPanel({
               : 'Update password'}
         </Button>
       </form>
+
+      <section className="space-y-4 border-t border-black/10 pt-6 dark:border-white/10">
+        <div className="space-y-1">
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-black/80 dark:text-white/80">
+            Legal and support
+          </p>
+          <p className="text-sm text-black/60 dark:text-white/60">
+            Review privacy, terms, refunds, and support guidance.
+          </p>
+        </div>
+        <LegalSupportLinks ariaLabel="Account legal and support links" />
+        <p className="text-xs text-black/55 dark:text-white/55">
+          Need detailed support guidance?{' '}
+          <Link href="/support" className="underline underline-offset-2">
+            Open the Support Center
+          </Link>
+          .
+        </p>
+      </section>
 
       <form className="space-y-6" onSubmit={handleDelete}>
         <div className="space-y-1">

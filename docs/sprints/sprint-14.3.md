@@ -139,12 +139,12 @@ a simple, secure JSON export flow with robust authorization and audit logging.
 
 ### Tasks (6)
 
-- [ ] **Task 4.1**: API tests for auth requirements (`401` when signed out)
-- [ ] **Task 4.2**: API tests for user-scope correctness (no cross-user leakage)
-- [ ] **Task 4.3**: Service/unit tests for payload integrity and record counts
-- [ ] **Task 4.4**: Component tests for account export section interactions
-- [ ] **Task 4.5**: Optional E2E smoke for account export download flow
-- [ ] **Task 4.6**: CI stability pass for new export/audit surfaces
+- [x] **Task 4.1**: API tests for auth requirements (`401` when signed out)
+- [x] **Task 4.2**: API tests for user-scope correctness (no cross-user leakage)
+- [x] **Task 4.3**: Service/unit tests for payload integrity and record counts
+- [x] **Task 4.4**: Component tests for account export section interactions
+- [x] **Task 4.5**: Optional E2E smoke for account export download flow
+- [x] **Task 4.6**: CI stability pass for new export/audit surfaces
 
 ---
 

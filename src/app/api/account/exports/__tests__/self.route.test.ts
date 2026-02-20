@@ -234,4 +234,50 @@ describe('GET /api/account/exports/self', () => {
 
     errorSpy.mockRestore();
   });
+
+  it('ignores caller-provided userId query params and scopes export to session user', async () => {
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+
+    mockedGetServerSession.mockResolvedValue({ user: { id: 'user-session' } });
+    mockedGetUserDataExportPayload.mockResolvedValue({
+      schemaVersion: 1,
+      generatedAt: '2026-02-20T10:00:00.000Z',
+      userId: 'user-session',
+      habits: [],
+      completions: [],
+      reminders: {
+        settings: {
+          dailyDigestEnabled: true,
+          dailyDigestTimeMinutes: 1200,
+          quietHoursEnabled: false,
+          quietHoursStartMinutes: 1320,
+          quietHoursEndMinutes: 420,
+          snoozeDefaultMinutes: 10,
+        },
+        habitReminders: [],
+      },
+      achievements: {
+        achievementUnlocks: [],
+        habitMilestoneUnlocks: [],
+      },
+    });
+    mockedBuildUserDataExportFilename.mockReturnValue('20260220T100000Z-atlas-data-export.json');
+
+    const response = await GET(
+      new Request('https://example.com/api/account/exports/self?userId=user-attacker'),
+    );
+
+    expect(response.status).toBe(200);
+    expect(mockedGetUserDataExportPayload).toHaveBeenCalledWith(
+      expect.objectContaining({ userId: 'user-session' }),
+    );
+    expect(mockedGetUserDataExportPayload).not.toHaveBeenCalledWith(
+      expect.objectContaining({ userId: 'user-attacker' }),
+    );
+
+    const body = await response.json();
+    expect(body.userId).toBe('user-session');
+
+    logSpy.mockRestore();
+  });
 });

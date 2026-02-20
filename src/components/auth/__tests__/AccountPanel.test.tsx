@@ -10,6 +10,27 @@ function jsonResponse(body: unknown, status = 200) {
   });
 }
 
+const baseProps = {
+  email: 'user@example.com',
+  displayName: 'User',
+  role: 'user' as const,
+  twoFactorEnabled: false,
+  recoveryCodesRemaining: 0,
+  adminTwoFactorEnforced: false,
+  weekStart: 'mon' as const,
+  keepCompletedAtBottom: true,
+  hasPassword: true,
+  reminderSettings: {
+    dailyDigestEnabled: true,
+    dailyDigestTimeMinutes: 1200,
+    quietHoursEnabled: false,
+    quietHoursStartMinutes: 1320,
+    quietHoursEndMinutes: 420,
+    snoozeDefaultMinutes: 10,
+  },
+  timezoneLabel: 'UTC',
+};
+
 describe('AccountPanel', () => {
   beforeEach(() => {
     vi.spyOn(global, 'fetch').mockImplementation(async () => {
@@ -29,14 +50,9 @@ describe('AccountPanel', () => {
   it('renders security-check messaging for email updates', () => {
     render(
       <AccountPanel
+        {...baseProps}
         email="oauth@example.com"
         displayName="OAuth User"
-        role="user"
-        twoFactorEnabled={false}
-        recoveryCodesRemaining={0}
-        adminTwoFactorEnforced={false}
-        weekStart="mon"
-        keepCompletedAtBottom
         hasPassword={false}
       />,
     );
@@ -47,19 +63,7 @@ describe('AccountPanel', () => {
   });
 
   it('renders session controls section', () => {
-    render(
-      <AccountPanel
-        email="user@example.com"
-        displayName="User"
-        role="user"
-        twoFactorEnabled={false}
-        recoveryCodesRemaining={0}
-        adminTwoFactorEnforced={false}
-        weekStart="mon"
-        keepCompletedAtBottom
-        hasPassword
-      />,
-    );
+    render(<AccountPanel {...baseProps} />);
 
     expect(screen.getByText(/^active sessions$/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /sign out other devices/i })).toBeInTheDocument();
@@ -67,19 +71,7 @@ describe('AccountPanel', () => {
   });
 
   it('renders legal and support links section', () => {
-    render(
-      <AccountPanel
-        email="user@example.com"
-        displayName="User"
-        role="user"
-        twoFactorEnabled={false}
-        recoveryCodesRemaining={0}
-        adminTwoFactorEnforced={false}
-        weekStart="mon"
-        keepCompletedAtBottom
-        hasPassword
-      />,
-    );
+    render(<AccountPanel {...baseProps} />);
 
     expect(screen.getByText(/^legal and support$/i)).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /privacy policy/i })).toHaveAttribute(
@@ -99,18 +91,39 @@ describe('AccountPanel', () => {
     );
   });
 
+  it('renders account sections in a logical top-to-bottom order', () => {
+    render(<AccountPanel {...baseProps} />);
+
+    const orderedLabels = [
+      /^display name$/i,
+      /^email$/i,
+      /^password$/i,
+      /^week start$/i,
+      /^daily ordering$/i,
+      /^reminders$/i,
+      /^two-factor authentication$/i,
+      /^active sessions$/i,
+      /^delete request$/i,
+      /^legal and support$/i,
+    ];
+
+    const nodes = orderedLabels.map((label) => screen.getByText(label, { selector: 'p' }));
+    for (let index = 0; index < nodes.length - 1; index += 1) {
+      const currentNode = nodes[index];
+      const nextNode = nodes[index + 1];
+      const position = currentNode.compareDocumentPosition(nextNode);
+      expect(position & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    }
+  });
+
   it('shows admin enrollment notice when admin 2FA is required', () => {
     render(
       <AccountPanel
+        {...baseProps}
         email="admin@example.com"
         displayName="Admin"
         role="admin"
-        twoFactorEnabled={false}
-        recoveryCodesRemaining={0}
         adminTwoFactorEnforced
-        weekStart="mon"
-        keepCompletedAtBottom
-        hasPassword
       />,
     );
 
@@ -152,19 +165,7 @@ describe('AccountPanel', () => {
       return jsonResponse({ ok: true, data: {} });
     });
 
-    render(
-      <AccountPanel
-        email="user@example.com"
-        displayName="User"
-        role="user"
-        twoFactorEnabled={false}
-        recoveryCodesRemaining={0}
-        adminTwoFactorEnforced={false}
-        weekStart="mon"
-        keepCompletedAtBottom
-        hasPassword
-      />,
-    );
+    render(<AccountPanel {...baseProps} />);
 
     fireEvent.click(screen.getByRole('button', { name: /set up 2fa/i }));
     expect(await screen.findByLabelText(/manual setup key/i)).toBeInTheDocument();
@@ -220,19 +221,7 @@ describe('AccountPanel', () => {
       return jsonResponse({ ok: true, data: {} });
     });
 
-    render(
-      <AccountPanel
-        email="user@example.com"
-        displayName="User"
-        role="user"
-        twoFactorEnabled={false}
-        recoveryCodesRemaining={0}
-        adminTwoFactorEnforced={false}
-        weekStart="mon"
-        keepCompletedAtBottom
-        hasPassword
-      />,
-    );
+    render(<AccountPanel {...baseProps} />);
 
     fireEvent.change(screen.getByLabelText(/^new password$/i), {
       target: { value: 'AtlasUpdatedPassword123!' },
@@ -277,19 +266,7 @@ describe('AccountPanel', () => {
       return jsonResponse({ ok: true, data: {} });
     });
 
-    render(
-      <AccountPanel
-        email="user@example.com"
-        displayName="User"
-        role="user"
-        twoFactorEnabled
-        recoveryCodesRemaining={10}
-        adminTwoFactorEnforced={false}
-        weekStart="mon"
-        keepCompletedAtBottom
-        hasPassword
-      />,
-    );
+    render(<AccountPanel {...baseProps} twoFactorEnabled recoveryCodesRemaining={10} />);
 
     fireEvent.change(screen.getByLabelText(/type "disable 2fa"/i), {
       target: { value: 'DISABLE 2FA' },

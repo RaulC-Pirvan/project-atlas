@@ -1,6 +1,5 @@
 import Link from 'next/link';
 
-import { LegalSupportLinks } from '../legal/LegalSupportLinks';
 import { Button } from '../ui/Button';
 
 type ProAccountCardProps = {
@@ -35,19 +34,6 @@ export function ProAccountCard({ isPro }: ProAccountCardProps) {
         {isPro ? (
           <>
             <p>Thanks for supporting Atlas. Your Pro access is active.</p>
-            <div className="rounded-2xl border border-black/10 p-4 dark:border-white/10">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-black/55 dark:text-white/55">
-                Legal and support
-              </p>
-              <p className="mt-2 text-xs text-black/55 dark:text-white/55">
-                Review purchase policy and support options.
-              </p>
-              <LegalSupportLinks
-                ariaLabel="Pro legal and support links"
-                className="mt-3"
-                linkClassName="w-full sm:w-auto"
-              />
-            </div>
           </>
         ) : (
           <>
@@ -63,19 +49,6 @@ export function ProAccountCard({ isPro }: ProAccountCardProps) {
             <p className="text-xs text-black/50 dark:text-white/50">
               Restore purchase will be available in the mobile app.
             </p>
-            <div className="rounded-2xl border border-black/10 p-4 dark:border-white/10">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-black/55 dark:text-white/55">
-                Legal and support
-              </p>
-              <p className="mt-2 text-xs text-black/55 dark:text-white/55">
-                Review purchase policy and support options before upgrading.
-              </p>
-              <LegalSupportLinks
-                ariaLabel="Pro legal and support links"
-                className="mt-3"
-                linkClassName="w-full sm:w-auto"
-              />
-            </div>
           </>
         )}
       </div>

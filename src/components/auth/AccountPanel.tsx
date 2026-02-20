@@ -5,8 +5,10 @@ import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { getApiErrorMessage, parseJson } from '../../lib/api/client';
+import type { UserReminderSettings } from '../../lib/reminders/types';
 import type { WeekStart } from '../habits/weekdays';
 import { LegalSupportLinks } from '../legal/LegalSupportLinks';
+import { ReminderSettingsPanel } from '../reminders/ReminderSettingsPanel';
 import { Button } from '../ui/Button';
 import { FormField } from '../ui/FormField';
 import { Input } from '../ui/Input';
@@ -25,6 +27,8 @@ type AccountPanelProps = {
   weekStart: WeekStart;
   keepCompletedAtBottom: boolean;
   hasPassword: boolean;
+  reminderSettings: UserReminderSettings;
+  timezoneLabel: string;
 };
 
 type AccountResponse = {
@@ -103,6 +107,8 @@ export function AccountPanel({
   weekStart,
   keepCompletedAtBottom,
   hasPassword,
+  reminderSettings,
+  timezoneLabel,
 }: AccountPanelProps) {
   const [nextEmail, setNextEmail] = useState(email);
   const [displayNameInput, setDisplayNameInput] = useState(displayName);
@@ -883,6 +889,89 @@ export function AccountPanel({
 
       <form
         className="space-y-6 border-t border-black/10 pt-6 dark:border-white/10"
+        onSubmit={handleEmailUpdate}
+      >
+        <div className="space-y-1">
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-black/80 dark:text-white/80">
+            Email
+          </p>
+          <p className="text-sm text-black/60 dark:text-white/60">
+            Email changes require a fresh security check (password or 2FA).
+          </p>
+        </div>
+        <FormField id="account-email" label="Email" error={null}>
+          <Input
+            id="account-email"
+            name="email"
+            type="email"
+            autoComplete="email"
+            value={nextEmail}
+            onChange={(event) => {
+              const value = event.target.value;
+              setNextEmail(value);
+            }}
+          />
+        </FormField>
+        <Button
+          type="submit"
+          variant="outline"
+          className="w-full"
+          disabled={updatingEmail || stepUpStarting}
+        >
+          {updatingEmail
+            ? 'Updating...'
+            : stepUpStarting
+              ? 'Starting verification...'
+              : 'Update email'}
+        </Button>
+      </form>
+
+      <form
+        className="space-y-6 border-t border-black/10 pt-6 dark:border-white/10"
+        onSubmit={handlePasswordUpdate}
+      >
+        <div className="space-y-1">
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-black/80 dark:text-white/80">
+            Password
+          </p>
+          <p className="text-sm text-black/60 dark:text-white/60">Choose a new password.</p>
+        </div>
+        <FormField id="account-password" label="New password" error={null}>
+          <Input
+            id="account-password"
+            name="password"
+            type="password"
+            autoComplete="new-password"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+          />
+        </FormField>
+        <FormField id="account-confirm" label="Confirm new password" error={null}>
+          <Input
+            id="account-confirm"
+            name="confirm"
+            type="password"
+            autoComplete="new-password"
+            value={confirm}
+            onChange={(event) => setConfirm(event.target.value)}
+          />
+        </FormField>
+        <Button
+          type="submit"
+          variant="outline"
+          className="w-full"
+          disabled={updatingPassword || stepUpStarting}
+        >
+          {updatingPassword
+            ? 'Updating...'
+            : stepUpStarting
+              ? 'Starting verification...'
+              : 'Update password'}
+        </Button>
+      </form>
+
+      <form
+        className="space-y-6 border-t border-black/10 pt-6 dark:border-white/10"
         onSubmit={handleWeekStartUpdate}
       >
         <div className="space-y-1">
@@ -954,6 +1043,8 @@ export function AccountPanel({
           {updatingOrdering ? 'Updating...' : 'Update ordering'}
         </Button>
       </form>
+
+      <ReminderSettingsPanel initialSettings={reminderSettings} timezoneLabel={timezoneLabel} />
 
       <section className="space-y-6 border-t border-black/10 pt-6 dark:border-white/10">
         <div className="space-y-1">
@@ -1218,107 +1309,8 @@ export function AccountPanel({
 
       <form
         className="space-y-6 border-t border-black/10 pt-6 dark:border-white/10"
-        onSubmit={handleEmailUpdate}
+        onSubmit={handleDelete}
       >
-        <div className="space-y-1">
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-black/80 dark:text-white/80">
-            Email
-          </p>
-          <p className="text-sm text-black/60 dark:text-white/60">
-            Email changes require a fresh security check (password or 2FA).
-          </p>
-        </div>
-        <FormField id="account-email" label="Email" error={null}>
-          <Input
-            id="account-email"
-            name="email"
-            type="email"
-            autoComplete="email"
-            value={nextEmail}
-            onChange={(event) => {
-              const value = event.target.value;
-              setNextEmail(value);
-            }}
-          />
-        </FormField>
-        <Button
-          type="submit"
-          variant="outline"
-          className="w-full"
-          disabled={updatingEmail || stepUpStarting}
-        >
-          {updatingEmail
-            ? 'Updating...'
-            : stepUpStarting
-              ? 'Starting verification...'
-              : 'Update email'}
-        </Button>
-      </form>
-
-      <form
-        className="space-y-6 border-t border-black/10 pt-6 dark:border-white/10"
-        onSubmit={handlePasswordUpdate}
-      >
-        <div className="space-y-1">
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-black/80 dark:text-white/80">
-            Password
-          </p>
-          <p className="text-sm text-black/60 dark:text-white/60">Choose a new password.</p>
-        </div>
-        <FormField id="account-password" label="New password" error={null}>
-          <Input
-            id="account-password"
-            name="password"
-            type="password"
-            autoComplete="new-password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-          />
-        </FormField>
-        <FormField id="account-confirm" label="Confirm new password" error={null}>
-          <Input
-            id="account-confirm"
-            name="confirm"
-            type="password"
-            autoComplete="new-password"
-            value={confirm}
-            onChange={(event) => setConfirm(event.target.value)}
-          />
-        </FormField>
-        <Button
-          type="submit"
-          variant="outline"
-          className="w-full"
-          disabled={updatingPassword || stepUpStarting}
-        >
-          {updatingPassword
-            ? 'Updating...'
-            : stepUpStarting
-              ? 'Starting verification...'
-              : 'Update password'}
-        </Button>
-      </form>
-
-      <section className="space-y-4 border-t border-black/10 pt-6 dark:border-white/10">
-        <div className="space-y-1">
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-black/80 dark:text-white/80">
-            Legal and support
-          </p>
-          <p className="text-sm text-black/60 dark:text-white/60">
-            Review privacy, terms, refunds, and support guidance.
-          </p>
-        </div>
-        <LegalSupportLinks ariaLabel="Account legal and support links" />
-        <p className="text-xs text-black/55 dark:text-white/55">
-          Need detailed support guidance?{' '}
-          <Link href="/support" className="underline underline-offset-2">
-            Open the Support Center
-          </Link>
-          .
-        </p>
-      </section>
-
-      <form className="space-y-6" onSubmit={handleDelete}>
         <div className="space-y-1">
           <p className="text-xs font-semibold uppercase tracking-[0.3em] text-black/80 dark:text-white/80">
             Delete request
@@ -1353,6 +1345,25 @@ export function AccountPanel({
               : 'Request delete'}
         </Button>
       </form>
+
+      <section className="space-y-4 border-t border-black/10 pt-6 dark:border-white/10">
+        <div className="space-y-1">
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-black/80 dark:text-white/80">
+            Legal and support
+          </p>
+          <p className="text-sm text-black/60 dark:text-white/60">
+            Review privacy, terms, refunds, and support guidance.
+          </p>
+        </div>
+        <LegalSupportLinks ariaLabel="Account legal and support links" />
+        <p className="text-xs text-black/55 dark:text-white/55">
+          Need detailed support guidance?{' '}
+          <Link href="/support" className="underline underline-offset-2">
+            Open the Support Center
+          </Link>
+          .
+        </p>
+      </section>
 
       <Modal open={showStepUpModal} title="Security verification" eyebrow="Step-up auth">
         <form className="space-y-4" onSubmit={handleStepUpVerify}>

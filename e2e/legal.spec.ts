@@ -100,7 +100,7 @@ test('landing footer legal links navigate to legal and support routes', async ({
   await expect(page).toHaveURL(/\/support$/, { timeout: 15_000 });
 });
 
-test('signed-in users can discover legal links from account and pro', async ({ page, request }) => {
+test('signed-in users can discover legal links from account', async ({ page, request }) => {
   await createVerifiedUser(page, request, 'legal-links');
 
   await page.goto('/account');
@@ -112,12 +112,4 @@ test('signed-in users can discover legal links from account and pro', async ({ p
   await expect(accountLegalNav.getByRole('link', { name: /terms of service/i })).toBeVisible();
   await expect(accountLegalNav.getByRole('link', { name: /refund policy/i })).toBeVisible();
   await expect(accountLegalNav.getByRole('link', { name: /support center/i })).toBeVisible();
-
-  await page.goto('/pro');
-  const proLegalNav = page.getByRole('navigation', { name: /pro legal and support links/i });
-  await expect(proLegalNav).toBeVisible();
-  await expect(proLegalNav.getByRole('link', { name: /privacy policy/i })).toBeVisible();
-  await expect(proLegalNav.getByRole('link', { name: /terms of service/i })).toBeVisible();
-  await expect(proLegalNav.getByRole('link', { name: /refund policy/i })).toBeVisible();
-  await expect(proLegalNav.getByRole('link', { name: /support center/i })).toBeVisible();
 });

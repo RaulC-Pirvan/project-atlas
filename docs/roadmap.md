@@ -359,10 +359,10 @@
 
 ### Sprint 14.2: Trust & Policy Surfaces
 
-- [ ] Publish Privacy Policy, Terms, and Refund Policy pages
-- [ ] Add support response-time expectations and help guidance
-- [ ] Link legal/support surfaces from landing, Pro page, and account
-- [ ] Add simple policy versioning/change-log notes
+- [x] Publish Privacy Policy, Terms, and Refund Policy pages
+- [x] Add support response-time expectations and help guidance
+- [x] Link legal/support surfaces from landing, Pro page, and account
+- [x] Add simple policy versioning/change-log notes
 
 ---
 

@@ -11,6 +11,7 @@ type NavItem = {
   label: string;
   icon: string;
   desktopOrder?: string;
+  activeMatchPrefix?: string;
 };
 
 const desktopNavItems: NavItem[] = [
@@ -26,7 +27,14 @@ const desktopNavItems: NavItem[] = [
     desktopOrder: 'md:order-6',
   },
   { href: '/account', label: 'Account', icon: 'account', desktopOrder: 'md:order-7' },
-  { href: '/support', label: 'Support', icon: 'support', desktopOrder: 'md:order-8' },
+  { href: '/support#contact-form', label: 'Support', icon: 'support', desktopOrder: 'md:order-8' },
+  {
+    href: '/legal/changes',
+    label: 'Legal',
+    icon: 'legal',
+    desktopOrder: 'md:order-9',
+    activeMatchPrefix: '/legal',
+  },
 ];
 
 const mobilePrimaryItems: NavItem[] = [
@@ -40,7 +48,8 @@ const mobileMoreItems: NavItem[] = [
   { href: '/insights', label: 'Insights', icon: 'insights' },
   { href: '/achievements', label: 'Achievements', icon: 'achievements' },
   { href: '/account', label: 'Account', icon: 'account' },
-  { href: '/support', label: 'Support', icon: 'support' },
+  { href: '/support#contact-form', label: 'Support', icon: 'support' },
+  { href: '/legal/changes', label: 'Legal', icon: 'legal', activeMatchPrefix: '/legal' },
 ];
 
 const desktopBaseClasses =
@@ -197,6 +206,27 @@ function NavIcon({ icon }: { icon: string }) {
     );
   }
 
+  if (icon === 'legal') {
+    return (
+      <svg
+        viewBox="0 0 24 24"
+        aria-hidden="true"
+        className="h-5 w-5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M8 4h8" />
+        <path d="M6 8h12" />
+        <path d="M6 12h12" />
+        <path d="M6 16h8" />
+        <path d="M6 20h12" />
+      </svg>
+    );
+  }
+
   return (
     <svg
       viewBox="0 0 24 24"
@@ -257,6 +287,17 @@ function NavLink({
   );
 }
 
+function getNavPath(href: string): string {
+  const [pathWithQuery] = href.split('#');
+  const [path] = pathWithQuery.split('?');
+  return path || '/';
+}
+
+function isNavItemActive(pathname: string, item: NavItem): boolean {
+  const matchPath = item.activeMatchPrefix ?? getNavPath(item.href);
+  return pathname === matchPath || pathname.startsWith(`${matchPath}/`);
+}
+
 export function AppSidebar() {
   const pathname = usePathname();
   const [isMoreOpen, setIsMoreOpen] = useState(false);
@@ -266,10 +307,7 @@ export function AppSidebar() {
   }, [pathname]);
 
   const moreActive = useMemo(
-    () =>
-      mobileMoreItems.some(
-        (item) => pathname === item.href || pathname.startsWith(`${item.href}/`),
-      ),
+    () => mobileMoreItems.some((item) => isNavItemActive(pathname, item)),
     [pathname],
   );
 
@@ -285,7 +323,7 @@ export function AppSidebar() {
                 label={item.label}
                 icon={item.icon}
                 desktopOrder={item.desktopOrder}
-                active={pathname === item.href || pathname.startsWith(`${item.href}/`)}
+                active={isNavItemActive(pathname, item)}
               />
             ))}
           </div>
@@ -314,7 +352,7 @@ export function AppSidebar() {
                 key={item.href}
                 href={item.href}
                 className={`inline-flex h-10 items-center justify-center rounded-xl border border-black/15 px-2 text-xs font-medium uppercase tracking-[0.16em] dark:border-white/20 ${
-                  pathname === item.href || pathname.startsWith(`${item.href}/`)
+                  isNavItemActive(pathname, item)
                     ? 'bg-black text-white dark:bg-white dark:text-black'
                     : 'text-black/75 dark:text-white/75'
                 }`}
@@ -340,7 +378,7 @@ export function AppSidebar() {
               href={item.href}
               label={item.label}
               icon={item.icon}
-              active={pathname === item.href || pathname.startsWith(`${item.href}/`)}
+              active={isNavItemActive(pathname, item)}
               mobile
             />
           ))}

@@ -260,7 +260,10 @@ export function SupportCenter({ initialName, initialEmail, isAuthenticated }: Su
             </ul>
           </section>
 
-          <section className="rounded-3xl border border-black/10 bg-white p-6 opacity-0 translate-y-2 motion-reduce:translate-y-0 motion-reduce:opacity-100 motion-safe:animate-[rise-in_0.55s_ease-out_forwards] motion-safe:[animation-delay:320ms] dark:border-white/10 dark:bg-black">
+          <section
+            id="contact-form"
+            className="scroll-mt-6 rounded-3xl border border-black/10 bg-white p-6 opacity-0 translate-y-2 motion-reduce:translate-y-0 motion-reduce:opacity-100 motion-safe:animate-[rise-in_0.55s_ease-out_forwards] motion-safe:[animation-delay:320ms] dark:border-white/10 dark:bg-black"
+          >
             <form className="space-y-5" onSubmit={handleSubmit}>
               <div className="grid gap-4 sm:grid-cols-2">
                 <FormField id="support-name" label="Name" error={null}>

@@ -19,35 +19,35 @@ export function LegalPageLayout({ title, description, metadata, children }: Lega
   return (
     <main className="min-h-screen bg-white text-black dark:bg-black dark:text-white">
       <div className="mx-auto w-full max-w-5xl px-6 py-10 sm:py-14">
-        <header className="flex items-center justify-between">
+        <header className="flex items-center justify-between opacity-0 translate-y-2 motion-reduce:translate-y-0 motion-reduce:opacity-100 motion-safe:animate-[rise-in_0.5s_ease-out_forwards]">
           <p className="text-xs font-semibold uppercase tracking-[0.3em] text-black/60 dark:text-white/60">
             Project Atlas
           </p>
           <div className="flex items-center gap-3">
-            <Link
-              href="/landing"
-              className={`text-xs font-medium uppercase tracking-[0.2em] text-black/70 transition hover:text-black dark:text-white/70 dark:hover:text-white ${focusRingClasses}`}
-            >
-              Home
-            </Link>
             <Link
               href="/support"
               className={`text-xs font-medium uppercase tracking-[0.2em] text-black/70 transition hover:text-black dark:text-white/70 dark:hover:text-white ${focusRingClasses}`}
             >
               Support
             </Link>
+            <Link
+              href="/landing"
+              className={`text-xs font-medium uppercase tracking-[0.2em] text-black/70 transition hover:text-black dark:text-white/70 dark:hover:text-white ${focusRingClasses}`}
+            >
+              Home
+            </Link>
             <ThemeToggle />
           </div>
         </header>
 
-        <section className="mt-10 space-y-4">
+        <section className="mt-10 space-y-4 opacity-0 translate-y-2 motion-reduce:translate-y-0 motion-reduce:opacity-100 motion-safe:animate-[rise-in_0.5s_ease-out_forwards] motion-safe:[animation-delay:100ms]">
           <h1 className="text-3xl font-semibold tracking-tight">{title}</h1>
           <p className="max-w-3xl text-sm leading-relaxed text-black/65 dark:text-white/65">
             {description}
           </p>
         </section>
 
-        <section className="mt-8 rounded-3xl border border-black/10 bg-white p-5 dark:border-white/10 dark:bg-black">
+        <section className="mt-8 rounded-3xl border border-black/10 bg-white p-5 opacity-0 translate-y-2 motion-reduce:translate-y-0 motion-reduce:opacity-100 motion-safe:animate-[rise-in_0.5s_ease-out_forwards] motion-safe:[animation-delay:180ms] dark:border-white/10 dark:bg-black">
           <dl className="grid gap-4 sm:grid-cols-3">
             <div className="space-y-1">
               <dt className="text-[11px] font-semibold uppercase tracking-[0.2em] text-black/55 dark:text-white/55">
@@ -70,13 +70,16 @@ export function LegalPageLayout({ title, description, metadata, children }: Lega
           </dl>
         </section>
 
-        <article className="mt-8 rounded-3xl border border-black/10 bg-white p-6 dark:border-white/10 dark:bg-black">
+        <article className="mt-8 rounded-3xl border border-black/10 bg-white p-6 opacity-0 translate-y-2 motion-reduce:translate-y-0 motion-reduce:opacity-100 motion-safe:animate-[rise-in_0.5s_ease-out_forwards] motion-safe:[animation-delay:260ms] dark:border-white/10 dark:bg-black">
           <div className="space-y-6 text-sm leading-relaxed text-black/80 dark:text-white/80">
             {children}
           </div>
         </article>
 
-        <nav aria-label="Legal navigation" className="mt-8">
+        <nav
+          aria-label="Legal navigation"
+          className="mt-8 opacity-0 translate-y-2 motion-reduce:translate-y-0 motion-reduce:opacity-100 motion-safe:animate-[rise-in_0.5s_ease-out_forwards] motion-safe:[animation-delay:340ms]"
+        >
           <ul className="flex flex-wrap gap-3">
             {LEGAL_ROUTE_LINKS.map((item) => (
               <li key={item.id}>

@@ -13,23 +13,7 @@ describe('ProAccountCard', () => {
 
     const restore = screen.getByRole('button', { name: /restore purchase/i });
     expect(restore).toBeDisabled();
-
-    expect(screen.getByRole('link', { name: /privacy policy/i })).toHaveAttribute(
-      'href',
-      '/legal/privacy',
-    );
-    expect(screen.getByRole('link', { name: /terms of service/i })).toHaveAttribute(
-      'href',
-      '/legal/terms',
-    );
-    expect(screen.getByRole('link', { name: /refund policy/i })).toHaveAttribute(
-      'href',
-      '/legal/refunds',
-    );
-    expect(screen.getByRole('link', { name: /support center/i })).toHaveAttribute(
-      'href',
-      '/support',
-    );
+    expect(screen.queryByText(/legal and support/i)).toBeNull();
   });
 
   it('shows active state for pro users', () => {
@@ -37,10 +21,7 @@ describe('ProAccountCard', () => {
 
     expect(screen.getByText(/pro active/i)).toBeInTheDocument();
     expect(screen.queryByRole('link', { name: /upgrade to pro/i })).toBeNull();
-    expect(screen.getByRole('link', { name: /privacy policy/i })).toHaveAttribute(
-      'href',
-      '/legal/privacy',
-    );
+    expect(screen.queryByText(/legal and support/i)).toBeNull();
   });
 });
 

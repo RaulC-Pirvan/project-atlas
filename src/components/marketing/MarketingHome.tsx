@@ -173,16 +173,16 @@ export function MarketingHome({ isAuthenticated = false }: MarketingHomeProps) {
             {isAuthenticated ? (
               <>
                 <Link
-                  href="/today"
-                  className={`text-xs font-medium uppercase tracking-[0.25em] text-black/70 transition hover:text-black dark:text-white/70 dark:hover:text-white ${focusRingClasses}`}
-                >
-                  Dashboard
-                </Link>
-                <Link
                   href="/support"
                   className={`text-xs font-medium uppercase tracking-[0.25em] text-black/70 transition hover:text-black dark:text-white/70 dark:hover:text-white ${focusRingClasses}`}
                 >
                   Support
+                </Link>
+                <Link
+                  href="/today"
+                  className={`text-xs font-medium uppercase tracking-[0.25em] text-black/70 transition hover:text-black dark:text-white/70 dark:hover:text-white ${focusRingClasses}`}
+                >
+                  Dashboard
                 </Link>
               </>
             ) : (

@@ -3,7 +3,6 @@ import { redirect } from 'next/navigation';
 import { AccountPanel } from '../../components/auth/AccountPanel';
 import { AppShell } from '../../components/layout/AppShell';
 import { ProAccountCard } from '../../components/pro/ProAccountCard';
-import { ReminderSettingsPanel } from '../../components/reminders/ReminderSettingsPanel';
 import { getServerAuthSession } from '../../lib/auth/session';
 import { shouldEnforceAdminTwoFactor } from '../../lib/auth/twoFactorPolicy';
 import { prisma } from '../../lib/db/prisma';
@@ -73,8 +72,9 @@ export default async function AccountPage() {
           weekStart={user.weekStart}
           keepCompletedAtBottom={user.keepCompletedAtBottom}
           hasPassword={Boolean(user.passwordSetAt)}
+          reminderSettings={reminderSettings}
+          timezoneLabel={user.timezone}
         />
-        <ReminderSettingsPanel initialSettings={reminderSettings} timezoneLabel={user.timezone} />
       </div>
     </AppShell>
   );

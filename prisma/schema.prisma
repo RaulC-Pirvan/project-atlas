@@ -317,6 +317,15 @@ enum SupportAbuseSignalType {
   captcha_failed
 }
 
+enum UserDataExportAuditStatus {
+  success
+  failure
+}
+
+enum UserDataExportFormat {
+  json
+}
+
 model SupportTicket {
   id                String                @id @default(cuid())
   userId            String?
@@ -362,6 +371,29 @@ model SupportAbuseSignal {
   @@index([signalType, createdAt])
   @@index([ipHash, createdAt])
   @@index([emailHash, createdAt])
+}
+
+/**
+ * UserDataExportAudit stores durable audit records for self-service account exports.
+ *
+ * Notes:
+ * - userId is stored as an immutable snapshot string for durability.
+ * - recordCounts captures aggregate counts for exported resources.
+ */
+model UserDataExportAudit {
+  id           String                    @id @default(cuid())
+  userId       String
+  requestedAt  DateTime                  @default(now())
+  status       UserDataExportAuditStatus
+  format       UserDataExportFormat      @default(json)
+  recordCounts Json?
+  requestId    String
+  errorCode    String?
+  createdAt    DateTime                  @default(now())
+
+  @@index([userId, requestedAt])
+  @@index([requestedAt])
+  @@index([requestId])
 }
 
 /**

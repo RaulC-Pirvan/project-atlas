@@ -368,10 +368,10 @@
 
 ### Sprint 14.3: User Self-Service Data Export
 
-- [ ] Add user-scoped export endpoint (habits, completions, reminders, achievements)
-- [ ] Add account UI to request/download exports
-- [ ] Ensure strict auth checks and audit logging for exports
-- [ ] Add tests for export authorization and payload integrity
+- [x] Add user-scoped export endpoint (habits, completions, reminders, achievements)
+- [x] Add account UI to request/download exports
+- [x] Ensure strict auth checks and audit logging for exports
+- [x] Add tests for export authorization and payload integrity
 
 ---
 

@@ -53,6 +53,8 @@ A habit is defined independently of dates.
 - Auth foundation implemented: signup, verify-email, resend-verification, logout, NextAuth Credentials + Google OAuth, Prisma-backed DB sessions, and middleware protection.
 - Security hardening implemented: optional TOTP 2FA for all users, admin 2FA enforcement path, recovery codes (rotate/revoke/consume), active session controls (list/revoke/revoke-all), and step-up verification for sensitive account actions.
 - Account management API + UI: update email/password/display name/week start + daily ordering preference; delete account; reminders settings are integrated into the account flow.
+- Account self-service data export is implemented: authenticated JSON export at `GET /api/account/exports/self` with strict session-user scoping, download headers, and account page download action.
+- Account export hardening is implemented: per-user rate limiting (`3/15m` baseline), durable `UserDataExportAudit` DB records for success/failure, request-id audit correlation, and record-count metadata.
 - Email verification uses Resend client; debug token capture plus `/api/auth/debug/verification-token` for tests (shared token store for API routes).
 - Tests in place: Vitest unit/API tests, auth + habit + calendar + marketing + support + legal + admin component tests, Playwright auth + oauth + two-factor + habits + today + calendar + daily completion + support + legal + admin + marketing + visual regression E2E.
 - Playwright E2E runs use a Windows-safe temp dir setup via `playwright.global-setup.ts` to avoid chromium shutdown hangs.
@@ -114,6 +116,7 @@ A habit is defined independently of dates.
 - Reminder delivery strategy documented (push-ready, polling window, dedupe rules).
 - Reminder unit tests and E2E tests added (`e2e/reminders.spec.ts`).
 - Offline completions E2E added (`e2e/offline-completions.spec.ts`) plus component tests for pending indicators.
+- Account export coverage added: export route/API tests, export service/unit tests, account export component tests, and an optional account export E2E smoke (`e2e/account-export.spec.ts`).
 - `/api/completions` supports a test-only `x-atlas-test-now` header when `ENABLE_TEST_ENDPOINTS=true` for deterministic date-boundary E2E coverage.
 - Test-only debug endpoints exist when `ENABLE_TEST_ENDPOINTS=true`: `/api/pro/debug/grant`, `/api/habits/debug/create`.
 
@@ -150,6 +153,8 @@ A habit is defined independently of dates.
 - `src/app/api/account/2fa/*` - Account 2FA APIs (setup/enable/disable/recovery rotate/state).
 - `src/app/api/account/sessions/*` - Active session list + revoke one/revoke others/revoke all APIs.
 - `src/app/api/account/step-up/*` - Step-up challenge + verification APIs for sensitive account actions.
+- `src/app/api/account/exports/self/route.ts` - Authenticated self-service user data export API (JSON attachment, rate limit, audit).
+- `src/app/api/account/exports/__tests__/self.route.test.ts` - Account export route tests (auth/scope/rate-limit/audit/error behavior).
 - `src/app/api/habits/route.ts` - Habit list/create API.
 - `src/app/api/habits/[id]/route.ts` - Habit update/archive API.
 - `src/app/api/habits/order/route.ts` - Habit reorder API.
@@ -185,6 +190,8 @@ A habit is defined independently of dates.
 - `src/lib/api/reminders/validation.ts` - Reminder settings validation schema.
 - `src/lib/api/insights/summary.ts` - Insights data service (aggregated).
 - `src/lib/api/achievements/summary.ts` - Achievements data service (unlock persistence).
+- `src/lib/account/exports` - Self-service export domain helpers (types, payload assembly, rate limit, audit, filename, record counts).
+- `src/lib/account/exports/__tests__` - Account export unit/service tests.
 - `src/components/habits` - Habit UI components and tests (including manual ordering controls).
 - `src/components/calendar/CalendarMonth.tsx` - Calendar grid + progress indicators + completed-day styling.
 - `src/components/calendar/DailyCompletionPanel.tsx` - Selected-day habit list + completion toggles + completion ordering + completion sounds.
@@ -239,6 +246,7 @@ A habit is defined independently of dates.
 - `src/lib/http/rateLimit.ts` - In-memory rate limiting helper.
 - `src/types/next-auth.d.ts` - NextAuth session/JWT type extensions.
 - `prisma/schema.prisma` - DB models; migrations in `prisma/migrations`; seed in `prisma/seed.ts`.
+- `prisma/migrations/20260220103000_add_user_data_export_audit/migration.sql` - Adds `UserDataExportAudit` table and enums.
 - `src/app/api/auth/__tests__` - API auth tests.
 - `src/app/api/support/__tests__` - Support submit API tests.
 - `src/app/api/admin/__tests__/support.route.test.ts` - Admin support list route tests.
@@ -263,6 +271,7 @@ A habit is defined independently of dates.
 - `e2e/achievements.spec.ts` - Achievements unlock E2E coverage.
 - `e2e/streaks.spec.ts` - Streak UI E2E coverage.
 - `e2e/reminders.spec.ts` - Reminder settings + habit reminder times E2E coverage.
+- `e2e/account-export.spec.ts` - Account self-service export smoke E2E coverage.
 - `e2e` - Playwright auth + habits + calendar + daily completion + visual regression E2E tests.
 - `playwright.config.ts` - Playwright config (chromium + firefox + visual).
 - `playwright.global-setup.ts` - Windows temp dir setup for Playwright runs.
@@ -298,6 +307,8 @@ A habit is defined independently of dates.
 - `docs/test workflows/sprint-14.1-test-workflow.md` - Support Center + Contact Form test workflow.
 - `docs/sprints/sprint-14.2.md` - Trust & policy surfaces sprint plan.
 - `docs/test workflows/sprint-14.2-test-workflow.md` - Trust & policy surfaces test workflow.
+- `docs/sprints/sprint-14.3.md` - User self-service data export sprint plan.
+- `docs/test workflows/sprint-14.3-test-workflow.md` - User self-service data export test workflow.
 - `docs/ops/staging.md` - Staging environment guide.
 - `docs/ops/backups.md` - Backup strategy and validation checklist.
 - `docs/ops/legal-publish-checklist.md` - Legal publish readiness checklist and blockers.

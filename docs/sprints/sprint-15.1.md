@@ -172,12 +172,12 @@ No subscription purchase, UI, or entitlement behavior is exposed this sprint.
 
 ### Tasks (6)
 
-- [ ] **Task 2.1**: Integrate hosted Stripe Checkout flow into provider abstraction
-- [ ] **Task 2.2**: Normalize Stripe lifecycle events into canonical events
-- [ ] **Task 2.3**: Apply projection updates from canonical events
-- [ ] **Task 2.4**: Preserve compatibility with existing entitlement read API (`/api/pro/entitlement`)
-- [ ] **Task 2.5**: Add sanitized error handling and observability hooks
-- [ ] **Task 2.6**: Add tests for purchase success/failure/refund path projection
+- [x] **Task 2.1**: Integrate hosted Stripe Checkout flow into provider abstraction
+- [x] **Task 2.2**: Normalize Stripe lifecycle events into canonical events
+- [x] **Task 2.3**: Apply projection updates from canonical events
+- [x] **Task 2.4**: Preserve compatibility with existing entitlement read API (`/api/pro/entitlement`)
+- [x] **Task 2.5**: Add sanitized error handling and observability hooks
+- [x] **Task 2.6**: Add tests for purchase success/failure/refund path projection
 
 ---
 

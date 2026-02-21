@@ -59,7 +59,7 @@ export function ProPreviewCard({ isPro }: ProPreviewCardProps) {
 
       {!isPro ? (
         <div className="mt-4">
-          <Link href="/pro" className={`${linkClasses} w-full sm:w-auto`}>
+          <Link href="/api/billing/stripe/checkout" className={`${linkClasses} w-full sm:w-auto`}>
             Upgrade to Pro
           </Link>
         </div>

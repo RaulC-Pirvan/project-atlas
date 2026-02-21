@@ -32,6 +32,46 @@ export async function POST(request: Request) {
         select: { status: true, source: true, restoredAt: true, updatedAt: true },
       });
 
+      const now = new Date();
+      await prisma.billingEntitlementProjection.upsert({
+        where: {
+          userId_productKey: {
+            userId: session.user.id,
+            productKey: 'pro_lifetime_v1',
+          },
+        },
+        update: {
+          planType: 'one_time',
+          status: 'active',
+          provider: 'manual',
+          activeFrom: entitlement.restoredAt ?? now,
+          activeUntil: null,
+          periodStart: null,
+          periodEnd: null,
+          autoRenew: null,
+          lastEventId: `debug:grant:${session.user.id}:${now.getTime()}`,
+          lastEventType: 'entitlement_granted',
+          version: { increment: 1 },
+          updatedAt: now,
+        },
+        create: {
+          userId: session.user.id,
+          productKey: 'pro_lifetime_v1',
+          planType: 'one_time',
+          status: 'active',
+          provider: 'manual',
+          activeFrom: entitlement.restoredAt ?? now,
+          activeUntil: null,
+          periodStart: null,
+          periodEnd: null,
+          autoRenew: null,
+          lastEventId: `debug:grant:${session.user.id}:${now.getTime()}`,
+          lastEventType: 'entitlement_granted',
+          version: 1,
+          updatedAt: now,
+        },
+      });
+
       return jsonOk({
         isPro: entitlement.status === 'active',
         status: entitlement.status,

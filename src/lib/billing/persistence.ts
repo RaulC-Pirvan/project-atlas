@@ -256,6 +256,7 @@ function toProjectionUpsertData(projection: BillingEntitlementProjection): {
 export async function appendBillingEventAndProject(args: {
   prisma: BillingPersistenceClient;
   event: CanonicalBillingEvent;
+  signatureVerified?: boolean | null;
 }): Promise<AppendAndProjectResult> {
   return args.prisma.$transaction(async (tx) => {
     const duplicate = await findDuplicateEvent(tx, args.event);
@@ -297,7 +298,7 @@ export async function appendBillingEventAndProject(args: {
         receivedAt: args.event.receivedAt,
         payload: args.event.payload,
         payloadHash: trimNullable(args.event.payloadHash),
-        signatureVerified: null,
+        signatureVerified: args.signatureVerified ?? null,
       },
     });
 

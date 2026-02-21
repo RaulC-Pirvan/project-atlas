@@ -155,4 +155,35 @@ describe('getProEntitlementSummary', () => {
     expect(result.source).toBe('app_store');
     expect(result.restoredAt?.toISOString()).toBe('2026-02-03T00:00:00.000Z');
   });
+
+  it('falls back to legacy entitlement when projection table is missing', async () => {
+    const record = {
+      status: 'active' as const,
+      source: 'manual' as const,
+      restoredAt: new Date('2026-02-03T00:00:00.000Z'),
+      updatedAt: new Date('2026-02-04T00:00:00.000Z'),
+    };
+
+    const prisma = {
+      billingEntitlementProjection: {
+        findUnique: async () => {
+          throw {
+            code: 'P2021',
+            meta: { table: 'public.BillingEntitlementProjection' },
+            message: 'The table `public.BillingEntitlementProjection` does not exist.',
+          };
+        },
+      },
+      proEntitlement: {
+        findUnique: async () => record,
+      },
+    };
+
+    const result = await getProEntitlementSummary({ prisma, userId: 'user-1' });
+
+    expect(result.isPro).toBe(true);
+    expect(result.status).toBe('active');
+    expect(result.source).toBe('manual');
+    expect(result.restoredAt?.toISOString()).toBe('2026-02-03T00:00:00.000Z');
+  });
 });

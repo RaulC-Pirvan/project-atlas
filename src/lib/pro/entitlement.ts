@@ -50,6 +50,34 @@ type GetProEntitlementArgs = {
   userId: string;
 };
 
+function isMissingProjectionTableError(error: unknown): boolean {
+  if (!error || typeof error !== 'object') {
+    return false;
+  }
+
+  const candidate = error as {
+    code?: unknown;
+    message?: unknown;
+    meta?: { table?: unknown };
+  };
+
+  if (candidate.code !== 'P2021') {
+    return false;
+  }
+
+  if (
+    typeof candidate.meta?.table === 'string' &&
+    candidate.meta.table.includes('BillingEntitlementProjection')
+  ) {
+    return true;
+  }
+
+  return (
+    typeof candidate.message === 'string' &&
+    candidate.message.includes('BillingEntitlementProjection')
+  );
+}
+
 function mapProjectionProviderToSource(
   provider: BillingProjectionRecord['provider'],
 ): ProEntitlementSource | undefined {
@@ -68,10 +96,19 @@ export async function getProEntitlementSummary({
     return { isPro: false, status: 'none' };
   }
 
-  const projection = await prisma.billingEntitlementProjection?.findUnique({
-    where: { userId_productKey: { userId, productKey: 'pro_lifetime_v1' } },
-    select: { status: true, provider: true, activeFrom: true, updatedAt: true },
-  });
+  let projection: BillingProjectionRecord | null = null;
+  if (prisma.billingEntitlementProjection) {
+    try {
+      projection = await prisma.billingEntitlementProjection.findUnique({
+        where: { userId_productKey: { userId, productKey: 'pro_lifetime_v1' } },
+        select: { status: true, provider: true, activeFrom: true, updatedAt: true },
+      });
+    } catch (error) {
+      if (!isMissingProjectionTableError(error)) {
+        throw error;
+      }
+    }
+  }
   if (projection) {
     return {
       isPro: projection.status === 'active',

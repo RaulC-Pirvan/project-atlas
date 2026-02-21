@@ -100,4 +100,27 @@ describe('GET /api/billing/stripe/checkout', () => {
 
     errorSpy.mockRestore();
   });
+
+  it('returns service-unavailable response when stripe env is missing', async () => {
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    mockedGetServerSession.mockResolvedValue({ user: { id: 'user-1' } });
+    mockedGetProEntitlementSummary.mockResolvedValue({
+      isPro: false,
+      status: 'none',
+    });
+    mockedGetStripeCheckoutConfig.mockImplementation(() => {
+      throw new Error('Missing required env: STRIPE_SECRET_KEY');
+    });
+
+    const response = await GET(new Request('https://example.com/api/billing/stripe/checkout'));
+    expect(response.status).toBe(503);
+    const body = await response.json();
+    expect(body.ok).toBe(false);
+    expect(body.error.code).toBe('internal_error');
+    expect(body.error.recovery).toBe('retry_later');
+    expect(body.error.message).toBe('Checkout is temporarily unavailable. Please try again later.');
+    expect(mockedCreateStripeCheckoutSession).not.toHaveBeenCalled();
+
+    errorSpy.mockRestore();
+  });
 });

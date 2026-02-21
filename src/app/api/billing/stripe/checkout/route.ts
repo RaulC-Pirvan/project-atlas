@@ -12,6 +12,10 @@ import { getProEntitlementSummary } from '../../../../../lib/pro/entitlement';
 
 export const runtime = 'nodejs';
 
+function isMissingStripeCheckoutConfigError(error: unknown): boolean {
+  return error instanceof Error && error.message.startsWith('Missing required env:');
+}
+
 async function startCheckout(request: Request): Promise<Response> {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
@@ -26,7 +30,20 @@ async function startCheckout(request: Request): Promise<Response> {
     throw new ApiError('invalid_request', 'Pro is already active.', 400, 'none');
   }
 
-  const config = getStripeCheckoutConfig();
+  let config: ReturnType<typeof getStripeCheckoutConfig>;
+  try {
+    config = getStripeCheckoutConfig();
+  } catch (error) {
+    if (isMissingStripeCheckoutConfigError(error)) {
+      throw new ApiError(
+        'internal_error',
+        'Checkout is temporarily unavailable. Please try again later.',
+        503,
+        'retry_later',
+      );
+    }
+    throw error;
+  }
 
   await prisma.billingProductMapping.upsert({
     where: {

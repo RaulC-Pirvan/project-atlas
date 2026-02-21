@@ -59,7 +59,7 @@ This workflow verifies architecture correctness, security boundaries, and operat
 
 ## Manual QA Checklist
 
-### Workflow 1: One-time Pro remains launch default [ ]
+### Workflow 1: One-time Pro remains launch default [x]
 
 1. Review `/pro` and purchase initiation flow.
 2. Confirm there is no subscription plan surfaced in launch UX.
@@ -69,7 +69,7 @@ This workflow verifies architecture correctness, security boundaries, and operat
 - Purchase UX communicates one-time Pro only.
 - No monthly/yearly subscription offer is visible.
 
-### Workflow 2: Hosted Stripe Checkout redirect flow [ ]
+### Workflow 2: Hosted Stripe Checkout redirect flow [x]
 
 1. From `/pro`, trigger checkout.
 2. Confirm redirect goes to Stripe-hosted checkout (test mode).
@@ -79,7 +79,7 @@ This workflow verifies architecture correctness, security boundaries, and operat
 - User is redirected to Stripe hosted page.
 - No custom card-entry form is rendered in Atlas app.
 
-### Workflow 3: Provider-aware entitlement projection [ ]
+### Workflow 3: Provider-aware entitlement projection [x]
 
 1. Complete a successful Stripe test checkout.
 2. Query entitlement API and DB projection.
@@ -90,7 +90,7 @@ This workflow verifies architecture correctness, security boundaries, and operat
 - Internal canonical product key resolves to `pro_lifetime_v1`.
 - Existing entitlement read path remains compatible for client/UI.
 
-### Workflow 4: Canonical event capture on purchase lifecycle [ ]
+### Workflow 4: Canonical event capture on purchase lifecycle [x]
 
 1. Trigger purchase success and failure scenarios in test mode.
 2. Inspect billing event ledger rows.
@@ -101,7 +101,7 @@ This workflow verifies architecture correctness, security boundaries, and operat
 - Ledger rows preserve provider references and timestamps.
 - Event payload mapping is consistent and version-safe.
 
-### Workflow 5: Idempotency on duplicate webhook delivery [ ]
+### Workflow 5: Idempotency on duplicate webhook delivery [x]
 
 1. Replay the same Stripe webhook event (same provider event id) multiple times.
 2. Inspect ledger + projection.
@@ -112,7 +112,7 @@ This workflow verifies architecture correctness, security boundaries, and operat
 - Entitlement projection does not drift or duplicate grants.
 - Processing is replay-safe.
 
-### Workflow 6: Refund/chargeback-driven entitlement transitions [ ]
+### Workflow 6: Refund/chargeback-driven entitlement transitions [x]
 
 1. Trigger refund (or simulated canonical refund event).
 2. Validate projection transition and audit trail.
@@ -123,7 +123,7 @@ This workflow verifies architecture correctness, security boundaries, and operat
 - Entitlement projection transitions follow policy.
 - No destructive mutation of historical events.
 
-### Workflow 7: Security and failure-path hardening [ ]
+### Workflow 7: Security and failure-path hardening [x]
 
 1. Send invalid webhook signature request.
 2. Trigger malformed payload request.
@@ -134,7 +134,7 @@ This workflow verifies architecture correctness, security boundaries, and operat
 - Errors are sanitized (no sensitive internals leaked to clients).
 - Failure observability logs include route/status/error code.
 
-### Workflow 8: Pricing decision gate artifacts [ ]
+### Workflow 8: Pricing decision gate artifacts [x]
 
 1. Review pricing gate documentation and approval record template.
 2. Confirm required sign-off fields are present.
@@ -144,7 +144,7 @@ This workflow verifies architecture correctness, security boundaries, and operat
 - Gate requires Product, Finance, Legal, and Engineering sign-off.
 - Record includes chosen launch price, currencies, effective date, and freeze policy.
 
-### Workflow 9: Subscription migration path documentation [ ]
+### Workflow 9: Subscription migration path documentation [x]
 
 1. Review migration design notes.
 

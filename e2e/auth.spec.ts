@@ -21,8 +21,9 @@ async function signUp(page: Page, email: string) {
 async function signIn(page: Page, email: string, pass: string) {
   await page.goto('/sign-in');
   await page.getByLabel('Email').fill(email);
-  await page.getByLabel('Password').fill(pass);
-  await page.getByRole('button', { name: /sign in/i }).click();
+  const passwordInput = page.getByLabel('Password');
+  await passwordInput.fill(pass);
+  await passwordInput.press('Enter');
 }
 
 async function signOut(page: Page) {

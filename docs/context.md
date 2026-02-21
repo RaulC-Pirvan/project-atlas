@@ -98,6 +98,11 @@ Atlas will use a **Freemium + One-Time Purchase** model:
 - Pro tier is a **one-time payment unlock** for premium features
 - No Google Ads or ad-driven monetisation
 
+Launch non-goal:
+
+- Subscription plans are not user-facing for Sprint 15 launch.
+- Subscription schema compatibility is allowed, but subscription purchase UX remains disabled.
+
 Monetisation principle:
 
 - Upgrade should be driven by real value (insights + motivation + convenience)

@@ -377,6 +377,11 @@
 
 ## Phase 15: Monetization Runtime (Web-first) (Planned)
 
+Launch non-goal (explicit):
+
+- Subscriptions are not exposed to end users during Sprint 15.x launch work.
+- Billing launch behavior remains one-time Pro purchase only.
+
 ### Sprint 15.1: Billing Architecture + Entitlement Abstraction
 
 - [ ] Keep one-time Pro as launch default

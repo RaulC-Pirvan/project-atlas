@@ -185,12 +185,12 @@ No subscription purchase, UI, or entitlement behavior is exposed this sprint.
 
 ### Tasks (6)
 
-- [ ] **Task 3.1**: Create pricing gate checklist and approval artifact template
-- [ ] **Task 3.2**: Define launch freeze policy for price/config changes
-- [ ] **Task 3.3**: Document one-time launch defaults in ops docs
-- [ ] **Task 3.4**: Document subscription migration path with schema/event examples
-- [ ] **Task 3.5**: Add explicit non-goal statement in product docs (no subscriptions yet)
-- [ ] **Task 3.6**: Review docs for consistency with legal/refund surfaces
+- [x] **Task 3.1**: Create pricing gate checklist and approval artifact template
+- [x] **Task 3.2**: Define launch freeze policy for price/config changes
+- [x] **Task 3.3**: Document one-time launch defaults in ops docs
+- [x] **Task 3.4**: Document subscription migration path with schema/event examples
+- [x] **Task 3.5**: Add explicit non-goal statement in product docs (no subscriptions yet)
+- [x] **Task 3.6**: Review docs for consistency with legal/refund surfaces
 
 ---
 

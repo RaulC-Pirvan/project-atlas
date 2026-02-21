@@ -158,13 +158,13 @@ No subscription purchase, UI, or entitlement behavior is exposed this sprint.
 
 ### Tasks (7)
 
-- [ ] **Task 1.1**: Add immutable billing event ledger model
-- [ ] **Task 1.2**: Add provider-aware fields to entitlement projection model
-- [ ] **Task 1.3**: Add uniqueness constraints for event-id and idempotency-key dedupe
-- [ ] **Task 1.4**: Add provider/product mapping model for canonical SKU resolution
-- [ ] **Task 1.5**: Add migration-safe defaults preserving one-time Pro behavior
-- [ ] **Task 1.6**: Add persistence helpers for append + project flow
-- [ ] **Task 1.7**: Add tests for dedupe and replay safety
+- [x] **Task 1.1**: Add immutable billing event ledger model
+- [x] **Task 1.2**: Add provider-aware fields to entitlement projection model
+- [x] **Task 1.3**: Add uniqueness constraints for event-id and idempotency-key dedupe
+- [x] **Task 1.4**: Add provider/product mapping model for canonical SKU resolution
+- [x] **Task 1.5**: Add migration-safe defaults preserving one-time Pro behavior
+- [x] **Task 1.6**: Add persistence helpers for append + project flow
+- [x] **Task 1.7**: Add tests for dedupe and replay safety
 
 ---
 

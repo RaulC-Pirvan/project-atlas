@@ -1,6 +1,7 @@
 import {
   BILLING_PRODUCT_KEYS,
   BILLING_PROVIDERS,
+  type BillingPlanType,
   type BillingProductKey,
   type BillingProvider,
 } from './types';
@@ -87,20 +88,31 @@ export type BillingEventPayloadMap = {
 
 export type BillingEventPayload = BillingEventPayloadMap[BillingEventType];
 
-export type CanonicalBillingEvent<TType extends BillingEventType = BillingEventType> = {
+type CanonicalBillingEventBase = {
   eventId: string;
-  type: TType;
   userId: string;
   provider: BillingProvider;
   productKey: BillingProductKey;
+  planType?: BillingPlanType;
   occurredAt: Date;
   receivedAt: Date;
   providerEventId?: string | null;
   providerTransactionId?: string | null;
   idempotencyKey?: string | null;
   payloadHash?: string | null;
-  payload: BillingEventPayloadMap[TType];
 };
+
+export type CanonicalBillingEvent = {
+  [TType in BillingEventType]: CanonicalBillingEventBase & {
+    type: TType;
+    payload: BillingEventPayloadMap[TType];
+  };
+}[BillingEventType];
+
+export type CanonicalBillingEventOfType<TType extends BillingEventType> = Extract<
+  CanonicalBillingEvent,
+  { type: TType }
+>;
 
 export function isBillingEventType(value: string): value is BillingEventType {
   return BILLING_EVENT_TYPES.includes(value as BillingEventType);

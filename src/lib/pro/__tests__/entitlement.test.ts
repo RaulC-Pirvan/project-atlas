@@ -106,4 +106,53 @@ describe('getProEntitlementSummary', () => {
     expect(result.source).toBe('stripe');
     expect(result.restoredAt?.toISOString()).toBe('2026-02-03T00:00:00.000Z');
   });
+
+  it('maps ios_iap projection provider to ios_iap source', async () => {
+    const projection = {
+      status: 'active' as const,
+      provider: 'ios_iap' as const,
+      activeFrom: new Date('2026-02-03T00:00:00.000Z'),
+      updatedAt: new Date('2026-02-04T00:00:00.000Z'),
+    };
+
+    const prisma = {
+      billingEntitlementProjection: {
+        findUnique: async () => projection,
+      },
+      proEntitlement: {
+        findUnique: async () => null,
+      },
+    };
+
+    const result = await getProEntitlementSummary({ prisma, userId: 'user-1' });
+
+    expect(result.isPro).toBe(true);
+    expect(result.status).toBe('active');
+    expect(result.source).toBe('ios_iap');
+  });
+
+  it('keeps legacy one-time pro behavior when projection row is missing', async () => {
+    const record = {
+      status: 'active' as const,
+      source: 'app_store' as const,
+      restoredAt: new Date('2026-02-03T00:00:00.000Z'),
+      updatedAt: new Date('2026-02-04T00:00:00.000Z'),
+    };
+
+    const prisma = {
+      billingEntitlementProjection: {
+        findUnique: async () => null,
+      },
+      proEntitlement: {
+        findUnique: async () => record,
+      },
+    };
+
+    const result = await getProEntitlementSummary({ prisma, userId: 'user-1' });
+
+    expect(result.isPro).toBe(true);
+    expect(result.status).toBe('active');
+    expect(result.source).toBe('app_store');
+    expect(result.restoredAt?.toISOString()).toBe('2026-02-03T00:00:00.000Z');
+  });
 });

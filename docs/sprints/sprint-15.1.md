@@ -198,12 +198,12 @@ No subscription purchase, UI, or entitlement behavior is exposed this sprint.
 
 ### Tasks (6)
 
-- [ ] **Task 4.1**: Unit tests for event normalization and projection transitions
-- [ ] **Task 4.2**: API tests for entitlement reads under provider-aware projection
-- [ ] **Task 4.3**: Tests for idempotent replay and duplicate event handling
-- [ ] **Task 4.4**: Regression tests confirming one-time Pro launch behavior unchanged
-- [ ] **Task 4.5**: Optional E2E smoke for web checkout -> entitlement visible flow
-- [ ] **Task 4.6**: CI stability pass for billing/entitlement changes
+- [x] **Task 4.1**: Unit tests for event normalization and projection transitions
+- [x] **Task 4.2**: API tests for entitlement reads under provider-aware projection
+- [x] **Task 4.3**: Tests for idempotent replay and duplicate event handling
+- [x] **Task 4.4**: Regression tests confirming one-time Pro launch behavior unchanged
+- [x] **Task 4.5**: Optional E2E smoke for web checkout -> entitlement visible flow
+- [x] **Task 4.6**: CI stability pass for billing/entitlement changes
 
 ---
 

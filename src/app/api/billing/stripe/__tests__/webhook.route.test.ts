@@ -214,4 +214,97 @@ describe('POST /api/billing/stripe/webhook', () => {
     vi.useRealTimers();
     logSpy.mockRestore();
   });
+
+  it('returns dedupe metadata for duplicate replay handling', async () => {
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    const nowMs = Date.UTC(2026, 1, 21, 12, 0, 0);
+    const timestamp = Math.floor(nowMs / 1000);
+    vi.useFakeTimers();
+    vi.setSystemTime(nowMs);
+
+    mockedAppendBillingEventAndProject.mockResolvedValueOnce({
+      appended: false,
+      dedupeReason: 'provider_event_id',
+      ledgerEvent: {
+        id: 'event-row-1',
+        eventId: 'stripe:evt_1:purchase_succeeded',
+        userId: 'user-1',
+        provider: 'stripe',
+        providerEventId: 'evt_1',
+        providerTransactionId: 'pi_1',
+        idempotencyKey: null,
+        productKey: 'pro_lifetime_v1',
+        planType: 'one_time',
+        eventType: 'purchase_succeeded',
+        occurredAt: new Date('2026-02-21T09:00:00.000Z'),
+        receivedAt: new Date('2026-02-21T09:00:05.000Z'),
+        payload: {},
+        payloadHash: 'sha256:abc',
+        signatureVerified: true,
+        createdAt: new Date('2026-02-21T09:00:05.000Z'),
+      },
+      projection: {
+        userId: 'user-1',
+        productKey: 'pro_lifetime_v1',
+        planType: 'one_time',
+        status: 'active',
+        provider: 'stripe',
+        providerCustomerId: null,
+        providerAccountId: null,
+        activeFrom: new Date('2026-02-21T09:00:00.000Z'),
+        activeUntil: null,
+        periodStart: null,
+        periodEnd: null,
+        autoRenew: null,
+        lastEventId: 'stripe:evt_1:purchase_succeeded',
+        lastEventType: 'purchase_succeeded',
+        updatedAt: new Date('2026-02-21T09:00:05.000Z'),
+        version: 1,
+      },
+    });
+
+    const payload = JSON.stringify({
+      id: 'evt_1',
+      type: 'checkout.session.completed',
+      created: 1766361600,
+      data: {
+        object: {
+          id: 'cs_1',
+          payment_intent: 'pi_1',
+          amount_total: 1999,
+          currency: 'usd',
+          metadata: { userId: 'user-1', productKey: 'pro_lifetime_v1' },
+        },
+      },
+    });
+    const signature = buildSignatureHeader({
+      payload,
+      secret: 'whsec_test',
+      timestamp,
+    });
+
+    const response = await POST(
+      new Request('https://example.com/api/billing/stripe/webhook', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'stripe-signature': signature,
+        },
+        body: payload,
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    expect(body.ok).toBe(true);
+    expect(body.data).toEqual({
+      received: true,
+      ignored: false,
+      appended: false,
+      dedupeReason: 'provider_event_id',
+    });
+
+    vi.useRealTimers();
+    logSpy.mockRestore();
+  });
 });

@@ -384,11 +384,11 @@ Launch non-goal (explicit):
 
 ### Sprint 15.1: Billing Architecture + Entitlement Abstraction
 
-- [ ] Keep one-time Pro as launch default
-- [ ] Set formal launch pricing decision gate (one-time now, subscription considered post-launch)
-- [ ] Refactor entitlements to be provider-aware (`stripe`, `ios_iap`, `android_iap`)
-- [ ] Define canonical entitlement events and idempotency rules
-- [ ] Document migration path for future subscription support
+- [x] Keep one-time Pro as launch default
+- [x] Set formal launch pricing decision gate (one-time now, subscription considered post-launch)
+- [x] Refactor entitlements to be provider-aware (`stripe`, `ios_iap`, `android_iap`)
+- [x] Define canonical entitlement events and idempotency rules
+- [x] Document migration path for future subscription support
 
 ---
 

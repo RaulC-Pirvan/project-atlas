@@ -70,6 +70,37 @@ describe('stripe webhook normalization', () => {
     expect(canonical?.payload).toEqual({ reasonCode: 'checkout.session.expired' });
   });
 
+  it('maps checkout.session.async_payment_failed to purchase_failed', () => {
+    const event = parseStripeWebhookEvent(
+      JSON.stringify({
+        id: 'evt_2b',
+        type: 'checkout.session.async_payment_failed',
+        created: 1766361601,
+        data: {
+          object: {
+            id: 'cs_2b',
+            payment_intent: 'pi_2b',
+            metadata: {
+              userId: 'user-1',
+              productKey: 'pro_lifetime_v1',
+            },
+          },
+        },
+      }),
+    );
+
+    expect(event).not.toBeNull();
+    const canonical = normalizeStripeWebhookEventToCanonicalEvent({
+      event: event!,
+      receivedAt: new Date('2026-02-21T12:00:00.000Z'),
+    });
+
+    expect(canonical?.type).toBe('purchase_failed');
+    expect(canonical?.payload).toEqual({
+      reasonCode: 'checkout.session.async_payment_failed',
+    });
+  });
+
   it('maps charge.refunded to refund_issued', () => {
     const event = parseStripeWebhookEvent(
       JSON.stringify({

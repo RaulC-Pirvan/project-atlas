@@ -45,6 +45,44 @@ function buildBaseEvent(type: CanonicalBillingEvent['type']): CanonicalBillingEv
     };
   }
 
+  if (type === 'chargeback_lost') {
+    return {
+      eventId: 'evt:chargeback_lost',
+      type: 'chargeback_lost',
+      userId: 'user-1',
+      provider: 'stripe',
+      productKey: 'pro_lifetime_v1',
+      planType: 'one_time',
+      occurredAt,
+      receivedAt,
+      providerEventId: 'evt_provider_4',
+      providerTransactionId: 'txn_1',
+      payload: {
+        disputeId: 'dp_1',
+        transactionId: 'txn_1',
+      },
+    };
+  }
+
+  if (type === 'chargeback_won') {
+    return {
+      eventId: 'evt:chargeback_won',
+      type: 'chargeback_won',
+      userId: 'user-1',
+      provider: 'stripe',
+      productKey: 'pro_lifetime_v1',
+      planType: 'one_time',
+      occurredAt,
+      receivedAt,
+      providerEventId: 'evt_provider_5',
+      providerTransactionId: 'txn_1',
+      payload: {
+        disputeId: 'dp_1',
+        transactionId: 'txn_1',
+      },
+    };
+  }
+
   return {
     eventId: 'evt:refund_issued',
     type: 'refund_issued',
@@ -101,5 +139,31 @@ describe('billing projector', () => {
     expect(revoked.activeUntil?.toISOString()).toBe('2026-02-21T09:00:00.000Z');
     expect(revoked.lastEventType).toBe('refund_issued');
     expect(revoked.version).toBe(2);
+  });
+
+  it('revokes on chargeback_lost and restores on chargeback_won', () => {
+    const active = applyBillingEventToProjection({
+      current: createEmptyBillingEntitlementProjection({
+        userId: 'user-1',
+        updatedAt: new Date('2026-02-21T08:00:00.000Z'),
+      }),
+      event: buildBaseEvent('purchase_succeeded'),
+    });
+
+    const revoked = applyBillingEventToProjection({
+      current: active,
+      event: buildBaseEvent('chargeback_lost'),
+    });
+
+    const restored = applyBillingEventToProjection({
+      current: revoked,
+      event: buildBaseEvent('chargeback_won'),
+    });
+
+    expect(revoked.status).toBe('revoked');
+    expect(revoked.lastEventType).toBe('chargeback_lost');
+    expect(restored.status).toBe('active');
+    expect(restored.activeUntil).toBeNull();
+    expect(restored.lastEventType).toBe('chargeback_won');
   });
 });

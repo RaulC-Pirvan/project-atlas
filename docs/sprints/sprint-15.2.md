@@ -107,13 +107,13 @@ or recover Pro entitlement through secure, idempotent Stripe-backed processing.
 
 ### Tasks (7)
 
-- [ ] **Task 1.1**: Add web checkout session creation endpoint (server-side)
-- [ ] **Task 1.2**: Wire `/pro` and relevant upgrade entrypoints to Stripe checkout launch
-- [ ] **Task 1.3**: Include canonical metadata (`userId`, `productKey`) in checkout session
-- [ ] **Task 1.4**: Add success/cancel routing behavior and client feedback states
-- [ ] **Task 1.5**: Ensure pre-check prevents duplicate purchase attempts when already entitled
-- [ ] **Task 1.6**: Add observability logs for checkout initiation/success/cancel
-- [ ] **Task 1.7**: Add API/component tests for checkout initiation behavior
+- [x] **Task 1.1**: Add web checkout session creation endpoint (server-side)
+- [x] **Task 1.2**: Wire `/pro` and relevant upgrade entrypoints to Stripe checkout launch
+- [x] **Task 1.3**: Include canonical metadata (`userId`, `productKey`) in checkout session
+- [x] **Task 1.4**: Add success/cancel routing behavior and client feedback states
+- [x] **Task 1.5**: Ensure pre-check prevents duplicate purchase attempts when already entitled
+- [x] **Task 1.6**: Add observability logs for checkout initiation/success/cancel
+- [x] **Task 1.7**: Add API/component tests for checkout initiation behavior
 
 ---
 

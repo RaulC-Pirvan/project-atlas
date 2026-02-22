@@ -64,7 +64,21 @@ describe('GET /api/billing/stripe/checkout', () => {
     expect(response.status).toBe(303);
     expect(response.headers.get('location')).toBe('https://checkout.stripe.test/session/cs_test_1');
     expect(billingProductMappingUpsertMock).toHaveBeenCalledTimes(1);
-    expect(mockedCreateStripeCheckoutSession).toHaveBeenCalledTimes(1);
+    expect(mockedCreateStripeCheckoutSession).toHaveBeenCalledWith(
+      expect.objectContaining({
+        userId: 'user-1',
+        productKey: 'pro_lifetime_v1',
+        priceId: 'price_123',
+      }),
+    );
+
+    const logLines = logSpy.mock.calls.map((args) => String(args[0]));
+    expect(logLines.some((line) => line.includes('"message":"billing.checkout.initiated"'))).toBe(
+      true,
+    );
+    expect(logLines.some((line) => line.includes('"message":"billing.checkout.redirect"'))).toBe(
+      true,
+    );
 
     logSpy.mockRestore();
   });

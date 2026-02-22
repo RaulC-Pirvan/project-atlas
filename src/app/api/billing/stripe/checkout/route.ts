@@ -8,6 +8,7 @@ import { createStripeCheckoutSession } from '../../../../../lib/billing/stripe/c
 import { getStripeCheckoutConfig } from '../../../../../lib/billing/stripe/config';
 import { prisma } from '../../../../../lib/db/prisma';
 import { getRequestId, withApiLogging } from '../../../../../lib/observability/apiLogger';
+import { logInfo } from '../../../../../lib/observability/logger';
 import { getProEntitlementSummary } from '../../../../../lib/pro/entitlement';
 
 export const runtime = 'nodejs';
@@ -72,6 +73,13 @@ async function startCheckout(request: Request): Promise<Response> {
 
   const requestId = getRequestId(request);
   const idempotencyKey = buildBillingCommandDedupeKey(`checkout:${session.user.id}:${requestId}`);
+  logInfo('billing.checkout.initiated', {
+    requestId,
+    route: '/api/billing/stripe/checkout',
+    provider: 'stripe',
+    userId: session.user.id,
+    productKey: 'pro_lifetime_v1',
+  });
   const checkout = await createStripeCheckoutSession({
     secretKey: config.secretKey,
     priceId: config.proLifetimePriceId,
@@ -79,6 +87,14 @@ async function startCheckout(request: Request): Promise<Response> {
     userId: session.user.id,
     productKey: 'pro_lifetime_v1',
     idempotencyKey,
+  });
+  logInfo('billing.checkout.redirect', {
+    requestId,
+    route: '/api/billing/stripe/checkout',
+    provider: 'stripe',
+    userId: session.user.id,
+    productKey: 'pro_lifetime_v1',
+    checkoutSessionId: checkout.id,
   });
 
   return Response.redirect(checkout.url, 303);

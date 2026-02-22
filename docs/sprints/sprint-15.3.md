@@ -145,12 +145,16 @@ and supportable under real-world billing edge cases.
 
 ### Tasks (6)
 
-- [ ] **Task 0.1**: Define platform-region billing policy matrix template
-- [ ] **Task 0.2**: Define policy decision inputs and ownership (Product/Legal/Engineering)
-- [ ] **Task 0.3**: Define compliant default behavior states
-- [ ] **Task 0.4**: Define revalidation cadence before each store release
-- [ ] **Task 0.5**: Define audit requirements for policy changes
-- [ ] **Task 0.6**: Document unresolved-policy handling path
+- [x] **Task 0.1**: Define platform-region billing policy matrix template
+- [x] **Task 0.2**: Define policy decision inputs and ownership (Product/Legal/Engineering)
+- [x] **Task 0.3**: Define compliant default behavior states
+- [x] **Task 0.4**: Define revalidation cadence before each store release
+- [x] **Task 0.5**: Define audit requirements for policy changes
+- [x] **Task 0.6**: Document unresolved-policy handling path
+
+### Phase 0 Artifacts (Completed 2026-02-22)
+
+- `docs/ops/billing-compliance-matrix.md` (Tasks 0.1-0.6)
 
 ---
 

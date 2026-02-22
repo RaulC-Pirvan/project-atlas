@@ -180,12 +180,16 @@ and supportable under real-world billing edge cases.
 
 ### Tasks (6)
 
-- [ ] **Task 2.1**: Document platform-region fallback behavior matrix
-- [ ] **Task 2.2**: Define feature flag keys and emergency rollback playbook
-- [ ] **Task 2.3**: Document support triage runbook and evidence checklist
-- [ ] **Task 2.4**: Define escalation criteria and handoff templates
-- [ ] **Task 2.5**: Define manual adjustment audit schema requirements
-- [ ] **Task 2.6**: Align support playbook with refund and legal policies
+- [x] **Task 2.1**: Document platform-region fallback behavior matrix
+- [x] **Task 2.2**: Define feature flag keys and emergency rollback playbook
+- [x] **Task 2.3**: Document support triage runbook and evidence checklist
+- [x] **Task 2.4**: Define escalation criteria and handoff templates
+- [x] **Task 2.5**: Define manual adjustment audit schema requirements
+- [x] **Task 2.6**: Align support playbook with refund and legal policies
+
+### Phase 2 Artifacts (Completed 2026-02-22)
+
+- `docs/ops/billing-support-playbook.md` (Tasks 2.1-2.6)
 
 ---
 

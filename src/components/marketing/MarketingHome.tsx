@@ -149,6 +149,8 @@ type MarketingHomeProps = {
 };
 
 export function MarketingHome({ isAuthenticated = false }: MarketingHomeProps) {
+  const atlasProLink = isAuthenticated ? '/account#pro' : '/sign-in';
+
   return (
     <main className="relative min-h-screen overflow-hidden bg-white text-black dark:bg-black dark:text-white">
       <div
@@ -505,7 +507,7 @@ export function MarketingHome({ isAuthenticated = false }: MarketingHomeProps) {
 
           <div className="flex flex-wrap items-center gap-3">
             <Link
-              href="/pro"
+              href={atlasProLink}
               className={`inline-flex h-11 items-center justify-center rounded-full border border-black bg-black px-5 text-xs font-medium uppercase tracking-[0.2em] text-white transition hover:bg-black/90 dark:border-white dark:bg-white dark:text-black dark:hover:bg-white/90 ${focusRingClasses}`}
             >
               See Atlas Pro

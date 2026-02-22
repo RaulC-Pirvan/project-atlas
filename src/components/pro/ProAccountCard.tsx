@@ -39,7 +39,10 @@ export function ProAccountCard({ isPro }: ProAccountCardProps) {
           <>
             <p>Pro adds depth and motivation without blocking core habit tracking.</p>
             <div className="flex flex-col gap-3 sm:flex-row">
-              <Link href="/pro" className={`${linkClasses} w-full sm:w-auto`}>
+              <Link
+                href="/api/billing/stripe/checkout"
+                className={`${linkClasses} w-full sm:w-auto`}
+              >
                 Upgrade to Pro
               </Link>
               <Button type="button" variant="outline" className="w-full sm:w-auto" disabled>

@@ -368,40 +368,45 @@
 
 ### Sprint 14.3: User Self-Service Data Export
 
-- [ ] Add user-scoped export endpoint (habits, completions, reminders, achievements)
-- [ ] Add account UI to request/download exports
-- [ ] Ensure strict auth checks and audit logging for exports
-- [ ] Add tests for export authorization and payload integrity
+- [x] Add user-scoped export endpoint (habits, completions, reminders, achievements)
+- [x] Add account UI to request/download exports
+- [x] Ensure strict auth checks and audit logging for exports
+- [x] Add tests for export authorization and payload integrity
 
 ---
 
 ## Phase 15: Monetization Runtime (Web-first) (Planned)
 
+Launch non-goal (explicit):
+
+- Subscriptions are not exposed to end users during Sprint 15.x launch work.
+- Billing launch behavior remains one-time Pro purchase only.
+
 ### Sprint 15.1: Billing Architecture + Entitlement Abstraction
 
-- [ ] Keep one-time Pro as launch default
-- [ ] Set formal launch pricing decision gate (one-time now, subscription considered post-launch)
-- [ ] Refactor entitlements to be provider-aware (`stripe`, `ios_iap`, `android_iap`)
-- [ ] Define canonical entitlement events and idempotency rules
-- [ ] Document migration path for future subscription support
+- [x] Keep one-time Pro as launch default
+- [x] Set formal launch pricing decision gate (one-time now, subscription considered post-launch)
+- [x] Refactor entitlements to be provider-aware (`stripe`, `ios_iap`, `android_iap`)
+- [x] Define canonical entitlement events and idempotency rules
+- [x] Document migration path for future subscription support
 
 ---
 
 ### Sprint 15.2: Stripe Web Billing Integration
 
-- [ ] Add Stripe Checkout for one-time Pro upgrade on web
-- [ ] Implement secure webhook handling (signature verification + retry-safe processing)
-- [ ] Add billing history/invoice links in account
-- [ ] Add web restore/entitlement re-sync flow
-- [ ] Add API/unit/E2E coverage for checkout, webhook, and failure recovery
+- [x] Add Stripe Checkout for one-time Pro upgrade on web
+- [x] Implement secure webhook handling (signature verification + retry-safe processing)
+- [x] Add billing history/invoice links in account
+- [x] Add web restore/entitlement re-sync flow
+- [x] Add API/unit/E2E coverage for checkout, webhook, and failure recovery
 
 ---
 
 ### Sprint 15.3: Mobile Billing Compliance Strategy
 
-- [ ] Define Apple/Google in-app billing compliance path before store launch
-- [ ] Define entitlement reconciliation across Stripe and store purchases
-- [ ] Document region/platform fallback behavior and support playbook
+- [x] Define Apple/Google in-app billing compliance path before store launch
+- [x] Define entitlement reconciliation across Stripe and store purchases
+- [x] Document region/platform fallback behavior and support playbook
 
 ---
 

@@ -66,6 +66,8 @@ model User {
   recoveryCodes UserRecoveryCode[]
   stepUpChallenges AuthStepUpChallenge[]
   proEntitlement ProEntitlement?
+  billingEvents BillingEventLedger[]
+  billingEntitlementProjections BillingEntitlementProjection[]
   achievementUnlocks AchievementUnlock[]
   habitMilestoneUnlocks HabitMilestoneUnlock[]
   habitReminderSnoozes HabitReminderSnooze[]
@@ -429,6 +431,117 @@ enum ProEntitlementSource {
   app_store
   play_store
   promo
+}
+
+enum BillingProvider {
+  manual
+  stripe
+  ios_iap
+  android_iap
+}
+
+enum BillingPlanType {
+  one_time
+  subscription
+}
+
+enum BillingEntitlementStatus {
+  none
+  active
+  revoked
+}
+
+enum BillingEventType {
+  purchase_initiated
+  purchase_succeeded
+  purchase_failed
+  refund_issued
+  chargeback_opened
+  chargeback_won
+  chargeback_lost
+  entitlement_granted
+  entitlement_revoked
+  restore_requested
+  restore_succeeded
+  restore_failed
+}
+
+/**
+ * BillingProductMapping resolves provider-specific product identifiers to canonical Atlas product keys.
+ */
+model BillingProductMapping {
+  id                String          @id @default(cuid())
+  provider          BillingProvider
+  providerProductId String
+  productKey        String
+  planType          BillingPlanType @default(one_time)
+  active            Boolean         @default(true)
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  @@unique([provider, providerProductId])
+  @@index([productKey, active])
+}
+
+/**
+ * BillingEventLedger is an append-only canonical event store for billing lifecycle events.
+ *
+ * userId may be nulled only when a user account is deleted.
+ */
+model BillingEventLedger {
+  id                    String            @id @default(cuid())
+  eventId               String            @unique
+  userId                String?
+  provider              BillingProvider
+  providerEventId       String?
+  providerTransactionId String?
+  idempotencyKey        String?           @unique
+  productKey            String
+  planType              BillingPlanType   @default(one_time)
+  eventType             BillingEventType
+  occurredAt            DateTime
+  receivedAt            DateTime          @default(now())
+  payload               Json
+  payloadHash           String?
+  signatureVerified     Boolean?
+  createdAt             DateTime          @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@unique([provider, providerEventId])
+  @@index([userId, occurredAt])
+  @@index([eventType, occurredAt])
+  @@index([productKey])
+}
+
+/**
+ * BillingEntitlementProjection represents current entitlement state derived from billing events.
+ */
+model BillingEntitlementProjection {
+  id                 String                   @id @default(cuid())
+  userId             String
+  productKey         String
+  planType           BillingPlanType          @default(one_time)
+  status             BillingEntitlementStatus @default(none)
+  provider           BillingProvider?
+  providerCustomerId String?
+  providerAccountId  String?
+  activeFrom         DateTime?
+  activeUntil        DateTime?
+  periodStart        DateTime?
+  periodEnd          DateTime?
+  autoRenew          Boolean?
+  lastEventId        String?
+  lastEventType      BillingEventType?
+  version            Int                      @default(0)
+  createdAt          DateTime                 @default(now())
+  updatedAt          DateTime                 @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productKey])
+  @@index([status, updatedAt])
+  @@index([productKey, updatedAt])
 }
 
 

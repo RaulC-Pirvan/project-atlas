@@ -1,30 +1,42 @@
 import { redirect } from 'next/navigation';
 
-import { AppShell } from '../../components/layout/AppShell';
-import { ProAccountCard } from '../../components/pro/ProAccountCard';
-import { ProPreviewCard } from '../../components/pro/ProPreviewCard';
-import { getServerAuthSession } from '../../lib/auth/session';
-import { prisma } from '../../lib/db/prisma';
-import { getProEntitlementSummary } from '../../lib/pro/entitlement';
+import { parseStripeCheckoutQueryStatus } from '../../lib/billing/stripe/contracts';
 
-export default async function ProPage() {
-  const session = await getServerAuthSession();
+type SearchParams = {
+  checkout?: string | string[];
+  checkout_session_id?: string | string[];
+};
 
-  if (!session?.user?.id) {
-    redirect('/sign-in');
-  }
+function parseSearchParamValue(value: string | string[] | undefined): string | null {
+  const raw = Array.isArray(value) ? value[0] : value;
+  if (!raw) return null;
+  const normalized = raw.trim();
+  return normalized.length > 0 ? normalized : null;
+}
 
-  const proEntitlement = await getProEntitlementSummary({
-    prisma,
-    userId: session.user.id,
-  });
+function parseCheckoutSessionId(value: string | string[] | undefined): string | null {
+  const raw = parseSearchParamValue(value);
+  if (!raw) return null;
+  if (raw.length > 255) return null;
+  return raw;
+}
 
-  return (
-    <AppShell title="Atlas Pro" subtitle="More insight, more motivation, no extra friction.">
-      <div className="space-y-8">
-        <ProAccountCard isPro={proEntitlement.isPro} />
-        <ProPreviewCard isPro={proEntitlement.isPro} />
-      </div>
-    </AppShell>
+export default async function ProPage({
+  searchParams,
+}: {
+  searchParams?: SearchParams | Promise<SearchParams>;
+}) {
+  const resolvedSearchParams = await searchParams;
+  const checkoutStatus = parseStripeCheckoutQueryStatus(
+    parseSearchParamValue(resolvedSearchParams?.checkout),
   );
+  const checkoutSessionId = parseCheckoutSessionId(resolvedSearchParams?.checkout_session_id);
+  const redirectParams = new URLSearchParams();
+  if (checkoutStatus) {
+    redirectParams.set('checkout', checkoutStatus);
+  }
+  if (checkoutSessionId) {
+    redirectParams.set('checkout_session_id', checkoutSessionId);
+  }
+  redirect(redirectParams.size > 0 ? `/account?${redirectParams.toString()}` : '/account');
 }

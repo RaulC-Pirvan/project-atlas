@@ -9,7 +9,7 @@ describe('ProAccountCard', () => {
     render(<ProAccountCard isPro={false} />);
 
     const upgrade = screen.getByRole('link', { name: /upgrade to pro/i });
-    expect(upgrade).toHaveAttribute('href', '/pro');
+    expect(upgrade).toHaveAttribute('href', '/api/billing/stripe/checkout');
 
     const restore = screen.getByRole('button', { name: /restore purchase/i });
     expect(restore).toBeDisabled();
@@ -31,7 +31,7 @@ describe('ProPreviewCard', () => {
 
     expect(screen.getByText(/^preview$/i)).toBeInTheDocument();
     const upgrade = screen.getByRole('link', { name: /upgrade to pro/i });
-    expect(upgrade).toHaveAttribute('href', '/pro');
+    expect(upgrade).toHaveAttribute('href', '/api/billing/stripe/checkout');
   });
 
   it('shows active state for pro users', () => {

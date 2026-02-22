@@ -37,6 +37,7 @@ const baseProps = {
     snoozeDefaultMinutes: 10,
   },
   timezoneLabel: 'UTC',
+  initialCheckoutStatus: null,
 };
 
 describe('AccountPanel', () => {
@@ -107,6 +108,34 @@ describe('AccountPanel', () => {
     expect(screen.getByRole('button', { name: /download my data \(json\)/i })).toBeInTheDocument();
   });
 
+  it('renders billing and restore section with portal + restore actions', () => {
+    render(<AccountPanel {...baseProps} />);
+
+    expect(screen.getByText(/^billing and restore$/i)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /manage billing \/ invoices/i })).toHaveAttribute(
+      'href',
+      '/api/billing/stripe/portal',
+    );
+    expect(screen.getByRole('button', { name: /^restore purchase$/i })).toBeInTheDocument();
+    expect(screen.getByText(/previously completed purchases/i)).toBeInTheDocument();
+  });
+
+  it('shows success toast when returning from successful checkout', async () => {
+    render(<AccountPanel {...baseProps} initialCheckoutStatus="success" />);
+
+    expect(
+      await screen.findByText(
+        /checkout completed\. we are confirming your payment now\. pro access should appear shortly/i,
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it('shows neutral toast when checkout is canceled', async () => {
+    render(<AccountPanel {...baseProps} initialCheckoutStatus="cancel" />);
+
+    expect(await screen.findByText(/checkout canceled\. no charge was made/i)).toBeInTheDocument();
+  });
+
   it('renders account sections in a logical top-to-bottom order', () => {
     render(<AccountPanel {...baseProps} />);
 
@@ -118,6 +147,7 @@ describe('AccountPanel', () => {
       /^daily ordering$/i,
       /^reminders$/i,
       /^two-factor authentication$/i,
+      /^billing and restore$/i,
       /^active sessions$/i,
       /^data export$/i,
       /^delete request$/i,
@@ -210,6 +240,90 @@ describe('AccountPanel', () => {
       expect(fetchMock).toHaveBeenCalledWith('/api/account/exports/self', { method: 'GET' });
     });
     expect(await screen.findByText(/too many requests/i)).toBeInTheDocument();
+  });
+
+  it('shows pending and success feedback for restore purchase flow', async () => {
+    const restoreRequest = createDeferred<Response>();
+    const fetchMock = vi.spyOn(global, 'fetch').mockImplementation(async (input, init) => {
+      const url = typeof input === 'string' ? input : input.toString();
+      const method = init?.method ?? 'GET';
+
+      if (url === '/api/account/sessions' && method === 'GET') {
+        return jsonResponse({ ok: true, data: { sessions: [] } });
+      }
+
+      if (url === '/api/pro/restore' && method === 'POST') {
+        return await restoreRequest.promise;
+      }
+
+      return jsonResponse({ ok: true, data: {} });
+    });
+
+    render(<AccountPanel {...baseProps} />);
+
+    fireEvent.click(screen.getByRole('button', { name: /^restore purchase$/i }));
+    expect(screen.getByRole('button', { name: /restoring purchase/i })).toBeDisabled();
+
+    restoreRequest.resolve(
+      jsonResponse({
+        ok: true,
+        data: {
+          outcome: 'restored',
+          entitlement: {
+            isPro: true,
+            status: 'active',
+            source: 'stripe',
+            updatedAt: '2026-02-21T09:00:00.000Z',
+          },
+        },
+      }),
+    );
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith('/api/pro/restore', expect.any(Object));
+    });
+    expect(
+      await screen.findByText(/purchase restored\. pro access is now active/i),
+    ).toBeInTheDocument();
+  });
+
+  it('shows neutral restore message when no prior purchase is found', async () => {
+    const fetchMock = vi.spyOn(global, 'fetch').mockImplementation(async (input, init) => {
+      const url = typeof input === 'string' ? input : input.toString();
+      const method = init?.method ?? 'GET';
+
+      if (url === '/api/account/sessions' && method === 'GET') {
+        return jsonResponse({ ok: true, data: { sessions: [] } });
+      }
+
+      if (url === '/api/pro/restore' && method === 'POST') {
+        return jsonResponse({
+          ok: true,
+          data: {
+            outcome: 'not_found',
+            entitlement: {
+              isPro: false,
+              status: 'none',
+              source: null,
+              updatedAt: '2026-02-21T09:00:00.000Z',
+            },
+          },
+        });
+      }
+
+      return jsonResponse({ ok: true, data: {} });
+    });
+
+    render(<AccountPanel {...baseProps} />);
+
+    fireEvent.click(screen.getByRole('button', { name: /^restore purchase$/i }));
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith('/api/pro/restore', expect.any(Object));
+    });
+    expect(
+      await screen.findByText(/no completed web purchase was found for this account/i),
+    ).toBeInTheDocument();
   });
 
   it('shows admin enrollment notice when admin 2FA is required', () => {

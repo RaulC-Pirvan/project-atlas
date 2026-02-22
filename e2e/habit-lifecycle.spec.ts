@@ -142,6 +142,16 @@ async function openHabits(page: Page) {
   await expect(page.getByRole('heading', { name: /habits/i })).toBeVisible();
 }
 
+async function openCalendarDay(page: Page, monthKey: string, dateKey: string) {
+  const target = `/calendar?month=${monthKey}&date=${dateKey}`;
+  try {
+    await page.goto(target, { waitUntil: 'domcontentloaded' });
+  } catch {
+    await page.goto(target, { waitUntil: 'domcontentloaded' });
+  }
+  await expect(page.getByRole('heading', { name: /calendar/i })).toBeVisible();
+}
+
 test('habit lifecycle from creation to archive', async ({ page, request }) => {
   await createVerifiedUser(page, request, 'habit-lifecycle');
   const habitTitle = uniqueTitle('Lifecycle habit');
@@ -156,7 +166,7 @@ test('habit lifecycle from creation to archive', async ({ page, request }) => {
   await page.reload();
   await expect(page.getByText(habitTitle)).toBeVisible();
 
-  await page.goto(`/calendar?month=${todayMonthKey}&date=${todayKey}`);
+  await openCalendarDay(page, todayMonthKey, todayKey);
   const todayCheckbox = page.getByRole('checkbox', { name: new RegExp(habitTitle, 'i') });
   await expect(todayCheckbox).toHaveAttribute('aria-checked', 'false');
   const completionResponse = page.waitForResponse(
@@ -181,7 +191,7 @@ test('habit lifecycle from creation to archive', async ({ page, request }) => {
   await page.reload();
   await expect(page.getByText(habitTitle)).toBeVisible();
 
-  await page.goto(`/calendar?month=${todayMonthKey}&date=${todayKey}`);
+  await openCalendarDay(page, todayMonthKey, todayKey);
   await expect(page.getByRole('main').getByText('No habits scheduled for this day.')).toBeVisible();
   await expect(page.locator(`[data-date-key="${todayKey}"]`)).not.toHaveClass(/bg-\[#FAB95B\]/);
 
@@ -190,7 +200,7 @@ test('habit lifecycle from creation to archive', async ({ page, request }) => {
   await page.reload();
   await expect(page.getByText(habitTitle, { exact: true })).toHaveCount(0);
 
-  await page.goto(`/calendar?month=${todayMonthKey}&date=${todayKey}`);
+  await openCalendarDay(page, todayMonthKey, todayKey);
   await expect(page.getByRole('main').getByText('No habits scheduled for this day.')).toBeVisible();
   await expect(page.locator(`[data-date-key="${todayKey}"]`)).not.toHaveClass(/bg-\[#FAB95B\]/);
 });

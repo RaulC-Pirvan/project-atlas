@@ -64,6 +64,25 @@ function buildBaseEvent(type: CanonicalBillingEvent['type']): CanonicalBillingEv
     };
   }
 
+  if (type === 'chargeback_opened') {
+    return {
+      eventId: 'evt:chargeback_opened',
+      type: 'chargeback_opened',
+      userId: 'user-1',
+      provider: 'stripe',
+      productKey: 'pro_lifetime_v1',
+      planType: 'one_time',
+      occurredAt,
+      receivedAt,
+      providerEventId: 'evt_provider_6',
+      providerTransactionId: 'txn_1',
+      payload: {
+        disputeId: 'dp_1',
+        transactionId: 'txn_1',
+      },
+    };
+  }
+
   if (type === 'chargeback_won') {
     return {
       eventId: 'evt:chargeback_won',
@@ -165,5 +184,24 @@ describe('billing projector', () => {
     expect(restored.status).toBe('active');
     expect(restored.activeUntil).toBeNull();
     expect(restored.lastEventType).toBe('chargeback_won');
+  });
+
+  it('keeps active entitlement active on chargeback_opened', () => {
+    const active = applyBillingEventToProjection({
+      current: createEmptyBillingEntitlementProjection({
+        userId: 'user-1',
+        updatedAt: new Date('2026-02-21T08:00:00.000Z'),
+      }),
+      event: buildBaseEvent('purchase_succeeded'),
+    });
+
+    const pendingDispute = applyBillingEventToProjection({
+      current: active,
+      event: buildBaseEvent('chargeback_opened'),
+    });
+
+    expect(pendingDispute.status).toBe('active');
+    expect(pendingDispute.lastEventType).toBe('chargeback_opened');
+    expect(pendingDispute.activeUntil).toBeNull();
   });
 });

@@ -121,13 +121,13 @@ or recover Pro entitlement through secure, idempotent Stripe-backed processing.
 
 ### Tasks (7)
 
-- [ ] **Task 2.1**: Implement Stripe webhook endpoint with signature verification
-- [ ] **Task 2.2**: Normalize supported Stripe events into canonical billing events
-- [ ] **Task 2.3**: Persist webhook events with idempotency enforcement
-- [ ] **Task 2.4**: Apply retry-safe entitlement projection transitions
-- [ ] **Task 2.5**: Handle refund/dispute paths consistently with entitlement policy
-- [ ] **Task 2.6**: Ensure sanitized error behavior and no sensitive leakage
-- [ ] **Task 2.7**: Add tests for signature rejection, duplicate replay, and projection updates
+- [x] **Task 2.1**: Implement Stripe webhook endpoint with signature verification
+- [x] **Task 2.2**: Normalize supported Stripe events into canonical billing events
+- [x] **Task 2.3**: Persist webhook events with idempotency enforcement
+- [x] **Task 2.4**: Apply retry-safe entitlement projection transitions
+- [x] **Task 2.5**: Handle refund/dispute paths consistently with entitlement policy
+- [x] **Task 2.6**: Ensure sanitized error behavior and no sensitive leakage
+- [x] **Task 2.7**: Add tests for signature rejection, duplicate replay, and projection updates
 
 ---
 

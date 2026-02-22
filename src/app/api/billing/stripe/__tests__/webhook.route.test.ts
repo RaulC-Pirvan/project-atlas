@@ -215,6 +215,57 @@ describe('POST /api/billing/stripe/webhook', () => {
     logSpy.mockRestore();
   });
 
+  it('processes dispute closed won event into canonical chargeback_won', async () => {
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    const nowMs = Date.UTC(2026, 1, 21, 12, 0, 0);
+    const timestamp = Math.floor(nowMs / 1000);
+    vi.useFakeTimers();
+    vi.setSystemTime(nowMs);
+
+    const payload = JSON.stringify({
+      id: 'evt_3',
+      type: 'charge.dispute.closed',
+      created: 1766361600,
+      data: {
+        object: {
+          id: 'dp_1',
+          charge: 'ch_1',
+          status: 'won',
+          metadata: { userId: 'user-1', productKey: 'pro_lifetime_v1' },
+        },
+      },
+    });
+    const signature = buildSignatureHeader({
+      payload,
+      secret: 'whsec_test',
+      timestamp,
+    });
+
+    const response = await POST(
+      new Request('https://example.com/api/billing/stripe/webhook', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'stripe-signature': signature,
+        },
+        body: payload,
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(mockedAppendBillingEventAndProject).toHaveBeenCalledWith(
+      expect.objectContaining({
+        event: expect.objectContaining({
+          type: 'chargeback_won',
+          providerTransactionId: 'ch_1',
+        }),
+      }),
+    );
+
+    vi.useRealTimers();
+    logSpy.mockRestore();
+  });
+
   it('returns dedupe metadata for duplicate replay handling', async () => {
     const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
     const nowMs = Date.UTC(2026, 1, 21, 12, 0, 0);

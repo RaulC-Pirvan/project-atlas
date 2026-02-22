@@ -48,6 +48,47 @@ function getCanonicalReferences(object: Record<string, unknown>): {
   };
 }
 
+function getCanonicalReferencesFromStripeObject(object: Record<string, unknown>): {
+  userId: string;
+  productKey: 'pro_lifetime_v1';
+} | null {
+  const directRefs = getCanonicalReferences(object);
+  if (directRefs) {
+    return directRefs;
+  }
+
+  const chargeObject = object.charge;
+  if (isRecord(chargeObject)) {
+    const chargeRefs = getCanonicalReferences(chargeObject);
+    if (chargeRefs) {
+      return chargeRefs;
+    }
+  }
+
+  const paymentIntentObject = object.payment_intent;
+  if (isRecord(paymentIntentObject)) {
+    return getCanonicalReferences(paymentIntentObject);
+  }
+
+  return null;
+}
+
+function getStripeDisputeTransactionId(object: Record<string, unknown>): string | null {
+  const chargeObject = object.charge;
+  if (isRecord(chargeObject)) {
+    const chargeId = asString(chargeObject.id);
+    if (chargeId) return chargeId;
+  }
+
+  const paymentIntentObject = object.payment_intent;
+  if (isRecord(paymentIntentObject)) {
+    const paymentIntentId = asString(paymentIntentObject.id);
+    if (paymentIntentId) return paymentIntentId;
+  }
+
+  return asString(object.charge) ?? asString(object.payment_intent);
+}
+
 function buildBaseEvent(args: {
   event: StripeWebhookEvent;
   canonicalType: CanonicalBillingEvent['type'];
@@ -107,7 +148,7 @@ export function normalizeStripeWebhookEventToCanonicalEvent(args: {
 }): CanonicalBillingEvent | null {
   const receivedAt = args.receivedAt ?? new Date();
   const object = args.event.data.object;
-  const refs = getCanonicalReferences(object);
+  const refs = getCanonicalReferencesFromStripeObject(object);
   const providerEventType = args.event.type;
 
   if (!isStripeSupportedWebhookEventType(providerEventType)) {
@@ -177,6 +218,60 @@ export function normalizeStripeWebhookEventToCanonicalEvent(args: {
           refundId,
           amountCents: asNumber(object.amount_refunded),
           currency: (asString(object.currency) ?? 'USD').toUpperCase(),
+        },
+      };
+    }
+    case 'chargeback_opened': {
+      if (!refs) return null;
+      const disputeId = asString(object.id);
+      if (!disputeId) return null;
+      const transactionId = getStripeDisputeTransactionId(object);
+      return {
+        ...buildBaseEvent({
+          event: args.event,
+          canonicalType: 'chargeback_opened',
+          refs,
+          payloadHash: args.payloadHash,
+          providerTransactionId: transactionId,
+          receivedAt,
+        }),
+        type: 'chargeback_opened',
+        payload: {
+          disputeId,
+          transactionId,
+        },
+      };
+    }
+    case 'chargeback_won':
+    case 'chargeback_lost': {
+      if (!refs) return null;
+      const disputeId = asString(object.id);
+      if (!disputeId) return null;
+
+      const disputeStatus = asString(object.status);
+      let resolvedType: 'chargeback_won' | 'chargeback_lost' | null = null;
+      if (disputeStatus === 'won') {
+        resolvedType = 'chargeback_won';
+      } else if (disputeStatus === 'lost') {
+        resolvedType = 'chargeback_lost';
+      }
+
+      if (!resolvedType) return null;
+
+      const transactionId = getStripeDisputeTransactionId(object);
+      return {
+        ...buildBaseEvent({
+          event: args.event,
+          canonicalType: resolvedType,
+          refs,
+          payloadHash: args.payloadHash,
+          providerTransactionId: transactionId,
+          receivedAt,
+        }),
+        type: resolvedType,
+        payload: {
+          disputeId,
+          transactionId,
         },
       };
     }

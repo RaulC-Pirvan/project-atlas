@@ -41,13 +41,20 @@ export const STRIPE_WEBHOOK_EVENT_ALLOWLIST = [
   'checkout.session.expired',
   'checkout.session.async_payment_failed',
   'charge.refunded',
+  'charge.dispute.created',
+  'charge.dispute.closed',
 ] as const;
 
 export type StripeSupportedWebhookEventType = (typeof STRIPE_WEBHOOK_EVENT_ALLOWLIST)[number];
 
 export type StripeWebhookCanonicalType = Extract<
   BillingEventType,
-  'purchase_succeeded' | 'purchase_failed' | 'refund_issued'
+  | 'purchase_succeeded'
+  | 'purchase_failed'
+  | 'refund_issued'
+  | 'chargeback_opened'
+  | 'chargeback_won'
+  | 'chargeback_lost'
 >;
 
 export const STRIPE_WEBHOOK_CANONICAL_EVENT_MAP: Record<
@@ -58,6 +65,8 @@ export const STRIPE_WEBHOOK_CANONICAL_EVENT_MAP: Record<
   'checkout.session.expired': 'purchase_failed',
   'checkout.session.async_payment_failed': 'purchase_failed',
   'charge.refunded': 'refund_issued',
+  'charge.dispute.created': 'chargeback_opened',
+  'charge.dispute.closed': 'chargeback_lost',
 };
 
 export function parseStripeCheckoutQueryStatus(

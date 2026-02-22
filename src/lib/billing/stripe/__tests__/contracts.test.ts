@@ -38,6 +38,8 @@ describe('stripe phase 15.2 contract layer', () => {
       'checkout.session.expired',
       'checkout.session.async_payment_failed',
       'charge.refunded',
+      'charge.dispute.created',
+      'charge.dispute.closed',
     ]);
 
     expect(STRIPE_WEBHOOK_CANONICAL_EVENT_MAP).toEqual({
@@ -45,10 +47,13 @@ describe('stripe phase 15.2 contract layer', () => {
       'checkout.session.expired': 'purchase_failed',
       'checkout.session.async_payment_failed': 'purchase_failed',
       'charge.refunded': 'refund_issued',
+      'charge.dispute.created': 'chargeback_opened',
+      'charge.dispute.closed': 'chargeback_lost',
     });
 
     expect(isStripeSupportedWebhookEventType('checkout.session.completed')).toBe(true);
     expect(isStripeSupportedWebhookEventType('charge.refunded')).toBe(true);
+    expect(isStripeSupportedWebhookEventType('charge.dispute.created')).toBe(true);
     expect(isStripeSupportedWebhookEventType('customer.created')).toBe(false);
   });
 });

@@ -404,9 +404,9 @@ Launch non-goal (explicit):
 
 ### Sprint 15.3: Mobile Billing Compliance Strategy
 
-- [ ] Define Apple/Google in-app billing compliance path before store launch
-- [ ] Define entitlement reconciliation across Stripe and store purchases
-- [ ] Document region/platform fallback behavior and support playbook
+- [x] Define Apple/Google in-app billing compliance path before store launch
+- [x] Define entitlement reconciliation across Stripe and store purchases
+- [x] Document region/platform fallback behavior and support playbook
 
 ---
 

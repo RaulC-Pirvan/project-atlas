@@ -46,7 +46,19 @@ export function applyBillingEventToProjection(args: {
       }
       break;
     case 'purchase_succeeded':
+      next.providerCustomerId = args.event.payload.providerCustomerId ?? next.providerCustomerId;
+      next.status = 'active';
+      next.provider = args.event.provider;
+      next.activeFrom = next.activeFrom ?? args.event.occurredAt;
+      next.activeUntil = null;
+      break;
     case 'restore_succeeded':
+      next.providerCustomerId = args.event.payload.providerCustomerId ?? next.providerCustomerId;
+      next.status = 'active';
+      next.provider = args.event.provider;
+      next.activeFrom = next.activeFrom ?? args.event.occurredAt;
+      next.activeUntil = null;
+      break;
     case 'chargeback_won':
       next.status = 'active';
       next.provider = args.event.provider;

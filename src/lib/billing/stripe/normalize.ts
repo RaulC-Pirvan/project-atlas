@@ -26,6 +26,12 @@ function asNumber(value: unknown): number | null {
   return value;
 }
 
+function getNestedObjectId(value: unknown): string | null {
+  if (typeof value === 'string') return asString(value);
+  if (!isRecord(value)) return null;
+  return asString(value.id);
+}
+
 function getMetadataValue(object: Record<string, unknown>, key: string): string | null {
   const metadata = object.metadata;
   if (!isRecord(metadata)) return null;
@@ -161,9 +167,12 @@ export function normalizeStripeWebhookEventToCanonicalEvent(args: {
     case 'purchase_succeeded': {
       if (!refs) return null;
       const providerTransactionId =
-        asString(object.payment_intent) ?? asString(object.id) ?? `checkout:${args.event.id}`;
+        getNestedObjectId(object.payment_intent) ??
+        asString(object.id) ??
+        `checkout:${args.event.id}`;
       const amountCents = asNumber(object.amount_total) ?? 0;
       const currency = (asString(object.currency) ?? 'USD').toUpperCase();
+      const providerCustomerId = getNestedObjectId(object.customer);
       return {
         ...buildBaseEvent({
           event: args.event,
@@ -178,6 +187,7 @@ export function normalizeStripeWebhookEventToCanonicalEvent(args: {
           transactionId: providerTransactionId,
           amountCents,
           currency,
+          ...(providerCustomerId ? { providerCustomerId } : {}),
         },
       };
     }
@@ -189,7 +199,7 @@ export function normalizeStripeWebhookEventToCanonicalEvent(args: {
           canonicalType: 'purchase_failed',
           refs,
           payloadHash: args.payloadHash,
-          providerTransactionId: asString(object.payment_intent),
+          providerTransactionId: getNestedObjectId(object.payment_intent),
           receivedAt,
         }),
         type: 'purchase_failed',

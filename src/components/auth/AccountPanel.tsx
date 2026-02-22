@@ -5,6 +5,12 @@ import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { getApiErrorMessage, parseJson } from '../../lib/api/client';
+import {
+  ACCOUNT_BILLING_ACTIONS,
+  ACCOUNT_BILLING_COPY,
+  DEFAULT_PRO_RESTORE_REQUEST,
+  type ProRestoreResponse,
+} from '../../lib/billing/contracts';
 import type { UserReminderSettings } from '../../lib/reminders/types';
 import type { WeekStart } from '../habits/weekdays';
 import { LegalSupportLinks } from '../legal/LegalSupportLinks';
@@ -175,6 +181,7 @@ export function AccountPanel({
   const [sessionRowLoadingId, setSessionRowLoadingId] = useState<string | null>(null);
   const [revokeOthersLoading, setRevokeOthersLoading] = useState(false);
   const [signOutAllLoading, setSignOutAllLoading] = useState(false);
+  const [restoringPurchase, setRestoringPurchase] = useState(false);
   const [downloadingDataExport, setDownloadingDataExport] = useState(false);
   const [showStepUpModal, setShowStepUpModal] = useState(false);
   const [stepUpAction, setStepUpAction] = useState<SensitiveStepUpAction | null>(null);
@@ -432,6 +439,40 @@ export function AccountPanel({
       pushToast('Unable to sign out all devices right now.', 'error');
     } finally {
       setSignOutAllLoading(false);
+    }
+  };
+
+  const handleRestorePurchase = async () => {
+    setRestoringPurchase(true);
+
+    try {
+      const response = await fetch(ACCOUNT_BILLING_ACTIONS.restore_purchase.href, {
+        method: ACCOUNT_BILLING_ACTIONS.restore_purchase.method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(DEFAULT_PRO_RESTORE_REQUEST),
+      });
+      const body = await parseJson<ProRestoreResponse>(response);
+
+      if (!response.ok || !body?.ok) {
+        pushToast(getApiErrorMessage(response, body), 'error');
+        return;
+      }
+
+      if (body.data.outcome === 'restored') {
+        pushToast('Purchase restored. Pro access is now active.', 'success');
+        return;
+      }
+
+      if (body.data.outcome === 'already_active') {
+        pushToast('Pro is already active on this account.', 'neutral');
+        return;
+      }
+
+      pushToast('No completed web purchase was found for this account.', 'neutral');
+    } catch {
+      pushToast('Unable to restore your purchase right now.', 'error');
+    } finally {
+      setRestoringPurchase(false);
     }
   };
 
@@ -1278,6 +1319,40 @@ export function AccountPanel({
             </form>
           </div>
         )}
+      </section>
+
+      <section className="space-y-6 border-t border-black/10 pt-6 dark:border-white/10">
+        <div className="space-y-1">
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-black/80 dark:text-white/80">
+            {ACCOUNT_BILLING_COPY.sectionTitle}
+          </p>
+          <p className="text-sm text-black/60 dark:text-white/60">
+            {ACCOUNT_BILLING_COPY.sectionDescription}
+          </p>
+        </div>
+
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <Link
+            href={ACCOUNT_BILLING_ACTIONS.manage_billing.href}
+            className="inline-flex min-h-[44px] w-full items-center justify-center rounded-full border border-black/20 px-4 py-2 text-center text-xs font-semibold uppercase tracking-[0.25em] text-black/70 transition hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20 dark:border-white/20 dark:text-white/70 dark:hover:bg-white/10 dark:focus-visible:ring-white/30 sm:w-auto"
+          >
+            {ACCOUNT_BILLING_ACTIONS.manage_billing.label}
+          </Link>
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full sm:w-auto"
+            onClick={() => void handleRestorePurchase()}
+            disabled={restoringPurchase}
+          >
+            {restoringPurchase
+              ? 'Restoring purchase...'
+              : ACCOUNT_BILLING_ACTIONS.restore_purchase.label}
+          </Button>
+        </div>
+        <p className="text-xs text-black/55 dark:text-white/55">
+          {ACCOUNT_BILLING_COPY.restoreHint}
+        </p>
       </section>
 
       <section className="space-y-6 border-t border-black/10 pt-6 dark:border-white/10">

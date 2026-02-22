@@ -38,6 +38,7 @@ export type BillingEventPayloadMap = {
     transactionId: string;
     amountCents: number;
     currency: string;
+    providerCustomerId?: string | null;
   };
   purchase_failed: {
     reasonCode: string;
@@ -79,6 +80,7 @@ export type BillingEventPayloadMap = {
   restore_succeeded: {
     requestOrigin: BillingRestoreOrigin;
     restoredTransactionId?: string | null;
+    providerCustomerId?: string | null;
   };
   restore_failed: {
     requestOrigin: BillingRestoreOrigin;

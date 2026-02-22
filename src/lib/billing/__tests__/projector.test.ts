@@ -24,6 +24,7 @@ function buildBaseEvent(type: CanonicalBillingEvent['type']): CanonicalBillingEv
         transactionId: 'txn_1',
         amountCents: 1999,
         currency: 'USD',
+        providerCustomerId: 'cus_123',
       },
     };
   }
@@ -154,6 +155,7 @@ describe('billing projector', () => {
     });
 
     expect(active.status).toBe('active');
+    expect(active.providerCustomerId).toBe('cus_123');
     expect(revoked.status).toBe('revoked');
     expect(revoked.activeUntil?.toISOString()).toBe('2026-02-21T09:00:00.000Z');
     expect(revoked.lastEventType).toBe('refund_issued');

@@ -135,12 +135,12 @@ or recover Pro entitlement through secure, idempotent Stripe-backed processing.
 
 ### Tasks (6)
 
-- [ ] **Task 3.1**: Add account section for web billing history/invoice links
-- [ ] **Task 3.2**: Add server endpoint to create Stripe billing portal/session link
-- [ ] **Task 3.3**: Implement authenticated web restore/re-sync endpoint
-- [ ] **Task 3.4**: Add restore UX states (pending/success/error) with toast-first feedback
-- [ ] **Task 3.5**: Ensure restore path is idempotent and safe for repeated clicks
-- [ ] **Task 3.6**: Add component/API tests for billing links and restore flow
+- [x] **Task 3.1**: Add account section for web billing history/invoice links
+- [x] **Task 3.2**: Add server endpoint to create Stripe billing portal/session link
+- [x] **Task 3.3**: Implement authenticated web restore/re-sync endpoint
+- [x] **Task 3.4**: Add restore UX states (pending/success/error) with toast-first feedback
+- [x] **Task 3.5**: Ensure restore path is idempotent and safe for repeated clicks
+- [x] **Task 3.6**: Add component/API tests for billing links and restore flow
 
 ---
 

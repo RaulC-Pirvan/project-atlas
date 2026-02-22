@@ -80,6 +80,23 @@ async function startCheckout(request: Request): Promise<Response> {
     userId: session.user.id,
     productKey: 'pro_lifetime_v1',
   });
+
+  if (process.env.BILLING_STRIPE_TEST_MODE === 'true') {
+    const testCheckoutUrl =
+      process.env.BILLING_STRIPE_TEST_CHECKOUT_URL?.trim() ||
+      'https://checkout.stripe.test/session/cs_test_mode';
+    logInfo('billing.checkout.redirect', {
+      requestId,
+      route: '/api/billing/stripe/checkout',
+      provider: 'stripe',
+      userId: session.user.id,
+      productKey: 'pro_lifetime_v1',
+      checkoutSessionId: 'cs_test_mode',
+      testMode: true,
+    });
+    return Response.redirect(testCheckoutUrl, 303);
+  }
+
   const checkout = await createStripeCheckoutSession({
     secretKey: config.secretKey,
     priceId: config.proLifetimePriceId,

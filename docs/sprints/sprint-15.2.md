@@ -148,12 +148,12 @@ or recover Pro entitlement through secure, idempotent Stripe-backed processing.
 
 ### Tasks (6)
 
-- [ ] **Task 4.1**: Unit tests for Stripe event normalization and projection transitions
-- [ ] **Task 4.2**: API tests for checkout/webhook/restore auth + error paths
-- [ ] **Task 4.3**: Replay tests for duplicate webhook deliveries and idempotency
-- [ ] **Task 4.4**: Regression tests for entitlement read compatibility (`/api/pro/entitlement`)
-- [ ] **Task 4.5**: E2E smoke for checkout start, webhook effect visibility, and restore fallback
-- [ ] **Task 4.6**: CI stability pass for new billing runtime surfaces
+- [x] **Task 4.1**: Unit tests for Stripe event normalization and projection transitions
+- [x] **Task 4.2**: API tests for checkout/webhook/restore auth + error paths
+- [x] **Task 4.3**: Replay tests for duplicate webhook deliveries and idempotency
+- [x] **Task 4.4**: Regression tests for entitlement read compatibility (`/api/pro/entitlement`)
+- [x] **Task 4.5**: E2E smoke for checkout start, webhook effect visibility, and restore fallback
+- [x] **Task 4.6**: CI stability pass for new billing runtime surfaces
 
 ---
 

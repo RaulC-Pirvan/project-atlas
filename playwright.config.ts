@@ -6,6 +6,13 @@ const webServerEnv = {
   ENABLE_TEST_GOOGLE_OAUTH_PROVIDER: process.env.ENABLE_TEST_GOOGLE_OAUTH_PROVIDER ?? 'true',
   NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET ?? 'test-secret',
   NEXTAUTH_URL: process.env.NEXTAUTH_URL ?? 'http://localhost:3000',
+  STRIPE_SECRET_KEY: 'sk_test_atlas',
+  STRIPE_PRICE_PRO_LIFETIME: 'price_test_atlas',
+  STRIPE_WEBHOOK_SECRET: 'whsec_test',
+  BILLING_STRIPE_TEST_MODE: 'true',
+  BILLING_STRIPE_TEST_CHECKOUT_URL:
+    process.env.BILLING_STRIPE_TEST_CHECKOUT_URL ??
+    'https://checkout.stripe.test/session/cs_test_mode',
   SUPPORT_IP_HASH_SECRET: process.env.SUPPORT_IP_HASH_SECRET ?? 'test-support-ip-hash-secret',
   TOTP_ENCRYPTION_KEY:
     process.env.TOTP_ENCRYPTION_KEY ??

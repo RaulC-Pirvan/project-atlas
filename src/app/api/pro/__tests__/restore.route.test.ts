@@ -1,5 +1,5 @@
 import { getServerSession } from 'next-auth/next';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { appendBillingEventAndProject } from '../../../../lib/billing/persistence';
 import { getStripePortalConfig } from '../../../../lib/billing/stripe/config';
@@ -7,8 +7,24 @@ import { findLatestStripeCompletedCheckout } from '../../../../lib/billing/strip
 import { getProEntitlementSummary } from '../../../../lib/pro/entitlement';
 import { POST } from '../restore/route';
 
+const { billingEventLedgerFindFirstMock, billingEntitlementProjectionFindUniqueMock } = vi.hoisted(
+  () => ({
+    billingEventLedgerFindFirstMock: vi.fn(),
+    billingEntitlementProjectionFindUniqueMock: vi.fn(),
+  }),
+);
+
 vi.mock('next-auth/next', () => ({ getServerSession: vi.fn() }));
-vi.mock('../../../../lib/db/prisma', () => ({ prisma: {} }));
+vi.mock('../../../../lib/db/prisma', () => ({
+  prisma: {
+    billingEventLedger: {
+      findFirst: billingEventLedgerFindFirstMock,
+    },
+    billingEntitlementProjection: {
+      findUnique: billingEntitlementProjectionFindUniqueMock,
+    },
+  },
+}));
 vi.mock('../../../../lib/billing/persistence', () => ({ appendBillingEventAndProject: vi.fn() }));
 vi.mock('../../../../lib/billing/stripe/config', () => ({ getStripePortalConfig: vi.fn() }));
 vi.mock('../../../../lib/billing/stripe/restore', () => ({
@@ -23,12 +39,17 @@ const mockedFindLatestStripeCompletedCheckout = vi.mocked(findLatestStripeComple
 const mockedGetProEntitlementSummary = vi.mocked(getProEntitlementSummary);
 
 describe('POST /api/pro/restore', () => {
+  const previousBillingStripeTestMode = process.env.BILLING_STRIPE_TEST_MODE;
+
   beforeEach(() => {
     mockedGetServerSession.mockReset();
     mockedAppendBillingEventAndProject.mockReset();
     mockedGetStripePortalConfig.mockReset();
     mockedFindLatestStripeCompletedCheckout.mockReset();
     mockedGetProEntitlementSummary.mockReset();
+    billingEventLedgerFindFirstMock.mockReset();
+    billingEntitlementProjectionFindUniqueMock.mockReset();
+    delete process.env.BILLING_STRIPE_TEST_MODE;
 
     mockedGetStripePortalConfig.mockReturnValue({
       secretKey: 'sk_test_123',
@@ -75,6 +96,14 @@ describe('POST /api/pro/restore', () => {
         version: 1,
       },
     });
+  });
+
+  afterEach(() => {
+    if (previousBillingStripeTestMode === undefined) {
+      delete process.env.BILLING_STRIPE_TEST_MODE;
+    } else {
+      process.env.BILLING_STRIPE_TEST_MODE = previousBillingStripeTestMode;
+    }
   });
 
   it('returns already_active when user already has pro', async () => {
@@ -205,6 +234,63 @@ describe('POST /api/pro/restore', () => {
     logSpy.mockRestore();
   });
 
+  it('uses local billing ledger lookup in stripe test mode', async () => {
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    process.env.BILLING_STRIPE_TEST_MODE = 'true';
+
+    mockedGetServerSession.mockResolvedValue({ user: { id: 'user-1' } });
+    mockedGetProEntitlementSummary
+      .mockResolvedValueOnce({
+        isPro: false,
+        status: 'none',
+      })
+      .mockResolvedValueOnce({
+        isPro: true,
+        status: 'active',
+        source: 'stripe',
+        restoredAt: new Date('2026-02-21T09:00:00.000Z'),
+        updatedAt: new Date('2026-02-21T09:00:05.000Z'),
+      });
+    billingEventLedgerFindFirstMock.mockResolvedValue({
+      providerEventId: 'checkout_session:cs_local_123',
+      providerTransactionId: 'pi_local_123',
+      occurredAt: new Date('2026-02-21T09:00:00.000Z'),
+      payload: {
+        amountCents: 1999,
+        currency: 'usd',
+        providerCustomerId: 'cus_local_123',
+      },
+    });
+    billingEntitlementProjectionFindUniqueMock.mockResolvedValue({
+      providerCustomerId: null,
+    });
+
+    const response = await POST(
+      new Request('https://example.com/api/pro/restore', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ trigger: 'account' }),
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    expect(body.ok).toBe(true);
+    expect(body.data.outcome).toBe('restored');
+    expect(mockedFindLatestStripeCompletedCheckout).not.toHaveBeenCalled();
+    expect(mockedAppendBillingEventAndProject).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        event: expect.objectContaining({
+          providerEventId: 'checkout_session:cs_local_123',
+          providerTransactionId: 'pi_local_123',
+        }),
+      }),
+    );
+
+    logSpy.mockRestore();
+  });
+
   it('rejects unauthenticated requests', async () => {
     const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     mockedGetServerSession.mockResolvedValue(null);
@@ -233,6 +319,25 @@ describe('POST /api/pro/restore', () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ trigger: 'invalid' }),
+      }),
+    );
+    expect(response.status).toBe(400);
+    const body = await response.json();
+    expect(body.ok).toBe(false);
+    expect(body.error.code).toBe('invalid_request');
+
+    errorSpy.mockRestore();
+  });
+
+  it('rejects malformed json request body', async () => {
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    mockedGetServerSession.mockResolvedValue({ user: { id: 'user-1' } });
+
+    const response = await POST(
+      new Request('https://example.com/api/pro/restore', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: '{',
       }),
     );
     expect(response.status).toBe(400);

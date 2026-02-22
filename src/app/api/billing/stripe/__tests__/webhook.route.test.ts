@@ -107,6 +107,36 @@ describe('POST /api/billing/stripe/webhook', () => {
     errorSpy.mockRestore();
   });
 
+  it('rejects invalid payload with valid signature', async () => {
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const payload = 'not-json';
+    const timestamp = Math.floor(Date.now() / 1000);
+    const signature = buildSignatureHeader({
+      payload,
+      secret: 'whsec_test',
+      timestamp,
+    });
+
+    const response = await POST(
+      new Request('https://example.com/api/billing/stripe/webhook', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'stripe-signature': signature,
+        },
+        body: payload,
+      }),
+    );
+
+    expect(response.status).toBe(400);
+    const body = await response.json();
+    expect(body.ok).toBe(false);
+    expect(body.error.code).toBe('invalid_request');
+    expect(mockedAppendBillingEventAndProject).not.toHaveBeenCalled();
+
+    errorSpy.mockRestore();
+  });
+
   it('processes checkout success event into canonical purchase_succeeded', async () => {
     const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
     const nowMs = Date.UTC(2026, 1, 21, 12, 0, 0);
@@ -266,6 +296,53 @@ describe('POST /api/billing/stripe/webhook', () => {
     logSpy.mockRestore();
   });
 
+  it('ignores unsupported event types safely', async () => {
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    const nowMs = Date.UTC(2026, 1, 21, 12, 0, 0);
+    const timestamp = Math.floor(nowMs / 1000);
+    vi.useFakeTimers();
+    vi.setSystemTime(nowMs);
+
+    const payload = JSON.stringify({
+      id: 'evt_ignore_1',
+      type: 'customer.created',
+      created: 1766361600,
+      data: {
+        object: {
+          id: 'cus_1',
+        },
+      },
+    });
+    const signature = buildSignatureHeader({
+      payload,
+      secret: 'whsec_test',
+      timestamp,
+    });
+
+    const response = await POST(
+      new Request('https://example.com/api/billing/stripe/webhook', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'stripe-signature': signature,
+        },
+        body: payload,
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    expect(body.ok).toBe(true);
+    expect(body.data).toEqual({
+      received: true,
+      ignored: true,
+    });
+    expect(mockedAppendBillingEventAndProject).not.toHaveBeenCalled();
+
+    vi.useRealTimers();
+    logSpy.mockRestore();
+  });
+
   it('returns dedupe metadata for duplicate replay handling', async () => {
     const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
     const nowMs = Date.UTC(2026, 1, 21, 12, 0, 0);
@@ -354,6 +431,152 @@ describe('POST /api/billing/stripe/webhook', () => {
       appended: false,
       dedupeReason: 'provider_event_id',
     });
+
+    vi.useRealTimers();
+    logSpy.mockRestore();
+  });
+
+  it('keeps duplicate replay handling stable across repeated deliveries', async () => {
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    const nowMs = Date.UTC(2026, 1, 21, 12, 0, 0);
+    const timestamp = Math.floor(nowMs / 1000);
+    vi.useFakeTimers();
+    vi.setSystemTime(nowMs);
+
+    mockedAppendBillingEventAndProject
+      .mockResolvedValueOnce({
+        appended: true,
+        dedupeReason: null,
+        ledgerEvent: {
+          id: 'event-row-1',
+          eventId: 'stripe:evt_replay_1:purchase_succeeded',
+          userId: 'user-1',
+          provider: 'stripe',
+          providerEventId: 'evt_replay_1',
+          providerTransactionId: 'pi_1',
+          idempotencyKey: null,
+          productKey: 'pro_lifetime_v1',
+          planType: 'one_time',
+          eventType: 'purchase_succeeded',
+          occurredAt: new Date('2026-02-21T09:00:00.000Z'),
+          receivedAt: new Date('2026-02-21T09:00:05.000Z'),
+          payload: {},
+          payloadHash: 'sha256:abc',
+          signatureVerified: true,
+          createdAt: new Date('2026-02-21T09:00:05.000Z'),
+        },
+        projection: {
+          userId: 'user-1',
+          productKey: 'pro_lifetime_v1',
+          planType: 'one_time',
+          status: 'active',
+          provider: 'stripe',
+          providerCustomerId: null,
+          providerAccountId: null,
+          activeFrom: new Date('2026-02-21T09:00:00.000Z'),
+          activeUntil: null,
+          periodStart: null,
+          periodEnd: null,
+          autoRenew: null,
+          lastEventId: 'stripe:evt_replay_1:purchase_succeeded',
+          lastEventType: 'purchase_succeeded',
+          updatedAt: new Date('2026-02-21T09:00:05.000Z'),
+          version: 1,
+        },
+      })
+      .mockResolvedValueOnce({
+        appended: false,
+        dedupeReason: 'provider_event_id',
+        ledgerEvent: {
+          id: 'event-row-1',
+          eventId: 'stripe:evt_replay_1:purchase_succeeded',
+          userId: 'user-1',
+          provider: 'stripe',
+          providerEventId: 'evt_replay_1',
+          providerTransactionId: 'pi_1',
+          idempotencyKey: null,
+          productKey: 'pro_lifetime_v1',
+          planType: 'one_time',
+          eventType: 'purchase_succeeded',
+          occurredAt: new Date('2026-02-21T09:00:00.000Z'),
+          receivedAt: new Date('2026-02-21T09:00:05.000Z'),
+          payload: {},
+          payloadHash: 'sha256:abc',
+          signatureVerified: true,
+          createdAt: new Date('2026-02-21T09:00:05.000Z'),
+        },
+        projection: {
+          userId: 'user-1',
+          productKey: 'pro_lifetime_v1',
+          planType: 'one_time',
+          status: 'active',
+          provider: 'stripe',
+          providerCustomerId: null,
+          providerAccountId: null,
+          activeFrom: new Date('2026-02-21T09:00:00.000Z'),
+          activeUntil: null,
+          periodStart: null,
+          periodEnd: null,
+          autoRenew: null,
+          lastEventId: 'stripe:evt_replay_1:purchase_succeeded',
+          lastEventType: 'purchase_succeeded',
+          updatedAt: new Date('2026-02-21T09:00:05.000Z'),
+          version: 1,
+        },
+      });
+
+    const payload = JSON.stringify({
+      id: 'evt_replay_1',
+      type: 'checkout.session.completed',
+      created: 1766361600,
+      data: {
+        object: {
+          id: 'cs_1',
+          payment_intent: 'pi_1',
+          amount_total: 1999,
+          currency: 'usd',
+          metadata: { userId: 'user-1', productKey: 'pro_lifetime_v1' },
+        },
+      },
+    });
+    const signature = buildSignatureHeader({
+      payload,
+      secret: 'whsec_test',
+      timestamp,
+    });
+
+    const firstResponse = await POST(
+      new Request('https://example.com/api/billing/stripe/webhook', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'stripe-signature': signature,
+        },
+        body: payload,
+      }),
+    );
+    const secondResponse = await POST(
+      new Request('https://example.com/api/billing/stripe/webhook', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'stripe-signature': signature,
+        },
+        body: payload,
+      }),
+    );
+
+    expect(firstResponse.status).toBe(200);
+    expect(secondResponse.status).toBe(200);
+
+    const firstBody = await firstResponse.json();
+    const secondBody = await secondResponse.json();
+    expect(firstBody.ok).toBe(true);
+    expect(firstBody.data.appended).toBe(true);
+    expect(firstBody.data.dedupeReason).toBeNull();
+    expect(secondBody.ok).toBe(true);
+    expect(secondBody.data.appended).toBe(false);
+    expect(secondBody.data.dedupeReason).toBe('provider_event_id');
 
     vi.useRealTimers();
     logSpy.mockRestore();

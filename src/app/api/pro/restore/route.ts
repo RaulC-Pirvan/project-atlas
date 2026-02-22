@@ -27,6 +27,71 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
 }
 
+function asString(value: unknown): string | null {
+  if (typeof value !== 'string') return null;
+  const normalized = value.trim();
+  return normalized.length > 0 ? normalized : null;
+}
+
+function asNumber(value: unknown): number | null {
+  if (typeof value !== 'number' || !Number.isFinite(value)) return null;
+  return value;
+}
+
+type RestoreCheckoutLookup = Awaited<ReturnType<typeof findLatestStripeCompletedCheckout>>;
+
+async function findLatestStripeCompletedCheckoutForTestMode(
+  userId: string,
+): Promise<RestoreCheckoutLookup> {
+  const latestPurchase = await prisma.billingEventLedger.findFirst({
+    where: {
+      userId,
+      provider: 'stripe',
+      productKey: 'pro_lifetime_v1',
+      eventType: 'purchase_succeeded',
+    },
+    orderBy: [{ occurredAt: 'desc' }, { createdAt: 'desc' }],
+    select: {
+      providerEventId: true,
+      providerTransactionId: true,
+      occurredAt: true,
+      payload: true,
+    },
+  });
+
+  if (!latestPurchase) {
+    return null;
+  }
+
+  const payload = isRecord(latestPurchase.payload) ? latestPurchase.payload : {};
+  const projection = await prisma.billingEntitlementProjection.findUnique({
+    where: {
+      userId_productKey: {
+        userId,
+        productKey: 'pro_lifetime_v1',
+      },
+    },
+    select: {
+      providerCustomerId: true,
+    },
+  });
+
+  const rawProviderEventId = asString(latestPurchase.providerEventId);
+  const checkoutSessionId =
+    rawProviderEventId && rawProviderEventId.startsWith('checkout_session:')
+      ? rawProviderEventId.replace('checkout_session:', '')
+      : (rawProviderEventId ?? `test_restore_checkout_${latestPurchase.occurredAt.getTime()}`);
+
+  return {
+    checkoutSessionId,
+    paymentIntentId: asString(latestPurchase.providerTransactionId),
+    customerId: asString(payload.providerCustomerId) ?? projection?.providerCustomerId ?? null,
+    amountTotal: asNumber(payload.amountCents),
+    currency: asString(payload.currency)?.toUpperCase() ?? null,
+    createdAt: latestPurchase.occurredAt,
+  };
+}
+
 function parseRestoreRequest(value: unknown): ProRestoreRequest {
   if (!isRecord(value) || value.trigger !== 'account') {
     throw new ApiError('invalid_request', 'Invalid restore request.', 400, 'update_input');
@@ -121,11 +186,14 @@ async function restoreProEntitlement(request: Request): Promise<Response> {
     },
   });
 
-  const latestCheckout = await findLatestStripeCompletedCheckout({
-    secretKey: config.secretKey,
-    userId: session.user.id,
-    productKey: 'pro_lifetime_v1',
-  });
+  const latestCheckout =
+    process.env.BILLING_STRIPE_TEST_MODE === 'true'
+      ? await findLatestStripeCompletedCheckoutForTestMode(session.user.id)
+      : await findLatestStripeCompletedCheckout({
+          secretKey: config.secretKey,
+          userId: session.user.id,
+          productKey: 'pro_lifetime_v1',
+        });
 
   if (!latestCheckout) {
     await appendBillingEventAndProject({

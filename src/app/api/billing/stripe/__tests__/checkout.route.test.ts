@@ -1,5 +1,5 @@
 import { getServerSession } from 'next-auth/next';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { createStripeCheckoutSession } from '../../../../../lib/billing/stripe/checkout';
 import { getStripeCheckoutConfig } from '../../../../../lib/billing/stripe/config';
@@ -30,6 +30,9 @@ const mockedGetStripeCheckoutConfig = vi.mocked(getStripeCheckoutConfig);
 const mockedCreateStripeCheckoutSession = vi.mocked(createStripeCheckoutSession);
 
 describe('GET /api/billing/stripe/checkout', () => {
+  const previousTestMode = process.env.BILLING_STRIPE_TEST_MODE;
+  const previousTestCheckoutUrl = process.env.BILLING_STRIPE_TEST_CHECKOUT_URL;
+
   beforeEach(() => {
     mockedGetServerSession.mockReset();
     mockedGetProEntitlementSummary.mockReset();
@@ -49,6 +52,21 @@ describe('GET /api/billing/stripe/checkout', () => {
     billingProductMappingUpsertMock.mockResolvedValue({
       id: 'mapping-1',
     });
+    delete process.env.BILLING_STRIPE_TEST_MODE;
+    delete process.env.BILLING_STRIPE_TEST_CHECKOUT_URL;
+  });
+
+  afterEach(() => {
+    if (previousTestMode === undefined) {
+      delete process.env.BILLING_STRIPE_TEST_MODE;
+    } else {
+      process.env.BILLING_STRIPE_TEST_MODE = previousTestMode;
+    }
+    if (previousTestCheckoutUrl === undefined) {
+      delete process.env.BILLING_STRIPE_TEST_CHECKOUT_URL;
+    } else {
+      process.env.BILLING_STRIPE_TEST_CHECKOUT_URL = previousTestCheckoutUrl;
+    }
   });
 
   it('creates hosted checkout and redirects authenticated users', async () => {
@@ -136,5 +154,51 @@ describe('GET /api/billing/stripe/checkout', () => {
     expect(mockedCreateStripeCheckoutSession).not.toHaveBeenCalled();
 
     errorSpy.mockRestore();
+  });
+
+  it('returns internal error when Stripe session creation fails upstream', async () => {
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    mockedGetServerSession.mockResolvedValue({ user: { id: 'user-1' } });
+    mockedGetProEntitlementSummary.mockResolvedValue({
+      isPro: false,
+      status: 'none',
+    });
+    mockedCreateStripeCheckoutSession.mockRejectedValue(
+      new Error('Stripe checkout session creation failed.'),
+    );
+
+    const response = await GET(new Request('https://example.com/api/billing/stripe/checkout'));
+    expect(response.status).toBe(500);
+    const body = await response.json();
+    expect(body.ok).toBe(false);
+    expect(body.error.code).toBe('internal_error');
+    expect(body.error.message).toBe('Internal server error.');
+
+    errorSpy.mockRestore();
+  });
+
+  it('uses deterministic test-mode checkout redirect without calling Stripe API', async () => {
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    process.env.BILLING_STRIPE_TEST_MODE = 'true';
+    process.env.BILLING_STRIPE_TEST_CHECKOUT_URL = 'https://checkout.stripe.test/session/custom';
+
+    mockedGetServerSession.mockResolvedValue({ user: { id: 'user-1' } });
+    mockedGetProEntitlementSummary.mockResolvedValue({
+      isPro: false,
+      status: 'none',
+    });
+
+    const response = await GET(new Request('https://example.com/api/billing/stripe/checkout'));
+    expect(response.status).toBe(303);
+    expect(response.headers.get('location')).toBe('https://checkout.stripe.test/session/custom');
+    expect(mockedCreateStripeCheckoutSession).not.toHaveBeenCalled();
+
+    const logLines = logSpy.mock.calls.map((args) => String(args[0]));
+    expect(logLines.some((line) => line.includes('"message":"billing.checkout.redirect"'))).toBe(
+      true,
+    );
+    expect(logLines.some((line) => line.includes('"testMode":true'))).toBe(true);
+
+    logSpy.mockRestore();
   });
 });

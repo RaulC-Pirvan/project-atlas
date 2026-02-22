@@ -1,3 +1,5 @@
+import crypto from 'node:crypto';
+
 import { type APIRequestContext, expect, type Page, test } from '@playwright/test';
 
 const password = 'AtlasTestPassword123!';
@@ -59,18 +61,55 @@ async function createVerifiedUser(page: Page, request: APIRequestContext, prefix
   await page.goto(`/verify-email?token=${encodeURIComponent(token)}`);
   await expect(page.getByRole('heading', { name: /email verified\./i })).toBeVisible();
   await signIn(page, email);
+  return email;
 }
 
-test('optional smoke: checkout entrypoint and entitlement visibility', async ({
+async function resolveUserIdFromDebugGoogleSignIn(
+  request: APIRequestContext,
+  email: string,
+): Promise<string> {
+  const response = await request.post('/api/auth/debug/google-sign-in', {
+    data: {
+      email,
+      providerAccountId: `billing-debug-${Date.now()}`,
+    },
+    timeout: 10_000,
+  });
+  expect(response.ok()).toBeTruthy();
+  const body = (await response.json()) as {
+    ok: boolean;
+    data?: {
+      user?: {
+        id?: string;
+      };
+    };
+  };
+
+  const userId = body.data?.user?.id;
+  expect(typeof userId).toBe('string');
+  expect((userId ?? '').length).toBeGreaterThan(0);
+  return userId as string;
+}
+
+function buildStripeSignatureHeader(args: {
+  payload: string;
+  secret: string;
+  timestamp: number;
+}): string {
+  const signedPayload = `${args.timestamp}.${args.payload}`;
+  const signature = crypto
+    .createHmac('sha256', args.secret)
+    .update(signedPayload, 'utf8')
+    .digest('hex');
+  return `t=${args.timestamp},v1=${signature}`;
+}
+
+test('billing smoke: checkout start, webhook effect visibility, and restore fallback', async ({
   page,
   request,
 }) => {
-  test.skip(
-    !process.env.STRIPE_SECRET_KEY || !process.env.STRIPE_PRICE_PRO_LIFETIME,
-    'Requires Stripe checkout env vars for optional billing smoke.',
-  );
-
-  await createVerifiedUser(page, request, 'pro-billing-smoke');
+  const email = await createVerifiedUser(page, request, 'pro-billing-smoke');
+  const userId = await resolveUserIdFromDebugGoogleSignIn(request, email);
   await page.goto('/pro');
   const upgradeLink = page.getByRole('link', { name: /upgrade to pro/i });
   await expect(upgradeLink).toHaveAttribute('href', '/api/billing/stripe/checkout');
@@ -81,20 +120,82 @@ test('optional smoke: checkout entrypoint and entitlement visibility', async ({
   });
   expect(checkoutResponse.status()).toBe(303);
   const location = checkoutResponse.headers()['location'] ?? '';
-  expect(location.length).toBeGreaterThan(0);
+  expect(location).toContain('checkout.stripe.test/session/');
 
-  // Optional smoke keeps checkout external and simulates completed purchase via test-only grant.
-  const grantResponse = await page.request.post('/api/pro/debug/grant', { timeout: 10_000 });
-  expect(grantResponse.ok()).toBeTruthy();
+  const restoreBeforeResponse = await page.request.post('/api/pro/restore', {
+    data: { trigger: 'account' },
+    timeout: 10_000,
+  });
+  expect(restoreBeforeResponse.ok()).toBeTruthy();
+  const restoreBeforeBody = (await restoreBeforeResponse.json()) as {
+    ok: boolean;
+    data: { outcome: string; entitlement: { isPro: boolean; status: string } };
+  };
+  expect(restoreBeforeBody.ok).toBe(true);
+  expect(restoreBeforeBody.data.outcome).toBe('not_found');
+  expect(restoreBeforeBody.data.entitlement.isPro).toBe(false);
+
+  const webhookSecret = 'whsec_test';
+  const webhookPayload = JSON.stringify({
+    id: `evt_checkout_${Date.now()}`,
+    type: 'checkout.session.completed',
+    created: Math.floor(Date.now() / 1000),
+    data: {
+      object: {
+        id: `cs_checkout_${Date.now()}`,
+        payment_intent: `pi_checkout_${Date.now()}`,
+        customer: `cus_checkout_${Date.now()}`,
+        amount_total: 1999,
+        currency: 'usd',
+        metadata: {
+          userId,
+          productKey: 'pro_lifetime_v1',
+        },
+      },
+    },
+  });
+  const webhookSignature = buildStripeSignatureHeader({
+    payload: webhookPayload,
+    secret: webhookSecret,
+    timestamp: Math.floor(Date.now() / 1000),
+  });
+  const webhookResponse = await page.request.post('/api/billing/stripe/webhook', {
+    data: webhookPayload,
+    headers: {
+      'Content-Type': 'application/json',
+      'stripe-signature': webhookSignature,
+    },
+    timeout: 10_000,
+  });
+  expect(webhookResponse.ok()).toBeTruthy();
+  const webhookBody = (await webhookResponse.json()) as {
+    ok: boolean;
+    data: { ignored: boolean };
+  };
+  expect(webhookBody.ok).toBe(true);
+  expect(webhookBody.data.ignored).toBe(false);
 
   const entitlementResponse = await page.request.get('/api/pro/entitlement', { timeout: 10_000 });
   expect(entitlementResponse.ok()).toBeTruthy();
   const body = (await entitlementResponse.json()) as {
     ok: boolean;
-    data: { isPro: boolean; status: string };
+    data: { isPro: boolean; status: string; source: string | null };
   };
 
   expect(body.ok).toBe(true);
   expect(body.data.isPro).toBe(true);
   expect(body.data.status).toBe('active');
+  expect(body.data.source).toBe('stripe');
+
+  const restoreAfterResponse = await page.request.post('/api/pro/restore', {
+    data: { trigger: 'account' },
+    timeout: 10_000,
+  });
+  expect(restoreAfterResponse.ok()).toBeTruthy();
+  const restoreAfterBody = (await restoreAfterResponse.json()) as {
+    ok: boolean;
+    data: { outcome: string };
+  };
+  expect(restoreAfterBody.ok).toBe(true);
+  expect(restoreAfterBody.data.outcome).toBe('already_active');
 });

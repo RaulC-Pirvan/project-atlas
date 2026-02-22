@@ -13,6 +13,7 @@ describe('stripe webhook normalization', () => {
           object: {
             id: 'cs_1',
             payment_intent: 'pi_1',
+            customer: 'cus_1',
             amount_total: 1999,
             currency: 'usd',
             metadata: {
@@ -38,6 +39,7 @@ describe('stripe webhook normalization', () => {
       transactionId: 'pi_1',
       amountCents: 1999,
       currency: 'USD',
+      providerCustomerId: 'cus_1',
     });
   });
 

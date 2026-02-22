@@ -103,6 +103,26 @@ function buildBaseEvent(type: CanonicalBillingEvent['type']): CanonicalBillingEv
     };
   }
 
+  if (type === 'restore_succeeded') {
+    return {
+      eventId: 'evt:restore_succeeded',
+      type: 'restore_succeeded',
+      userId: 'user-1',
+      provider: 'stripe',
+      productKey: 'pro_lifetime_v1',
+      planType: 'one_time',
+      occurredAt,
+      receivedAt,
+      providerEventId: 'evt_provider_restore_1',
+      providerTransactionId: 'txn_restore_1',
+      payload: {
+        requestOrigin: 'web',
+        restoredTransactionId: 'txn_restore_1',
+        providerCustomerId: 'cus_restore_1',
+      },
+    };
+  }
+
   return {
     eventId: 'evt:refund_issued',
     type: 'refund_issued',
@@ -205,5 +225,23 @@ describe('billing projector', () => {
     expect(pendingDispute.status).toBe('active');
     expect(pendingDispute.lastEventType).toBe('chargeback_opened');
     expect(pendingDispute.activeUntil).toBeNull();
+  });
+
+  it('activates and sets provider customer id on restore_succeeded', () => {
+    const base = createEmptyBillingEntitlementProjection({
+      userId: 'user-1',
+      updatedAt: new Date('2026-02-21T08:00:00.000Z'),
+    });
+
+    const restored = applyBillingEventToProjection({
+      current: base,
+      event: buildBaseEvent('restore_succeeded'),
+    });
+
+    expect(restored.status).toBe('active');
+    expect(restored.provider).toBe('stripe');
+    expect(restored.providerCustomerId).toBe('cus_restore_1');
+    expect(restored.lastEventType).toBe('restore_succeeded');
+    expect(restored.activeUntil).toBeNull();
   });
 });

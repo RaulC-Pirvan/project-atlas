@@ -93,7 +93,10 @@ describe('MarketingHome', () => {
       screen.getByRole('heading', { name: /smarter reminder intelligence/i }),
     ).toBeInTheDocument();
 
-    expect(screen.getByRole('link', { name: /see atlas pro/i })).toHaveAttribute('href', '/pro');
+    expect(screen.getByRole('link', { name: /see atlas pro/i })).toHaveAttribute(
+      'href',
+      '/sign-in',
+    );
     expect(screen.getByRole('link', { name: /start free/i })).toHaveAttribute('href', '/sign-up');
     expect(screen.getByRole('link', { name: /open support center/i })).toHaveAttribute(
       'href',
@@ -115,6 +118,10 @@ describe('MarketingHome', () => {
       '/calendar',
     );
     expect(screen.getByRole('link', { name: /^support$/i })).toHaveAttribute('href', '/support');
+    expect(screen.getByRole('link', { name: /see atlas pro/i })).toHaveAttribute(
+      'href',
+      '/account#pro',
+    );
     const legalNav = screen.getByRole('navigation', { name: /landing legal and support links/i });
     expect(within(legalNav).getByRole('link', { name: /privacy policy/i })).toHaveAttribute(
       'href',

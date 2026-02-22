@@ -1,9 +1,12 @@
+'use client';
+
 import Link from 'next/link';
+import { useEffect, useRef, useState } from 'react';
 
 import type { StripeCheckoutQueryStatus } from '../../lib/billing/stripe/contracts';
 import type { ProEntitlementSource } from '../../lib/pro/entitlement';
 import { Button } from '../ui/Button';
-import { Notice } from '../ui/Notice';
+import { type ToastItem, ToastStack } from '../ui/Toast';
 
 type ProPlanCardProps = {
   isPro: boolean;
@@ -53,6 +56,59 @@ function getCheckoutStatusCopy(
 
 export function ProPlanCard({ isPro, source, checkoutStatus = null }: ProPlanCardProps) {
   const checkoutStatusCopy = checkoutStatus ? getCheckoutStatusCopy(checkoutStatus, isPro) : null;
+  const [toasts, setToasts] = useState<ToastItem[]>([]);
+  const toastIdRef = useRef(0);
+  const handledCheckoutToastRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!checkoutStatusCopy) return;
+
+    const toastKey = `${checkoutStatus}:${isPro ? 'pro' : 'free'}`;
+    if (handledCheckoutToastRef.current === toastKey) {
+      return;
+    }
+    handledCheckoutToastRef.current = toastKey;
+
+    const id = toastIdRef.current + 1;
+    toastIdRef.current = id;
+
+    setToasts((previous) => [
+      ...previous,
+      {
+        id,
+        tone: checkoutStatusCopy.tone,
+        message: checkoutStatusCopy.message,
+        state: 'entering',
+      },
+    ]);
+
+    window.requestAnimationFrame(() => {
+      setToasts((previous) =>
+        previous.map((toast) => (toast.id === id ? { ...toast, state: 'open' } : toast)),
+      );
+    });
+
+    window.setTimeout(() => {
+      setToasts((previous) =>
+        previous.map((toast) => (toast.id === id ? { ...toast, state: 'closing' } : toast)),
+      );
+    }, 4500);
+
+    window.setTimeout(() => {
+      setToasts((previous) => previous.filter((toast) => toast.id !== id));
+    }, 4800);
+
+    const url = new URL(window.location.href);
+    if (!url.searchParams.has('checkout') && !url.searchParams.has('checkout_session_id')) {
+      return;
+    }
+
+    url.searchParams.delete('checkout');
+    url.searchParams.delete('checkout_session_id');
+    const nextSearch = url.searchParams.toString();
+    const nextUrl = `${url.pathname}${nextSearch ? `?${nextSearch}` : ''}${url.hash}`;
+    window.history.replaceState(window.history.state, '', nextUrl);
+  }, [checkoutStatus, checkoutStatusCopy, isPro]);
 
   return (
     <section className="rounded-2xl border border-black/10 px-6 py-6 dark:border-white/10">
@@ -94,9 +150,6 @@ export function ProPlanCard({ isPro, source, checkoutStatus = null }: ProPlanCar
       </div>
 
       <div className="mt-4 space-y-4 text-sm text-black/70 dark:text-white/70">
-        {checkoutStatusCopy ? (
-          <Notice tone={checkoutStatusCopy.tone}>{checkoutStatusCopy.message}</Notice>
-        ) : null}
         {isPro ? (
           <div className="rounded-xl border border-black/10 px-4 py-3 dark:border-white/10">
             <p className="font-medium text-black dark:text-white">Your Pro access is active.</p>
@@ -142,6 +195,7 @@ export function ProPlanCard({ isPro, source, checkoutStatus = null }: ProPlanCar
           Contact support
         </Link>
       </div>
+      <ToastStack toasts={toasts} />
     </section>
   );
 }

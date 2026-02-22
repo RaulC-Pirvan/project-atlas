@@ -41,18 +41,20 @@ describe('ProPlanCard', () => {
     expect(restore).toBeDisabled();
   });
 
-  it('shows checkout success feedback while entitlement is synchronizing', () => {
+  it('shows checkout success feedback while entitlement is synchronizing', async () => {
     render(<ProPlanCard isPro={false} checkoutStatus="success" />);
 
     expect(
-      screen.getByText(/checkout completed\. we are confirming your payment now/i),
+      await screen.findByText(/checkout completed\. we are confirming your payment now/i),
     ).toBeInTheDocument();
   });
 
-  it('shows checkout cancellation feedback', () => {
+  it('shows checkout cancellation feedback', async () => {
     render(<ProPlanCard isPro={false} checkoutStatus="cancel" />);
 
-    expect(screen.getByText(/checkout was canceled\. no charge was made/i)).toBeInTheDocument();
+    expect(
+      await screen.findByText(/checkout was canceled\. no charge was made/i),
+    ).toBeInTheDocument();
   });
 
   it('shows active entitlement details for pro users', () => {
@@ -65,11 +67,11 @@ describe('ProPlanCard', () => {
     expect(screen.queryByRole('link', { name: /upgrade to pro/i })).toBeNull();
   });
 
-  it('shows active confirmation when checkout returns success and pro is active', () => {
+  it('shows active confirmation when checkout returns success and pro is active', async () => {
     render(<ProPlanCard isPro source="stripe" checkoutStatus="success" />);
 
     expect(
-      screen.getByText(/checkout completed and pro is now active on your account/i),
+      await screen.findByText(/checkout completed and pro is now active on your account/i),
     ).toBeInTheDocument();
   });
 });

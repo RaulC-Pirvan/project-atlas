@@ -5,8 +5,8 @@ export const STRIPE_CHECKOUT_HTTP_METHOD = 'GET' as const;
 export const STRIPE_CHECKOUT_REDIRECT_STATUS = 303 as const;
 
 export const STRIPE_CHECKOUT_SUCCESS_PATH =
-  '/pro?checkout=success&checkout_session_id={CHECKOUT_SESSION_ID}' as const;
-export const STRIPE_CHECKOUT_CANCEL_PATH = '/pro?checkout=cancel' as const;
+  '/account?checkout=success&checkout_session_id={CHECKOUT_SESSION_ID}' as const;
+export const STRIPE_CHECKOUT_CANCEL_PATH = '/account?checkout=cancel' as const;
 
 export const STRIPE_CHECKOUT_QUERY_STATUSES = ['success', 'cancel'] as const;
 

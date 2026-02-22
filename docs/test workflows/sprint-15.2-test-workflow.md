@@ -60,7 +60,7 @@ This workflow focuses on security, reliability, and user-facing billing continui
 
 ## Manual QA Checklist
 
-### Workflow 1: Checkout launch from web upgrade entrypoint [ ]
+### Workflow 1: Checkout launch from web upgrade entrypoint [x]
 
 1. Sign in as non-Pro user.
 2. Open `/pro`.
@@ -71,7 +71,7 @@ This workflow focuses on security, reliability, and user-facing billing continui
 - User is redirected to hosted Stripe Checkout.
 - Atlas app does not render custom card form.
 
-### Workflow 2: Successful checkout grants entitlement [ ]
+### Workflow 2: Successful checkout grants entitlement [x]
 
 1. Complete Stripe test payment.
 2. Return to app success route.
@@ -83,7 +83,7 @@ This workflow focuses on security, reliability, and user-facing billing continui
 - Pro-gated UI unlocks correctly.
 - `/api/pro/entitlement` reflects active state.
 
-### Workflow 3: Canceled checkout does not grant entitlement [ ]
+### Workflow 3: Canceled checkout does not grant entitlement [x]
 
 1. Start checkout and cancel before payment completion.
 2. Return to app.
@@ -93,7 +93,7 @@ This workflow focuses on security, reliability, and user-facing billing continui
 - Entitlement remains unchanged (non-Pro).
 - User receives clear non-success UX feedback.
 
-### Workflow 4: Webhook signature verification [ ]
+### Workflow 4: Webhook signature verification [x]
 
 1. Send invalid-signature webhook request to webhook endpoint.
 
@@ -103,7 +103,7 @@ This workflow focuses on security, reliability, and user-facing billing continui
 - No event ledger write/projection mutation occurs.
 - Error response/logging remains sanitized.
 
-### Workflow 5: Retry-safe duplicate webhook replay [ ]
+### Workflow 5: Retry-safe duplicate webhook replay [x]
 
 1. Replay same Stripe event ID multiple times.
 2. Inspect ledger + entitlement state.
@@ -114,7 +114,7 @@ This workflow focuses on security, reliability, and user-facing billing continui
 - No duplicate entitlement grants/revocations.
 - Projection remains stable and deterministic.
 
-### Workflow 6: Refund/dispute transition handling [ ]
+### Workflow 6: Refund/dispute transition handling [x]
 
 1. Trigger refund/dispute test path (or simulate canonical mapped event).
 2. Inspect entitlement state and event records.
@@ -125,7 +125,7 @@ This workflow focuses on security, reliability, and user-facing billing continui
 - Entitlement transitions follow policy.
 - Event history remains append-only.
 
-### Workflow 7: Account billing history/invoice link behavior [ ]
+### Workflow 7: Account billing history/invoice link behavior [x]
 
 1. Sign in as Pro user.
 2. Open `/account`.
@@ -136,7 +136,7 @@ This workflow focuses on security, reliability, and user-facing billing continui
 - Link/session opens Stripe-hosted billing/invoice surface.
 - User can access invoice/receipt history where available.
 
-### Workflow 8: Restore/re-sync flow success path [ ]
+### Workflow 8: Restore/re-sync flow success path [x]
 
 1. Use account restore/re-sync action after a known successful purchase.
 2. Re-run action multiple times.
@@ -147,7 +147,7 @@ This workflow focuses on security, reliability, and user-facing billing continui
 - Repeated restore calls are safe/idempotent.
 - UX uses clear toast-based success messaging.
 
-### Workflow 9: Restore/re-sync failure path [ ]
+### Workflow 9: Restore/re-sync failure path [x]
 
 1. Trigger restore for user with no qualifying purchase.
 

@@ -19,9 +19,9 @@ describe('stripe phase 15.2 contract layer', () => {
     expect(STRIPE_CHECKOUT_HTTP_METHOD).toBe('GET');
     expect(STRIPE_CHECKOUT_REDIRECT_STATUS).toBe(303);
     expect(STRIPE_CHECKOUT_SUCCESS_PATH).toBe(
-      '/pro?checkout=success&checkout_session_id={CHECKOUT_SESSION_ID}',
+      '/account?checkout=success&checkout_session_id={CHECKOUT_SESSION_ID}',
     );
-    expect(STRIPE_CHECKOUT_CANCEL_PATH).toBe('/pro?checkout=cancel');
+    expect(STRIPE_CHECKOUT_CANCEL_PATH).toBe('/account?checkout=cancel');
   });
 
   it('guards checkout query status parsing', () => {

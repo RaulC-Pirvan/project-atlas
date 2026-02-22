@@ -11,6 +11,7 @@ import {
   DEFAULT_PRO_RESTORE_REQUEST,
   type ProRestoreResponse,
 } from '../../lib/billing/contracts';
+import type { StripeCheckoutQueryStatus } from '../../lib/billing/stripe/contracts';
 import type { UserReminderSettings } from '../../lib/reminders/types';
 import type { WeekStart } from '../habits/weekdays';
 import { LegalSupportLinks } from '../legal/LegalSupportLinks';
@@ -35,6 +36,7 @@ type AccountPanelProps = {
   hasPassword: boolean;
   reminderSettings: UserReminderSettings;
   timezoneLabel: string;
+  initialCheckoutStatus: StripeCheckoutQueryStatus | null;
 };
 
 type AccountResponse = {
@@ -134,6 +136,7 @@ export function AccountPanel({
   hasPassword,
   reminderSettings,
   timezoneLabel,
+  initialCheckoutStatus,
 }: AccountPanelProps) {
   const [nextEmail, setNextEmail] = useState(email);
   const [displayNameInput, setDisplayNameInput] = useState(displayName);
@@ -194,6 +197,7 @@ export function AccountPanel({
 
   const deleteConfirmInvalid = deleteConfirmError;
   const toastIdRef = useRef(0);
+  const checkoutToastHandledRef = useRef(false);
   const stepUpCompleteRef = useRef<((stepUpChallengeToken: string) => Promise<void>) | null>(null);
   const adminEnrollmentRequired =
     role === 'admin' && adminTwoFactorEnforced && !twoFactorEnabledState;
@@ -253,6 +257,32 @@ export function AccountPanel({
   useEffect(() => {
     void loadSessions();
   }, [loadSessions]);
+
+  useEffect(() => {
+    if (!initialCheckoutStatus || checkoutToastHandledRef.current) {
+      return;
+    }
+
+    checkoutToastHandledRef.current = true;
+
+    if (initialCheckoutStatus === 'success') {
+      pushToast(
+        'Checkout completed. We are confirming your payment now. Pro access should appear shortly.',
+        'success',
+      );
+    } else {
+      pushToast('Checkout canceled. No charge was made.', 'neutral');
+    }
+
+    const url = new URL(window.location.href);
+    if (!url.searchParams.has('checkout') && !url.searchParams.has('checkout_session_id')) {
+      return;
+    }
+    url.searchParams.delete('checkout');
+    url.searchParams.delete('checkout_session_id');
+    const nextPath = `${url.pathname}${url.search ? `?${url.searchParams.toString()}` : ''}${url.hash}`;
+    window.history.replaceState({}, '', nextPath);
+  }, [initialCheckoutStatus, pushToast]);
 
   const resetStepUpModal = useCallback(() => {
     setShowStepUpModal(false);

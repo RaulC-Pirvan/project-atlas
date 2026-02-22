@@ -37,6 +37,7 @@ const baseProps = {
     snoozeDefaultMinutes: 10,
   },
   timezoneLabel: 'UTC',
+  initialCheckoutStatus: null,
 };
 
 describe('AccountPanel', () => {
@@ -117,6 +118,22 @@ describe('AccountPanel', () => {
     );
     expect(screen.getByRole('button', { name: /^restore purchase$/i })).toBeInTheDocument();
     expect(screen.getByText(/previously completed purchases/i)).toBeInTheDocument();
+  });
+
+  it('shows success toast when returning from successful checkout', async () => {
+    render(<AccountPanel {...baseProps} initialCheckoutStatus="success" />);
+
+    expect(
+      await screen.findByText(
+        /checkout completed\. we are confirming your payment now\. pro access should appear shortly/i,
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it('shows neutral toast when checkout is canceled', async () => {
+    render(<AccountPanel {...baseProps} initialCheckoutStatus="cancel" />);
+
+    expect(await screen.findByText(/checkout canceled\. no charge was made/i)).toBeInTheDocument();
   });
 
   it('renders account sections in a logical top-to-bottom order', () => {

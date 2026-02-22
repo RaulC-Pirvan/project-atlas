@@ -27,7 +27,15 @@ const desktopNavItems: NavItem[] = [
     desktopOrder: 'md:order-6',
   },
   { href: '/account', label: 'Account', icon: 'account', desktopOrder: 'md:order-7' },
-  { href: '/support#contact-form', label: 'Support', icon: 'support', desktopOrder: 'md:order-8' },
+];
+
+const desktopUtilityItems: NavItem[] = [
+  {
+    href: '/support#contact-form',
+    label: 'Support',
+    icon: 'support',
+    desktopOrder: 'md:order-8',
+  },
   {
     href: '/legal/changes',
     label: 'Legal',
@@ -48,6 +56,9 @@ const mobileMoreItems: NavItem[] = [
   { href: '/insights', label: 'Insights', icon: 'insights' },
   { href: '/achievements', label: 'Achievements', icon: 'achievements' },
   { href: '/account', label: 'Account', icon: 'account' },
+];
+
+const mobileUtilityItems: NavItem[] = [
   { href: '/support#contact-form', label: 'Support', icon: 'support' },
   { href: '/legal/changes', label: 'Legal', icon: 'legal', activeMatchPrefix: '/legal' },
 ];
@@ -307,7 +318,9 @@ export function AppSidebar() {
   }, [pathname]);
 
   const moreActive = useMemo(
-    () => mobileMoreItems.some((item) => isNavItemActive(pathname, item)),
+    () =>
+      mobileMoreItems.some((item) => isNavItemActive(pathname, item)) ||
+      mobileUtilityItems.some((item) => isNavItemActive(pathname, item)),
     [pathname],
   );
 
@@ -329,10 +342,22 @@ export function AppSidebar() {
           </div>
         </nav>
         <div>
+          <div className="flex w-full flex-col">
+            {desktopUtilityItems.map((item) => (
+              <NavLink
+                key={item.href}
+                href={item.href}
+                label={item.label}
+                icon={item.icon}
+                desktopOrder={item.desktopOrder}
+                active={isNavItemActive(pathname, item)}
+              />
+            ))}
+          </div>
           <SignOutButton
-            variant="ghost"
+            variant="danger"
             size="sm"
-            className={`${desktopBaseClasses} ${desktopInactiveClasses} h-auto w-full justify-center`}
+            className="h-auto w-full justify-center rounded-none border-0 py-3 text-sm uppercase tracking-[0.2em]"
           />
         </div>
       </div>
@@ -362,11 +387,27 @@ export function AppSidebar() {
               </Link>
             ))}
           </div>
+          <div className="mt-2 grid grid-cols-2 gap-2">
+            {mobileUtilityItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`inline-flex h-10 items-center justify-center rounded-xl border border-black/15 px-2 text-xs font-medium uppercase tracking-[0.16em] dark:border-white/20 ${
+                  isNavItemActive(pathname, item)
+                    ? 'bg-black text-white dark:bg-white dark:text-black'
+                    : 'text-black/75 dark:text-white/75'
+                }`}
+                onClick={() => setIsMoreOpen(false)}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </div>
           <div className="mt-2 border-t border-black/10 pt-2 dark:border-white/10">
             <SignOutButton
-              variant="ghost"
+              variant="danger"
               size="sm"
-              className="h-10 w-full justify-center rounded-xl border border-black/15 text-xs font-medium uppercase tracking-[0.16em] text-black/75 dark:border-white/20 dark:text-white/75"
+              className="h-10 w-full justify-center rounded-xl border-0 text-xs font-medium uppercase tracking-[0.16em]"
             />
           </div>
         </div>

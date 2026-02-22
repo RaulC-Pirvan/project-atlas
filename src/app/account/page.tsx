@@ -5,16 +5,47 @@ import { AppShell } from '../../components/layout/AppShell';
 import { ProAccountCard } from '../../components/pro/ProAccountCard';
 import { getServerAuthSession } from '../../lib/auth/session';
 import { shouldEnforceAdminTwoFactor } from '../../lib/auth/twoFactorPolicy';
+import { parseStripeCheckoutQueryStatus } from '../../lib/billing/stripe/contracts';
 import { prisma } from '../../lib/db/prisma';
+import { logInfo } from '../../lib/observability/logger';
 import { getProEntitlementSummary } from '../../lib/pro/entitlement';
 import { resolveReminderSettings } from '../../lib/reminders/settings';
 
-export default async function AccountPage() {
+type SearchParams = {
+  checkout?: string | string[];
+  checkout_session_id?: string | string[];
+};
+
+function parseSearchParamValue(value: string | string[] | undefined): string | null {
+  const raw = Array.isArray(value) ? value[0] : value;
+  if (!raw) return null;
+  const normalized = raw.trim();
+  return normalized.length > 0 ? normalized : null;
+}
+
+function parseCheckoutSessionId(value: string | string[] | undefined): string | null {
+  const raw = parseSearchParamValue(value);
+  if (!raw) return null;
+  if (raw.length > 255) return null;
+  return raw;
+}
+
+export default async function AccountPage({
+  searchParams,
+}: {
+  searchParams?: SearchParams | Promise<SearchParams>;
+}) {
   const session = await getServerAuthSession();
 
   if (!session?.user) {
     redirect('/sign-in');
   }
+
+  const resolvedSearchParams = await searchParams;
+  const checkoutStatus = parseStripeCheckoutQueryStatus(
+    parseSearchParamValue(resolvedSearchParams?.checkout),
+  );
+  const checkoutSessionId = parseCheckoutSessionId(resolvedSearchParams?.checkout_session_id);
 
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
@@ -43,6 +74,16 @@ export default async function AccountPage() {
     prisma,
     userId: session.user.id,
   });
+
+  if (checkoutStatus) {
+    logInfo('billing.checkout.return', {
+      route: '/account',
+      userId: session.user.id,
+      checkoutStatus,
+      checkoutSessionId: checkoutSessionId ?? undefined,
+      isPro: proEntitlement.isPro,
+    });
+  }
 
   const reminderSettingsRecord = await prisma.userReminderSettings.findUnique({
     where: { userId: session.user.id },
@@ -74,6 +115,7 @@ export default async function AccountPage() {
           hasPassword={Boolean(user.passwordSetAt)}
           reminderSettings={reminderSettings}
           timezoneLabel={user.timezone}
+          initialCheckoutStatus={checkoutStatus}
         />
       </div>
     </AppShell>

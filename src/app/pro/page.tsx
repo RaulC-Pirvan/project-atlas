@@ -1,16 +1,6 @@
 import { redirect } from 'next/navigation';
 
-import { AppShell } from '../../components/layout/AppShell';
-import { ProFeatureHubCard } from '../../components/pro/ProFeatureHubCard';
-import { ProManageCard } from '../../components/pro/ProManageCard';
-import { ProPlanCard } from '../../components/pro/ProPlanCard';
-import { ProRoadmapCard } from '../../components/pro/ProRoadmapCard';
-import { ProValueCard } from '../../components/pro/ProValueCard';
-import { getServerAuthSession } from '../../lib/auth/session';
 import { parseStripeCheckoutQueryStatus } from '../../lib/billing/stripe/contracts';
-import { prisma } from '../../lib/db/prisma';
-import { logInfo } from '../../lib/observability/logger';
-import { getProEntitlementSummary } from '../../lib/pro/entitlement';
 
 type SearchParams = {
   checkout?: string | string[];
@@ -36,51 +26,17 @@ export default async function ProPage({
 }: {
   searchParams?: SearchParams | Promise<SearchParams>;
 }) {
-  const session = await getServerAuthSession();
-
-  if (!session?.user?.id) {
-    redirect('/sign-in');
-  }
-
   const resolvedSearchParams = await searchParams;
   const checkoutStatus = parseStripeCheckoutQueryStatus(
     parseSearchParamValue(resolvedSearchParams?.checkout),
   );
   const checkoutSessionId = parseCheckoutSessionId(resolvedSearchParams?.checkout_session_id);
-
-  const proEntitlement = await getProEntitlementSummary({
-    prisma,
-    userId: session.user.id,
-  });
-
+  const redirectParams = new URLSearchParams();
   if (checkoutStatus) {
-    logInfo('billing.checkout.return', {
-      route: '/pro',
-      userId: session.user.id,
-      checkoutStatus,
-      checkoutSessionId: checkoutSessionId ?? undefined,
-      isPro: proEntitlement.isPro,
-    });
+    redirectParams.set('checkout', checkoutStatus);
   }
-
-  return (
-    <AppShell
-      title="Atlas Pro"
-      subtitle="Manage your plan, unlock features, and keep billing simple."
-    >
-      <div className="space-y-8">
-        <ProValueCard isPro={proEntitlement.isPro} />
-        <ProPlanCard
-          isPro={proEntitlement.isPro}
-          source={proEntitlement.source}
-          checkoutStatus={checkoutStatus}
-        />
-        <ProFeatureHubCard isPro={proEntitlement.isPro} />
-        <div className="grid gap-8 lg:grid-cols-2">
-          <ProManageCard isPro={proEntitlement.isPro} />
-          <ProRoadmapCard isPro={proEntitlement.isPro} />
-        </div>
-      </div>
-    </AppShell>
-  );
+  if (checkoutSessionId) {
+    redirectParams.set('checkout_session_id', checkoutSessionId);
+  }
+  redirect(redirectParams.size > 0 ? `/account?${redirectParams.toString()}` : '/account');
 }

@@ -110,7 +110,7 @@ test('billing smoke: checkout start, webhook effect visibility, and restore fall
 }) => {
   const email = await createVerifiedUser(page, request, 'pro-billing-smoke');
   const userId = await resolveUserIdFromDebugGoogleSignIn(request, email);
-  await page.goto('/pro');
+  await page.goto('/account');
   const upgradeLink = page.getByRole('link', { name: /upgrade to pro/i });
   await expect(upgradeLink).toHaveAttribute('href', '/api/billing/stripe/checkout');
 

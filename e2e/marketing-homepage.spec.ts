@@ -85,7 +85,7 @@ test('marketing homepage introduces the product for signed-out visitors', async 
   await expect(page.getByRole('link', { name: /open support center/i })).toBeVisible();
 });
 
-test('marketing homepage CTA links navigate to sign-up, sign-in, support, and pro page', async ({
+test('marketing homepage CTA links navigate to sign-up, sign-in, support, and pro entrypoint', async ({
   page,
 }) => {
   await page.goto('/landing');

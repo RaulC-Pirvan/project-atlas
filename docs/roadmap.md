@@ -394,11 +394,11 @@ Launch non-goal (explicit):
 
 ### Sprint 15.2: Stripe Web Billing Integration
 
-- [ ] Add Stripe Checkout for one-time Pro upgrade on web
-- [ ] Implement secure webhook handling (signature verification + retry-safe processing)
-- [ ] Add billing history/invoice links in account
-- [ ] Add web restore/entitlement re-sync flow
-- [ ] Add API/unit/E2E coverage for checkout, webhook, and failure recovery
+- [x] Add Stripe Checkout for one-time Pro upgrade on web
+- [x] Implement secure webhook handling (signature verification + retry-safe processing)
+- [x] Add billing history/invoice links in account
+- [x] Add web restore/entitlement re-sync flow
+- [x] Add API/unit/E2E coverage for checkout, webhook, and failure recovery
 
 ---
 

@@ -485,11 +485,13 @@ model BillingProductMapping {
 
 /**
  * BillingEventLedger is an append-only canonical event store for billing lifecycle events.
+ *
+ * userId may be nulled only when a user account is deleted.
  */
 model BillingEventLedger {
   id                    String            @id @default(cuid())
   eventId               String            @unique
-  userId                String
+  userId                String?
   provider              BillingProvider
   providerEventId       String?
   providerTransactionId String?
@@ -504,7 +506,7 @@ model BillingEventLedger {
   signatureVerified     Boolean?
   createdAt             DateTime          @default(now())
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@unique([provider, providerEventId])
   @@index([userId, occurredAt])

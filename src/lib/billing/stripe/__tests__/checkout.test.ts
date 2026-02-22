@@ -48,9 +48,9 @@ describe('createStripeCheckoutSession', () => {
     expect(body.get('line_items[0][price]')).toBe('price_123');
     expect(body.get('line_items[0][quantity]')).toBe('1');
     expect(body.get('success_url')).toBe(
-      'https://atlas.example.com/pro?checkout=success&checkout_session_id={CHECKOUT_SESSION_ID}',
+      'https://atlas.example.com/account?checkout=success&checkout_session_id={CHECKOUT_SESSION_ID}',
     );
-    expect(body.get('cancel_url')).toBe('https://atlas.example.com/pro?checkout=cancel');
+    expect(body.get('cancel_url')).toBe('https://atlas.example.com/account?checkout=cancel');
     expect(body.get('client_reference_id')).toBe('user-1');
     expect(body.get('metadata[userId]')).toBe('user-1');
     expect(body.get('metadata[productKey]')).toBe('pro_lifetime_v1');

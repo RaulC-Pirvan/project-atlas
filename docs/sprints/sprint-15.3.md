@@ -162,13 +162,17 @@ and supportable under real-world billing edge cases.
 
 ### Tasks (7)
 
-- [ ] **Task 1.1**: Define provider state normalization contract
-- [ ] **Task 1.2**: Define union-of-valid-sources projection algorithm
-- [ ] **Task 1.3**: Define `reconcile_pending` and retry/backoff behavior
-- [ ] **Task 1.4**: Define deterministic trigger matrix (webhook/sign-in/restore/sweep)
-- [ ] **Task 1.5**: Define revocation confidence requirements
-- [ ] **Task 1.6**: Define observability fields for reconciliation diagnostics
-- [ ] **Task 1.7**: Add scenario tables for success/conflict/outage paths
+- [x] **Task 1.1**: Define provider state normalization contract
+- [x] **Task 1.2**: Define union-of-valid-sources projection algorithm
+- [x] **Task 1.3**: Define `reconcile_pending` and retry/backoff behavior
+- [x] **Task 1.4**: Define deterministic trigger matrix (webhook/sign-in/restore/sweep)
+- [x] **Task 1.5**: Define revocation confidence requirements
+- [x] **Task 1.6**: Define observability fields for reconciliation diagnostics
+- [x] **Task 1.7**: Add scenario tables for success/conflict/outage paths
+
+### Phase 1 Artifacts (Completed 2026-02-22)
+
+- `docs/ops/billing-reconciliation.md` (Tasks 1.1-1.7)
 
 ---
 

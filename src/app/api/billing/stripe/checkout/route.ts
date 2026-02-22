@@ -13,7 +13,11 @@ import { getProEntitlementSummary } from '../../../../../lib/pro/entitlement';
 export const runtime = 'nodejs';
 
 function isMissingStripeCheckoutConfigError(error: unknown): boolean {
-  return error instanceof Error && error.message.startsWith('Missing required env:');
+  return (
+    error instanceof Error &&
+    (error.message.startsWith('Missing required env:') ||
+      error.message.startsWith('Invalid env: APP_URL/NEXT_PUBLIC_APP_URL/NEXTAUTH_URL'))
+  );
 }
 
 async function startCheckout(request: Request): Promise<Response> {

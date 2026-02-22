@@ -56,7 +56,7 @@ A habit is defined independently of dates.
 - Account self-service data export is implemented: authenticated JSON export at `GET /api/account/exports/self` with strict session-user scoping, download headers, and account page download action.
 - Account export hardening is implemented: per-user rate limiting (`3/15m` baseline), durable `UserDataExportAudit` DB records for success/failure, request-id audit correlation, and record-count metadata.
 - Email verification uses Resend client; debug token capture plus `/api/auth/debug/verification-token` for tests (shared token store for API routes).
-- Tests in place: Vitest unit/API tests, auth + habit + calendar + marketing + support + legal + admin component tests, Playwright auth + oauth + two-factor + habits + today + calendar + daily completion + support + legal + admin + marketing + visual regression E2E.
+- Tests in place: Vitest unit/API tests, auth + habit + calendar + marketing + support + legal + admin + billing component/API tests, Playwright auth + oauth + two-factor + habits + today + calendar + daily completion + support + legal + admin + marketing + visual regression + Pro billing E2E.
 - Playwright E2E runs use a Windows-safe temp dir setup via `playwright.global-setup.ts` to avoid chromium shutdown hangs.
 - Auth and admin E2E flows include resilience improvements for current navigation and transient request resets (sidebar/mobile sign-out selectors and retry-safe admin API checks).
 - Daily completion and streaks E2E include retry-safe habit creation to handle transient network resets in Firefox.
@@ -82,7 +82,7 @@ A habit is defined independently of dates.
 - Support form validation remains toast-first (no inline error text), with field-specific error toasts and invalid-field highlighting.
 - Trust & policy surfaces are implemented at `/legal/privacy`, `/legal/terms`, `/legal/refunds`, and `/legal/changes` with shared metadata (`Version`, `Effective date`, `Last updated`) and legal change-log governance content.
 - Legal publish-readiness guard is implemented with placeholder detection and optional production enforcement via `ENFORCE_LEGAL_PUBLISH_READY=true`.
-- Legal/support discoverability is implemented on landing and account surfaces; `/pro` remains upgrade-focused without a dedicated legal/support block.
+- Legal/support discoverability is implemented on landing, account, and `/pro` surfaces (including billing-related links and support escalation path).
 - Today view implemented at `/today` for fast daily entry of today's due habits.
 - Calendar view implemented with monthly grid, month navigation, selected-day side panel (`?date=YYYY-MM-DD`), daily completion toggles via `/api/completions`, per-day progress indicators, and golden completed-day tiles (black text for contrast).
 - Calendar defaults to selecting today on `/calendar` (current month); mobile daily sheet only auto-opens when a `date` param is present.
@@ -101,8 +101,11 @@ A habit is defined independently of dates.
 - Admin dashboard implemented with allowlist access, health status panel, user/habit lists, activity log, support triage panel, and admin-safe CSV exports.
 - Admin support triage supports status filtering/pagination, status transitions (`open`/`in_progress`/`resolved`), and ticket context display (requester name/email, subject, message) while avoiding infrastructure-sensitive leakage.
 - Admin one-page navigation supports smooth scrolling for section anchors (`Health`, `Users`, `Habits`, `Activity`, `Support`, `Export`) with reduced-motion fallback.
-- Pro entitlement model implemented (server-side) with `ProEntitlement` table and `/api/pro/entitlement` endpoint.
-- Pro upgrade entry points and preview states implemented (calendar and account surfaces), with a dedicated `/pro` page and mobile-first restore purchase placeholder.
+- Sprint 15.1 billing architecture is implemented with provider-aware entitlement contracts, canonical billing event taxonomy, idempotency contracts, and replay-safe projection logic.
+- Billing persistence foundation is implemented with append-only `BillingEventLedger`, provider-aware `BillingEntitlementProjection`, and `BillingProductMapping` canonical SKU resolution (`pro_lifetime_v1`).
+- Web-first Stripe runtime integration is implemented via hosted checkout (`/api/billing/stripe/checkout`) and signed webhook ingestion (`/api/billing/stripe/webhook`) with canonical event normalization and sanitized failure responses.
+- `/api/pro/entitlement` remains the canonical compatibility read API and now resolves from billing projection first with fallback to legacy `ProEntitlement` during migration states.
+- Pro upgrade entry points are wired to hosted Stripe checkout, and `/pro` is expanded into a plan/value/feature hub with one-time launch copy and restore placeholder messaging.
 - Advanced Insights v1 implemented (Pro-gated): insights API, aggregated calculations, and Insights UI (cards + heatmap + summary panel).
 - Insights heatmap mobile UX improved with horizontal row scrolling, clear Older/Newer direction, intensity legend, and overflow-safe card sizing.
 - Calendar now shows a Pro-only Insights snapshot card; Free users see an upgrade card.
@@ -122,7 +125,8 @@ A habit is defined independently of dates.
 
 ## Roadmap (high-level)
 
-- Expand testing and launch readiness (coverage, staging, backups, CI audit).
+- Complete Sprint 15.2 Stripe web billing execution (webhook reliability, billing history links, restore/re-sync).
+- Complete Sprint 15.3 mobile billing compliance strategy before store launch (Apple/Google policy path and entitlement reconciliation).
 - Continue post-launch UX polish and reliability hardening (navigation ergonomics, responsive QA, E2E stability).
 - Smart reminders and push notifications (Pro).
 - Store launch readiness (privacy, metadata, compliance assets).
@@ -174,6 +178,10 @@ A habit is defined independently of dates.
 - `src/app/api/admin/support/route.ts` - Admin support ticket list API (filter + cursor pagination).
 - `src/app/api/admin/support/[id]/route.ts` - Admin support ticket status update API.
 - `src/app/api/support/tickets/route.ts` - Public support ticket submit API.
+- `src/app/api/billing/stripe/checkout/route.ts` - Authenticated hosted Stripe Checkout entrypoint for one-time Pro.
+- `src/app/api/billing/stripe/webhook/route.ts` - Stripe webhook ingestion with signature verification and canonical event projection.
+- `src/app/api/billing/stripe/__tests__/checkout.route.test.ts` - Checkout endpoint tests (auth, entitlement guard, env failure handling).
+- `src/app/api/billing/stripe/__tests__/webhook.route.test.ts` - Webhook tests (signature rejection, canonical mapping, replay dedupe behavior).
 - `src/app/api/pro/entitlement/route.ts` - Pro entitlement API (read-only summary).
 - `src/app/api/pro/debug/grant/route.ts` - Test-only Pro entitlement grant.
 - `src/app/api/habits/debug/create/route.ts` - Test-only habit creation with explicit `createdAt`.
@@ -235,6 +243,9 @@ A habit is defined independently of dates.
 - `src/lib/support` - Support domain helpers (policy, retention, hashing, lifecycle, types).
 - `src/lib/legal` - Legal policy metadata, change-log, governance steps, and publish guard/enforcement helpers.
 - `src/lib/pro` - Pro entitlement helpers.
+- `src/lib/billing` - Billing domain contracts, idempotency helpers, canonical events, projection logic, and persistence helpers.
+- `src/lib/billing/stripe` - Stripe adapter utilities (config, checkout client, webhook normalization, signature verification).
+- `src/lib/billing/__tests__` - Billing domain/persistence/projector unit tests.
 - `src/lib/insights` - Insights domain helpers (summary, types, weekdays).
 - `src/lib/insights/__tests__` - Insights unit tests.
 - `src/lib/achievements` - Achievements domain helpers (catalogue, summary, types).
@@ -247,6 +258,7 @@ A habit is defined independently of dates.
 - `src/types/next-auth.d.ts` - NextAuth session/JWT type extensions.
 - `prisma/schema.prisma` - DB models; migrations in `prisma/migrations`; seed in `prisma/seed.ts`.
 - `prisma/migrations/20260220103000_add_user_data_export_audit/migration.sql` - Adds `UserDataExportAudit` table and enums.
+- `prisma/migrations/20260221130000_add_billing_event_ledger_and_projection/migration.sql` - Adds billing ledger/projection/product-mapping models and constraints.
 - `src/app/api/auth/__tests__` - API auth tests.
 - `src/app/api/support/__tests__` - Support submit API tests.
 - `src/app/api/admin/__tests__/support.route.test.ts` - Admin support list route tests.
@@ -256,7 +268,7 @@ A habit is defined independently of dates.
 - `src/components/ui` - Shared UI primitives.
 - `src/app/(auth)` - Auth pages (sign-in, sign-up, verify-email).
 - `src/app/account/page.tsx` - Account management page.
-- `src/app/pro/page.tsx` - Pro upgrade page and preview content.
+- `src/app/pro/page.tsx` - Pro plan/value/feature hub page with one-time launch messaging and checkout entrypoint.
 - `middleware.ts` - Route protection using DB session cookies, legacy JWT-session cutover invalidation, and admin 2FA enrollment gating.
 - `e2e/auth.spec.ts` - Auth flows E2E coverage (including shared sign-out helper for desktop/mobile nav variants).
 - `e2e/oauth.spec.ts` - Google OAuth and credentials fallback E2E coverage.
@@ -272,6 +284,7 @@ A habit is defined independently of dates.
 - `e2e/streaks.spec.ts` - Streak UI E2E coverage.
 - `e2e/reminders.spec.ts` - Reminder settings + habit reminder times E2E coverage.
 - `e2e/account-export.spec.ts` - Account self-service export smoke E2E coverage.
+- `e2e/pro-billing.spec.ts` - Optional Pro billing checkout/entitlement smoke coverage.
 - `e2e` - Playwright auth + habits + calendar + daily completion + visual regression E2E tests.
 - `playwright.config.ts` - Playwright config (chromium + firefox + visual).
 - `playwright.global-setup.ts` - Windows temp dir setup for Playwright runs.
@@ -309,10 +322,22 @@ A habit is defined independently of dates.
 - `docs/test workflows/sprint-14.2-test-workflow.md` - Trust & policy surfaces test workflow.
 - `docs/sprints/sprint-14.3.md` - User self-service data export sprint plan.
 - `docs/test workflows/sprint-14.3-test-workflow.md` - User self-service data export test workflow.
+- `docs/sprints/sprint-15.1.md` - Billing architecture and entitlement abstraction sprint plan (completed).
+- `docs/sprints/sprint-15.2.md` - Stripe web billing integration sprint plan (execution sprint).
+- `docs/sprints/sprint-15.3.md` - Mobile billing compliance strategy sprint plan.
+- `docs/test workflows/sprint-15.1-test-workflow.md` - Billing architecture and projection test workflows.
+- `docs/test workflows/sprint-15.2-test-workflow.md` - Stripe integration and restore/recovery test workflows.
+- `docs/test workflows/sprint-15.3-test-workflow.md` - Mobile billing compliance test workflows.
 - `docs/ops/staging.md` - Staging environment guide.
 - `docs/ops/backups.md` - Backup strategy and validation checklist.
 - `docs/ops/legal-publish-checklist.md` - Legal publish readiness checklist and blockers.
 - `docs/ops/reminders-delivery.md` - Reminder delivery strategy (push-ready).
+- `docs/ops/billing-source-of-truth.md` - Billing source-of-truth boundaries and ownership model.
+- `docs/ops/billing-launch-defaults.md` - One-time Pro launch defaults, provider/event policy, and required config.
+- `docs/ops/billing-pricing-gate.md` - Pricing gate checklist and decision artifact template.
+- `docs/ops/billing-launch-freeze-policy.md` - Pre-launch billing freeze policy and emergency exception rules.
+- `docs/ops/billing-subscription-migration.md` - Future subscription migration path (schema/event compatibility, UX out of scope).
+- `docs/ops/billing-legal-consistency-review.md` - Billing/legal/support consistency review artifact.
 
 ## Engineering Standards
 

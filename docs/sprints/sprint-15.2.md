@@ -94,12 +94,12 @@ or recover Pro entitlement through secure, idempotent Stripe-backed processing.
 
 ### Tasks (6)
 
-- [ ] **Task 0.1**: Define Stripe config contract (keys, price IDs, webhook secret, env validation)
-- [ ] **Task 0.2**: Define checkout request/response API contracts
-- [ ] **Task 0.3**: Define webhook event allowlist and canonical mapping table
-- [ ] **Task 0.4**: Define restore/re-sync API contract and response semantics
-- [ ] **Task 0.5**: Define account billing-link UX contract and copy
-- [ ] **Task 0.6**: Add tests for config validation and guardrails
+- [x] **Task 0.1**: Define Stripe config contract (keys, price IDs, webhook secret, env validation)
+- [x] **Task 0.2**: Define checkout request/response API contracts
+- [x] **Task 0.3**: Define webhook event allowlist and canonical mapping table
+- [x] **Task 0.4**: Define restore/re-sync API contract and response semantics
+- [x] **Task 0.5**: Define account billing-link UX contract and copy
+- [x] **Task 0.6**: Add tests for config validation and guardrails
 
 ---
 

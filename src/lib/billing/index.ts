@@ -1,3 +1,4 @@
+export * from './contracts';
 export * from './events';
 export * from './idempotency';
 export * from './persistence';

@@ -56,7 +56,9 @@ export default defineConfig({
           },
         },
       },
-      workers: process.env.CI ? 1 : undefined,
+      // Keep Firefox single-worker to avoid intermittent Browser.removeBrowserContext teardown
+      // failures observed on Windows in parallel execution.
+      workers: 1,
       testIgnore: /calendar-visual\.spec\.ts/,
     },
     {

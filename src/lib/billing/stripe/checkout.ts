@@ -1,3 +1,5 @@
+import { STRIPE_CHECKOUT_CANCEL_PATH, STRIPE_CHECKOUT_SUCCESS_PATH } from './contracts';
+
 export type StripeCheckoutSession = {
   id: string;
   url: string;
@@ -27,8 +29,8 @@ function asString(value: unknown): string | null {
 export async function createStripeCheckoutSession(
   args: CreateStripeCheckoutSessionArgs,
 ): Promise<StripeCheckoutSession> {
-  const successPath = args.successPath ?? '/pro?checkout=success';
-  const cancelPath = args.cancelPath ?? '/pro?checkout=cancel';
+  const successPath = args.successPath ?? STRIPE_CHECKOUT_SUCCESS_PATH;
+  const cancelPath = args.cancelPath ?? STRIPE_CHECKOUT_CANCEL_PATH;
   const successUrl = `${args.appUrl}${successPath}`;
   const cancelUrl = `${args.appUrl}${cancelPath}`;
 

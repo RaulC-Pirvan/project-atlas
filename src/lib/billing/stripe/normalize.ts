@@ -1,5 +1,6 @@
 import type { CanonicalBillingEvent } from '../events';
 import { isBillingProductKey } from '../types';
+import { isStripeSupportedWebhookEventType, STRIPE_WEBHOOK_CANONICAL_EVENT_MAP } from './contracts';
 
 type StripeWebhookEvent = {
   id: string;
@@ -107,9 +108,16 @@ export function normalizeStripeWebhookEventToCanonicalEvent(args: {
   const receivedAt = args.receivedAt ?? new Date();
   const object = args.event.data.object;
   const refs = getCanonicalReferences(object);
+  const providerEventType = args.event.type;
 
-  switch (args.event.type) {
-    case 'checkout.session.completed': {
+  if (!isStripeSupportedWebhookEventType(providerEventType)) {
+    return null;
+  }
+
+  const canonicalType = STRIPE_WEBHOOK_CANONICAL_EVENT_MAP[providerEventType];
+
+  switch (canonicalType) {
+    case 'purchase_succeeded': {
       if (!refs) return null;
       const providerTransactionId =
         asString(object.payment_intent) ?? asString(object.id) ?? `checkout:${args.event.id}`;
@@ -132,8 +140,7 @@ export function normalizeStripeWebhookEventToCanonicalEvent(args: {
         },
       };
     }
-    case 'checkout.session.expired':
-    case 'checkout.session.async_payment_failed': {
+    case 'purchase_failed': {
       if (!refs) return null;
       return {
         ...buildBaseEvent({
@@ -146,11 +153,11 @@ export function normalizeStripeWebhookEventToCanonicalEvent(args: {
         }),
         type: 'purchase_failed',
         payload: {
-          reasonCode: args.event.type,
+          reasonCode: providerEventType,
         },
       };
     }
-    case 'charge.refunded': {
+    case 'refund_issued': {
       if (!refs) return null;
       const chargeId = asString(object.id);
       if (!chargeId) return null;
@@ -173,7 +180,5 @@ export function normalizeStripeWebhookEventToCanonicalEvent(args: {
         },
       };
     }
-    default:
-      return null;
   }
 }

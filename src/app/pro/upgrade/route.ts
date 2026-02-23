@@ -3,17 +3,33 @@ import { getServerSession } from 'next-auth/next';
 import {
   buildProIntentPath,
   logProConversionEvent,
-  parseProCtaSource,
+  logProConversionGuardrail,
+  parseProCtaSourceWithReason,
 } from '../../../lib/analytics/proConversion';
 import { authOptions } from '../../../lib/auth/nextauth';
+import { getRequestId } from '../../../lib/observability/apiLogger';
 
 export const runtime = 'nodejs';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const source = parseProCtaSource(searchParams.get('source'));
+  const requestId = getRequestId(request);
+  const parsedSource = parseProCtaSourceWithReason(searchParams.get('source'));
+  const source = parsedSource.source;
   const session = await getServerSession(authOptions);
   const userId = session?.user?.id ?? null;
+
+  if (parsedSource.reason === 'invalid') {
+    logProConversionGuardrail({
+      reason: 'invalid_source_fallback',
+      surface: '/pro/upgrade',
+      authenticated: Boolean(userId),
+      userId,
+      source,
+      rawSource: parsedSource.raw,
+      requestId,
+    });
+  }
 
   logProConversionEvent({
     event: 'pro_cta_click',
@@ -21,6 +37,7 @@ export async function GET(request: Request) {
     authenticated: Boolean(userId),
     userId,
     source,
+    requestId,
   });
 
   if (userId) {

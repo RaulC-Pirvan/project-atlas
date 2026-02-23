@@ -1,5 +1,9 @@
 import { ProUpgradePage } from '../../components/pro/ProUpgradePage';
-import { logProConversionEvent, parseProCtaSource } from '../../lib/analytics/proConversion';
+import {
+  logProConversionEvent,
+  logProConversionGuardrail,
+  parseProCtaSourceWithReason,
+} from '../../lib/analytics/proConversion';
 import { getServerAuthSession } from '../../lib/auth/session';
 import { prisma } from '../../lib/db/prisma';
 import { getProEntitlementSummary } from '../../lib/pro/entitlement';
@@ -34,7 +38,19 @@ export default async function ProPage({
         });
 
   const resolvedSearchParams = await searchParams;
-  const source = parseProCtaSource(parseSourceParam(resolvedSearchParams?.source));
+  const parsedSource = parseProCtaSourceWithReason(parseSourceParam(resolvedSearchParams?.source));
+  const source = parsedSource.source;
+
+  if (parsedSource.reason === 'invalid') {
+    logProConversionGuardrail({
+      reason: 'invalid_source_fallback',
+      surface: '/pro',
+      authenticated: Boolean(userId),
+      userId,
+      source,
+      rawSource: parsedSource.raw,
+    });
+  }
 
   logProConversionEvent({
     event: 'pro_page_view',

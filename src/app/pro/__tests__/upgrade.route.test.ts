@@ -49,4 +49,29 @@ describe('GET /pro/upgrade', () => {
       'https://example.com/api/billing/stripe/checkout?source=direct',
     );
   });
+
+  it('falls back to direct source and records guardrail logs for invalid source', async () => {
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    mockedGetServerSession.mockResolvedValueOnce({ user: { id: 'user-3' } });
+
+    const response = await GET(new Request('https://example.com/pro/upgrade?source=%%%invalid%%%'));
+
+    expect(response.status).toBe(303);
+    expect(response.headers.get('location')).toBe(
+      'https://example.com/api/billing/stripe/checkout?source=direct',
+    );
+
+    const logLines = logSpy.mock.calls.map((args) => String(args[0]));
+    const warnLines = warnSpy.mock.calls.map((args) => String(args[0]));
+    expect(logLines.some((line) => line.includes('"message":"analytics.pro_conversion"'))).toBe(
+      true,
+    );
+    expect(
+      warnLines.some((line) => line.includes('"message":"analytics.pro_conversion.guardrail"')),
+    ).toBe(true);
+
+    logSpy.mockRestore();
+    warnSpy.mockRestore();
+  });
 });

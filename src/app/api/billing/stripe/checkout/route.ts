@@ -2,7 +2,8 @@ import { getServerSession } from 'next-auth/next';
 
 import {
   logProConversionEvent,
-  parseProCtaSource,
+  logProConversionGuardrail,
+  parseProCtaSourceWithReason,
 } from '../../../../../lib/analytics/proConversion';
 import { ApiError, asApiError } from '../../../../../lib/api/errors';
 import { jsonError } from '../../../../../lib/api/response';
@@ -27,11 +28,25 @@ function isMissingStripeCheckoutConfigError(error: unknown): boolean {
 
 async function startCheckout(request: Request): Promise<Response> {
   const { searchParams } = new URL(request.url);
-  const source = parseProCtaSource(searchParams.get('source'));
+  const requestId = getRequestId(request);
+  const parsedSource = parseProCtaSourceWithReason(searchParams.get('source'));
+  const source = parsedSource.source;
 
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
     throw new ApiError('unauthorized', 'Not authenticated.', 401);
+  }
+
+  if (parsedSource.reason === 'invalid') {
+    logProConversionGuardrail({
+      reason: 'invalid_source_fallback',
+      surface: '/api/billing/stripe/checkout',
+      authenticated: true,
+      userId: session.user.id,
+      source,
+      rawSource: parsedSource.raw,
+      requestId,
+    });
   }
 
   const entitlement = await getProEntitlementSummary({
@@ -78,7 +93,6 @@ async function startCheckout(request: Request): Promise<Response> {
     },
   });
 
-  const requestId = getRequestId(request);
   const idempotencyKey = buildBillingCommandDedupeKey(`checkout:${session.user.id}:${requestId}`);
   const successPath = `/account?checkout=success&source=${source}&checkout_session_id={CHECKOUT_SESSION_ID}`;
   const cancelPath = `/account?checkout=cancel&source=${source}`;
@@ -97,6 +111,7 @@ async function startCheckout(request: Request): Promise<Response> {
     userId: session.user.id,
     source,
     provider: 'stripe',
+    requestId,
   });
 
   if (process.env.BILLING_STRIPE_TEST_MODE === 'true') {

@@ -134,6 +134,43 @@ describe('GET /api/billing/stripe/checkout', () => {
     logSpy.mockRestore();
   });
 
+  it('falls back invalid source to direct and emits guardrail diagnostics', async () => {
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    mockedGetServerSession.mockResolvedValue({ user: { id: 'user-9' } });
+    mockedGetProEntitlementSummary.mockResolvedValue({
+      isPro: false,
+      status: 'none',
+    });
+
+    const response = await GET(
+      new Request('https://example.com/api/billing/stripe/checkout?source=not-real'),
+    );
+
+    expect(response.status).toBe(303);
+    expect(mockedCreateStripeCheckoutSession).toHaveBeenCalledWith(
+      expect.objectContaining({
+        userId: 'user-9',
+        successPath:
+          '/account?checkout=success&source=direct&checkout_session_id={CHECKOUT_SESSION_ID}',
+        cancelPath: '/account?checkout=cancel&source=direct',
+      }),
+    );
+
+    const warnLines = warnSpy.mock.calls.map((args) => String(args[0]));
+    expect(
+      warnLines.some((line) => line.includes('"message":"analytics.pro_conversion.guardrail"')),
+    ).toBe(true);
+    const logLines = logSpy.mock.calls.map((args) => String(args[0]));
+    expect(logLines.some((line) => line.includes('"message":"analytics.pro_conversion"'))).toBe(
+      true,
+    );
+
+    logSpy.mockRestore();
+    warnSpy.mockRestore();
+  });
+
   it('rejects unauthenticated requests', async () => {
     const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     mockedGetServerSession.mockResolvedValue(null);

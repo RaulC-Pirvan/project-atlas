@@ -206,12 +206,58 @@ Event contract is centralized in `src/lib/analytics/proConversion.ts` with sourc
 
 ### Tasks (6)
 
-- [ ] **Task 2.1**: Instrument Pro page view and CTA click events
-- [ ] **Task 2.2**: Instrument checkout start and return outcomes
-- [ ] **Task 2.3**: Connect entitlement-active event for conversion truth
-- [ ] **Task 2.4**: Add guardrails against duplicate/invalid client event spam
-- [ ] **Task 2.5**: Validate event payload contracts with tests
-- [ ] **Task 2.6**: Add observability logs for conversion flow diagnostics
+- [x] **Task 2.1**: Instrument Pro page view and CTA click events
+- [x] **Task 2.2**: Instrument checkout start and return outcomes
+- [x] **Task 2.3**: Connect entitlement-active event for conversion truth
+- [x] **Task 2.4**: Add guardrails against duplicate/invalid client event spam
+- [x] **Task 2.5**: Validate event payload contracts with tests
+- [x] **Task 2.6**: Add observability logs for conversion flow diagnostics
+
+### Phase 2 Implementation Notes (Current)
+
+#### 2.1 Pro page view + CTA click
+
+- `pro_page_view` emitted from `/pro` server page render.
+- `pro_cta_click` emitted from `/pro/upgrade` entry route before redirect branching.
+- Event contract source: `src/lib/analytics/proConversion.ts`.
+
+#### 2.2 Checkout start + return outcomes
+
+- `pro_checkout_initiated` emitted at `/api/billing/stripe/checkout`.
+- `pro_checkout_return` emitted on `/account` when `checkout=success|cancel` query is present.
+- Source attribution (`direct|hero|comparison|faq`) is propagated into checkout return URLs.
+
+#### 2.3 Entitlement-active truth event
+
+- `pro_entitlement_active` emitted only on webhook projection write when:
+  - billing event is appended, and
+  - resulting projection status is `active`.
+- Dedupe replay events do not emit conversion completion.
+
+#### 2.4 Guardrails for duplicate/invalid spam
+
+- Invalid `source` query values are normalized to `direct` and recorded as:
+  - `analytics.pro_conversion.guardrail` with `reason=invalid_source_fallback`.
+- Duplicate high-frequency conversion events are suppressed in-memory for selected events:
+  - `pro_page_view`
+  - `pro_cta_click`
+  - `pro_checkout_return`
+- Suppression emits guardrail diagnostics with `reason=duplicate_event_suppressed`.
+
+#### 2.5 Event payload contract validation
+
+- Added/extended tests for:
+  - source parsing + reason metadata
+  - duplicate suppression behavior
+  - disabled analytics no-op behavior
+  - invalid-source fallback diagnostics on upgrade/checkout routes
+  - entitlement-active emit vs dedupe-no-emit behavior in webhook route.
+
+#### 2.6 Observability diagnostics
+
+- Conversion analytics payloads now include `schemaVersion` and `requestId` (API routes).
+- Added webhook projection diagnostic log:
+  - `billing.webhook.projected` with append/dedupe/projection status context.
 
 ---
 

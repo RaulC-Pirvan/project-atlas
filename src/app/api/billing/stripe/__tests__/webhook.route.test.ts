@@ -191,6 +191,15 @@ describe('POST /api/billing/stripe/webhook', () => {
     expect(body.ok).toBe(true);
     expect(body.data.ignored).toBe(false);
 
+    const logLines = logSpy.mock.calls.map((args) => String(args[0]));
+    expect(logLines.some((line) => line.includes('"message":"billing.webhook.projected"'))).toBe(
+      true,
+    );
+    expect(logLines.some((line) => line.includes('"message":"analytics.pro_conversion"'))).toBe(
+      true,
+    );
+    expect(logLines.some((line) => line.includes('"event":"pro_entitlement_active"'))).toBe(true);
+
     vi.useRealTimers();
     logSpy.mockRestore();
   });
@@ -431,6 +440,12 @@ describe('POST /api/billing/stripe/webhook', () => {
       appended: false,
       dedupeReason: 'provider_event_id',
     });
+
+    const logLines = logSpy.mock.calls.map((args) => String(args[0]));
+    expect(logLines.some((line) => line.includes('"message":"billing.webhook.projected"'))).toBe(
+      true,
+    );
+    expect(logLines.some((line) => line.includes('"event":"pro_entitlement_active"'))).toBe(false);
 
     vi.useRealTimers();
     logSpy.mockRestore();

@@ -3,7 +3,11 @@ import { redirect } from 'next/navigation';
 import { AccountPanel } from '../../components/auth/AccountPanel';
 import { AppShell } from '../../components/layout/AppShell';
 import { ProAccountCard } from '../../components/pro/ProAccountCard';
-import { logProConversionEvent, parseProCtaSource } from '../../lib/analytics/proConversion';
+import {
+  logProConversionEvent,
+  logProConversionGuardrail,
+  parseProCtaSourceWithReason,
+} from '../../lib/analytics/proConversion';
 import { getServerAuthSession } from '../../lib/auth/session';
 import { shouldEnforceAdminTwoFactor } from '../../lib/auth/twoFactorPolicy';
 import { parseStripeCheckoutQueryStatus } from '../../lib/billing/stripe/contracts';
@@ -48,7 +52,10 @@ export default async function AccountPage({
     parseSearchParamValue(resolvedSearchParams?.checkout),
   );
   const checkoutSessionId = parseCheckoutSessionId(resolvedSearchParams?.checkout_session_id);
-  const source = parseProCtaSource(parseSearchParamValue(resolvedSearchParams?.source));
+  const parsedSource = parseProCtaSourceWithReason(
+    parseSearchParamValue(resolvedSearchParams?.source),
+  );
+  const source = parsedSource.source;
 
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
@@ -77,6 +84,17 @@ export default async function AccountPage({
     prisma,
     userId: session.user.id,
   });
+
+  if (parsedSource.reason === 'invalid') {
+    logProConversionGuardrail({
+      reason: 'invalid_source_fallback',
+      surface: '/account',
+      authenticated: true,
+      userId: session.user.id,
+      source,
+      rawSource: parsedSource.raw,
+    });
+  }
 
   if (checkoutStatus) {
     logInfo('billing.checkout.return', {

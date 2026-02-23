@@ -199,3 +199,15 @@ test('billing smoke: checkout start, webhook effect visibility, and restore fall
   expect(restoreAfterBody.ok).toBe(true);
   expect(restoreAfterBody.data.outcome).toBe('already_active');
 });
+
+test('pro page: signed-out upgrade CTA routes through auth with preserved intent', async ({
+  page,
+}) => {
+  await page.goto('/pro');
+
+  const upgrade = page.getByRole('link', { name: /sign in to upgrade/i }).first();
+  await expect(upgrade).toHaveAttribute('href', '/pro/upgrade?source=hero');
+  await upgrade.click();
+
+  await expect(page).toHaveURL(/\/sign-in\?from=%2Fpro%3Fintent%3Dupgrade%26source%3Dhero/);
+});

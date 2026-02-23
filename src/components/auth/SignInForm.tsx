@@ -6,6 +6,7 @@ import { useRef, useState } from 'react';
 import { signInSchema } from '../../lib/api/auth/validation';
 import { parseJson } from '../../lib/api/client';
 import { GOOGLE_PROVIDER_ID } from '../../lib/auth/oauthProviders';
+import { DEFAULT_POST_AUTH_PATH } from '../../lib/auth/redirects';
 import { Button } from '../ui/Button';
 import { FormField } from '../ui/FormField';
 import { Input } from '../ui/Input';
@@ -27,6 +28,7 @@ type VerifySignInTwoFactorResponse = {
 type SignInFormProps = {
   showGoogleSignIn?: boolean;
   googleProviderId?: string;
+  postSignInPath?: string;
 };
 
 type TwoFactorMethod = 'totp' | 'recovery_code';
@@ -34,6 +36,7 @@ type TwoFactorMethod = 'totp' | 'recovery_code';
 export function SignInForm({
   showGoogleSignIn = false,
   googleProviderId = GOOGLE_PROVIDER_ID,
+  postSignInPath = DEFAULT_POST_AUTH_PATH,
 }: SignInFormProps) {
   const router = useRouter();
   const [email, setEmail] = useState('');
@@ -122,7 +125,7 @@ export function SignInForm({
         return;
       }
 
-      router.push('/today');
+      router.push(postSignInPath);
       router.refresh();
     } finally {
       setSubmitting(false);
@@ -165,7 +168,7 @@ export function SignInForm({
         return;
       }
 
-      router.push('/today');
+      router.push(postSignInPath);
       router.refresh();
     } finally {
       setSubmitting(false);
@@ -272,7 +275,7 @@ export function SignInForm({
           <OAuthActionButton
             provider="google"
             providerId={googleProviderId}
-            callbackUrl="/today"
+            callbackUrl={postSignInPath}
             label="Continue with Google"
             onError={(message) => pushToast(message, 'error')}
           />

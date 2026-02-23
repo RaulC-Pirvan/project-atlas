@@ -1,5 +1,6 @@
 import crypto from 'node:crypto';
 
+import { logProConversionEvent } from '../../../../../lib/analytics/proConversion';
 import { ApiError, asApiError } from '../../../../../lib/api/errors';
 import { jsonError, jsonOk } from '../../../../../lib/api/response';
 import type { BillingPersistenceClient } from '../../../../../lib/billing/persistence';
@@ -60,6 +61,18 @@ export async function POST(request: Request) {
         event: canonicalEvent,
         signatureVerified: true,
       });
+
+      if (result.appended && result.projection.status === 'active') {
+        logProConversionEvent({
+          event: 'pro_entitlement_active',
+          surface: '/api/billing/stripe/webhook',
+          authenticated: Boolean(result.ledgerEvent.userId),
+          userId: result.ledgerEvent.userId,
+          provider: 'stripe',
+          dedupeReason: result.dedupeReason,
+          isPro: true,
+        });
+      }
 
       return jsonOk({
         received: true,

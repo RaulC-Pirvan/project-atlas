@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { AccountPanel } from '../../components/auth/AccountPanel';
 import { AppShell } from '../../components/layout/AppShell';
 import { ProAccountCard } from '../../components/pro/ProAccountCard';
+import { logProConversionEvent, parseProCtaSource } from '../../lib/analytics/proConversion';
 import { getServerAuthSession } from '../../lib/auth/session';
 import { shouldEnforceAdminTwoFactor } from '../../lib/auth/twoFactorPolicy';
 import { parseStripeCheckoutQueryStatus } from '../../lib/billing/stripe/contracts';
@@ -14,6 +15,7 @@ import { resolveReminderSettings } from '../../lib/reminders/settings';
 type SearchParams = {
   checkout?: string | string[];
   checkout_session_id?: string | string[];
+  source?: string | string[];
 };
 
 function parseSearchParamValue(value: string | string[] | undefined): string | null {
@@ -46,6 +48,7 @@ export default async function AccountPage({
     parseSearchParamValue(resolvedSearchParams?.checkout),
   );
   const checkoutSessionId = parseCheckoutSessionId(resolvedSearchParams?.checkout_session_id);
+  const source = parseProCtaSource(parseSearchParamValue(resolvedSearchParams?.source));
 
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
@@ -81,6 +84,18 @@ export default async function AccountPage({
       userId: session.user.id,
       checkoutStatus,
       checkoutSessionId: checkoutSessionId ?? undefined,
+      isPro: proEntitlement.isPro,
+      source,
+    });
+    logProConversionEvent({
+      event: 'pro_checkout_return',
+      surface: '/account',
+      authenticated: true,
+      userId: session.user.id,
+      source,
+      checkoutStatus,
+      checkoutSessionId,
+      provider: 'stripe',
       isPro: proEntitlement.isPro,
     });
   }

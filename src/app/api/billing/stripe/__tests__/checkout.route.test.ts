@@ -87,6 +87,9 @@ describe('GET /api/billing/stripe/checkout', () => {
         userId: 'user-1',
         productKey: 'pro_lifetime_v1',
         priceId: 'price_123',
+        successPath:
+          '/account?checkout=success&source=direct&checkout_session_id={CHECKOUT_SESSION_ID}',
+        cancelPath: '/account?checkout=cancel&source=direct',
       }),
     );
 
@@ -95,6 +98,36 @@ describe('GET /api/billing/stripe/checkout', () => {
       true,
     );
     expect(logLines.some((line) => line.includes('"message":"billing.checkout.redirect"'))).toBe(
+      true,
+    );
+
+    logSpy.mockRestore();
+  });
+
+  it('propagates pro CTA source into checkout return paths', async () => {
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+
+    mockedGetServerSession.mockResolvedValue({ user: { id: 'user-1' } });
+    mockedGetProEntitlementSummary.mockResolvedValue({
+      isPro: false,
+      status: 'none',
+    });
+
+    const response = await GET(
+      new Request('https://example.com/api/billing/stripe/checkout?source=comparison'),
+    );
+
+    expect(response.status).toBe(303);
+    expect(mockedCreateStripeCheckoutSession).toHaveBeenCalledWith(
+      expect.objectContaining({
+        successPath:
+          '/account?checkout=success&source=comparison&checkout_session_id={CHECKOUT_SESSION_ID}',
+        cancelPath: '/account?checkout=cancel&source=comparison',
+      }),
+    );
+
+    const logLines = logSpy.mock.calls.map((args) => String(args[0]));
+    expect(logLines.some((line) => line.includes('"message":"analytics.pro_conversion"'))).toBe(
       true,
     );
 

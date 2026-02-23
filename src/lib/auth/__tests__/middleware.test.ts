@@ -8,6 +8,8 @@ describe('isPublicPath', () => {
     expect(isPublicPath('/sign-up')).toBe(true);
     expect(isPublicPath('/verify-email')).toBe(true);
     expect(isPublicPath('/landing')).toBe(true);
+    expect(isPublicPath('/pro')).toBe(true);
+    expect(isPublicPath('/pro/upgrade')).toBe(true);
     expect(isPublicPath('/support')).toBe(true);
     expect(isPublicPath('/legal/privacy')).toBe(true);
     expect(isPublicPath('/legal/terms')).toBe(true);

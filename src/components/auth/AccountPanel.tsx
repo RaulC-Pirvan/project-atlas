@@ -275,11 +275,16 @@ export function AccountPanel({
     }
 
     const url = new URL(window.location.href);
-    if (!url.searchParams.has('checkout') && !url.searchParams.has('checkout_session_id')) {
+    if (
+      !url.searchParams.has('checkout') &&
+      !url.searchParams.has('checkout_session_id') &&
+      !url.searchParams.has('source')
+    ) {
       return;
     }
     url.searchParams.delete('checkout');
     url.searchParams.delete('checkout_session_id');
+    url.searchParams.delete('source');
     const nextPath = `${url.pathname}${url.search ? `?${url.searchParams.toString()}` : ''}${url.hash}`;
     window.history.replaceState({}, '', nextPath);
   }, [initialCheckoutStatus, pushToast]);

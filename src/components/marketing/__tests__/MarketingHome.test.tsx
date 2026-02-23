@@ -95,7 +95,7 @@ describe('MarketingHome', () => {
 
     expect(screen.getByRole('link', { name: /see atlas pro/i })).toHaveAttribute(
       'href',
-      '/sign-in',
+      '/pro?source=hero',
     );
     expect(screen.getByRole('link', { name: /start free/i })).toHaveAttribute('href', '/sign-up');
     expect(screen.getByRole('link', { name: /open support center/i })).toHaveAttribute(
@@ -120,7 +120,7 @@ describe('MarketingHome', () => {
     expect(screen.getByRole('link', { name: /^support$/i })).toHaveAttribute('href', '/support');
     expect(screen.getByRole('link', { name: /see atlas pro/i })).toHaveAttribute(
       'href',
-      '/account#pro',
+      '/pro?source=hero',
     );
     const legalNav = screen.getByRole('navigation', { name: /landing legal and support links/i });
     expect(within(legalNav).getByRole('link', { name: /privacy policy/i })).toHaveAttribute(

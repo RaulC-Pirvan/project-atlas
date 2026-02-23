@@ -106,6 +106,7 @@ A habit is defined independently of dates.
 - Web-first Stripe runtime integration is implemented via hosted checkout (`/api/billing/stripe/checkout`) and signed webhook ingestion (`/api/billing/stripe/webhook`) with canonical event normalization and sanitized failure responses.
 - `/api/pro/entitlement` remains the canonical compatibility read API and now resolves from billing projection first with fallback to legacy `ProEntitlement` during migration states.
 - Pro upgrade entry points are wired to hosted Stripe checkout, with checkout success/cancel returning to `/account` for toast-first feedback; `/pro` now redirects to `/account` for compatibility.
+- Sprint 15.3 mobile billing compliance strategy is documented and currently in review, with completed artifacts for policy matrix, reconciliation contract, fallback/support operations playbook, store-launch checklist, and expanded Phase 3 scenario workflows.
 - Advanced Insights v1 implemented (Pro-gated): insights API, aggregated calculations, and Insights UI (cards + heatmap + summary panel).
 - Insights heatmap mobile UX improved with horizontal row scrolling, clear Older/Newer direction, intensity legend, and overflow-safe card sizing.
 - Calendar now shows a Pro-only Insights snapshot card; Free users see an upgrade card.
@@ -125,8 +126,8 @@ A habit is defined independently of dates.
 
 ## Roadmap (high-level)
 
-- Complete Sprint 15.2 Stripe web billing execution (webhook reliability, billing history links, restore/re-sync).
-- Complete Sprint 15.3 mobile billing compliance strategy before store launch (Apple/Google policy path and entitlement reconciliation).
+- Sprint 15.2 Stripe web billing execution is complete (webhook reliability, billing history links, restore/re-sync).
+- Sprint 15.3 mobile billing compliance strategy artifacts are complete and in review; next step is cross-functional approvals and launch-gate execution before store launch.
 - Continue post-launch UX polish and reliability hardening (navigation ergonomics, responsive QA, E2E stability).
 - Smart reminders and push notifications (Pro).
 - Store launch readiness (privacy, metadata, compliance assets).
@@ -327,7 +328,7 @@ A habit is defined independently of dates.
 - `docs/sprints/sprint-15.3.md` - Mobile billing compliance strategy sprint plan.
 - `docs/test workflows/sprint-15.1-test-workflow.md` - Billing architecture and projection test workflows.
 - `docs/test workflows/sprint-15.2-test-workflow.md` - Stripe integration and restore/recovery test workflows.
-- `docs/test workflows/sprint-15.3-test-workflow.md` - Mobile billing compliance test workflows.
+- `docs/test workflows/sprint-15.3-test-workflow.md` - Mobile billing compliance test workflows (including Phase 3 fallback and reconciliation simulation scenarios).
 - `docs/ops/staging.md` - Staging environment guide.
 - `docs/ops/backups.md` - Backup strategy and validation checklist.
 - `docs/ops/legal-publish-checklist.md` - Legal publish readiness checklist and blockers.
@@ -338,6 +339,10 @@ A habit is defined independently of dates.
 - `docs/ops/billing-launch-freeze-policy.md` - Pre-launch billing freeze policy and emergency exception rules.
 - `docs/ops/billing-subscription-migration.md` - Future subscription migration path (schema/event compatibility, UX out of scope).
 - `docs/ops/billing-legal-consistency-review.md` - Billing/legal/support consistency review artifact.
+- `docs/ops/billing-compliance-matrix.md` - Platform-region billing policy matrix and governance contract.
+- `docs/ops/billing-reconciliation.md` - Multi-provider reconciliation strategy and conflict-safe resolution contract.
+- `docs/ops/billing-support-playbook.md` - Billing fallback behavior, support triage, escalation, and audit requirements.
+- `docs/ops/store-launch-billing-checklist.md` - Store-launch billing readiness, scenario packs, sign-off, and publish gate checklist.
 
 ## Engineering Standards
 

@@ -149,7 +149,7 @@ type MarketingHomeProps = {
 };
 
 export function MarketingHome({ isAuthenticated = false }: MarketingHomeProps) {
-  const atlasProLink = isAuthenticated ? '/account#pro' : '/sign-in';
+  const atlasProLink = '/pro?source=hero';
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-white text-black dark:bg-black dark:text-white">

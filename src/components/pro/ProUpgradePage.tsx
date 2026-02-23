@@ -39,6 +39,8 @@ const freeVsProRows = [
 
 const focusRingClasses =
   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/40 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-white/40 dark:focus-visible:ring-offset-black';
+const revealBaseClasses =
+  'opacity-0 translate-y-3 motion-reduce:translate-y-0 motion-reduce:opacity-100 motion-safe:animate-[rise-in_0.6s_ease-out_forwards]';
 
 function PrimaryAction({ href, label }: { href: string; label: string }) {
   return (
@@ -70,7 +72,7 @@ export function ProUpgradePage({ isAuthenticated, isPro }: ProUpgradePageProps) 
   return (
     <main className="min-h-screen bg-white text-black dark:bg-black dark:text-white">
       <div className="mx-auto w-full max-w-6xl px-6 py-12 lg:px-10">
-        <header className="flex items-center justify-between">
+        <header className={`flex items-center justify-between ${revealBaseClasses}`}>
           <div className="flex items-center gap-3">
             <p className="text-xs uppercase tracking-[0.3em] text-black/60 dark:text-white/60">
               Project Atlas
@@ -91,11 +93,18 @@ export function ProUpgradePage({ isAuthenticated, isPro }: ProUpgradePageProps) 
           </div>
         </header>
 
-        <section className="mt-12 rounded-3xl border border-black/10 p-8 dark:border-white/10">
+        <section
+          aria-labelledby="pro-hero-title"
+          data-testid="pro-hero-section"
+          className={`mt-12 rounded-3xl border border-black/10 p-8 dark:border-white/10 ${revealBaseClasses} motion-safe:[animation-delay:80ms]`}
+        >
           <p className="text-xs uppercase tracking-[0.28em] text-black/60 dark:text-white/60">
             One-time purchase
           </p>
-          <h1 className="mt-4 text-4xl font-semibold tracking-tight sm:text-5xl">
+          <h1
+            id="pro-hero-title"
+            className="mt-4 text-4xl font-semibold tracking-tight sm:text-5xl"
+          >
             Upgrade only when deeper insight will help.
           </h1>
           <p className="mt-5 max-w-3xl text-sm leading-relaxed text-black/70 dark:text-white/70">
@@ -124,9 +133,14 @@ export function ProUpgradePage({ isAuthenticated, isPro }: ProUpgradePageProps) 
           </p>
         </section>
 
-        <section className="mt-12 space-y-6 border-t border-black/10 pt-10 dark:border-white/10">
+        <section
+          aria-labelledby="pro-outcomes-title"
+          className={`mt-12 space-y-6 border-t border-black/10 pt-10 dark:border-white/10 ${revealBaseClasses} motion-safe:[animation-delay:160ms]`}
+        >
           <div className="space-y-2">
-            <h2 className="text-2xl font-semibold tracking-tight">What Pro adds in practice</h2>
+            <h2 id="pro-outcomes-title" className="text-2xl font-semibold tracking-tight">
+              What Pro adds in practice
+            </h2>
             <p className="text-sm text-black/65 dark:text-white/65">
               Concrete outcomes, not vague promises.
             </p>
@@ -140,6 +154,10 @@ export function ProUpgradePage({ isAuthenticated, isPro }: ProUpgradePageProps) 
                 See 7/30/90-day trend shifts and weekday consistency so you know where routines are
                 improving or slipping.
               </p>
+              <p className="mt-2 text-xs text-black/55 dark:text-white/55">
+                Example: catch that weekend completion is dropping below weekday baseline, then
+                adjust workload and reminder timing before streak quality regresses further.
+              </p>
             </article>
             <article className="rounded-2xl border border-black/10 p-5 dark:border-white/10">
               <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-black/70 dark:text-white/70">
@@ -148,6 +166,10 @@ export function ProUpgradePage({ isAuthenticated, isPro }: ProUpgradePageProps) 
               <p className="mt-3 text-sm text-black/70 dark:text-white/70">
                 Expand beyond baseline achievements with milestone tracks that reward sustained
                 consistency over time.
+              </p>
+              <p className="mt-2 text-xs text-black/55 dark:text-white/55">
+                Example: keep a 30-completion milestone visible for one habit while building toward
+                a 100-completion long-run marker.
               </p>
             </article>
             <article className="rounded-2xl border border-black/10 p-5 dark:border-white/10">
@@ -158,20 +180,33 @@ export function ProUpgradePage({ isAuthenticated, isPro }: ProUpgradePageProps) 
                 Configure daily digest, quiet hours, and per-habit reminder cadence with push-ready
                 controls built for store launch.
               </p>
+              <p className="mt-2 text-xs text-black/55 dark:text-white/55">
+                Example: run reminder at 07:30, stretch reminder at 20:30, with quiet hours from
+                22:00-07:00 to avoid overnight noise.
+              </p>
             </article>
           </div>
         </section>
 
-        <section className="mt-12 space-y-6 border-t border-black/10 pt-10 dark:border-white/10">
+        <section
+          aria-labelledby="pro-comparison-title"
+          className={`mt-12 space-y-6 border-t border-black/10 pt-10 dark:border-white/10 ${revealBaseClasses} motion-safe:[animation-delay:240ms]`}
+        >
           <div className="space-y-2">
-            <h2 className="text-2xl font-semibold tracking-tight">Free vs Pro</h2>
+            <h2 id="pro-comparison-title" className="text-2xl font-semibold tracking-tight">
+              Free vs Pro
+            </h2>
             <p className="text-sm text-black/65 dark:text-white/65">
               Free remains complete for day-to-day tracking. Pro adds depth for analysis and
               motivation.
             </p>
           </div>
           <div className="overflow-x-auto rounded-2xl border border-black/10 dark:border-white/10">
-            <table className="w-full min-w-[640px] table-fixed border-collapse text-left text-sm">
+            <table
+              aria-label="Free and Pro feature comparison"
+              className="w-full min-w-[640px] table-fixed border-collapse text-left text-sm"
+            >
+              <caption className="sr-only">Free and Pro feature comparison</caption>
               <colgroup>
                 <col className="w-[58%]" />
                 <col className="w-[21%]" />
@@ -220,9 +255,14 @@ export function ProUpgradePage({ isAuthenticated, isPro }: ProUpgradePageProps) 
           ) : null}
         </section>
 
-        <section className="mt-12 space-y-6 border-t border-black/10 pt-10 dark:border-white/10">
+        <section
+          aria-labelledby="pro-faq-title"
+          className={`mt-12 space-y-6 border-t border-black/10 pt-10 dark:border-white/10 ${revealBaseClasses} motion-safe:[animation-delay:320ms]`}
+        >
           <div className="space-y-2">
-            <h2 className="text-2xl font-semibold tracking-tight">FAQ and trust details</h2>
+            <h2 id="pro-faq-title" className="text-2xl font-semibold tracking-tight">
+              FAQ and trust details
+            </h2>
             <p className="text-sm text-black/65 dark:text-white/65">
               Refund and support language matches our legal policy.
             </p>

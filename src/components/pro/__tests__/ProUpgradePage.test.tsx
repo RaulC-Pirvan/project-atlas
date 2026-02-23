@@ -61,4 +61,19 @@ describe('ProUpgradePage', () => {
     const refundLinks = screen.getAllByRole('link', { name: /refund policy/i });
     expect(refundLinks.some((link) => link.getAttribute('href') === '/legal/refunds')).toBe(true);
   });
+
+  it('includes accessible section semantics and reduced-motion-safe reveal classes', () => {
+    const { container } = render(<ProUpgradePage isAuthenticated={false} isPro={false} />);
+
+    expect(
+      screen.getByRole('table', { name: /free and pro feature comparison/i }),
+    ).toBeInTheDocument();
+
+    const hero = screen.getByTestId('pro-hero-section');
+    expect(hero.className).toContain('motion-reduce:opacity-100');
+    expect(hero.className).toContain('motion-safe:animate-[rise-in_0.6s_ease-out_forwards]');
+
+    const sections = container.querySelectorAll('section[aria-labelledby]');
+    expect(sections.length).toBeGreaterThanOrEqual(4);
+  });
 });

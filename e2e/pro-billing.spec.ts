@@ -211,3 +211,23 @@ test('pro page: signed-out upgrade CTA routes through auth with preserved intent
 
   await expect(page).toHaveURL(/\/sign-in\?from=%2Fpro%3Fintent%3Dupgrade%26source%3Dhero/);
 });
+
+test('pro page: signed-in upgrade entry redirects to checkout with source', async ({
+  page,
+  request,
+}) => {
+  await createVerifiedUser(page, request, 'pro-upgrade-signed-in');
+  await page.goto('/pro');
+
+  const upgrade = page.getByRole('link', { name: /upgrade to pro/i }).first();
+  await expect(upgrade).toHaveAttribute('href', '/pro/upgrade?source=hero');
+
+  const upgradeResponse = await page.request.get('/pro/upgrade?source=hero', {
+    maxRedirects: 0,
+    timeout: 10_000,
+  });
+  expect(upgradeResponse.status()).toBe(303);
+  expect(upgradeResponse.headers()['location']).toContain(
+    '/api/billing/stripe/checkout?source=hero',
+  );
+});

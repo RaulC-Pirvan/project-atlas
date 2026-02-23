@@ -149,13 +149,56 @@ Event contract is centralized in `src/lib/analytics/proConversion.ts` with sourc
 
 ### Tasks (7)
 
-- [ ] **Task 1.1**: Implement redesigned `/pro` layout with clear section hierarchy
-- [ ] **Task 1.2**: Add concrete feature examples and outcomes
-- [ ] **Task 1.3**: Add explicit Free value and transparent comparison block
-- [ ] **Task 1.4**: Add FAQ and trust section with legal-parity refund language
-- [ ] **Task 1.5**: Ensure CTA states for signed-in/signed-out paths are deterministic
-- [ ] **Task 1.6**: Preserve `/account` as transactional billing management surface
-- [ ] **Task 1.7**: Add accessibility and reduced-motion coverage for new sections
+- [x] **Task 1.1**: Implement redesigned `/pro` layout with clear section hierarchy
+- [x] **Task 1.2**: Add concrete feature examples and outcomes
+- [x] **Task 1.3**: Add explicit Free value and transparent comparison block
+- [x] **Task 1.4**: Add FAQ and trust section with legal-parity refund language
+- [x] **Task 1.5**: Ensure CTA states for signed-in/signed-out paths are deterministic
+- [x] **Task 1.6**: Preserve `/account` as transactional billing management surface
+- [x] **Task 1.7**: Add accessibility and reduced-motion coverage for new sections
+
+### Phase 1 Implementation Notes (Current)
+
+#### 1.1 Layout + hierarchy
+
+- `/pro` now renders a dedicated conversion surface (no `/account` redirect).
+- Section order is explicit: Hero -> Outcomes -> Free vs Pro -> FAQ/Trust.
+- App-shell navigation remains unchanged; no persistent Pro clutter added to authenticated nav.
+
+#### 1.2 Concrete examples + outcomes
+
+- Outcome cards now include practical examples:
+  - detecting weekday/weekend completion imbalance
+  - milestone progression across 30/100 completion horizons
+  - reminder timing + quiet hours concrete setup example
+
+#### 1.3 Free value + transparent comparison
+
+- Free is described as complete for core daily tracking.
+- Comparison matrix remains factual and non-coercive (`Full`, `Preview`, `Baseline`, `Expanded`).
+
+#### 1.4 FAQ + trust copy
+
+- FAQ refund language mirrors `/legal/refunds`:
+  - 14-day goodwill window for direct web purchases
+  - Apple/Google refund-channel ownership for app-store purchases
+
+#### 1.5 Deterministic CTA states
+
+- Signed-out users: CTA -> `/pro/upgrade` -> `/sign-in?from=...`.
+- Signed-in users: CTA -> `/pro/upgrade` -> `/api/billing/stripe/checkout?source=...`.
+- Pro-active users: CTA switches to `/account#pro` management entry.
+
+#### 1.6 `/account` transactional preservation
+
+- `/account` remains canonical for billing management and restore controls.
+- Checkout return and billing toasts continue to resolve on `/account`.
+
+#### 1.7 Accessibility + reduced motion
+
+- Added semantic section labeling (`aria-labelledby`) and comparison table labeling.
+- Added reduced-motion-safe reveal treatment (`motion-safe` animation with `motion-reduce` fallback).
+- Added component tests for semantics and motion class presence.
 
 ---
 

@@ -16,6 +16,21 @@ describe('ProUpgradePage', () => {
     expect(screen.getByText(/do i lose core tracking if i stay on free/i)).toBeInTheDocument();
   });
 
+  it('renders hierarchy sections in expected order', () => {
+    render(<ProUpgradePage isAuthenticated={false} isPro={false} />);
+
+    const outcomes = screen.getByRole('heading', { name: /what pro adds in practice/i });
+    const comparison = screen.getByRole('heading', { name: /free vs pro/i });
+    const faq = screen.getByRole('heading', { name: /faq and trust details/i });
+
+    expect(outcomes.compareDocumentPosition(comparison) & Node.DOCUMENT_POSITION_FOLLOWING).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING,
+    );
+    expect(comparison.compareDocumentPosition(faq) & Node.DOCUMENT_POSITION_FOLLOWING).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING,
+    );
+  });
+
   it('routes signed-out upgrade CTA through tracked pro upgrade path', () => {
     render(<ProUpgradePage isAuthenticated={false} isPro={false} />);
 
@@ -60,6 +75,19 @@ describe('ProUpgradePage', () => {
     ).toBeInTheDocument();
     const refundLinks = screen.getAllByRole('link', { name: /refund policy/i });
     expect(refundLinks.some((link) => link.getAttribute('href') === '/legal/refunds')).toBe(true);
+  });
+
+  it('shows transparent comparison rows for free and pro framing', () => {
+    render(<ProUpgradePage isAuthenticated={false} isPro={false} />);
+
+    expect(
+      screen.getByText(/core tracking \(habits, schedules, completions, calendar\)/i),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/streaks and grace window/i)).toBeInTheDocument();
+    expect(screen.getByText(/advanced insights/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/^full$/i).length).toBeGreaterThanOrEqual(2);
+    expect(screen.getAllByText(/^preview$/i).length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText(/^expanded$/i).length).toBeGreaterThanOrEqual(1);
   });
 
   it('includes accessible section semantics and reduced-motion-safe reveal classes', () => {

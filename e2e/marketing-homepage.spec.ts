@@ -112,7 +112,17 @@ test('marketing homepage CTA links navigate to sign-up, sign-in, support, and pr
 
   await page.goto('/landing');
   await page.getByRole('link', { name: /see atlas pro/i }).click();
+  await expect(page).toHaveURL(/\/pro\?source=hero$/, { timeout: 15_000 });
+
+  await page
+    .getByRole('link', { name: /sign in to upgrade/i })
+    .first()
+    .click();
   await expect(page).toHaveURL(/\/sign-in(?:\?.*)?$/, { timeout: 15_000 });
+  const signInUrl = new URL(page.url());
+  expect(signInUrl.searchParams.get('from')).toBe('/pro?intent=upgrade&source=hero');
+  expect(signInUrl.searchParams.get('intent')).toBe('pro_upgrade');
+  expect(signInUrl.searchParams.get('source')).toBe('hero');
 });
 
 test('signed-out visitors are routed from root to /landing', async ({ page }) => {

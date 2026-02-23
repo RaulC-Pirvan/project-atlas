@@ -38,7 +38,7 @@ can upgrade through a deterministic path with instrumented conversion events.
 - [x] Keep Free value explicit and non-degraded in all Pro messaging
 - [x] Add upgrade FAQ, guarantee/refund copy, and trust details
 - [x] Instrument Pro CTA and conversion events
-- [ ] Add responsive/component/E2E coverage for Pro conversion experience
+- [x] Add responsive/component/E2E coverage for Pro conversion experience
 
 ### Excluded (this sprint)
 
@@ -265,12 +265,54 @@ Event contract is centralized in `src/lib/analytics/proConversion.ts` with sourc
 
 ### Tasks (6)
 
-- [ ] **Task 3.1**: Add component tests for hierarchy, comparison, and trust copy
-- [ ] **Task 3.2**: Add E2E for signed-out -> auth -> upgrade intent return
-- [ ] **Task 3.3**: Add E2E for signed-in CTA -> checkout start path
-- [ ] **Task 3.4**: Add regression tests for `/account` billing actions unaffected
-- [ ] **Task 3.5**: Run legal/product copy consistency review
-- [ ] **Task 3.6**: Finalize publish-ready conversion artifact set
+- [x] **Task 3.1**: Add component tests for hierarchy, comparison, and trust copy
+- [x] **Task 3.2**: Add E2E for signed-out -> auth -> upgrade intent return
+- [x] **Task 3.3**: Add E2E for signed-in CTA -> checkout start path
+- [x] **Task 3.4**: Add regression tests for `/account` billing actions unaffected
+- [x] **Task 3.5**: Run legal/product copy consistency review
+- [x] **Task 3.6**: Finalize publish-ready conversion artifact set
+
+### Phase 3 Implementation Notes (Current)
+
+#### 3.1 Component coverage (hierarchy/comparison/trust)
+
+- Added hierarchy-order assertions to `src/components/pro/__tests__/ProUpgradePage.test.tsx` for:
+  - Outcomes -> Free vs Pro -> FAQ and trust sequence
+- Added transparent comparison assertions for Free/Pro labels (`Full`, `Preview`, `Expanded`) and core row copy.
+- Existing trust/refund link assertions remain in place for legal parity checks.
+
+#### 3.2 Signed-out auth-return conversion path
+
+- Extended `e2e/pro-billing.spec.ts` with full signed-out flow:
+  - `/pro` CTA click redirects to `/sign-in?from=/pro?intent=upgrade&source=hero`
+  - successful sign-in returns user to `/pro?intent=upgrade&source=hero`
+  - returned surface exposes deterministic authenticated upgrade CTA (`/pro/upgrade?source=hero`).
+
+#### 3.3 Signed-in CTA checkout-start path
+
+- Extended `e2e/pro-billing.spec.ts` signed-in case to assert both redirect hops:
+  - `/pro/upgrade?source=hero` -> `/api/billing/stripe/checkout?source=hero`
+  - checkout route 303 redirect to Stripe checkout session URL.
+
+#### 3.4 `/account` billing regression coverage
+
+- Added regression test to `src/components/auth/__tests__/AccountPanel.test.tsx` validating:
+  - checkout return query cleanup still executes
+  - billing actions remain available (`Manage billing / invoices`, `Restore purchase`).
+
+#### 3.5 Legal/product copy consistency review
+
+- Added review artifact: `docs/ops/pro-conversion-legal-product-review.md`.
+- Review confirms `/pro` refund/trust wording matches `/legal/refunds` and Free framing remains non-coercive.
+
+#### 3.6 Publish-ready conversion artifacts
+
+- Added artifact bundle: `docs/ops/pro-conversion-publish-artifacts.md`.
+- Bundle now includes implementation, tests, legal parity review, and conversion instrumentation evidence.
+- Targeted execution evidence completed:
+  - `npm test -- src/components/pro/__tests__/ProUpgradePage.test.tsx src/components/auth/__tests__/AccountPanel.test.tsx src/lib/analytics/__tests__/proConversion.test.ts src/app/pro/__tests__/upgrade.route.test.ts src/app/api/billing/stripe/__tests__/checkout.route.test.ts src/app/api/billing/stripe/__tests__/webhook.route.test.ts`
+  - `npm run e2e -- e2e/pro-billing.spec.ts --project=chromium`
+  - `npx eslint src/components/pro/__tests__/ProUpgradePage.test.tsx src/components/auth/__tests__/AccountPanel.test.tsx e2e/pro-billing.spec.ts`
 
 ---
 
@@ -311,14 +353,14 @@ Names are placeholders; final keys are locked during implementation.
 
 ## Definition of Done
 
-1. [ ] `/pro` presents a clear, concrete, trustable upgrade narrative.
-2. [ ] Free value remains explicit and non-degraded.
-3. [ ] FAQ/refund/trust copy is legally aligned.
-4. [ ] Signed-in and signed-out CTA flows are deterministic.
-5. [ ] Conversion events are instrumented from view to entitlement-active.
-6. [ ] Component and E2E coverage passes for key conversion paths.
-7. [ ] No regression to `/account` billing management behavior.
-8. [ ] CI quality gates pass for touched surfaces.
+1. [x] `/pro` presents a clear, concrete, trustable upgrade narrative.
+2. [x] Free value remains explicit and non-degraded.
+3. [x] FAQ/refund/trust copy is legally aligned.
+4. [x] Signed-in and signed-out CTA flows are deterministic.
+5. [x] Conversion events are instrumented from view to entitlement-active.
+6. [x] Component and E2E coverage passes for key conversion paths.
+7. [x] No regression to `/account` billing management behavior.
+8. [x] CI quality gates pass for touched surfaces.
 
 ---
 

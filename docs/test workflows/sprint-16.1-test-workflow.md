@@ -54,7 +54,7 @@ This workflow verifies conversion clarity, legal consistency, and event quality.
 
 ## Manual QA Checklist
 
-### Workflow 1: Pro page hierarchy clarity [ ]
+### Workflow 1: Pro page hierarchy clarity [x]
 
 1. Open `/pro`.
 2. Review section order and narrative flow.
@@ -64,7 +64,7 @@ This workflow verifies conversion clarity, legal consistency, and event quality.
 - Benefits are concrete and understandable.
 - Page structure is scannable on desktop and mobile.
 
-### Workflow 2: Free value remains explicit [ ]
+### Workflow 2: Free value remains explicit [x]
 
 1. Review Free vs Pro comparison content.
 
@@ -73,7 +73,7 @@ This workflow verifies conversion clarity, legal consistency, and event quality.
 - Free tier remains clearly useful.
 - No coercive or misleading downgrade framing.
 
-### Workflow 3: Trust/refund copy alignment [ ]
+### Workflow 3: Trust/refund copy alignment [x]
 
 1. Compare `/pro` trust/refund copy with `/legal/refunds`.
 
@@ -82,7 +82,7 @@ This workflow verifies conversion clarity, legal consistency, and event quality.
 - Wording aligns with legal policy.
 - No extra guarantee promises beyond legal stance.
 
-### Workflow 4: Signed-out CTA flow [ ]
+### Workflow 4: Signed-out CTA flow [x]
 
 1. From signed-out session, click upgrade CTA.
 2. Complete auth and return flow.
@@ -92,7 +92,7 @@ This workflow verifies conversion clarity, legal consistency, and event quality.
 - User is routed through auth safely.
 - Upgrade intent is preserved after auth.
 
-### Workflow 5: Signed-in CTA flow [ ]
+### Workflow 5: Signed-in CTA flow [x]
 
 1. Sign in as non-Pro user.
 2. Trigger upgrade CTA from `/pro`.
@@ -102,7 +102,7 @@ This workflow verifies conversion clarity, legal consistency, and event quality.
 - Checkout initiation path triggers correctly.
 - No conflicting CTA state is shown.
 
-### Workflow 6: Conversion event emission quality [ ]
+### Workflow 6: Conversion event emission quality [x]
 
 1. Exercise page view, CTA click, checkout start/return.
 2. Inspect analytics/event logs.
@@ -112,7 +112,7 @@ This workflow verifies conversion clarity, legal consistency, and event quality.
 - Event names and payload fields follow contract.
 - No duplicate spam under normal navigation.
 
-### Workflow 7: Account billing regression guard [ ]
+### Workflow 7: Account billing regression guard [x]
 
 1. Open `/account` and verify billing/restore controls.
 

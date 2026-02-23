@@ -414,10 +414,10 @@ Launch non-goal (explicit):
 
 ### Sprint 16.1: Pro Upgrade Page Refresh
 
-- [ ] Redesign `/pro` with clearer feature hierarchy and concrete examples
-- [ ] Keep Free value explicit and non-degraded in all Pro messaging
-- [ ] Add upgrade FAQ, guarantee/refund copy, and trust details
-- [ ] Instrument Pro CTA and conversion events
+- [x] Redesign `/pro` with clearer feature hierarchy and concrete examples
+- [x] Keep Free value explicit and non-degraded in all Pro messaging
+- [x] Add upgrade FAQ, guarantee/refund copy, and trust details
+- [x] Instrument Pro CTA and conversion events
 
 ---
 

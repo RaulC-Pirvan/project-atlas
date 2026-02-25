@@ -1,7 +1,7 @@
 # Sprint 16.2 Test Workflow - Landing Walkthrough Narrative
 
 **Status**: Planned  
-**Last Updated**: February 2026
+**Last Updated**: February 25, 2026
 
 ---
 
@@ -23,6 +23,7 @@ This workflow verifies messaging clarity, asset realism, and route correctness.
 
 1. Required docs and surfaces:
    - `docs/sprints/sprint-16.2.md`
+   - `docs/ops/landing-walkthrough-phase-0-contract.md`
    - `src/app/landing/page.tsx`
    - walkthrough assets in `public/images/walkthrough/*` (or chosen path)
 
@@ -168,6 +169,7 @@ Sprint 16.2 is considered verified when:
 ## References
 
 - [Sprint 16.2 Plan](../sprints/sprint-16.2.md)
+- [Phase 0 Contract Artifact](../ops/landing-walkthrough-phase-0-contract.md)
 - [Sprint 16.1 Plan](../sprints/sprint-16.1.md)
 - [Sprint 5.2 Plan](../sprints/sprint-5.2.md)
 - [Roadmap](../roadmap.md)

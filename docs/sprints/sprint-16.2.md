@@ -1,7 +1,7 @@
 # Sprint 16.2: Landing Walkthrough Narrative - Project Atlas
 
 **Duration**: TBD (5-7 days)  
-**Status**: Planned  
+**Status**: In Progress  
 **Theme**: Ship a guided, value-first landing walkthrough using real product surfaces to improve activation and upgrade intent quality.
 
 ---
@@ -78,12 +78,57 @@ next actions (sign up, first habit, first completion) with reduced confusion.
 
 ### Tasks (6)
 
-- [ ] **Task 0.1**: Define walkthrough information architecture and step sequence
-- [ ] **Task 0.2**: Define screenshot capture standards (desktop/mobile, quality, naming)
-- [ ] **Task 0.3**: Define copy style guide for value-first non-technical language
-- [ ] **Task 0.4**: Define CTA mapping for signed-out/signed-in states
-- [ ] **Task 0.5**: Define accessibility baseline (alt text, contrast, reading order)
-- [ ] **Task 0.6**: Define responsive breakpoints and layout behavior contract
+- [x] **Task 0.1**: Define walkthrough information architecture and step sequence
+- [x] **Task 0.2**: Define screenshot capture standards (desktop/mobile, quality, naming)
+- [x] **Task 0.3**: Define copy style guide for value-first non-technical language
+- [x] **Task 0.4**: Define CTA mapping for signed-out/signed-in states
+- [x] **Task 0.5**: Define accessibility baseline (alt text, contrast, reading order)
+- [x] **Task 0.6**: Define responsive breakpoints and layout behavior contract
+
+### Phase 0 Implementation Notes (Current)
+
+Phase 0 contract is documented in:
+
+- `docs/ops/landing-walkthrough-phase-0-contract.md`
+
+#### 0.1 Walkthrough IA + Step Sequence
+
+- Canonical sequence is locked to `create -> remind -> complete -> review`.
+- Landing walkthrough section will be rendered as an ordered narrative with one clear user outcome per step.
+- Each step contract now includes:
+  - action surface (where the user acts)
+  - value outcome (what improves immediately)
+  - daily relevance (why this matters in routine usage)
+
+#### 0.2 Screenshot Capture Standards
+
+- Asset source is locked to real Atlas product surfaces only.
+- Capture standards now define viewport sizes, format/compression, naming convention, and source routes.
+- Assets are versioned under a dedicated walkthrough path to prevent ad-hoc naming drift.
+
+#### 0.3 Copy Style Guide (Value-First)
+
+- Copy contract now enforces non-technical language and short, concrete outcomes.
+- Step copy must always describe user action, user result, and daily impact.
+- Internal implementation terms are explicitly excluded from user-facing walkthrough copy.
+
+#### 0.4 CTA Mapping (Auth-Aware)
+
+- Signed-out walkthrough CTAs map to auth entry routes (`/sign-up`, `/sign-in`).
+- Signed-in walkthrough CTAs map to in-app action routes (`/today`, `/calendar`) without auth detours.
+- CTA wording is aligned with existing Sprint 16.1 conversion language conventions.
+
+#### 0.5 Accessibility Baseline
+
+- Alt text policy, heading order, semantic sequence, keyboard focus behavior, and contrast targets are now defined.
+- Walkthrough sequence must remain meaningful in both visual and assistive-tech reading order.
+- Reduced-motion fallback behavior is included as baseline requirement.
+
+#### 0.6 Responsive Contract
+
+- Mobile, tablet, and desktop breakpoint behavior is now defined for walkthrough composition.
+- Contract includes touch-target minimums, spacing/line-length limits, and screenshot framing expectations.
+- Desktop supports side-by-side storytelling; mobile preserves a single-column reading-first flow.
 
 ---
 
@@ -178,4 +223,5 @@ Names are placeholders; final keys are locked during implementation.
 - [Sprint 16.1 Plan](./sprint-16.1.md)
 - [Sprint 16.3 Plan](./sprint-16.3.md)
 - [Sprint 5.2 Plan](./sprint-5.2.md)
+- [Phase 0 Contract Artifact](../ops/landing-walkthrough-phase-0-contract.md)
 - [Roadmap](../roadmap.md)

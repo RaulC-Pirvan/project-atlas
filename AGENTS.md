@@ -82,7 +82,7 @@ A habit is defined independently of dates.
 - Support form validation remains toast-first (no inline error text), with field-specific error toasts and invalid-field highlighting.
 - Trust & policy surfaces are implemented at `/legal/privacy`, `/legal/terms`, `/legal/refunds`, and `/legal/changes` with shared metadata (`Version`, `Effective date`, `Last updated`) and legal change-log governance content.
 - Legal publish-readiness guard is implemented with placeholder detection and optional production enforcement via `ENFORCE_LEGAL_PUBLISH_READY=true`.
-- Legal/support discoverability is implemented on landing and account surfaces; `/pro` is retained as a compatibility redirect to `/account`.
+- Legal/support discoverability is implemented on landing, account, and Pro surfaces.
 - Today view implemented at `/today` for fast daily entry of today's due habits.
 - Calendar view implemented with monthly grid, month navigation, selected-day side panel (`?date=YYYY-MM-DD`), daily completion toggles via `/api/completions`, per-day progress indicators, and golden completed-day tiles (black text for contrast).
 - Calendar defaults to selecting today on `/calendar` (current month); mobile daily sheet only auto-opens when a `date` param is present.
@@ -105,7 +105,9 @@ A habit is defined independently of dates.
 - Billing persistence foundation is implemented with append-only `BillingEventLedger`, provider-aware `BillingEntitlementProjection`, and `BillingProductMapping` canonical SKU resolution (`pro_lifetime_v1`).
 - Web-first Stripe runtime integration is implemented via hosted checkout (`/api/billing/stripe/checkout`) and signed webhook ingestion (`/api/billing/stripe/webhook`) with canonical event normalization and sanitized failure responses.
 - `/api/pro/entitlement` remains the canonical compatibility read API and now resolves from billing projection first with fallback to legacy `ProEntitlement` during migration states.
-- Pro upgrade entry points are wired to hosted Stripe checkout, with checkout success/cancel returning to `/account` for toast-first feedback; `/pro` now redirects to `/account` for compatibility.
+- Pro upgrade flow now uses a dedicated `/pro` conversion page with deterministic CTA routing through `/pro/upgrade`; signed-out users are routed to sign-in with preserved upgrade intent, and signed-in users are routed to Stripe checkout.
+- Checkout success/cancel still return to `/account` for toast-first feedback, and `/account` remains the canonical billing/restore management surface.
+- Sprint 16.1 Pro conversion refresh is implemented: Pro hierarchy/comparison/trust copy, conversion analytics (`pro_page_view`, `pro_cta_click`, `pro_checkout_initiated`, `pro_checkout_return`, `pro_entitlement_active`), duplicate/invalid-source guardrails, and targeted component/API/E2E coverage.
 - Sprint 15.3 mobile billing compliance strategy is documented and currently in review, with completed artifacts for policy matrix, reconciliation contract, fallback/support operations playbook, store-launch checklist, and expanded Phase 3 scenario workflows.
 - Advanced Insights v1 implemented (Pro-gated): insights API, aggregated calculations, and Insights UI (cards + heatmap + summary panel).
 - Insights heatmap mobile UX improved with horizontal row scrolling, clear Older/Newer direction, intensity legend, and overflow-safe card sizing.
@@ -244,6 +246,8 @@ A habit is defined independently of dates.
 - `src/lib/support` - Support domain helpers (policy, retention, hashing, lifecycle, types).
 - `src/lib/legal` - Legal policy metadata, change-log, governance steps, and publish guard/enforcement helpers.
 - `src/lib/pro` - Pro entitlement helpers.
+- `src/lib/analytics/proConversion.ts` - Pro conversion event contract, source parsing, and duplicate guardrails.
+- `src/lib/analytics/__tests__/proConversion.test.ts` - Conversion event contract and guardrail tests.
 - `src/lib/billing` - Billing domain contracts, idempotency helpers, canonical events, projection logic, and persistence helpers.
 - `src/lib/billing/stripe` - Stripe adapter utilities (config, checkout client, webhook normalization, signature verification).
 - `src/lib/billing/__tests__` - Billing domain/persistence/projector unit tests.
@@ -269,7 +273,9 @@ A habit is defined independently of dates.
 - `src/components/ui` - Shared UI primitives.
 - `src/app/(auth)` - Auth pages (sign-in, sign-up, verify-email).
 - `src/app/account/page.tsx` - Account management page and primary Pro/billing surface (checkout return logging + status handoff to toasts).
-- `src/app/pro/page.tsx` - Legacy compatibility route that redirects to `/account` and forwards checkout query params.
+- `src/app/pro/page.tsx` - Dedicated Pro conversion page with trust-first copy and Pro page-view instrumentation.
+- `src/app/pro/upgrade/route.ts` - Deterministic upgrade intent route that logs CTA events and branches signed-in vs signed-out flows.
+- `src/app/pro/__tests__/upgrade.route.test.ts` - Upgrade route tests for auth branching and source guardrails.
 - `middleware.ts` - Route protection using DB session cookies, legacy JWT-session cutover invalidation, and admin 2FA enrollment gating.
 - `e2e/auth.spec.ts` - Auth flows E2E coverage (including shared sign-out helper for desktop/mobile nav variants).
 - `e2e/oauth.spec.ts` - Google OAuth and credentials fallback E2E coverage.
@@ -329,6 +335,10 @@ A habit is defined independently of dates.
 - `docs/test workflows/sprint-15.1-test-workflow.md` - Billing architecture and projection test workflows.
 - `docs/test workflows/sprint-15.2-test-workflow.md` - Stripe integration and restore/recovery test workflows.
 - `docs/test workflows/sprint-15.3-test-workflow.md` - Mobile billing compliance test workflows (including Phase 3 fallback and reconciliation simulation scenarios).
+- `docs/sprints/sprint-16.1.md` - Pro upgrade page refresh sprint plan and implementation notes.
+- `docs/sprints/sprint-16.2.md` - Landing walkthrough narrative sprint plan.
+- `docs/sprints/sprint-16.3.md` - Product analytics baseline sprint plan.
+- `docs/test workflows/sprint-16.1-test-workflow.md` - Pro conversion UX, instrumentation, and billing regression workflow checks.
 - `docs/ops/staging.md` - Staging environment guide.
 - `docs/ops/backups.md` - Backup strategy and validation checklist.
 - `docs/ops/legal-publish-checklist.md` - Legal publish readiness checklist and blockers.
@@ -343,6 +353,8 @@ A habit is defined independently of dates.
 - `docs/ops/billing-reconciliation.md` - Multi-provider reconciliation strategy and conflict-safe resolution contract.
 - `docs/ops/billing-support-playbook.md` - Billing fallback behavior, support triage, escalation, and audit requirements.
 - `docs/ops/store-launch-billing-checklist.md` - Store-launch billing readiness, scenario packs, sign-off, and publish gate checklist.
+- `docs/ops/pro-conversion-legal-product-review.md` - Sprint 16.1 legal/product copy consistency review artifact.
+- `docs/ops/pro-conversion-publish-artifacts.md` - Sprint 16.1 publish-ready conversion artifact set and verification bundle.
 
 ## Engineering Standards
 

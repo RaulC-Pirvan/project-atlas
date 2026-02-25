@@ -123,7 +123,7 @@ This workflow verifies messaging clarity, asset realism, and route correctness.
 ### Component / Unit
 
 ```bash
-npm test -- src/components/marketing/__tests__
+npm test -- src/components/marketing/__tests__ src/lib/analytics/__tests__/landingWalkthrough.test.ts src/app/landing/walkthrough/track/__tests__/route.test.ts
 ```
 
 ### E2E

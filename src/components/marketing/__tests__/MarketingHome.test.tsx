@@ -18,9 +18,14 @@ describe('MarketingHome', () => {
 
     const signInLinks = screen.getAllByRole('link', { name: /sign in/i });
     expect(signInLinks.length).toBeGreaterThan(0);
-    signInLinks.forEach((link) => {
-      expect(link).toHaveAttribute('href', '/sign-in');
-    });
+    expect(signInLinks.some((link) => link.getAttribute('href') === '/sign-in')).toBeTruthy();
+    expect(
+      signInLinks.some(
+        (link) =>
+          link.getAttribute('href') ===
+          '/landing/walkthrough/track?target=%2Fsign-in&source=walkthrough_secondary',
+      ),
+    ).toBeTruthy();
 
     expect(screen.getByRole('link', { name: /^support$/i })).toHaveAttribute('href', '/support');
     const legalNav = screen.getByRole('navigation', { name: /landing legal and support links/i });
@@ -68,6 +73,10 @@ describe('MarketingHome', () => {
     expect(screen.getByText(/step 2 - remind/i)).toBeInTheDocument();
     expect(screen.getByText(/step 3 - complete/i)).toBeInTheDocument();
     expect(screen.getByText(/step 4 - review/i)).toBeInTheDocument();
+    expect(screen.getByTestId('landing-walkthrough-step-create')).toBeInTheDocument();
+    expect(screen.getByTestId('landing-walkthrough-step-remind')).toBeInTheDocument();
+    expect(screen.getByTestId('landing-walkthrough-step-complete')).toBeInTheDocument();
+    expect(screen.getByTestId('landing-walkthrough-step-review')).toBeInTheDocument();
 
     expect(
       screen.getByRole('heading', { name: /today \+ calendar workflow/i }),
@@ -115,9 +124,14 @@ describe('MarketingHome', () => {
     );
     const freeLinks = screen.getAllByRole('link', { name: /start free/i });
     expect(freeLinks.length).toBeGreaterThan(0);
-    freeLinks.forEach((link) => {
-      expect(link).toHaveAttribute('href', '/sign-up');
-    });
+    expect(freeLinks.some((link) => link.getAttribute('href') === '/sign-up')).toBeTruthy();
+    expect(
+      freeLinks.some(
+        (link) =>
+          link.getAttribute('href') ===
+          '/landing/walkthrough/track?target=%2Fsign-up&source=walkthrough_primary',
+      ),
+    ).toBeTruthy();
     expect(screen.getByRole('link', { name: /open support center/i })).toHaveAttribute(
       'href',
       '/support',
@@ -129,15 +143,25 @@ describe('MarketingHome', () => {
 
     const dashboardLinks = screen.getAllByRole('link', { name: /dashboard/i });
     expect(dashboardLinks.length).toBeGreaterThanOrEqual(2);
-    dashboardLinks.forEach((link) => {
-      expect(link).toHaveAttribute('href', '/today');
-    });
+    expect(dashboardLinks.some((link) => link.getAttribute('href') === '/today')).toBeTruthy();
+    expect(
+      dashboardLinks.some(
+        (link) =>
+          link.getAttribute('href') ===
+          '/landing/walkthrough/track?target=%2Ftoday&source=walkthrough_primary',
+      ),
+    ).toBeTruthy();
 
     const calendarLinks = screen.getAllByRole('link', { name: /open calendar/i });
     expect(calendarLinks.length).toBeGreaterThan(0);
-    calendarLinks.forEach((link) => {
-      expect(link).toHaveAttribute('href', '/calendar');
-    });
+    expect(calendarLinks.some((link) => link.getAttribute('href') === '/calendar')).toBeTruthy();
+    expect(
+      calendarLinks.some(
+        (link) =>
+          link.getAttribute('href') ===
+          '/landing/walkthrough/track?target=%2Fcalendar&source=walkthrough_secondary',
+      ),
+    ).toBeTruthy();
     expect(screen.getByRole('link', { name: /^support$/i })).toHaveAttribute('href', '/support');
     expect(screen.getByRole('link', { name: /see atlas pro/i })).toHaveAttribute(
       'href',
@@ -149,5 +173,25 @@ describe('MarketingHome', () => {
       '/legal/privacy',
     );
     expect(screen.queryByRole('link', { name: /create your account/i })).not.toBeInTheDocument();
+  });
+
+  it('keeps heading hierarchy and walkthrough image alternatives accessible', () => {
+    const { container } = render(<MarketingHome />);
+
+    const h1s = container.querySelectorAll('h1');
+    expect(h1s).toHaveLength(1);
+
+    expect(screen.getByRole('heading', { level: 2, name: /how atlas works/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('img', { name: /desktop habits screen showing active habits/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('img', { name: /mobile account screen showing reminder settings/i }),
+    ).toBeInTheDocument();
+
+    const walkthroughSection = screen.getByTestId('landing-walkthrough-section');
+    expect(within(walkthroughSection).getAllByRole('heading', { level: 3 }).length).toBeGreaterThan(
+      0,
+    );
   });
 });

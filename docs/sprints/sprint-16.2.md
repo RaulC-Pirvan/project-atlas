@@ -194,12 +194,55 @@ Phase 0 contract is documented in:
 
 ### Tasks (6)
 
-- [ ] **Task 2.1**: Optimize screenshots for loading performance
-- [ ] **Task 2.2**: Verify mobile readability and touch-safe spacing
-- [ ] **Task 2.3**: Verify desktop composition and visual hierarchy
-- [ ] **Task 2.4**: Run copy consistency pass against Sprint 16.1 conversion language
-- [ ] **Task 2.5**: Add accessibility QA pass (alt text, landmarks, heading order)
-- [ ] **Task 2.6**: Add observability events for walkthrough section interactions
+- [x] **Task 2.1**: Optimize screenshots for loading performance
+- [x] **Task 2.2**: Verify mobile readability and touch-safe spacing
+- [x] **Task 2.3**: Verify desktop composition and visual hierarchy
+- [x] **Task 2.4**: Run copy consistency pass against Sprint 16.1 conversion language
+- [x] **Task 2.5**: Add accessibility QA pass (alt text, landmarks, heading order)
+- [x] **Task 2.6**: Add observability events for walkthrough section interactions
+
+### Phase 2 Implementation Notes (Current)
+
+#### 2.1 Screenshot loading performance
+
+- Walkthrough screenshot rendering was tuned with explicit `sizes`, `loading='lazy'`, and `decoding='async'` on `next/image`.
+- Desktop screenshots are hidden under `sm` and use `sizes` fallback `0px` on mobile widths to avoid unnecessary mobile fetch pressure.
+- Asset files remain in `public/images/walkthrough/*` and are now consumed with responsive image policy aligned to the Phase 0 contract.
+
+#### 2.2 Mobile readability + touch-safe spacing
+
+- Added dedicated mobile E2E assertions for:
+  - walkthrough section visibility
+  - CTA touch target heights (`>=44px`)
+  - no horizontal viewport overflow
+- Mobile walkthrough flow remains single-column and reading-first.
+
+#### 2.3 Desktop composition + hierarchy
+
+- Added desktop E2E composition assertion that validates side-by-side walkthrough media framing.
+- Desktop layout preserves clear story hierarchy: heading -> step context -> paired visuals.
+
+#### 2.4 Copy consistency with Sprint 16.1
+
+- Walkthrough CTA labels remain aligned with established conversion language:
+  - signed-out: `Start free`, `Sign in`
+  - signed-in: `Go to dashboard`, `Open calendar`
+- Copy remains non-coercive and value-first, consistent with Sprint 16.1 trust framing.
+
+#### 2.5 Accessibility QA baseline
+
+- Added component coverage for heading hierarchy (`single h1`, walkthrough `h2`, step `h3`) and non-empty image alternative text.
+- Walkthrough section includes stable test ids to support deterministic semantic validation.
+
+#### 2.6 Observability events for interactions
+
+- Added landing walkthrough analytics contract:
+  - `landing_walkthrough_view`
+  - `landing_walkthrough_cta_click`
+- Added source/target parsing with guardrails, auth-state-safe target fallback, and duplicate suppression.
+- Added tracked CTA redirect route:
+  - `/landing/walkthrough/track`
+- Landing page now emits walkthrough view analytics on render; tracked CTA route emits click analytics before redirect.
 
 ---
 

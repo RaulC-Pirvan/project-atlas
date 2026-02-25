@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 
+import { buildLandingWalkthroughTrackHref } from '../../lib/analytics/landingWalkthrough';
 import { LegalSupportLinks } from '../legal/LegalSupportLinks';
 import { ThemeToggle } from '../ui/ThemeToggle';
 
@@ -218,6 +219,14 @@ type MarketingHomeProps = {
 
 export function MarketingHome({ isAuthenticated = false }: MarketingHomeProps) {
   const atlasProLink = '/pro?source=hero';
+  const walkthroughPrimaryHref = buildLandingWalkthroughTrackHref({
+    source: 'walkthrough_primary',
+    target: isAuthenticated ? '/today' : '/sign-up',
+  });
+  const walkthroughSecondaryHref = buildLandingWalkthroughTrackHref({
+    source: 'walkthrough_secondary',
+    target: isAuthenticated ? '/calendar' : '/sign-in',
+  });
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-white text-black dark:bg-black dark:text-white">
@@ -413,6 +422,7 @@ export function MarketingHome({ isAuthenticated = false }: MarketingHomeProps) {
 
         <section
           aria-labelledby="landing-walkthrough-heading"
+          data-testid="landing-walkthrough-section"
           className="space-y-8 border-t border-black/10 pt-12 opacity-0 translate-y-3 motion-reduce:translate-y-0 motion-reduce:opacity-100 motion-safe:animate-[rise-in_0.6s_ease-out_forwards] motion-safe:[animation-delay:440ms] dark:border-white/10"
         >
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
@@ -434,6 +444,7 @@ export function MarketingHome({ isAuthenticated = false }: MarketingHomeProps) {
               return (
                 <li
                   key={step.id}
+                  data-testid={`landing-walkthrough-step-${step.id}`}
                   className="rounded-3xl border border-black/10 bg-white/75 p-6 shadow-[0_12px_28px_rgba(0,0,0,0.08)] opacity-0 translate-y-2 motion-reduce:translate-y-0 motion-reduce:opacity-100 motion-safe:animate-[rise-in_0.5s_ease-out_forwards] dark:border-white/10 dark:bg-black/60 dark:shadow-[0_12px_28px_rgba(0,0,0,0.45)] lg:p-8"
                   style={{ animationDelay: `${120 + index * 90}ms` }}
                 >
@@ -465,13 +476,15 @@ export function MarketingHome({ isAuthenticated = false }: MarketingHomeProps) {
                     </div>
 
                     <div className={`grid gap-4 sm:grid-cols-2 ${isOddStep ? 'lg:order-1' : ''}`}>
-                      <figure className="overflow-hidden rounded-2xl border border-black/10 bg-white dark:border-white/10 dark:bg-black">
+                      <figure className="hidden overflow-hidden rounded-2xl border border-black/10 bg-white sm:block dark:border-white/10 dark:bg-black">
                         <Image
                           src={step.desktopImage.src}
                           alt={step.desktopImage.alt}
                           width={1440}
                           height={900}
-                          sizes="(min-width: 1024px) 34vw, (min-width: 640px) 42vw, 100vw"
+                          sizes="(max-width: 639px) 0px, (max-width: 1023px) 46vw, 34vw"
+                          loading="lazy"
+                          decoding="async"
                           className="h-auto w-full"
                         />
                         <figcaption className="border-t border-black/10 px-3 py-2 text-[11px] font-medium uppercase tracking-[0.2em] text-black/55 dark:border-white/10 dark:text-white/55">
@@ -485,7 +498,9 @@ export function MarketingHome({ isAuthenticated = false }: MarketingHomeProps) {
                           alt={step.mobileImage.alt}
                           width={390}
                           height={844}
-                          sizes="(min-width: 1024px) 22vw, (min-width: 640px) 42vw, 100vw"
+                          sizes="(max-width: 639px) 100vw, (max-width: 1023px) 46vw, 22vw"
+                          loading="lazy"
+                          decoding="async"
                           className="h-auto w-full"
                         />
                         <figcaption className="border-t border-black/10 px-3 py-2 text-[11px] font-medium uppercase tracking-[0.2em] text-black/55 dark:border-white/10 dark:text-white/55">
@@ -505,13 +520,15 @@ export function MarketingHome({ isAuthenticated = false }: MarketingHomeProps) {
             </p>
             <div className="mt-4 flex flex-wrap items-center gap-3">
               <Link
-                href={isAuthenticated ? '/today' : '/sign-up'}
+                href={walkthroughPrimaryHref}
+                data-testid="landing-walkthrough-primary-cta"
                 className={`inline-flex h-11 items-center justify-center rounded-full border border-black bg-black px-5 text-xs font-medium uppercase tracking-[0.2em] text-white transition hover:bg-black/90 dark:border-white dark:bg-white dark:text-black dark:hover:bg-white/90 ${focusRingClasses}`}
               >
                 {isAuthenticated ? 'Go to dashboard' : 'Start free'}
               </Link>
               <Link
-                href={isAuthenticated ? '/calendar' : '/sign-in'}
+                href={walkthroughSecondaryHref}
+                data-testid="landing-walkthrough-secondary-cta"
                 className={`inline-flex h-11 items-center justify-center rounded-full border border-black/20 bg-white px-5 text-xs font-medium uppercase tracking-[0.2em] text-black transition hover:bg-black/5 dark:border-white/20 dark:bg-black dark:text-white dark:hover:bg-white/10 ${focusRingClasses}`}
               >
                 {isAuthenticated ? 'Open calendar' : 'Sign in'}

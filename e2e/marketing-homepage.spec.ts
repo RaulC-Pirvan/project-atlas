@@ -136,6 +136,17 @@ test('marketing homepage CTA links navigate to sign-up, sign-in, support, and pr
   expect(signInUrl.searchParams.get('source')).toBe('hero');
 });
 
+test('walkthrough CTA links route correctly through tracked entrypoint', async ({ page }) => {
+  await page.goto('/landing');
+
+  await page.getByTestId('landing-walkthrough-primary-cta').click();
+  await expect(page).toHaveURL(/\/sign-up/, { timeout: 15_000 });
+
+  await page.goto('/landing');
+  await page.getByTestId('landing-walkthrough-secondary-cta').click();
+  await expect(page).toHaveURL(/\/sign-in/, { timeout: 15_000 });
+});
+
 test('signed-out visitors are routed from root to /landing', async ({ page }) => {
   await page.goto('/');
   await expect(page).toHaveURL(/\/landing$/, { timeout: 15_000 });
@@ -162,4 +173,50 @@ test('signed-in visitors can open landing from sidebar and return to dashboard',
     .first()
     .click();
   await expect(page).toHaveURL(/\/today/, { timeout: 15_000 });
+});
+
+test('walkthrough stays readable and touch-safe on mobile viewport', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/landing');
+  await expect(page.getByTestId('landing-walkthrough-section')).toBeVisible();
+  await expect(page.getByRole('heading', { name: /how atlas works/i })).toBeVisible();
+
+  const primaryCta = page.getByTestId('landing-walkthrough-primary-cta');
+  const secondaryCta = page.getByTestId('landing-walkthrough-secondary-cta');
+
+  await expect(primaryCta).toBeVisible();
+  await expect(secondaryCta).toBeVisible();
+
+  const primaryBox = await primaryCta.boundingBox();
+  const secondaryBox = await secondaryCta.boundingBox();
+
+  expect(primaryBox).not.toBeNull();
+  expect(secondaryBox).not.toBeNull();
+  expect((primaryBox?.height ?? 0) >= 44).toBe(true);
+  expect((secondaryBox?.height ?? 0) >= 44).toBe(true);
+
+  const hasHorizontalOverflow = await page.evaluate(
+    () => document.documentElement.scrollWidth > window.innerWidth + 1,
+  );
+  expect(hasHorizontalOverflow).toBe(false);
+});
+
+test('walkthrough keeps two-image composition on desktop', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/landing');
+
+  const createStep = page.getByTestId('landing-walkthrough-step-create');
+  await expect(createStep).toBeVisible();
+
+  const desktopLabel = createStep.getByText('Desktop');
+  const mobileLabel = createStep.getByText('Mobile');
+  await expect(desktopLabel).toBeVisible();
+  await expect(mobileLabel).toBeVisible();
+
+  const desktopBox = await desktopLabel.boundingBox();
+  const mobileBox = await mobileLabel.boundingBox();
+
+  expect(desktopBox).not.toBeNull();
+  expect(mobileBox).not.toBeNull();
+  expect((mobileBox?.x ?? 0) > (desktopBox?.x ?? 0)).toBe(true);
 });

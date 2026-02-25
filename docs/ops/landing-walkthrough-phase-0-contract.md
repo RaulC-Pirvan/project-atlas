@@ -68,9 +68,8 @@ Each step must explicitly communicate:
 
 - Desktop capture target: 1440x900 viewport.
 - Mobile capture target: 390x844 viewport.
-- File format: `.webp`.
-- Compression target: quality 80-85.
-- Keep screenshot text crisp; avoid blur from aggressive compression.
+- File format: `.png` (current v1 capture baseline).
+- Keep screenshot text crisp and avoid aggressive export compression artifacts.
 
 ### Naming convention
 
@@ -80,13 +79,13 @@ Assets live under:
 
 Filename pattern:
 
-- `walkthrough-{step}-{surface}-{viewport}-v1.webp`
+- `walkthrough-{step}-{surface}-{viewport}-v1.png`
 
 Examples:
 
-- `walkthrough-create-habits-desktop-v1.webp`
-- `walkthrough-create-habits-mobile-v1.webp`
-- `walkthrough-complete-today-desktop-v1.webp`
+- `walkthrough-create-habits-desktop-v1.png`
+- `walkthrough-create-habits-mobile-v1.png`
+- `walkthrough-complete-today-desktop-v1.png`
 
 ### Asset acceptance rules
 

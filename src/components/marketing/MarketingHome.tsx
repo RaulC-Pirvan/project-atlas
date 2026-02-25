@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Link from 'next/link';
 
 import { LegalSupportLinks } from '../legal/LegalSupportLinks';
@@ -20,20 +21,87 @@ const corePillars = [
   },
 ];
 
-const workflowSteps = [
+type WalkthroughStep = {
+  id: 'create' | 'remind' | 'complete' | 'review';
+  title: string;
+  description: string;
+  what: string;
+  outcome: string;
+  dailyWhy: string;
+  desktopImage: {
+    src: string;
+    alt: string;
+  };
+  mobileImage: {
+    src: string;
+    alt: string;
+  };
+};
+
+const walkthroughSteps: WalkthroughStep[] = [
   {
-    title: 'Plan once, stay on schedule',
-    description:
-      'Choose active weekdays once, and Atlas shows the right habits each day and in your monthly view.',
+    id: 'create',
+    title: 'Create your routine once',
+    description: 'Add habits and weekdays one time, then let Atlas place them on the right days.',
+    what: 'Use Habits to set titles, weekdays, and optional notes.',
+    outcome: 'Atlas builds your due list automatically for matching calendar days.',
+    dailyWhy: 'You spend less time planning and more time actually doing the habit.',
+    desktopImage: {
+      src: '/images/walkthrough/walkthrough-create-habits-desktop-v1.png',
+      alt: 'Desktop Habits screen showing active habits with weekday schedules.',
+    },
+    mobileImage: {
+      src: '/images/walkthrough/walkthrough-create-habits-mobile-v1.png',
+      alt: 'Mobile Habits screen showing habit setup and schedule controls.',
+    },
   },
   {
-    title: 'Start with a focused daily list',
-    description: 'Open Today to see what is due now and check habits off in seconds.',
+    id: 'remind',
+    title: 'Set reminders that fit your day',
+    description: 'Choose reminder times and quiet-hours behavior that match your real routine.',
+    what: 'Set reminder times and daily reminder preferences from Account and Habits.',
+    outcome: 'Atlas can prompt you at useful times without noisy interruptions.',
+    dailyWhy: 'Helpful nudges arrive when they are useful, not when they are distracting.',
+    desktopImage: {
+      src: '/images/walkthrough/walkthrough-remind-account-desktop-v1.png',
+      alt: 'Desktop Account screen showing reminder settings and schedule controls.',
+    },
+    mobileImage: {
+      src: '/images/walkthrough/walkthrough-remind-account-mobile-v1.png',
+      alt: 'Mobile Account screen showing reminder settings and quiet hours.',
+    },
   },
   {
-    title: 'Use Calendar for context and review',
-    description:
-      'Scan month progress, inspect any date, and keep completion history aligned with real schedules.',
+    id: 'complete',
+    title: 'Complete habits in seconds',
+    description: 'Open Today, check off what is due, and keep momentum with a clear daily list.',
+    what: 'Use Today to mark habits complete for the current day.',
+    outcome: 'Completions, streak context, and progress update immediately.',
+    dailyWhy: 'A fast daily loop keeps consistency realistic even on busy days.',
+    desktopImage: {
+      src: '/images/walkthrough/walkthrough-complete-today-desktop-v1.png',
+      alt: 'Desktop Today screen showing a daily list with completed habits.',
+    },
+    mobileImage: {
+      src: '/images/walkthrough/walkthrough-complete-today-mobile-v1.png',
+      alt: 'Mobile Today screen showing tap-friendly habit completion controls.',
+    },
+  },
+  {
+    id: 'review',
+    title: 'Review progress with context',
+    description: 'Use Calendar to see what happened over time and inspect any specific day.',
+    what: 'Open Calendar for month-level progress and per-day completion details.',
+    outcome: 'Patterns are visible, including stronger days and missed rhythm.',
+    dailyWhy: 'Review helps you adjust early instead of repeating unhelpful patterns.',
+    desktopImage: {
+      src: '/images/walkthrough/walkthrough-review-calendar-desktop-v1.png',
+      alt: 'Desktop Calendar screen showing monthly progress and selected-day details.',
+    },
+    mobileImage: {
+      src: '/images/walkthrough/walkthrough-review-calendar-mobile-v1.png',
+      alt: 'Mobile Calendar screen showing month tiles and day detail panel.',
+    },
   },
 ];
 
@@ -343,33 +411,113 @@ export function MarketingHome({ isAuthenticated = false }: MarketingHomeProps) {
           </ul>
         </section>
 
-        <section className="space-y-8 border-t border-black/10 pt-12 opacity-0 translate-y-3 motion-reduce:translate-y-0 motion-reduce:opacity-100 motion-safe:animate-[rise-in_0.6s_ease-out_forwards] motion-safe:[animation-delay:440ms] dark:border-white/10">
+        <section
+          aria-labelledby="landing-walkthrough-heading"
+          className="space-y-8 border-t border-black/10 pt-12 opacity-0 translate-y-3 motion-reduce:translate-y-0 motion-reduce:opacity-100 motion-safe:animate-[rise-in_0.6s_ease-out_forwards] motion-safe:[animation-delay:440ms] dark:border-white/10"
+        >
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-            <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-              One workflow across every day.
+            <h2
+              id="landing-walkthrough-heading"
+              className="text-2xl font-semibold tracking-tight sm:text-3xl"
+            >
+              How Atlas works.
             </h2>
             <p className="max-w-xl text-sm leading-relaxed text-black/60 dark:text-white/60">
-              Atlas keeps daily check-ins fast while preserving the monthly context needed for
-              honest progress.
+              Follow one simple sequence: create, remind, complete, and review. Each step is shown
+              with real Atlas screens.
             </p>
           </div>
 
-          <ol className="grid gap-6 md:grid-cols-3">
-            {workflowSteps.map((step, index) => (
-              <li
-                key={step.title}
-                className="rounded-2xl border border-black/10 bg-white/70 p-6 text-sm text-black/70 shadow-[0_10px_24px_rgba(0,0,0,0.06)] dark:border-white/10 dark:bg-black/60 dark:text-white/70 dark:shadow-[0_10px_24px_rgba(0,0,0,0.45)]"
-              >
-                <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-black/50 dark:text-white/50">
-                  Step {index + 1}
-                </p>
-                <h3 className="mt-2 text-base font-semibold text-black dark:text-white">
-                  {step.title}
-                </h3>
-                <p className="mt-3 leading-relaxed">{step.description}</p>
-              </li>
-            ))}
+          <ol className="space-y-6">
+            {walkthroughSteps.map((step, index) => {
+              const isOddStep = index % 2 === 1;
+              return (
+                <li
+                  key={step.id}
+                  className="rounded-3xl border border-black/10 bg-white/75 p-6 shadow-[0_12px_28px_rgba(0,0,0,0.08)] opacity-0 translate-y-2 motion-reduce:translate-y-0 motion-reduce:opacity-100 motion-safe:animate-[rise-in_0.5s_ease-out_forwards] dark:border-white/10 dark:bg-black/60 dark:shadow-[0_12px_28px_rgba(0,0,0,0.45)] lg:p-8"
+                  style={{ animationDelay: `${120 + index * 90}ms` }}
+                >
+                  <div className="grid gap-6 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:items-start">
+                    <div className={`space-y-4 ${isOddStep ? 'lg:order-2' : ''}`}>
+                      <p className="font-mono text-[11px] uppercase tracking-[0.24em] text-black/50 dark:text-white/50">
+                        Step {index + 1} - {step.id}
+                      </p>
+                      <h3 className="text-xl font-semibold tracking-tight text-black dark:text-white sm:text-2xl">
+                        {step.title}
+                      </h3>
+                      <p className="text-sm leading-relaxed text-black/70 dark:text-white/70">
+                        {step.description}
+                      </p>
+                      <ul className="space-y-2 text-sm leading-relaxed text-black/70 dark:text-white/70">
+                        <li>
+                          <span className="font-medium text-black dark:text-white">Do:</span>{' '}
+                          {step.what}
+                        </li>
+                        <li>
+                          <span className="font-medium text-black dark:text-white">Get:</span>{' '}
+                          {step.outcome}
+                        </li>
+                        <li>
+                          <span className="font-medium text-black dark:text-white">Why:</span>{' '}
+                          {step.dailyWhy}
+                        </li>
+                      </ul>
+                    </div>
+
+                    <div className={`grid gap-4 sm:grid-cols-2 ${isOddStep ? 'lg:order-1' : ''}`}>
+                      <figure className="overflow-hidden rounded-2xl border border-black/10 bg-white dark:border-white/10 dark:bg-black">
+                        <Image
+                          src={step.desktopImage.src}
+                          alt={step.desktopImage.alt}
+                          width={1440}
+                          height={900}
+                          sizes="(min-width: 1024px) 34vw, (min-width: 640px) 42vw, 100vw"
+                          className="h-auto w-full"
+                        />
+                        <figcaption className="border-t border-black/10 px-3 py-2 text-[11px] font-medium uppercase tracking-[0.2em] text-black/55 dark:border-white/10 dark:text-white/55">
+                          Desktop
+                        </figcaption>
+                      </figure>
+
+                      <figure className="overflow-hidden rounded-2xl border border-black/10 bg-white dark:border-white/10 dark:bg-black">
+                        <Image
+                          src={step.mobileImage.src}
+                          alt={step.mobileImage.alt}
+                          width={390}
+                          height={844}
+                          sizes="(min-width: 1024px) 22vw, (min-width: 640px) 42vw, 100vw"
+                          className="h-auto w-full"
+                        />
+                        <figcaption className="border-t border-black/10 px-3 py-2 text-[11px] font-medium uppercase tracking-[0.2em] text-black/55 dark:border-white/10 dark:text-white/55">
+                          Mobile
+                        </figcaption>
+                      </figure>
+                    </div>
+                  </div>
+                </li>
+              );
+            })}
           </ol>
+
+          <div className="rounded-2xl border border-black/10 bg-white/80 p-5 dark:border-white/10 dark:bg-black/65">
+            <p className="text-sm leading-relaxed text-black/70 dark:text-white/70">
+              Start your first cycle now, then use the same flow every day.
+            </p>
+            <div className="mt-4 flex flex-wrap items-center gap-3">
+              <Link
+                href={isAuthenticated ? '/today' : '/sign-up'}
+                className={`inline-flex h-11 items-center justify-center rounded-full border border-black bg-black px-5 text-xs font-medium uppercase tracking-[0.2em] text-white transition hover:bg-black/90 dark:border-white dark:bg-white dark:text-black dark:hover:bg-white/90 ${focusRingClasses}`}
+              >
+                {isAuthenticated ? 'Go to dashboard' : 'Start free'}
+              </Link>
+              <Link
+                href={isAuthenticated ? '/calendar' : '/sign-in'}
+                className={`inline-flex h-11 items-center justify-center rounded-full border border-black/20 bg-white px-5 text-xs font-medium uppercase tracking-[0.2em] text-black transition hover:bg-black/5 dark:border-white/20 dark:bg-black dark:text-white dark:hover:bg-white/10 ${focusRingClasses}`}
+              >
+                {isAuthenticated ? 'Open calendar' : 'Sign in'}
+              </Link>
+            </div>
+          </div>
         </section>
 
         <section className="space-y-8 border-t border-black/10 pt-12 opacity-0 translate-y-3 motion-reduce:translate-y-0 motion-reduce:opacity-100 motion-safe:animate-[rise-in_0.6s_ease-out_forwards] motion-safe:[animation-delay:520ms] dark:border-white/10">

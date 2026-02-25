@@ -68,6 +68,17 @@ test('marketing homepage introduces the product for signed-out visitors', async 
   await expect(page.getByRole('heading', { name: /habits that follow your week/i })).toBeVisible();
   await expect(page.getByRole('link', { name: /create your account/i })).toBeVisible();
   await expect(page.getByRole('link', { name: /^support$/i })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /how atlas works/i })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /create your routine once/i })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: /set reminders that fit your day/i }),
+  ).toBeVisible();
+  await expect(page.getByRole('heading', { name: /complete habits in seconds/i })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /review progress with context/i })).toBeVisible();
+  await expect(page.getByText(/step 1 - create/i)).toBeVisible();
+  await expect(page.getByText(/step 2 - remind/i)).toBeVisible();
+  await expect(page.getByText(/step 3 - complete/i)).toBeVisible();
+  await expect(page.getByText(/step 4 - review/i)).toBeVisible();
   await expect(page.getByRole('heading', { name: /today \+ calendar workflow/i })).toBeVisible();
   await expect(page.getByRole('heading', { name: /insights \(analytics\)/i })).toBeVisible();
   await expect(page.getByRole('heading', { name: /achievements \+ milestones/i })).toBeVisible();

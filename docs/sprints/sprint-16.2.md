@@ -136,13 +136,57 @@ Phase 0 contract is documented in:
 
 ### Tasks (7)
 
-- [ ] **Task 1.1**: Implement walkthrough section scaffold on landing
-- [ ] **Task 1.2**: Add `create` step content + real screenshot pair
-- [ ] **Task 1.3**: Add `remind` step content + real screenshot pair
-- [ ] **Task 1.4**: Add `complete` step content + real screenshot pair
-- [ ] **Task 1.5**: Add `review` step content + real screenshot pair
-- [ ] **Task 1.6**: Wire CTA actions per auth state
-- [ ] **Task 1.7**: Add reduced-motion friendly transitions and fallback behavior
+- [x] **Task 1.1**: Implement walkthrough section scaffold on landing
+- [x] **Task 1.2**: Add `create` step content + real screenshot pair
+- [x] **Task 1.3**: Add `remind` step content + real screenshot pair
+- [x] **Task 1.4**: Add `complete` step content + real screenshot pair
+- [x] **Task 1.5**: Add `review` step content + real screenshot pair
+- [x] **Task 1.6**: Wire CTA actions per auth state
+- [x] **Task 1.7**: Add reduced-motion friendly transitions and fallback behavior
+
+### Phase 1 Implementation Notes (Current)
+
+#### 1.1 Walkthrough scaffold
+
+- Landing now includes a dedicated `How Atlas works` section rendered as an ordered 4-step narrative.
+- Section structure follows the locked sequence and semantic hierarchy:
+  - `h2` section heading
+  - `ol` sequence
+  - per-step `h3` titles
+
+#### 1.2-1.5 Step content + real screenshot pairs
+
+- Added canonical steps:
+  - `create`
+  - `remind`
+  - `complete`
+  - `review`
+- Each step now includes:
+  - value-first heading and summary
+  - explicit `Do / Get / Why` copy contract
+  - desktop and mobile real-product screenshot pair
+- Asset set added under `public/images/walkthrough/`:
+  - `walkthrough-create-habits-desktop-v1.png`
+  - `walkthrough-create-habits-mobile-v1.png`
+  - `walkthrough-remind-account-desktop-v1.png`
+  - `walkthrough-remind-account-mobile-v1.png`
+  - `walkthrough-complete-today-desktop-v1.png`
+  - `walkthrough-complete-today-mobile-v1.png`
+  - `walkthrough-review-calendar-desktop-v1.png`
+  - `walkthrough-review-calendar-mobile-v1.png`
+
+#### 1.6 Auth-aware CTA wiring
+
+- Walkthrough CTA block now branches by auth state:
+  - signed-out: primary `/sign-up` (`Start free`), secondary `/sign-in` (`Sign in`)
+  - signed-in: primary `/today` (`Go to dashboard`), secondary `/calendar` (`Open calendar`)
+- Existing hero/footer CTA behavior remains unchanged.
+
+#### 1.7 Reduced-motion support
+
+- Walkthrough section and step cards include motion-safe reveal classes.
+- `motion-reduce` fallbacks preserve readability without movement.
+- Existing focus-ring and keyboard CTA accessibility behavior is preserved.
 
 ---
 

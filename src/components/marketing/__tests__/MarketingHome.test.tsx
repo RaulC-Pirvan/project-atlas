@@ -53,6 +53,22 @@ describe('MarketingHome', () => {
   it('renders the expanded Phase 1 narrative sections', () => {
     render(<MarketingHome />);
 
+    expect(screen.getByRole('heading', { name: /how atlas works/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /create your routine once/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: /set reminders that fit your day/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: /complete habits in seconds/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: /review progress with context/i }),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/step 1 - create/i)).toBeInTheDocument();
+    expect(screen.getByText(/step 2 - remind/i)).toBeInTheDocument();
+    expect(screen.getByText(/step 3 - complete/i)).toBeInTheDocument();
+    expect(screen.getByText(/step 4 - review/i)).toBeInTheDocument();
+
     expect(
       screen.getByRole('heading', { name: /today \+ calendar workflow/i }),
     ).toBeInTheDocument();
@@ -97,7 +113,11 @@ describe('MarketingHome', () => {
       'href',
       '/pro?source=hero',
     );
-    expect(screen.getByRole('link', { name: /start free/i })).toHaveAttribute('href', '/sign-up');
+    const freeLinks = screen.getAllByRole('link', { name: /start free/i });
+    expect(freeLinks.length).toBeGreaterThan(0);
+    freeLinks.forEach((link) => {
+      expect(link).toHaveAttribute('href', '/sign-up');
+    });
     expect(screen.getByRole('link', { name: /open support center/i })).toHaveAttribute(
       'href',
       '/support',
@@ -113,10 +133,11 @@ describe('MarketingHome', () => {
       expect(link).toHaveAttribute('href', '/today');
     });
 
-    expect(screen.getByRole('link', { name: /open calendar/i })).toHaveAttribute(
-      'href',
-      '/calendar',
-    );
+    const calendarLinks = screen.getAllByRole('link', { name: /open calendar/i });
+    expect(calendarLinks.length).toBeGreaterThan(0);
+    calendarLinks.forEach((link) => {
+      expect(link).toHaveAttribute('href', '/calendar');
+    });
     expect(screen.getByRole('link', { name: /^support$/i })).toHaveAttribute('href', '/support');
     expect(screen.getByRole('link', { name: /see atlas pro/i })).toHaveAttribute(
       'href',

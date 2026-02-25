@@ -1,7 +1,7 @@
 # Sprint 16.2: Landing Walkthrough Narrative - Project Atlas
 
 **Duration**: TBD (5-7 days)  
-**Status**: In Progress  
+**Status**: Completed  
 **Theme**: Ship a guided, value-first landing walkthrough using real product surfaces to improve activation and upgrade intent quality.
 
 ---
@@ -34,11 +34,11 @@ next actions (sign up, first habit, first completion) with reduced confusion.
 
 ### Included
 
-- [ ] Add guided `how Atlas works` walkthrough on landing
-- [ ] Use real UI examples/screenshots (`create -> remind -> complete -> review`)
-- [ ] Keep language non-technical and value-first
-- [ ] Add responsive and E2E coverage for walkthrough content + CTA flow
-- [ ] Preserve current navigation and auth-aware route behavior
+- [x] Add guided `how Atlas works` walkthrough on landing
+- [x] Use real UI examples/screenshots (`create -> remind -> complete -> review`)
+- [x] Keep language non-technical and value-first
+- [x] Add responsive and E2E coverage for walkthrough content + CTA flow
+- [x] Preserve current navigation and auth-aware route behavior
 
 ### Excluded (this sprint)
 
@@ -250,24 +250,67 @@ Phase 0 contract is documented in:
 
 ### Tasks (6)
 
-- [ ] **Task 3.1**: Add component tests for walkthrough presence/order/content
-- [ ] **Task 3.2**: Add E2E coverage for signed-out walkthrough + CTA path
-- [ ] **Task 3.3**: Add E2E coverage for signed-in walkthrough + CTA path
-- [ ] **Task 3.4**: Add responsive regression checks for key breakpoints
-- [ ] **Task 3.5**: Run copy/legal consistency review
-- [ ] **Task 3.6**: Finalize publish-ready walkthrough artifacts
+- [x] **Task 3.1**: Add component tests for walkthrough presence/order/content
+- [x] **Task 3.2**: Add E2E coverage for signed-out walkthrough + CTA path
+- [x] **Task 3.3**: Add E2E coverage for signed-in walkthrough + CTA path
+- [x] **Task 3.4**: Add responsive regression checks for key breakpoints
+- [x] **Task 3.5**: Run copy/legal consistency review
+- [x] **Task 3.6**: Finalize publish-ready walkthrough artifacts
+
+### Phase 3 Implementation Notes (Current)
+
+#### 3.1 Component coverage (presence/order/content)
+
+- Extended `MarketingHome` component tests to assert:
+  - walkthrough section presence
+  - stable step order (`create -> remind -> complete -> review`)
+  - per-step content contract (`Do / Get / Why`) for representative steps
+  - heading hierarchy and walkthrough image alt coverage
+
+#### 3.2 Signed-out walkthrough CTA coverage
+
+- E2E now includes dedicated signed-out walkthrough CTA assertions:
+  - primary walkthrough CTA redirects to `/sign-up`
+  - secondary walkthrough CTA redirects to `/sign-in`
+  - path is verified through tracked walkthrough CTA route
+
+#### 3.3 Signed-in walkthrough CTA coverage
+
+- Added signed-in walkthrough CTA E2E path coverage:
+  - primary walkthrough CTA redirects to `/today`
+  - secondary walkthrough CTA redirects to `/calendar`
+
+#### 3.4 Responsive regression checks
+
+- Added key-breakpoint E2E regression checks for:
+  - mobile (`390x844`)
+  - tablet (`768x1024`)
+  - desktop (`1280x900` / `1440x900`)
+- Assertions include readability and no horizontal overflow, plus desktop media composition checks.
+
+#### 3.5 Copy/legal consistency review
+
+- Added legal/product review artifact:
+  - `docs/ops/landing-walkthrough-legal-product-review.md`
+- Review confirms value-first messaging, Free usefulness framing, and no legal over-commitments.
+
+#### 3.6 Publish-ready walkthrough artifacts
+
+- Added publish artifact bundle:
+  - `docs/ops/landing-walkthrough-publish-artifacts.md`
+- Bundle includes implementation surfaces, analytics contracts, asset inventory, verification tests, and execution evidence.
 
 ---
 
 ## Environment and Config
 
-Expected control surface:
+Finalized control surface:
 
 - `ANALYTICS_ENABLED`
 - `LANDING_WALKTHROUGH_ENABLED`
 - `NEXTAUTH_URL`
 
-Names are placeholders; final keys are locked during implementation.
+These keys are now locked for Sprint 16.2 surfaces.
 
 ---
 
@@ -295,13 +338,13 @@ Names are placeholders; final keys are locked during implementation.
 
 ## Definition of Done
 
-1. [ ] Landing includes a guided, clear walkthrough narrative.
-2. [ ] Walkthrough uses real current-product screenshots.
-3. [ ] Copy remains non-technical and value-first.
-4. [ ] CTA behavior is correct for signed-out and signed-in users.
-5. [ ] Responsive and accessibility quality is validated.
-6. [ ] Component and E2E coverage passes for walkthrough and CTA flows.
-7. [ ] CI quality gates pass for touched surfaces.
+1. [x] Landing includes a guided, clear walkthrough narrative.
+2. [x] Walkthrough uses real current-product screenshots.
+3. [x] Copy remains non-technical and value-first.
+4. [x] CTA behavior is correct for signed-out and signed-in users.
+5. [x] Responsive and accessibility quality is validated.
+6. [x] Component and E2E coverage passes for walkthrough and CTA flows.
+7. [x] CI quality gates pass for touched surfaces.
 
 ---
 
@@ -311,4 +354,6 @@ Names are placeholders; final keys are locked during implementation.
 - [Sprint 16.3 Plan](./sprint-16.3.md)
 - [Sprint 5.2 Plan](./sprint-5.2.md)
 - [Phase 0 Contract Artifact](../ops/landing-walkthrough-phase-0-contract.md)
+- [Phase 3 Legal/Product Review](../ops/landing-walkthrough-legal-product-review.md)
+- [Phase 3 Publish Artifact Set](../ops/landing-walkthrough-publish-artifacts.md)
 - [Roadmap](../roadmap.md)

@@ -194,4 +194,35 @@ describe('MarketingHome', () => {
       0,
     );
   });
+
+  it('keeps walkthrough step order and Do/Get/Why content contract stable', () => {
+    const { container } = render(<MarketingHome />);
+
+    const orderedStepIds = Array.from(
+      container.querySelectorAll<HTMLElement>('[data-testid^="landing-walkthrough-step-"]'),
+    ).map((element) => element.dataset.testid);
+
+    expect(orderedStepIds).toEqual([
+      'landing-walkthrough-step-create',
+      'landing-walkthrough-step-remind',
+      'landing-walkthrough-step-complete',
+      'landing-walkthrough-step-review',
+    ]);
+
+    const createStep = screen.getByTestId('landing-walkthrough-step-create');
+    expect(within(createStep).getByText(/use habits to set titles, weekdays/i)).toBeInTheDocument();
+    expect(
+      within(createStep).getByText(/atlas builds your due list automatically/i),
+    ).toBeInTheDocument();
+    expect(
+      within(createStep).getByText(/you spend less time planning and more time/i),
+    ).toBeInTheDocument();
+
+    const reviewStep = screen.getByTestId('landing-walkthrough-step-review');
+    expect(
+      within(reviewStep).getByText(/open calendar for month-level progress/i),
+    ).toBeInTheDocument();
+    expect(within(reviewStep).getByText(/patterns are visible/i)).toBeInTheDocument();
+    expect(within(reviewStep).getByText(/review helps you adjust early/i)).toBeInTheDocument();
+  });
 });

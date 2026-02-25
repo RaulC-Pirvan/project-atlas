@@ -147,6 +147,21 @@ test('walkthrough CTA links route correctly through tracked entrypoint', async (
   await expect(page).toHaveURL(/\/sign-in/, { timeout: 15_000 });
 });
 
+test('signed-in walkthrough CTA links route to dashboard and calendar', async ({
+  page,
+  request,
+}) => {
+  await createVerifiedUser(page, request, 'marketing-walkthrough-auth');
+  await page.goto('/landing');
+
+  await page.getByTestId('landing-walkthrough-primary-cta').click();
+  await expect(page).toHaveURL(/\/today/, { timeout: 15_000 });
+
+  await page.goto('/landing');
+  await page.getByTestId('landing-walkthrough-secondary-cta').click();
+  await expect(page).toHaveURL(/\/calendar/, { timeout: 15_000 });
+});
+
 test('signed-out visitors are routed from root to /landing', async ({ page }) => {
   await page.goto('/');
   await expect(page).toHaveURL(/\/landing$/, { timeout: 15_000 });
@@ -219,4 +234,35 @@ test('walkthrough keeps two-image composition on desktop', async ({ page }) => {
   expect(desktopBox).not.toBeNull();
   expect(mobileBox).not.toBeNull();
   expect((mobileBox?.x ?? 0) > (desktopBox?.x ?? 0)).toBe(true);
+});
+
+test('walkthrough remains stable across key responsive breakpoints', async ({ page }) => {
+  const breakpoints = [
+    { name: 'mobile', width: 390, height: 844 },
+    { name: 'tablet', width: 768, height: 1024 },
+    { name: 'desktop', width: 1280, height: 900 },
+  ] as const;
+
+  for (const breakpoint of breakpoints) {
+    await page.setViewportSize({ width: breakpoint.width, height: breakpoint.height });
+    await page.goto('/landing');
+
+    await expect(page.getByRole('heading', { name: /how atlas works/i })).toBeVisible();
+    await expect(page.getByTestId('landing-walkthrough-step-create')).toBeVisible();
+    await expect(page.getByTestId('landing-walkthrough-step-review')).toBeVisible();
+
+    const hasHorizontalOverflow = await page.evaluate(
+      () => document.documentElement.scrollWidth > window.innerWidth + 1,
+    );
+    expect(hasHorizontalOverflow).toBe(false);
+
+    if (breakpoint.name === 'desktop') {
+      await expect(
+        page.getByTestId('landing-walkthrough-step-create').getByText('Desktop'),
+      ).toBeVisible();
+      await expect(
+        page.getByTestId('landing-walkthrough-step-create').getByText('Mobile'),
+      ).toBeVisible();
+    }
+  }
 });

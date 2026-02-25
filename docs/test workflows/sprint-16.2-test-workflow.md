@@ -1,6 +1,6 @@
 # Sprint 16.2 Test Workflow - Landing Walkthrough Narrative
 
-**Status**: Planned  
+**Status**: Completed  
 **Last Updated**: February 25, 2026
 
 ---
@@ -99,11 +99,12 @@ This workflow verifies messaging clarity, asset realism, and route correctness.
 ### Workflow 6: Responsive behavior [ ]
 
 1. Validate walkthrough on mobile viewport.
-2. Validate walkthrough on desktop viewport.
+2. Validate walkthrough on tablet viewport.
+3. Validate walkthrough on desktop viewport.
 
 **Expected**:
 
-- Layout is readable and stable on both sizes.
+- Layout is readable and stable across mobile/tablet/desktop.
 - Screenshot framing and text hierarchy remain clean.
 
 ### Workflow 7: Accessibility baseline [ ]
@@ -170,6 +171,8 @@ Sprint 16.2 is considered verified when:
 
 - [Sprint 16.2 Plan](../sprints/sprint-16.2.md)
 - [Phase 0 Contract Artifact](../ops/landing-walkthrough-phase-0-contract.md)
+- [Phase 3 Legal/Product Review](../ops/landing-walkthrough-legal-product-review.md)
+- [Phase 3 Publish Artifact Set](../ops/landing-walkthrough-publish-artifacts.md)
 - [Sprint 16.1 Plan](../sprints/sprint-16.1.md)
 - [Sprint 5.2 Plan](../sprints/sprint-5.2.md)
 - [Roadmap](../roadmap.md)

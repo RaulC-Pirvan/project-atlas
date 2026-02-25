@@ -423,10 +423,10 @@ Launch non-goal (explicit):
 
 ### Sprint 16.2: Landing Walkthrough Narrative
 
-- [ ] Add guided `how Atlas works` walkthrough on landing
-- [ ] Use real UI examples/screenshots (`create -> remind -> complete -> review`)
-- [ ] Keep language non-technical and value-first
-- [ ] Add responsive and E2E coverage for walkthrough content + CTA flow
+- [x] Add guided `how Atlas works` walkthrough on landing
+- [x] Use real UI examples/screenshots (`create -> remind -> complete -> review`)
+- [x] Keep language non-technical and value-first
+- [x] Add responsive and E2E coverage for walkthrough content + CTA flow
 
 ---
 

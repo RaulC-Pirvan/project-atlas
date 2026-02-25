@@ -10,7 +10,7 @@
 Sprint 16.2 validates landing walkthrough quality and activation clarity:
 
 - Guided `create -> remind -> complete -> review` narrative
-- Real product screenshot usage (desktop + mobile)
+- Live code-rendered preview usage (no static screenshots)
 - Non-technical, value-first language
 - Auth-aware CTA behavior
 - Responsive and E2E coverage for walkthrough interactions
@@ -50,7 +50,7 @@ This workflow verifies messaging clarity, asset realism, and route correctness.
 
 ## Manual QA Checklist
 
-### Workflow 1: Walkthrough structure is present and ordered [ ]
+### Workflow 1: Walkthrough structure is present and ordered [x]
 
 1. Open `/landing`.
 2. Review walkthrough sequence.
@@ -60,16 +60,17 @@ This workflow verifies messaging clarity, asset realism, and route correctness.
 - Steps appear in order: `create`, `remind`, `complete`, `review`.
 - Narrative is coherent and easy to scan.
 
-### Workflow 2: Real screenshot authenticity [ ]
+### Workflow 2: Live preview authenticity [x]
 
-1. Inspect walkthrough images across steps.
+1. Inspect walkthrough previews across steps.
 
 **Expected**:
 
-- Assets reflect real Atlas UI surfaces.
-- No placeholder/mockup visuals remain.
+- Previews are rendered from component code, not static image files.
+- Preview structures reflect real Atlas UI patterns.
+- Preview layout adapts cleanly across viewport sizes.
 
-### Workflow 3: Copy quality and readability [ ]
+### Workflow 3: Copy quality and readability [x]
 
 1. Review walkthrough text and headings.
 
@@ -78,7 +79,7 @@ This workflow verifies messaging clarity, asset realism, and route correctness.
 - Copy is non-technical and value-first.
 - Claims are clear, concrete, and consistent.
 
-### Workflow 4: Signed-out CTA behavior [ ]
+### Workflow 4: Signed-out CTA behavior [x]
 
 1. Use primary CTA from walkthrough as signed-out user.
 
@@ -87,7 +88,7 @@ This workflow verifies messaging clarity, asset realism, and route correctness.
 - Route goes to auth entrypoint.
 - No broken or ambiguous action targets.
 
-### Workflow 5: Signed-in CTA behavior [ ]
+### Workflow 5: Signed-in CTA behavior [x]
 
 1. Repeat CTA action while signed in.
 
@@ -96,7 +97,7 @@ This workflow verifies messaging clarity, asset realism, and route correctness.
 - Route goes to dashboard/app-intended destination.
 - CTA label and action remain context-correct.
 
-### Workflow 6: Responsive behavior [ ]
+### Workflow 6: Responsive behavior [x]
 
 1. Validate walkthrough on mobile viewport.
 2. Validate walkthrough on tablet viewport.
@@ -105,9 +106,10 @@ This workflow verifies messaging clarity, asset realism, and route correctness.
 **Expected**:
 
 - Layout is readable and stable across mobile/tablet/desktop.
-- Screenshot framing and text hierarchy remain clean.
+- Live preview panel remains readable at each breakpoint.
+- Preview framing and text hierarchy remain clean.
 
-### Workflow 7: Accessibility baseline [ ]
+### Workflow 7: Accessibility baseline [x]
 
 1. Verify image alt text and heading order.
 2. Verify keyboard focus movement through CTA elements.
@@ -158,7 +160,7 @@ npm run ci:full
 Sprint 16.2 is considered verified when:
 
 1. Walkthrough sequence is present and clear.
-2. Real product screenshots are used consistently.
+2. Live preview components are used consistently.
 3. Copy remains value-first and non-technical.
 4. Signed-out and signed-in CTA flows behave correctly.
 5. Mobile and desktop responsive behavior is validated.

@@ -216,24 +216,28 @@ test('walkthrough stays readable and touch-safe on mobile viewport', async ({ pa
   expect(hasHorizontalOverflow).toBe(false);
 });
 
-test('walkthrough keeps two-image composition on desktop', async ({ page }) => {
+test('walkthrough keeps live preview readability on desktop', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/landing');
 
   const createStep = page.getByTestId('landing-walkthrough-step-create');
   await expect(createStep).toBeVisible();
 
-  const desktopLabel = createStep.getByText('Desktop');
-  const mobileLabel = createStep.getByText('Mobile');
-  await expect(desktopLabel).toBeVisible();
-  await expect(mobileLabel).toBeVisible();
+  const previewLabel = createStep.getByText(/live component preview/i);
+  await expect(previewLabel).toBeVisible();
 
-  const desktopBox = await desktopLabel.boundingBox();
-  const mobileBox = await mobileLabel.boundingBox();
+  const preview = createStep.getByRole('img', {
+    name: /live create walkthrough preview/i,
+  });
+  await expect(preview).toBeVisible();
 
-  expect(desktopBox).not.toBeNull();
-  expect(mobileBox).not.toBeNull();
-  expect((mobileBox?.x ?? 0) > (desktopBox?.x ?? 0)).toBe(true);
+  const imageBox = await preview.boundingBox();
+  const stepBox = await createStep.boundingBox();
+
+  expect(imageBox).not.toBeNull();
+  expect(stepBox).not.toBeNull();
+  expect((imageBox?.width ?? 0) >= (stepBox?.width ?? 0) * 0.58).toBe(true);
+  await expect(createStep.locator('img')).toHaveCount(0);
 });
 
 test('walkthrough remains stable across key responsive breakpoints', async ({ page }) => {
@@ -258,11 +262,11 @@ test('walkthrough remains stable across key responsive breakpoints', async ({ pa
 
     if (breakpoint.name === 'desktop') {
       await expect(
-        page.getByTestId('landing-walkthrough-step-create').getByText('Desktop'),
+        page.getByTestId('landing-walkthrough-step-create').getByText(/live component preview/i),
       ).toBeVisible();
-      await expect(
-        page.getByTestId('landing-walkthrough-step-create').getByText('Mobile'),
-      ).toBeVisible();
+      await expect(page.getByTestId('landing-walkthrough-step-create').locator('img')).toHaveCount(
+        0,
+      );
     }
   }
 });

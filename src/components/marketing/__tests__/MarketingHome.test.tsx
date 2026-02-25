@@ -175,7 +175,7 @@ describe('MarketingHome', () => {
     expect(screen.queryByRole('link', { name: /create your account/i })).not.toBeInTheDocument();
   });
 
-  it('keeps heading hierarchy and walkthrough image alternatives accessible', () => {
+  it('keeps heading hierarchy and walkthrough live previews accessible', () => {
     const { container } = render(<MarketingHome />);
 
     const h1s = container.querySelectorAll('h1');
@@ -183,11 +183,18 @@ describe('MarketingHome', () => {
 
     expect(screen.getByRole('heading', { level: 2, name: /how atlas works/i })).toBeInTheDocument();
     expect(
-      screen.getByRole('img', { name: /desktop habits screen showing active habits/i }),
+      screen.getByRole('img', { name: /live create walkthrough preview/i }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole('img', { name: /mobile account screen showing reminder settings/i }),
+      screen.getByRole('img', { name: /live remind walkthrough preview/i }),
     ).toBeInTheDocument();
+    expect(screen.getByTestId('landing-walkthrough-preview-create')).toBeInTheDocument();
+    expect(screen.getByTestId('landing-walkthrough-preview-remind')).toBeInTheDocument();
+    expect(screen.getByTestId('landing-walkthrough-preview-complete')).toBeInTheDocument();
+    expect(screen.getByTestId('landing-walkthrough-preview-review')).toBeInTheDocument();
+    expect(
+      container.querySelectorAll('[data-testid^="landing-walkthrough-step-"] img'),
+    ).toHaveLength(0);
 
     const walkthroughSection = screen.getByTestId('landing-walkthrough-section');
     expect(within(walkthroughSection).getAllByRole('heading', { level: 3 }).length).toBeGreaterThan(

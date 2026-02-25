@@ -1,6 +1,7 @@
 const PUBLIC_PATHS = new Set([
   '/',
   '/landing',
+  '/landing/walkthrough/track',
   '/pro',
   '/pro/upgrade',
   '/sign-in',

@@ -72,6 +72,7 @@ A habit is defined independently of dates.
 - Habits page mobile actions are tuned for symmetry (2x2 action grid) and danger-forward delete affordances.
 - Authenticated screens use `AppShell` + `AppSidebar` with desktop core routes (`Home/Today/Calendar/Habits/Insights/Achievements/Account`) plus bottom utility actions (`Support` -> `/support#contact-form`, `Legal` -> `/legal/changes`, `Sign out`), and mobile primary nav (`Today/Calendar/Habits`) with animated `More` actions (`Home/Insights/Achievements/Account`) plus utility actions (`Support/Legal/Sign out`).
 - Marketing homepage expansion is live with full product narrative, refined non-technical messaging, Free vs Pro comparison, Pro value callouts, and support discoverability entry points.
+- Sprint 16.2 landing walkthrough is implemented on `/landing` as a live, code-rendered `create -> remind -> complete -> review` sequence with auth-aware tracked CTAs, responsive/mobile hardening, and component + E2E coverage.
 - Root routing is auth-aware: signed-out users visiting `/` are routed to canonical landing `/landing`, while signed-in users are routed to `/today`.
 - Signed-in users can access `/landing` and use two-way navigation (`Home` in app shell, `Go to dashboard` on landing).
 - Light/dark theme toggle (system default + localStorage persistence) available on marketing/auth/app shells.
@@ -147,6 +148,8 @@ A habit is defined independently of dates.
 - `src/app` - App Router UI and API routes.
 - `src/app/page.tsx` - Auth-aware root router (`/` -> `/landing` when signed out, `/today` when signed in).
 - `src/app/landing/page.tsx` - Canonical marketing landing page route (accessible signed-in and signed-out).
+- `src/app/landing/walkthrough/track/route.ts` - Tracked walkthrough CTA redirect route (logs analytics and redirects to validated targets).
+- `src/app/landing/walkthrough/track/__tests__/route.test.ts` - Walkthrough tracked CTA route tests.
 - `src/app/support/page.tsx` - Public support center route (FAQ + support form).
 - `src/app/support/loading.tsx` - Support route loading skeleton.
 - `src/app/legal/privacy/page.tsx` - Public Privacy policy route.
@@ -246,6 +249,8 @@ A habit is defined independently of dates.
 - `src/lib/support` - Support domain helpers (policy, retention, hashing, lifecycle, types).
 - `src/lib/legal` - Legal policy metadata, change-log, governance steps, and publish guard/enforcement helpers.
 - `src/lib/pro` - Pro entitlement helpers.
+- `src/lib/analytics/landingWalkthrough.ts` - Landing walkthrough analytics contracts and tracked CTA href builder.
+- `src/lib/analytics/__tests__/landingWalkthrough.test.ts` - Landing walkthrough analytics contract tests.
 - `src/lib/analytics/proConversion.ts` - Pro conversion event contract, source parsing, and duplicate guardrails.
 - `src/lib/analytics/__tests__/proConversion.test.ts` - Conversion event contract and guardrail tests.
 - `src/lib/billing` - Billing domain contracts, idempotency helpers, canonical events, projection logic, and persistence helpers.
@@ -339,6 +344,7 @@ A habit is defined independently of dates.
 - `docs/sprints/sprint-16.2.md` - Landing walkthrough narrative sprint plan.
 - `docs/sprints/sprint-16.3.md` - Product analytics baseline sprint plan.
 - `docs/test workflows/sprint-16.1-test-workflow.md` - Pro conversion UX, instrumentation, and billing regression workflow checks.
+- `docs/test workflows/sprint-16.2-test-workflow.md` - Landing walkthrough narrative + responsive/CTA workflow checks.
 - `docs/ops/staging.md` - Staging environment guide.
 - `docs/ops/backups.md` - Backup strategy and validation checklist.
 - `docs/ops/legal-publish-checklist.md` - Legal publish readiness checklist and blockers.
@@ -355,6 +361,9 @@ A habit is defined independently of dates.
 - `docs/ops/store-launch-billing-checklist.md` - Store-launch billing readiness, scenario packs, sign-off, and publish gate checklist.
 - `docs/ops/pro-conversion-legal-product-review.md` - Sprint 16.1 legal/product copy consistency review artifact.
 - `docs/ops/pro-conversion-publish-artifacts.md` - Sprint 16.1 publish-ready conversion artifact set and verification bundle.
+- `docs/ops/landing-walkthrough-phase-0-contract.md` - Sprint 16.2 walkthrough narrative/accessibility/responsive contract.
+- `docs/ops/landing-walkthrough-legal-product-review.md` - Sprint 16.2 legal/product consistency review artifact.
+- `docs/ops/landing-walkthrough-publish-artifacts.md` - Sprint 16.2 publish-ready walkthrough artifact bundle.
 
 ## Engineering Standards
 

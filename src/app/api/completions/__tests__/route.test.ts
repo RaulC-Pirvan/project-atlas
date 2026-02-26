@@ -8,12 +8,16 @@ import { POST } from '../route';
 const { mockedFindUnique } = vi.hoisted(() => ({
   mockedFindUnique: vi.fn(),
 }));
+const mockedHabitCompletionCount = vi.hoisted(() => vi.fn());
 
 vi.mock('next-auth/next', () => ({ getServerSession: vi.fn() }));
 vi.mock('../../../../lib/db/prisma', () => ({
   prisma: {
     user: {
       findUnique: mockedFindUnique,
+    },
+    habitCompletion: {
+      count: mockedHabitCompletionCount,
     },
   },
 }));
@@ -54,6 +58,7 @@ describe('POST /api/completions', () => {
     process.env.ENABLE_TEST_ENDPOINTS = 'true';
     mockedGetServerSession.mockResolvedValue({ user: { id: 'user-1' } });
     mockedFindUnique.mockResolvedValue({ timezone: 'UTC' });
+    mockedHabitCompletionCount.mockResolvedValue(2);
     mockedToggleCompletion.mockResolvedValue({
       status: 'created',
       habitId: 'habit-1',
@@ -79,6 +84,7 @@ describe('POST /api/completions', () => {
     delete process.env.ENABLE_TEST_ENDPOINTS;
     mockedGetServerSession.mockResolvedValue({ user: { id: 'user-1' } });
     mockedFindUnique.mockResolvedValue({ timezone: 'UTC' });
+    mockedHabitCompletionCount.mockResolvedValue(2);
     mockedToggleCompletion.mockResolvedValue({
       status: 'created',
       habitId: 'habit-1',

@@ -1,3 +1,4 @@
+import { logFunnelEvent } from '../../../../../../lib/analytics/funnel';
 import { verifySignInTwoFactorSchema } from '../../../../../../lib/api/auth/validation';
 import { ApiError, asApiError } from '../../../../../../lib/api/errors';
 import { jsonError, jsonOk } from '../../../../../../lib/api/response';
@@ -24,11 +25,13 @@ import {
   consumeRateLimit,
   getRateLimitKey,
 } from '../../../../../../lib/http/rateLimit';
-import { withApiLogging } from '../../../../../../lib/observability/apiLogger';
+import { getRequestId, withApiLogging } from '../../../../../../lib/observability/apiLogger';
 
 export const runtime = 'nodejs';
 
 export async function POST(request: Request) {
+  const requestId = getRequestId(request);
+
   return withApiLogging(
     request,
     { route: '/api/auth/sign-in/2fa/verify' },
@@ -142,6 +145,15 @@ export async function POST(request: Request) {
       if (decision) {
         applyRateLimitHeaders(response.headers, decision);
       }
+
+      logFunnelEvent({
+        event: 'auth_sign_in_completed',
+        surface: '/api/auth/sign-in/2fa/verify',
+        authenticated: true,
+        userId: challenge.userId,
+        provider: 'credentials',
+        requestId,
+      });
 
       return response;
     },

@@ -190,6 +190,36 @@ describe('SignInForm', () => {
     });
   });
 
+  it('uses post sign-in path for credentials and OAuth callback', async () => {
+    fetchMock.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ ok: true, data: { ok: true } }),
+    });
+
+    render(<SignInForm showGoogleSignIn postSignInPath="/pro?intent=upgrade&source=hero" />);
+
+    fireEvent.change(screen.getByLabelText(/email/i), {
+      target: { value: 'user@example.com' },
+    });
+    fireEvent.change(screen.getByLabelText(/password/i), {
+      target: { value: 'password123' },
+    });
+    fireEvent.submit(screen.getByRole('button', { name: /sign in/i }));
+
+    await waitFor(() => {
+      expect(pushMock).toHaveBeenCalledWith('/pro?intent=upgrade&source=hero');
+    });
+
+    signInMock.mockResolvedValueOnce(undefined);
+    fireEvent.click(screen.getByRole('button', { name: /continue with google/i }));
+
+    await waitFor(() => {
+      expect(signInMock).toHaveBeenCalledWith('google', {
+        callbackUrl: '/pro?intent=upgrade&source=hero',
+      });
+    });
+  });
+
   it('hides Google button by default and keeps credentials fallback visible', () => {
     render(<SignInForm />);
 

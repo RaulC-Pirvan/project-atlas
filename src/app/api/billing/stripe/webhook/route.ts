@@ -1,5 +1,6 @@
 import crypto from 'node:crypto';
 
+import { logProConversionEvent } from '../../../../../lib/analytics/proConversion';
 import { ApiError, asApiError } from '../../../../../lib/api/errors';
 import { jsonError, jsonOk } from '../../../../../lib/api/response';
 import type { BillingPersistenceClient } from '../../../../../lib/billing/persistence';
@@ -11,7 +12,8 @@ import {
 } from '../../../../../lib/billing/stripe/normalize';
 import { verifyStripeWebhookSignature } from '../../../../../lib/billing/stripe/signature';
 import { prisma } from '../../../../../lib/db/prisma';
-import { withApiLogging } from '../../../../../lib/observability/apiLogger';
+import { getRequestId, withApiLogging } from '../../../../../lib/observability/apiLogger';
+import { logInfo } from '../../../../../lib/observability/logger';
 
 export const runtime = 'nodejs';
 
@@ -24,6 +26,7 @@ export async function POST(request: Request) {
     request,
     { route: '/api/billing/stripe/webhook' },
     async () => {
+      const requestId = getRequestId(request);
       const rawBody = await request.text();
       const signatureHeader = request.headers.get('stripe-signature');
 
@@ -60,6 +63,30 @@ export async function POST(request: Request) {
         event: canonicalEvent,
         signatureVerified: true,
       });
+
+      logInfo('billing.webhook.projected', {
+        requestId,
+        route: '/api/billing/stripe/webhook',
+        provider: 'stripe',
+        userId: result.ledgerEvent.userId ?? undefined,
+        appended: result.appended,
+        dedupeReason: result.dedupeReason,
+        projectionStatus: result.projection.status,
+        eventType: result.ledgerEvent.eventType,
+      });
+
+      if (result.appended && result.projection.status === 'active') {
+        logProConversionEvent({
+          event: 'pro_entitlement_active',
+          surface: '/api/billing/stripe/webhook',
+          authenticated: Boolean(result.ledgerEvent.userId),
+          userId: result.ledgerEvent.userId,
+          provider: 'stripe',
+          dedupeReason: result.dedupeReason,
+          isPro: true,
+          requestId,
+        });
+      }
 
       return jsonOk({
         received: true,

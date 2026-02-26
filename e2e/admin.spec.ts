@@ -152,9 +152,13 @@ test('admin users can access the admin dashboard and APIs', async ({ page }) => 
 
   await page.goto('/admin');
   await expect(page.getByRole('heading', { name: /admin dashboard/i })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /conversion/i })).toBeVisible();
   await expect(page.getByRole('heading', { name: /health status/i })).toBeVisible();
   await expect(page.getByRole('heading', { name: /users/i })).toBeVisible();
   await expect(page.getByRole('heading', { name: /habits/i })).toBeVisible();
+  await expect(page.getByText(/landing -> first completion rate/i).first()).toBeVisible();
+  await expect(page.getByText(/funnel transitions \(read-only\)/i)).toBeVisible();
+  await expect(page.getByText(/event totals \(read-only\)/i)).toBeVisible();
 
   const response = await getWithRetry(page.request, '/api/admin/health', 200);
   expect(response.status()).toBe(200);

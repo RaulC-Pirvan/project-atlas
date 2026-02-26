@@ -23,6 +23,10 @@ describe('AdminSidebar', () => {
   it('renders navigation links', () => {
     render(<AdminSidebar />);
 
+    expect(screen.getByRole('link', { name: /conversion/i })).toHaveAttribute(
+      'href',
+      '/admin#conversion',
+    );
     expect(screen.getByRole('link', { name: /health/i })).toHaveAttribute('href', '/admin#health');
     expect(screen.getByRole('link', { name: /users/i })).toHaveAttribute('href', '/admin#users');
     expect(screen.getByRole('link', { name: /habits/i })).toHaveAttribute('href', '/admin#habits');

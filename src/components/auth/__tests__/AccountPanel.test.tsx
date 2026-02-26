@@ -136,6 +136,31 @@ describe('AccountPanel', () => {
     expect(await screen.findByText(/checkout canceled\. no charge was made/i)).toBeInTheDocument();
   });
 
+  it('keeps account billing actions available after checkout-return query cleanup', async () => {
+    window.history.replaceState(
+      {},
+      '',
+      '/account?checkout=success&checkout_session_id=cs_test_123&source=hero',
+    );
+
+    render(<AccountPanel {...baseProps} initialCheckoutStatus="success" />);
+
+    await screen.findByText(
+      /checkout completed\. we are confirming your payment now\. pro access should appear shortly/i,
+    );
+    await waitFor(() => {
+      expect(window.location.search).not.toContain('checkout=');
+      expect(window.location.search).not.toContain('checkout_session_id=');
+      expect(window.location.search).not.toContain('source=');
+    });
+
+    expect(screen.getByRole('link', { name: /manage billing \/ invoices/i })).toHaveAttribute(
+      'href',
+      '/api/billing/stripe/portal',
+    );
+    expect(screen.getByRole('button', { name: /^restore purchase$/i })).toBeEnabled();
+  });
+
   it('renders account sections in a logical top-to-bottom order', () => {
     render(<AccountPanel {...baseProps} />);
 

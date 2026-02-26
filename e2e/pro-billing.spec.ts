@@ -60,6 +60,15 @@ async function createVerifiedUser(page: Page, request: APIRequestContext, prefix
   const token = await fetchVerificationToken(request, email);
   await page.goto(`/verify-email?token=${encodeURIComponent(token)}`);
   await expect(page.getByRole('heading', { name: /email verified\./i })).toBeVisible();
+  return email;
+}
+
+async function createVerifiedAndSignedInUser(
+  page: Page,
+  request: APIRequestContext,
+  prefix: string,
+) {
+  const email = await createVerifiedUser(page, request, prefix);
   await signIn(page, email);
   return email;
 }
@@ -108,7 +117,7 @@ test('billing smoke: checkout start, webhook effect visibility, and restore fall
   page,
   request,
 }) => {
-  const email = await createVerifiedUser(page, request, 'pro-billing-smoke');
+  const email = await createVerifiedAndSignedInUser(page, request, 'pro-billing-smoke');
   const userId = await resolveUserIdFromDebugGoogleSignIn(request, email);
   await page.goto('/account');
   const upgradeLink = page.getByRole('link', { name: /upgrade to pro/i });
@@ -198,4 +207,57 @@ test('billing smoke: checkout start, webhook effect visibility, and restore fall
   };
   expect(restoreAfterBody.ok).toBe(true);
   expect(restoreAfterBody.data.outcome).toBe('already_active');
+});
+
+test('pro page: signed-out upgrade CTA routes through auth with preserved intent', async ({
+  page,
+  request,
+}) => {
+  const email = await createVerifiedUser(page, request, 'pro-upgrade-signed-out-auth');
+
+  await page.goto('/pro');
+
+  const upgrade = page.getByRole('link', { name: /sign in to upgrade/i }).first();
+  await expect(upgrade).toHaveAttribute('href', '/pro/upgrade?source=hero');
+  await upgrade.click();
+
+  await expect(page).toHaveURL(/\/sign-in\?from=%2Fpro%3Fintent%3Dupgrade%26source%3Dhero/);
+  await page.getByLabel('Email').fill(email);
+  await page.getByLabel('Password').fill(password);
+  await page.getByRole('button', { name: /sign in/i }).click();
+  await expect(page).toHaveURL(/\/pro\?intent=upgrade&source=hero/, { timeout: 15_000 });
+  await expect(page.getByRole('link', { name: /upgrade to pro/i }).first()).toHaveAttribute(
+    'href',
+    '/pro/upgrade?source=hero',
+  );
+});
+
+test('pro page: signed-in upgrade entry redirects to checkout with source', async ({
+  page,
+  request,
+}) => {
+  await createVerifiedAndSignedInUser(page, request, 'pro-upgrade-signed-in');
+  await page.goto('/pro');
+
+  const upgrade = page.getByRole('link', { name: /upgrade to pro/i }).first();
+  await expect(upgrade).toHaveAttribute('href', '/pro/upgrade?source=hero');
+
+  const upgradeResponse = await page.request.get('/pro/upgrade?source=hero', {
+    maxRedirects: 0,
+    timeout: 10_000,
+  });
+  expect(upgradeResponse.status()).toBe(303);
+  expect(upgradeResponse.headers()['location']).toContain(
+    '/api/billing/stripe/checkout?source=hero',
+  );
+
+  const checkoutStartResponse = await page.request.get(
+    upgradeResponse.headers()['location'] ?? '/api/billing/stripe/checkout?source=hero',
+    {
+      maxRedirects: 0,
+      timeout: 10_000,
+    },
+  );
+  expect(checkoutStartResponse.status()).toBe(303);
+  expect(checkoutStartResponse.headers()['location']).toContain('checkout.stripe.test/session/');
 });

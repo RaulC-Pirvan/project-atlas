@@ -414,28 +414,28 @@ Launch non-goal (explicit):
 
 ### Sprint 16.1: Pro Upgrade Page Refresh
 
-- [ ] Redesign `/pro` with clearer feature hierarchy and concrete examples
-- [ ] Keep Free value explicit and non-degraded in all Pro messaging
-- [ ] Add upgrade FAQ, guarantee/refund copy, and trust details
-- [ ] Instrument Pro CTA and conversion events
+- [x] Redesign `/pro` with clearer feature hierarchy and concrete examples
+- [x] Keep Free value explicit and non-degraded in all Pro messaging
+- [x] Add upgrade FAQ, guarantee/refund copy, and trust details
+- [x] Instrument Pro CTA and conversion events
 
 ---
 
 ### Sprint 16.2: Landing Walkthrough Narrative
 
-- [ ] Add guided `how Atlas works` walkthrough on landing
-- [ ] Use real UI examples/screenshots (`create -> remind -> complete -> review`)
-- [ ] Keep language non-technical and value-first
-- [ ] Add responsive and E2E coverage for walkthrough content + CTA flow
+- [x] Add guided `how Atlas works` walkthrough on landing
+- [x] Use real UI examples/screenshots (`create -> remind -> complete -> review`)
+- [x] Keep language non-technical and value-first
+- [x] Add responsive and E2E coverage for walkthrough content + CTA flow
 
 ---
 
 ### Sprint 16.3: Product Analytics Baseline
 
-- [ ] Instrument funnel events (landing -> sign-up -> first habit -> first completion -> upgrade)
-- [ ] Add lightweight conversion dashboard
-- [ ] Define baseline KPIs and weekly review cadence
-- [ ] Ensure privacy-safe defaults and clear user-facing controls
+- [x] Instrument funnel events (landing -> sign-up -> first habit -> first completion -> upgrade)
+- [x] Add lightweight conversion dashboard
+- [x] Define baseline KPIs and weekly review cadence
+- [x] Ensure privacy-safe defaults and clear user-facing controls
 
 ---
 

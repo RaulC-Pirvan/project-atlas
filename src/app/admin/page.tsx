@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import { getServerSession } from 'next-auth/next';
 
 import { AdminActivityPanel } from '@/components/admin/AdminActivityPanel';
+import { AdminConversionPanel } from '@/components/admin/AdminConversionPanel';
 import { AdminExportPanel } from '@/components/admin/AdminExportPanel';
 import { AdminHabitsPanel } from '@/components/admin/AdminHabitsPanel';
 import { AdminHealthPanel } from '@/components/admin/AdminHealthPanel';
@@ -26,6 +27,22 @@ export default async function AdminPage() {
       subtitle="Read-only visibility for internal health, users, habits, and activity."
     >
       <div className="space-y-10">
+        <section
+          id="conversion"
+          aria-labelledby="admin-conversion"
+          className="scroll-mt-20 space-y-3"
+        >
+          <div className="space-y-1">
+            <h2 id="admin-conversion" className="text-lg font-semibold">
+              Conversion
+            </h2>
+            <p className="text-sm text-black/60 dark:text-white/60">
+              Funnel KPIs, date-range comparisons, and read-only reporting summary.
+            </p>
+          </div>
+          <AdminConversionPanel />
+        </section>
+
         <section id="health" aria-labelledby="admin-health" className="scroll-mt-20 space-y-3">
           <div className="space-y-1">
             <h2 id="admin-health" className="text-lg font-semibold">

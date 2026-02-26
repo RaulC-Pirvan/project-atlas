@@ -2,6 +2,7 @@ import { PrismaAdapter } from '@next-auth/prisma-adapter';
 import type { NextAuthOptions } from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
 
+import { logFunnelEvent } from '../analytics/funnel';
 import { prisma } from '../db/prisma';
 import { resolveGoogleOAuthSignIn } from './googleOAuth';
 import {
@@ -87,6 +88,15 @@ export const authOptions: NextAuthOptions = {
       user.emailVerified = result.user.emailVerified;
       user.isAdmin = canUseAdminAccess && isAdmin;
       user.twoFactorEnabled = twoFactorEnabled;
+
+      logFunnelEvent({
+        event: 'auth_sign_in_completed',
+        surface: '/api/auth/[...nextauth]',
+        authenticated: true,
+        userId: result.user.id,
+        provider: 'google',
+      });
+
       return true;
     },
     async jwt({ token, user }) {

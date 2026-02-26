@@ -67,6 +67,8 @@ export function AdminHealthPanel() {
           ? 'Error'
           : 'Pending';
 
+  const showSkeleton = state.status === 'idle' || state.status === 'loading';
+
   return (
     <Card className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -75,6 +77,22 @@ export function AdminHealthPanel() {
           {badgeLabel}
         </span>
       </div>
+      {showSkeleton ? (
+        <div className="grid gap-4 sm:grid-cols-3" role="status" aria-label="Loading health status">
+          <div className="space-y-2">
+            <div className="h-3 w-16 rounded-full bg-black/10 motion-safe:animate-pulse motion-reduce:animate-none dark:bg-white/10" />
+            <div className="h-7 w-24 rounded-full bg-black/10 motion-safe:animate-pulse motion-reduce:animate-none dark:bg-white/10" />
+          </div>
+          <div className="space-y-2">
+            <div className="h-3 w-20 rounded-full bg-black/10 motion-safe:animate-pulse motion-reduce:animate-none dark:bg-white/10" />
+            <div className="h-5 w-40 rounded-full bg-black/10 motion-safe:animate-pulse motion-reduce:animate-none dark:bg-white/10" />
+          </div>
+          <div className="space-y-2">
+            <div className="h-3 w-14 rounded-full bg-black/10 motion-safe:animate-pulse motion-reduce:animate-none dark:bg-white/10" />
+            <div className="h-5 w-32 rounded-full bg-black/10 motion-safe:animate-pulse motion-reduce:animate-none dark:bg-white/10" />
+          </div>
+        </div>
+      ) : null}
       {state.status === 'ready' ? (
         <div className="grid gap-4 sm:grid-cols-3">
           <div className="space-y-1">

@@ -1,5 +1,10 @@
 import { getServerSession } from 'next-auth/next';
 
+import {
+  logProConversionEvent,
+  logProConversionGuardrail,
+  parseProCtaSourceWithReason,
+} from '../../../../../lib/analytics/proConversion';
 import { ApiError, asApiError } from '../../../../../lib/api/errors';
 import { jsonError } from '../../../../../lib/api/response';
 import { authOptions } from '../../../../../lib/auth/nextauth';
@@ -22,9 +27,26 @@ function isMissingStripeCheckoutConfigError(error: unknown): boolean {
 }
 
 async function startCheckout(request: Request): Promise<Response> {
+  const { searchParams } = new URL(request.url);
+  const requestId = getRequestId(request);
+  const parsedSource = parseProCtaSourceWithReason(searchParams.get('source'));
+  const source = parsedSource.source;
+
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
     throw new ApiError('unauthorized', 'Not authenticated.', 401);
+  }
+
+  if (parsedSource.reason === 'invalid') {
+    logProConversionGuardrail({
+      reason: 'invalid_source_fallback',
+      surface: '/api/billing/stripe/checkout',
+      authenticated: true,
+      userId: session.user.id,
+      source,
+      rawSource: parsedSource.raw,
+      requestId,
+    });
   }
 
   const entitlement = await getProEntitlementSummary({
@@ -71,14 +93,25 @@ async function startCheckout(request: Request): Promise<Response> {
     },
   });
 
-  const requestId = getRequestId(request);
   const idempotencyKey = buildBillingCommandDedupeKey(`checkout:${session.user.id}:${requestId}`);
+  const successPath = `/account?checkout=success&source=${source}&checkout_session_id={CHECKOUT_SESSION_ID}`;
+  const cancelPath = `/account?checkout=cancel&source=${source}`;
   logInfo('billing.checkout.initiated', {
     requestId,
     route: '/api/billing/stripe/checkout',
     provider: 'stripe',
     userId: session.user.id,
     productKey: 'pro_lifetime_v1',
+    source,
+  });
+  logProConversionEvent({
+    event: 'pro_checkout_initiated',
+    surface: '/api/billing/stripe/checkout',
+    authenticated: true,
+    userId: session.user.id,
+    source,
+    provider: 'stripe',
+    requestId,
   });
 
   if (process.env.BILLING_STRIPE_TEST_MODE === 'true') {
@@ -92,6 +125,7 @@ async function startCheckout(request: Request): Promise<Response> {
       userId: session.user.id,
       productKey: 'pro_lifetime_v1',
       checkoutSessionId: 'cs_test_mode',
+      source,
       testMode: true,
     });
     return Response.redirect(testCheckoutUrl, 303);
@@ -104,6 +138,8 @@ async function startCheckout(request: Request): Promise<Response> {
     userId: session.user.id,
     productKey: 'pro_lifetime_v1',
     idempotencyKey,
+    successPath,
+    cancelPath,
   });
   logInfo('billing.checkout.redirect', {
     requestId,
@@ -112,6 +148,7 @@ async function startCheckout(request: Request): Promise<Response> {
     userId: session.user.id,
     productKey: 'pro_lifetime_v1',
     checkoutSessionId: checkout.id,
+    source,
   });
 
   return Response.redirect(checkout.url, 303);

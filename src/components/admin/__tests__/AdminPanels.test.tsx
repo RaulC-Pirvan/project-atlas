@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { AdminActivityPanel } from '../AdminActivityPanel';
+import { AdminConversionPanel } from '../AdminConversionPanel';
 import { AdminExportPanel } from '../AdminExportPanel';
 import { AdminHabitsPanel } from '../AdminHabitsPanel';
 import { AdminHealthPanel } from '../AdminHealthPanel';
@@ -167,6 +168,61 @@ describe('admin panels', () => {
 
     expect(screen.getByText(/download users csv/i)).toBeInTheDocument();
     expect(screen.getByText(/download habits csv/i)).toBeInTheDocument();
+  });
+
+  it('renders conversion KPI cards from the admin conversion endpoint', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        ok: true,
+        data: {
+          summary: {
+            generatedAt: '2026-02-26T00:00:00.000Z',
+            range: { startDate: '2026-02-20', endDate: '2026-02-26', dayCount: 7 },
+            baselineRange: { startDate: '2026-02-13', endDate: '2026-02-19', dayCount: 7 },
+            compareWithBaseline: true,
+            coverage: { partial: false, reasons: [] },
+            kpis: [
+              {
+                id: 'landing_to_first_completion',
+                label: 'Landing -> First Completion Rate',
+                formula:
+                  'unique_users(habit_first_completion_recorded) / unique_users(landing_page_view)',
+                sourceOfTruth: 'analytics.funnel',
+                numeratorEvent: 'habit_first_completion_recorded',
+                denominatorEvent: 'landing_page_view',
+                numeratorUsers: 10,
+                denominatorUsers: 20,
+                rate: 0.5,
+                baselineRate: 0.4,
+                deltaRate: 0.1,
+                status: 'ok',
+              },
+            ],
+            events: [
+              {
+                event: 'landing_page_view',
+                users: 20,
+                events: 25,
+                baselineUsers: 18,
+                baselineEvents: 19,
+              },
+            ],
+          },
+        },
+      }),
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    render(<AdminConversionPanel />);
+
+    expect(
+      (await screen.findAllByText(/landing -> first completion rate/i)).length,
+    ).toBeGreaterThan(0);
+    expect(screen.getByText('50.0%')).toBeInTheDocument();
+    expect(screen.getByText(/compare baseline period/i)).toBeInTheDocument();
+
+    vi.unstubAllGlobals();
   });
 
   it('starts export downloads when buttons are clicked', () => {

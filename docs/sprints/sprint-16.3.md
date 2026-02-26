@@ -320,12 +320,70 @@ Approval workflow:
 
 ### Tasks (6)
 
-- [ ] **Task 2.1**: Add admin conversion dashboard shell
-- [ ] **Task 2.2**: Add KPI cards for north-star metrics
-- [ ] **Task 2.3**: Add date-range and baseline period comparison controls
-- [ ] **Task 2.4**: Add metric definitions tooltip/source-of-truth references
-- [ ] **Task 2.5**: Add fallback states for incomplete/partial data
-- [ ] **Task 2.6**: Add export-friendly summary view (read-only)
+- [x] **Task 2.1**: Add admin conversion dashboard shell
+- [x] **Task 2.2**: Add KPI cards for north-star metrics
+- [x] **Task 2.3**: Add date-range and baseline period comparison controls
+- [x] **Task 2.4**: Add metric definitions tooltip/source-of-truth references
+- [x] **Task 2.5**: Add fallback states for incomplete/partial data
+- [x] **Task 2.6**: Add export-friendly summary view (read-only)
+
+### Phase 2 Implementation Notes (Current)
+
+#### 2.1 Admin conversion dashboard shell
+
+- Added a new `Conversion` section to `/admin` with dedicated panel wiring:
+  - `src/app/admin/page.tsx`
+  - `src/components/admin/AdminConversionPanel.tsx`
+- Updated admin sidebar anchor navigation to include `Conversion`:
+  - `src/components/admin/AdminSidebar.tsx`
+
+#### 2.2 KPI cards for north-star metrics
+
+- Added conversion summary service for KPI aggregation over analytics events:
+  - `src/lib/admin/conversion.ts`
+- KPI cards now render:
+  - Landing -> First Completion Rate
+  - Pro Page -> Checkout Start Rate
+  - Checkout Start -> Entitlement Active Rate
+- Aggregation uses unique-actor counting with user-id preference and request-id
+  fallback for anonymous traffic.
+
+#### 2.3 Date-range and baseline comparison controls
+
+- Added admin conversion API with date-range query support and baseline compare:
+  - `GET /api/admin/conversion`
+  - `src/app/api/admin/conversion/route.ts`
+- Added panel controls:
+  - start date
+  - end date
+  - compare-baseline toggle
+  - apply/reset/refresh actions
+
+#### 2.4 Metric definitions and source-of-truth references
+
+- Each KPI card includes expandable definition content:
+  - formula
+  - source-of-truth reference
+- Definitions are returned by service-level KPI contracts and rendered in panel
+  details blocks.
+
+#### 2.5 Fallback states for incomplete/partial data
+
+- Added coverage diagnostics in conversion summary output:
+  - no events in selected range
+  - in-memory log-window truncation relative to selected range start
+  - zero-denominator KPI states
+- UI shows fallback notices and KPI status badges (`OK`, `Partial`,
+  `Insufficient data`) to prevent silent metric misreads.
+
+#### 2.6 Export-friendly summary view (read-only)
+
+- Added read-only event totals table and read-only CSV summary block in panel.
+- Summary includes:
+  - selected range and baseline range
+  - KPI rates + deltas
+  - numerator/denominator event counts
+  - raw event totals for verification
 
 ---
 

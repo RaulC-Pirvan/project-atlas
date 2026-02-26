@@ -6,6 +6,7 @@ import type { MouseEvent } from 'react';
 import { SignOutButton } from '../auth/SignOutButton';
 
 const navItems = [
+  { href: '/admin#conversion', label: 'Conversion' },
   { href: '/admin#health', label: 'Health' },
   { href: '/admin#users', label: 'Users' },
   { href: '/admin#habits', label: 'Habits' },

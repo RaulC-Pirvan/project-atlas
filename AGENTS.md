@@ -73,6 +73,7 @@ A habit is defined independently of dates.
 - Authenticated screens use `AppShell` + `AppSidebar` with desktop core routes (`Home/Today/Calendar/Habits/Insights/Achievements/Account`) plus bottom utility actions (`Support` -> `/support#contact-form`, `Legal` -> `/legal/changes`, `Sign out`), and mobile primary nav (`Today/Calendar/Habits`) with animated `More` actions (`Home/Insights/Achievements/Account`) plus utility actions (`Support/Legal/Sign out`).
 - Marketing homepage expansion is live with full product narrative, refined non-technical messaging, Free vs Pro comparison, Pro value callouts, and support discoverability entry points.
 - Sprint 16.2 landing walkthrough is implemented on `/landing` as a live, code-rendered `create -> remind -> complete -> review` sequence with auth-aware tracked CTAs, responsive/mobile hardening, and component + E2E coverage.
+- Sprint 16.3 analytics baseline is implemented: funnel + Pro conversion instrumentation runtime, admin conversion dashboard KPIs (range/baseline comparison, transitions, event totals, export summary), ingestion guardrails, and hardening test coverage.
 - Root routing is auth-aware: signed-out users visiting `/` are routed to canonical landing `/landing`, while signed-in users are routed to `/today`.
 - Signed-in users can access `/landing` and use two-way navigation (`Home` in app shell, `Go to dashboard` on landing).
 - Light/dark theme toggle (system default + localStorage persistence) available on marketing/auth/app shells.
@@ -125,7 +126,7 @@ A habit is defined independently of dates.
 - Offline completions E2E added (`e2e/offline-completions.spec.ts`) plus component tests for pending indicators.
 - Account export coverage added: export route/API tests, export service/unit tests, account export component tests, and an optional account export E2E smoke (`e2e/account-export.spec.ts`).
 - `/api/completions` supports a test-only `x-atlas-test-now` header when `ENABLE_TEST_ENDPOINTS=true` for deterministic date-boundary E2E coverage.
-- Test-only debug endpoints exist when `ENABLE_TEST_ENDPOINTS=true`: `/api/pro/debug/grant`, `/api/habits/debug/create`.
+- Test-only debug endpoints exist when `ENABLE_TEST_ENDPOINTS=true`: `/api/pro/debug/grant`, `/api/habits/debug/create`, `/api/admin/debug/conversion/seed`.
 
 ## Roadmap (high-level)
 
@@ -181,6 +182,8 @@ A habit is defined independently of dates.
 - `src/app/api/auth/2fa/challenge/*` - Generic 2FA challenge verification endpoints.
 - `src/app/admin/page.tsx` - Admin dashboard UI (server-authenticated).
 - `src/app/api/admin/*/route.ts` - Admin APIs (health, users, habits, activity, support, exports).
+- `src/app/api/admin/conversion/route.ts` - Admin conversion summary API (KPI cards, transitions, event totals, export summary data).
+- `src/app/api/admin/debug/conversion/seed/route.ts` - Test-only admin endpoint to seed sample conversion analytics into the in-memory admin log store.
 - `src/app/api/admin/support/route.ts` - Admin support ticket list API (filter + cursor pagination).
 - `src/app/api/admin/support/[id]/route.ts` - Admin support ticket status update API.
 - `src/app/api/support/tickets/route.ts` - Public support ticket submit API.
@@ -217,6 +220,7 @@ A habit is defined independently of dates.
 - `src/components/legal` - Shared legal layout and legal/support link primitives.
 - `src/components/marketing` - Marketing homepage layout and expanded sections (workflow, insights, achievements, reminders, offline reliability, grace window, Free vs Pro, Pro callouts).
 - `src/components/admin` - Admin UI components and tests.
+- `src/components/admin/AdminConversionPanel.tsx` - Admin conversion dashboard panel (KPI cards, date range controls, baseline comparison, transitions/event totals tables, export summary, sample-data seeding in test mode).
 - `src/components/admin/AdminSupportPanel.tsx` - Admin support triage UI panel.
 - `src/components/support` - Support center UI components and tests.
 - `src/components/pro` - Pro upgrade entry points and preview cards.
@@ -245,6 +249,7 @@ A habit is defined independently of dates.
 - `src/lib/reminders` - Reminder domain helpers (time parsing, settings defaults, rules, validation, delivery strategy).
 - `src/lib/reminders/__tests__` - Reminder unit tests.
 - `src/lib/admin` - Admin access/auth and data services (users, habits, support, exports).
+- `src/lib/admin/conversion.ts` - Conversion KPI dictionary, date-range parsing, funnel transition math, and summary builder for admin reporting.
 - `src/lib/admin/support.ts` - Admin support ticket query/update services.
 - `src/lib/support` - Support domain helpers (policy, retention, hashing, lifecycle, types).
 - `src/lib/legal` - Legal policy metadata, change-log, governance steps, and publish guard/enforcement helpers.
@@ -273,6 +278,9 @@ A habit is defined independently of dates.
 - `src/app/api/support/__tests__` - Support submit API tests.
 - `src/app/api/admin/__tests__/support.route.test.ts` - Admin support list route tests.
 - `src/app/api/admin/__tests__/support-id.route.test.ts` - Admin support status route tests.
+- `src/app/api/admin/__tests__/conversion.route.test.ts` - Admin conversion summary route tests.
+- `src/app/api/admin/__tests__/conversion-seed.route.test.ts` - Admin conversion sample-data seed route tests.
+- `src/lib/admin/__tests__/conversion.test.ts` - Conversion KPI and funnel transition calculation tests.
 - `src/lib/auth/__tests__` - Auth unit tests (password, tokens, policy, credentials).
 - `src/components/auth` - Auth/account UI panels and tests.
 - `src/components/ui` - Shared UI primitives.
@@ -345,6 +353,7 @@ A habit is defined independently of dates.
 - `docs/sprints/sprint-16.3.md` - Product analytics baseline sprint plan.
 - `docs/test workflows/sprint-16.1-test-workflow.md` - Pro conversion UX, instrumentation, and billing regression workflow checks.
 - `docs/test workflows/sprint-16.2-test-workflow.md` - Landing walkthrough narrative + responsive/CTA workflow checks.
+- `docs/test workflows/sprint-16.3-test-workflow.md` - Analytics baseline admin dashboard and instrumentation workflow checks.
 - `docs/ops/staging.md` - Staging environment guide.
 - `docs/ops/backups.md` - Backup strategy and validation checklist.
 - `docs/ops/legal-publish-checklist.md` - Legal publish readiness checklist and blockers.

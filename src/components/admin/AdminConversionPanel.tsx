@@ -174,6 +174,11 @@ export function AdminConversionPanel() {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [compareWithBaseline, setCompareWithBaseline] = useState(true);
+  const [isSeedingSampleData, setIsSeedingSampleData] = useState(false);
+  const [seedMessage, setSeedMessage] = useState<string | null>(null);
+  const [seedError, setSeedError] = useState<string | null>(null);
+
+  const canSeedSampleData = process.env.NODE_ENV !== 'production';
 
   const loadConversion = useCallback(
     async (opts?: { startDate?: string; endDate?: string; compare?: boolean }) => {
@@ -240,12 +245,54 @@ export function AdminConversionPanel() {
     setStartDate('');
     setEndDate('');
     setCompareWithBaseline(true);
+    setSeedMessage(null);
+    setSeedError(null);
     void loadConversion({
       startDate: '',
       endDate: '',
       compare: true,
     });
   }, [loadConversion]);
+
+  const handleSeedSampleData = useCallback(async () => {
+    setIsSeedingSampleData(true);
+    setSeedMessage(null);
+    setSeedError(null);
+
+    try {
+      const response = await fetch('/api/admin/debug/conversion/seed', {
+        method: 'POST',
+      });
+      if (!response.ok) {
+        throw new Error('Unable to seed conversion sample data.');
+      }
+
+      const body = (await response.json()) as {
+        ok: boolean;
+        data?: {
+          seeded: { totalEvents: number };
+        };
+      };
+      if (!body.ok || !body.data?.seeded) {
+        throw new Error('Unable to seed conversion sample data.');
+      }
+
+      setSeedMessage(`Sample analytics seeded (${body.data.seeded.totalEvents} events).`);
+      await loadConversion({
+        startDate,
+        endDate,
+        compare: compareWithBaseline,
+      });
+    } catch (seedFetchError) {
+      const message =
+        seedFetchError instanceof Error
+          ? seedFetchError.message
+          : 'Unable to seed conversion sample data.';
+      setSeedError(message);
+    } finally {
+      setIsSeedingSampleData(false);
+    }
+  }, [compareWithBaseline, endDate, loadConversion, startDate]);
 
   const exportSummary = useMemo(() => {
     if (!summary) return '';
@@ -269,12 +316,25 @@ export function AdminConversionPanel() {
             Funnel KPI cards and event totals for admin review.
           </p>
         </div>
-        <Button type="button" variant="outline" size="sm" onClick={handleRefresh}>
-          Refresh metrics
-        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          {canSeedSampleData ? (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={handleSeedSampleData}
+              disabled={isSeedingSampleData}
+            >
+              {isSeedingSampleData ? 'Seeding...' : 'Seed sample data'}
+            </Button>
+          ) : null}
+          <Button type="button" variant="outline" size="sm" onClick={handleRefresh}>
+            Refresh metrics
+          </Button>
+        </div>
       </div>
 
-      <div className="grid gap-3 rounded-2xl border border-black/10 p-4 text-sm dark:border-white/10 md:grid-cols-4">
+      <div className="grid gap-3 rounded-2xl border border-black/10 p-4 text-sm dark:border-white/10 md:grid-cols-2 lg:grid-cols-4">
         <label className="space-y-1">
           <span className="block text-xs uppercase tracking-[0.2em] text-black/50 dark:text-white/50">
             Start date
@@ -297,7 +357,7 @@ export function AdminConversionPanel() {
             className="h-10 w-full rounded-xl border border-black/15 px-3 text-sm dark:border-white/20 dark:bg-black"
           />
         </label>
-        <label className="flex items-end gap-2 pb-2">
+        <label className="flex h-10 items-center gap-2 self-end">
           <input
             type="checkbox"
             checked={compareWithBaseline}
@@ -308,7 +368,7 @@ export function AdminConversionPanel() {
             Compare baseline period
           </span>
         </label>
-        <div className="flex items-end gap-2">
+        <div className="flex h-10 items-center gap-2 self-end">
           <Button type="button" variant="outline" size="sm" onClick={handleApply}>
             Apply
           </Button>
@@ -322,6 +382,8 @@ export function AdminConversionPanel() {
         <Notice>Loading conversion metrics...</Notice>
       ) : null}
       {state === 'error' ? <Notice tone="error">{error}</Notice> : null}
+      {seedMessage ? <Notice>{seedMessage}</Notice> : null}
+      {seedError ? <Notice tone="error">{seedError}</Notice> : null}
 
       {summary ? (
         <div className="space-y-5">
@@ -350,7 +412,7 @@ export function AdminConversionPanel() {
             </Notice>
           ) : null}
 
-          <div className="grid gap-3 md:grid-cols-3">
+          <div className="space-y-3">
             {summary.kpis.map((kpi) => (
               <div
                 key={kpi.id}
@@ -369,18 +431,6 @@ export function AdminConversionPanel() {
                 <p className="mt-3 text-xs text-black/60 dark:text-white/60">
                   {kpi.numeratorUsers} / {kpi.denominatorUsers} unique users
                 </p>
-
-                <details className="mt-3 rounded-xl border border-black/10 p-2 text-xs dark:border-white/10">
-                  <summary className="cursor-pointer uppercase tracking-[0.15em] text-black/60 dark:text-white/60">
-                    Metric definition
-                  </summary>
-                  <p className="mt-2">
-                    <span className="font-semibold">Formula:</span> {kpi.formula}
-                  </p>
-                  <p className="mt-1">
-                    <span className="font-semibold">Source:</span> {kpi.sourceOfTruth}
-                  </p>
-                </details>
               </div>
             ))}
           </div>

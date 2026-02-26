@@ -432,10 +432,10 @@ Launch non-goal (explicit):
 
 ### Sprint 16.3: Product Analytics Baseline
 
-- [ ] Instrument funnel events (landing -> sign-up -> first habit -> first completion -> upgrade)
-- [ ] Add lightweight conversion dashboard
-- [ ] Define baseline KPIs and weekly review cadence
-- [ ] Ensure privacy-safe defaults and clear user-facing controls
+- [x] Instrument funnel events (landing -> sign-up -> first habit -> first completion -> upgrade)
+- [x] Add lightweight conversion dashboard
+- [x] Define baseline KPIs and weekly review cadence
+- [x] Ensure privacy-safe defaults and clear user-facing controls
 
 ---
 

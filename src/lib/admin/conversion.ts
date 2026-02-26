@@ -44,12 +44,31 @@ export type ConversionCoverage = {
   reasons: string[];
 };
 
+export type ConversionTransition = {
+  id:
+    | 'landing_to_signup'
+    | 'signup_to_first_habit'
+    | 'first_habit_to_first_completion'
+    | 'pro_page_to_checkout'
+    | 'checkout_to_entitlement';
+  label: string;
+  fromEvent: ConversionEventName;
+  toEvent: ConversionEventName;
+  fromUsers: number;
+  toUsers: number;
+  transitionedUsers: number;
+  rate: number | null;
+  baselineTransitionedUsers: number | null;
+  baselineRate: number | null;
+};
+
 export type ConversionSummary = {
   generatedAt: Date;
   range: ConversionRange;
   baselineRange: ConversionRange | null;
   compareWithBaseline: boolean;
   kpis: ConversionKpi[];
+  transitions: ConversionTransition[];
   events: ConversionEventSummary[];
   coverage: ConversionCoverage;
 };
@@ -111,6 +130,39 @@ const SUMMARY_EVENTS: ConversionEventName[] = [
   'pro_checkout_return',
   'pro_entitlement_active',
 ];
+
+const TRANSITION_DEFINITIONS = [
+  {
+    id: 'landing_to_signup' as const,
+    label: 'Landing -> Signup',
+    fromEvent: 'landing_page_view' as const,
+    toEvent: 'auth_sign_up_completed' as const,
+  },
+  {
+    id: 'signup_to_first_habit' as const,
+    label: 'Signup -> First Habit',
+    fromEvent: 'auth_sign_up_completed' as const,
+    toEvent: 'habit_first_created' as const,
+  },
+  {
+    id: 'first_habit_to_first_completion' as const,
+    label: 'First Habit -> First Completion',
+    fromEvent: 'habit_first_created' as const,
+    toEvent: 'habit_first_completion_recorded' as const,
+  },
+  {
+    id: 'pro_page_to_checkout' as const,
+    label: 'Pro Page -> Checkout Start',
+    fromEvent: 'pro_page_view' as const,
+    toEvent: 'pro_checkout_initiated' as const,
+  },
+  {
+    id: 'checkout_to_entitlement' as const,
+    label: 'Checkout Start -> Entitlement Active',
+    fromEvent: 'pro_checkout_initiated' as const,
+    toEvent: 'pro_entitlement_active' as const,
+  },
+] as const;
 
 const FUNNEL_EVENT_SET = new Set(FUNNEL_EVENTS);
 const PRO_EVENT_SET = new Set(PRO_CONVERSION_EVENTS);
@@ -188,6 +240,32 @@ function getAggregateCount(
   const aggregate = map.get(event);
   if (!aggregate) return { users: 0, events: 0 };
   return { users: aggregate.users.size, events: aggregate.events };
+}
+
+function getAggregateUsers(
+  map: Map<ConversionEventName, EventAggregate>,
+  event: ConversionEventName,
+): Set<string> {
+  const aggregate = map.get(event);
+  if (!aggregate) {
+    return new Set<string>();
+  }
+  return aggregate.users;
+}
+
+function intersectionSize(left: Set<string>, right: Set<string>): number {
+  if (left.size === 0 || right.size === 0) {
+    return 0;
+  }
+
+  const [small, large] = left.size <= right.size ? [left, right] : [right, left];
+  let count = 0;
+  for (const value of small) {
+    if (large.has(value)) {
+      count += 1;
+    }
+  }
+  return count;
 }
 
 function computeRate(numerator: number, denominator: number): number | null {
@@ -317,6 +395,41 @@ export function buildConversionSummary(args: {
     };
   });
 
+  const transitions: ConversionTransition[] = TRANSITION_DEFINITIONS.map((definition) => {
+    const fromUsers = getAggregateUsers(rangeStats.byEvent, definition.fromEvent);
+    const toUsers = getAggregateUsers(rangeStats.byEvent, definition.toEvent);
+    const transitionedUsers = intersectionSize(fromUsers, toUsers);
+    const rate = computeRate(transitionedUsers, fromUsers.size);
+
+    const baselineFromUsers = baselineStats
+      ? getAggregateUsers(baselineStats.byEvent, definition.fromEvent)
+      : null;
+    const baselineToUsers = baselineStats
+      ? getAggregateUsers(baselineStats.byEvent, definition.toEvent)
+      : null;
+    const baselineTransitionedUsers =
+      baselineFromUsers && baselineToUsers
+        ? intersectionSize(baselineFromUsers, baselineToUsers)
+        : null;
+    const baselineRate =
+      baselineFromUsers && baselineTransitionedUsers !== null
+        ? computeRate(baselineTransitionedUsers, baselineFromUsers.size)
+        : null;
+
+    return {
+      id: definition.id,
+      label: definition.label,
+      fromEvent: definition.fromEvent,
+      toEvent: definition.toEvent,
+      fromUsers: fromUsers.size,
+      toUsers: toUsers.size,
+      transitionedUsers,
+      rate,
+      baselineTransitionedUsers,
+      baselineRate,
+    };
+  });
+
   const events: ConversionEventSummary[] = SUMMARY_EVENTS.map((event) => {
     const active = getAggregateCount(rangeStats.byEvent, event);
     const baseline = baselineStats ? getAggregateCount(baselineStats.byEvent, event) : null;
@@ -354,6 +467,7 @@ export function buildConversionSummary(args: {
     baselineRange: args.compareWithBaseline ? toRange(baselineRangeStart, baselineRangeEnd) : null,
     compareWithBaseline: args.compareWithBaseline,
     kpis,
+    transitions,
     events,
     coverage: {
       partial: coverageReasons.length > 0,

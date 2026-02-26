@@ -51,6 +51,15 @@ describe('conversion summary helpers', () => {
     ).toThrow('Both start and end are required');
   });
 
+  it('rejects ranges longer than 90 days', () => {
+    expect(() =>
+      parseConversionSummaryRange({
+        start: '2026-01-01',
+        end: '2026-04-30',
+      }),
+    ).toThrow('Date range cannot exceed 90 days.');
+  });
+
   it('builds north-star KPIs with baseline comparison', () => {
     const entries = [
       analyticsLog({
@@ -65,6 +74,20 @@ describe('conversion summary helpers', () => {
         timestamp: '2026-02-20T09:00:00.000Z',
         message: 'analytics.funnel',
         event: 'habit_first_completion_recorded',
+        userId: 'u1',
+      }),
+      analyticsLog({
+        id: 'e2b',
+        timestamp: '2026-02-20T09:10:00.000Z',
+        message: 'analytics.funnel',
+        event: 'auth_sign_up_completed',
+        userId: 'u1',
+      }),
+      analyticsLog({
+        id: 'e2c',
+        timestamp: '2026-02-20T09:20:00.000Z',
+        message: 'analytics.funnel',
+        event: 'habit_first_created',
         userId: 'u1',
       }),
       analyticsLog({
@@ -119,6 +142,13 @@ describe('conversion summary helpers', () => {
     expect(summary.kpis[2]?.id).toBe('checkout_to_entitlement_active');
     expect(summary.kpis[2]?.rate).toBe(1);
     expect(summary.events.find((event) => event.event === 'pro_checkout_initiated')?.users).toBe(1);
+    expect(
+      summary.transitions.find((transition) => transition.id === 'pro_page_to_checkout')?.rate,
+    ).toBe(1);
+    expect(
+      summary.transitions.find((transition) => transition.id === 'signup_to_first_habit')
+        ?.transitionedUsers,
+    ).toBe(1);
     expect(summary.coverage.partial).toBe(false);
   });
 
@@ -133,5 +163,35 @@ describe('conversion summary helpers', () => {
     expect(summary.coverage.partial).toBe(true);
     expect(summary.coverage.reasons[0]).toContain('No analytics events');
     expect(summary.kpis.some((kpi) => kpi.status === 'insufficient_data')).toBe(true);
+  });
+
+  it('keeps transition rate at 0 when no overlapping users exist', () => {
+    const summary = buildConversionSummary({
+      entries: [
+        analyticsLog({
+          id: 't1',
+          timestamp: '2026-02-20T08:00:00.000Z',
+          message: 'analytics.pro_conversion',
+          event: 'pro_page_view',
+          userId: 'user-a',
+        }),
+        analyticsLog({
+          id: 't2',
+          timestamp: '2026-02-20T08:10:00.000Z',
+          message: 'analytics.pro_conversion',
+          event: 'pro_checkout_initiated',
+          userId: 'user-b',
+        }),
+      ],
+      rangeStart: new Date('2026-02-20T00:00:00.000Z'),
+      rangeEnd: new Date('2026-02-20T00:00:00.000Z'),
+      compareWithBaseline: false,
+    });
+
+    const transition = summary.transitions.find((item) => item.id === 'pro_page_to_checkout');
+    expect(transition?.fromUsers).toBe(1);
+    expect(transition?.toUsers).toBe(1);
+    expect(transition?.transitionedUsers).toBe(0);
+    expect(transition?.rate).toBe(0);
   });
 });

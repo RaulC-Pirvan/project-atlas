@@ -34,6 +34,19 @@ type ConversionEventSummary = {
   baselineEvents: number | null;
 };
 
+type ConversionTransition = {
+  id: string;
+  label: string;
+  fromEvent: string;
+  toEvent: string;
+  fromUsers: number;
+  toUsers: number;
+  transitionedUsers: number;
+  rate: number | null;
+  baselineTransitionedUsers: number | null;
+  baselineRate: number | null;
+};
+
 type ConversionRange = {
   startDate: string;
   endDate: string;
@@ -46,6 +59,7 @@ type ConversionSummary = {
   baselineRange: ConversionRange | null;
   compareWithBaseline: boolean;
   kpis: ConversionKpi[];
+  transitions: ConversionTransition[];
   events: ConversionEventSummary[];
   coverage: {
     partial: boolean;
@@ -117,6 +131,21 @@ function buildExportSummary(summary: ConversionSummary): string {
         String(kpi.denominatorUsers),
         kpi.formula,
         kpi.sourceOfTruth,
+      ].join(','),
+    );
+  }
+
+  lines.push('');
+  lines.push('Transition,Rate,Transitioned Users,From Users,To Users,Baseline Rate');
+  for (const transition of summary.transitions) {
+    lines.push(
+      [
+        transition.label,
+        formatRate(transition.rate),
+        String(transition.transitionedUsers),
+        String(transition.fromUsers),
+        String(transition.toUsers),
+        formatRate(transition.baselineRate),
       ].join(','),
     );
   }
@@ -354,6 +383,39 @@ export function AdminConversionPanel() {
                 </details>
               </div>
             ))}
+          </div>
+
+          <div className="rounded-2xl border border-black/10 p-4 dark:border-white/10">
+            <p className="text-sm font-semibold">Funnel transitions (read-only)</p>
+            <p className="text-xs text-black/60 dark:text-white/60">
+              Transition overlap uses shared actor ids between source and destination events.
+            </p>
+            <div className="mt-3 overflow-x-auto">
+              <table className="w-full min-w-[640px] text-left text-xs">
+                <thead>
+                  <tr className="border-b border-black/10 dark:border-white/10">
+                    <th className="px-2 py-2">Transition</th>
+                    <th className="px-2 py-2">Rate</th>
+                    <th className="px-2 py-2">Transitioned users</th>
+                    <th className="px-2 py-2">From users</th>
+                    <th className="px-2 py-2">To users</th>
+                    <th className="px-2 py-2">Baseline rate</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {summary.transitions.map((transition) => (
+                    <tr key={transition.id} className="border-b border-black/5 dark:border-white/5">
+                      <td className="px-2 py-2">{transition.label}</td>
+                      <td className="px-2 py-2">{formatRate(transition.rate)}</td>
+                      <td className="px-2 py-2">{transition.transitionedUsers}</td>
+                      <td className="px-2 py-2">{transition.fromUsers}</td>
+                      <td className="px-2 py-2">{transition.toUsers}</td>
+                      <td className="px-2 py-2">{formatRate(transition.baselineRate)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
 
           <div className="rounded-2xl border border-black/10 p-4 dark:border-white/10">

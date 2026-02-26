@@ -391,12 +391,69 @@ Approval workflow:
 
 ### Tasks (6)
 
-- [ ] **Task 3.1**: Add unit tests for KPI calculations and funnel transitions
-- [ ] **Task 3.2**: Add API/integration tests for event contract validation
-- [ ] **Task 3.3**: Add E2E smoke for dashboard visibility and core metrics
-- [ ] **Task 3.4**: Add privacy review checklist and sign-off record
-- [ ] **Task 3.5**: Run weekly review dry-run using baseline data
-- [ ] **Task 3.6**: Finalize publish-ready analytics baseline docs
+- [x] **Task 3.1**: Add unit tests for KPI calculations and funnel transitions
+- [x] **Task 3.2**: Add API/integration tests for event contract validation
+- [x] **Task 3.3**: Add E2E smoke for dashboard visibility and core metrics
+- [x] **Task 3.4**: Add privacy review checklist and sign-off record
+- [x] **Task 3.5**: Run weekly review dry-run using baseline data
+- [x] **Task 3.6**: Finalize publish-ready analytics baseline docs
+
+### Phase 3 Implementation Notes (Current)
+
+#### 3.1 Unit tests for KPI calculations and funnel transitions
+
+- Expanded conversion-domain test coverage in:
+  - `src/lib/admin/__tests__/conversion.test.ts`
+- Added coverage for:
+  - baseline KPI math
+  - transition overlap calculations
+  - zero-overlap transition handling
+  - date-range validation boundaries (including max-range guard)
+
+#### 3.2 API/integration tests for event contract validation
+
+- Added conversion API contract tests in:
+  - `src/app/api/admin/__tests__/conversion.route.test.ts`
+- Added metadata allow-list validation tests in:
+  - `src/lib/observability/__tests__/adminLogStore.test.ts`
+- Contract tests now verify malformed/unknown analytics events are ignored by
+  conversion summaries and invalid request params are rejected.
+
+#### 3.3 E2E smoke for dashboard visibility and core metrics
+
+- Extended admin E2E smoke in:
+  - `e2e/admin.spec.ts`
+- Smoke now verifies:
+  - conversion section visibility
+  - core KPI presence
+  - transition/event reporting sections
+- Targeted run executed:
+  - `npm run e2e -- e2e/admin.spec.ts --project=chromium`
+
+#### 3.4 Privacy review checklist and sign-off record
+
+- Added privacy review artifact:
+  - `docs/ops/analytics-baseline-privacy-review.md`
+- Artifact records scope, checklist, findings, and sign-off status.
+
+#### 3.5 Weekly review dry-run using baseline data
+
+- Added weekly review dry-run artifact:
+  - `docs/ops/analytics-weekly-review-dry-run.md`
+- Artifact records:
+  - review window
+  - dry-run KPI snapshot
+  - transition summary
+  - decisions + follow-up actions
+
+#### 3.6 Publish-ready analytics baseline docs
+
+- Added publish bundle artifact:
+  - `docs/ops/analytics-baseline-publish-artifacts.md`
+- Added sprint-specific test workflow:
+  - `docs/test workflows/sprint-16.3-test-workflow.md`
+- Bundle includes required artifact inventory, verification list, publish-gate
+  checklist, and execution evidence.
 
 ---
 
@@ -438,14 +495,14 @@ Names are placeholders; final keys are locked during implementation.
 
 ## Definition of Done
 
-1. [ ] Funnel event taxonomy v1 is documented and instrumented.
-2. [ ] Client/server ownership split is enforced in contracts.
-3. [ ] North-star KPIs are defined, implemented, and reviewable.
-4. [ ] Admin conversion dashboard exposes baseline funnel visibility.
-5. [ ] Privacy-safe defaults are implemented and documented.
-6. [ ] Unit/API/E2E coverage passes for core analytics flows.
-7. [ ] Weekly KPI review cadence and owner model are documented.
-8. [ ] CI quality gates pass for touched surfaces.
+1. [x] Funnel event taxonomy v1 is documented and instrumented.
+2. [x] Client/server ownership split is enforced in contracts.
+3. [x] North-star KPIs are defined, implemented, and reviewable.
+4. [x] Admin conversion dashboard exposes baseline funnel visibility.
+5. [x] Privacy-safe defaults are implemented and documented.
+6. [x] Unit/API/E2E coverage passes for core analytics flows.
+7. [x] Weekly KPI review cadence and owner model are documented.
+8. [x] CI quality gates pass for touched surfaces.
 
 ---
 
@@ -454,4 +511,8 @@ Names are placeholders; final keys are locked during implementation.
 - [Sprint 16.1 Plan](./sprint-16.1.md)
 - [Sprint 16.2 Plan](./sprint-16.2.md)
 - [Sprint 15.2 Plan](./sprint-15.2.md)
+- [Sprint 16.3 Test Workflow](../test workflows/sprint-16.3-test-workflow.md)
+- [Analytics Privacy Review](../ops/analytics-baseline-privacy-review.md)
+- [Analytics Weekly Review Dry-Run](../ops/analytics-weekly-review-dry-run.md)
+- [Analytics Publish Artifact Set](../ops/analytics-baseline-publish-artifacts.md)
 - [Roadmap](../roadmap.md)

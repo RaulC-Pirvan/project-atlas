@@ -199,6 +199,20 @@ describe('admin panels', () => {
                 status: 'ok',
               },
             ],
+            transitions: [
+              {
+                id: 'landing_to_signup',
+                label: 'Landing -> Signup',
+                fromEvent: 'landing_page_view',
+                toEvent: 'auth_sign_up_completed',
+                fromUsers: 20,
+                toUsers: 12,
+                transitionedUsers: 10,
+                rate: 0.5,
+                baselineTransitionedUsers: 8,
+                baselineRate: 0.44,
+              },
+            ],
             events: [
               {
                 event: 'landing_page_view',
@@ -219,7 +233,9 @@ describe('admin panels', () => {
     expect(
       (await screen.findAllByText(/landing -> first completion rate/i)).length,
     ).toBeGreaterThan(0);
-    expect(screen.getByText('50.0%')).toBeInTheDocument();
+    expect((await screen.findAllByText('50.0%')).length).toBeGreaterThan(0);
+    expect(screen.getByText(/funnel transitions \(read-only\)/i)).toBeInTheDocument();
+    expect((await screen.findAllByText(/landing -> signup/i)).length).toBeGreaterThan(0);
     expect(screen.getByText(/compare baseline period/i)).toBeInTheDocument();
 
     vi.unstubAllGlobals();

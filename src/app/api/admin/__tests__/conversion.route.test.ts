@@ -79,4 +79,46 @@ describe('GET /api/admin/conversion', () => {
 
     errorSpy.mockRestore();
   });
+
+  it('ignores analytics entries that do not match contract event names', async () => {
+    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+
+    mockedGetServerSession.mockResolvedValue({ user: { id: 'u1', email: 'admin@example.com' } });
+    mockedGetAdminLogSnapshot.mockReturnValue([
+      {
+        id: 'invalid',
+        timestamp: '2026-02-21T10:00:00.000Z',
+        level: 'info',
+        message: 'analytics.funnel',
+        metadata: {
+          event: 'not_a_contract_event',
+          userId: 'user-1',
+        },
+      },
+      {
+        id: 'valid',
+        timestamp: '2026-02-21T11:00:00.000Z',
+        level: 'info',
+        message: 'analytics.funnel',
+        metadata: {
+          event: 'landing_page_view',
+          userId: 'user-1',
+        },
+      },
+    ]);
+
+    const response = await GET(
+      new Request('https://example.com/api/admin/conversion?start=2026-02-21&end=2026-02-21'),
+    );
+    expect(response.status).toBe(200);
+
+    const body = await response.json();
+    expect(body.ok).toBe(true);
+    const landingSummary = body.data.summary.events.find(
+      (event: { event: string; users: number }) => event.event === 'landing_page_view',
+    );
+    expect(landingSummary?.users).toBe(1);
+
+    logSpy.mockRestore();
+  });
 });

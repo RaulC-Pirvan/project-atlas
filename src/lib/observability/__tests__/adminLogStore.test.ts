@@ -25,4 +25,30 @@ describe('admin log store', () => {
     const entries = getAdminLogSnapshot(1);
     expect(entries).toHaveLength(1);
   });
+
+  it('keeps only allow-listed analytics metadata and drops free-form payload keys', () => {
+    recordAdminLog({
+      message: 'analytics.funnel',
+      level: 'info',
+      event: 'landing_page_view',
+      userId: 'user-1',
+      source: 'hero_primary',
+      target: '/sign-up',
+      details: 'allowed-detail',
+      email: 'user@example.com',
+      habitTitle: 'Private habit name',
+      token: 'secret-token',
+    });
+
+    const entry = getAdminLogSnapshot(1)[0];
+    expect(entry.metadata).toBeTruthy();
+    expect(entry.metadata?.event).toBe('landing_page_view');
+    expect(entry.metadata?.userId).toBe('user-1');
+    expect(entry.metadata?.source).toBe('hero_primary');
+    expect(entry.metadata?.target).toBe('/sign-up');
+    expect(entry.metadata?.details).toBe('allowed-detail');
+    expect((entry.metadata as Record<string, unknown>).email).toBeUndefined();
+    expect((entry.metadata as Record<string, unknown>).habitTitle).toBeUndefined();
+    expect((entry.metadata as Record<string, unknown>).token).toBeUndefined();
+  });
 });

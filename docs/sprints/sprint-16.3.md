@@ -86,12 +86,162 @@ operational ownership.
 
 ### Tasks (6)
 
-- [ ] **Task 0.1**: Define analytics event taxonomy v1 (funnel + conversion)
-- [ ] **Task 0.2**: Define client/server event ownership matrix
-- [ ] **Task 0.3**: Define KPI dictionary and formulas
-- [ ] **Task 0.4**: Define privacy-safe payload contract and redaction rules
-- [ ] **Task 0.5**: Define weekly review cadence and owner responsibilities
-- [ ] **Task 0.6**: Define event versioning and change-control policy
+- [x] **Task 0.1**: Define analytics event taxonomy v1 (funnel + conversion)
+- [x] **Task 0.2**: Define client/server event ownership matrix
+- [x] **Task 0.3**: Define KPI dictionary and formulas
+- [x] **Task 0.4**: Define privacy-safe payload contract and redaction rules
+- [x] **Task 0.5**: Define weekly review cadence and owner responsibilities
+- [x] **Task 0.6**: Define event versioning and change-control policy
+
+### Phase 0 Implementation Notes (Current)
+
+Phase 0 governance contract is locked in this sprint document.
+
+#### 0.1 Analytics Event Taxonomy v1 (Funnel + Conversion)
+
+All event names use `snake_case` and include `schemaVersion` in payload.
+
+| Funnel Stage | Event | Description | Primary Surface |
+| --- | --- | --- | --- |
+| Awareness | `landing_page_view` | Landing route rendered for a session. | `/landing` |
+| Education | `landing_walkthrough_view` | Walkthrough section viewed. | `/landing` |
+| Intent | `landing_walkthrough_cta_click` | Walkthrough CTA click before redirect. | `/landing/walkthrough/track` |
+| Acquisition | `auth_sign_up_completed` | Account successfully created and persisted. | `/api/auth/sign-up` |
+| Activation | `habit_first_created` | User created first non-archived habit. | `/api/habits` |
+| Activation | `habit_first_completion_recorded` | First valid completion persisted. | `/api/completions` |
+| Monetization Intent | `pro_page_view` | Pro page render tracked. | `/pro` |
+| Monetization Intent | `pro_cta_click` | Upgrade CTA clicked. | `/pro`, `/account`, `/landing` |
+| Monetization | `pro_checkout_initiated` | Checkout session created. | `/api/billing/stripe/checkout` |
+| Monetization | `pro_checkout_return` | User returned from checkout success/cancel. | `/account` |
+| Monetization Truth | `pro_entitlement_active` | Entitlement projection became active. | `/api/billing/stripe/webhook` |
+
+Notes:
+
+- Existing Sprint 16.1 and 16.2 event contracts are preserved.
+- New activation events are milestone-only and fire once per user lifecycle.
+- Funnel reporting uses unique-user counting by default.
+
+#### 0.2 Client/Server Event Ownership Matrix
+
+| Event | Owner | Truth Class | Emission Rule |
+| --- | --- | --- | --- |
+| `landing_page_view` | Client | Intent | Emit on route render with dedupe guard. |
+| `landing_walkthrough_view` | Client | Intent | Emit once per view window (guardrailed). |
+| `landing_walkthrough_cta_click` | Server route | Intent | Emit in tracked redirect route before navigation. |
+| `auth_sign_up_completed` | Server | Domain truth | Emit only after user row commit succeeds. |
+| `habit_first_created` | Server | Domain truth | Emit when first active habit is persisted. |
+| `habit_first_completion_recorded` | Server | Domain truth | Emit when first completion write is committed. |
+| `pro_page_view` | Client | Intent | Emit on `/pro` render with duplicate suppression. |
+| `pro_cta_click` | Client | Intent | Emit on click with validated source. |
+| `pro_checkout_initiated` | Server | Billing truth | Emit only after checkout session creation succeeds. |
+| `pro_checkout_return` | Client | Intent | Emit once on return state handoff to account. |
+| `pro_entitlement_active` | Server | Billing truth | Emit from webhook projection success path only. |
+
+Decision rule: KPI numerators and funnel "completion" stages must use server
+truth events when an equivalent server event exists.
+
+#### 0.3 KPI Dictionary and Formulas
+
+Default reporting window is trailing 7 complete UTC days unless explicitly
+overridden in dashboard filters.
+
+| KPI | Formula | Notes |
+| --- | --- | --- |
+| Landing -> First Completion Rate | `unique_users(habit_first_completion_recorded) / unique_users(landing_page_view)` | North-star activation metric. |
+| Pro Page -> Checkout Start Rate | `unique_users(pro_checkout_initiated) / unique_users(pro_page_view)` | North-star monetization intent metric. |
+| Checkout Start -> Entitlement Active Rate | `unique_users(pro_entitlement_active) / unique_users(pro_checkout_initiated)` | North-star billing success metric. |
+| Signup -> First Habit Rate | `unique_users(habit_first_created) / unique_users(auth_sign_up_completed)` | Activation diagnostic metric. |
+| First Habit -> First Completion Rate | `unique_users(habit_first_completion_recorded) / unique_users(habit_first_created)` | Habit quality diagnostic metric. |
+| Event Validity Rate | `valid_events / total_received_events` | Pipeline health metric. |
+
+Formula rules:
+
+- `unique_users` means distinct stable actor id in window (`userId` when
+  authenticated, pseudonymous session id when anonymous).
+- Division by zero returns `null` (not `0%`) and dashboard renders as
+  "insufficient data".
+- KPI definition changes require policy version bump (see 0.6).
+
+#### 0.4 Privacy-Safe Payload Contract and Redaction Rules
+
+Allowed baseline fields:
+
+- `event`
+- `schemaVersion`
+- `occurredAt`
+- `surface`
+- `requestId`
+- `authenticated`
+- `source` and `target` (enum-only)
+- `provider`
+- `status`
+- `dedupeReason`
+
+Restricted fields (must be transformed before emit):
+
+- `userId` -> stable pseudonymous hash (`sha256(userId + analytics_salt)`).
+- `checkoutSessionId` and provider ids -> one-way hash; never raw.
+- URL/query inputs -> whitelist enums only; drop all unknown keys.
+
+Forbidden fields (must never be emitted):
+
+- Email addresses, display names, phone numbers, IP address full values.
+- Habit titles/descriptions and any free-form user-entered text.
+- Auth tokens, cookies, passwords, recovery codes, TOTP secrets.
+- Support ticket subject/message and legal acceptance raw payloads.
+
+Operational rules:
+
+- Validator enforces allow-list; unknown fields are rejected and counted in
+  `Event Validity Rate`.
+- Payload values are bounded (`<=128` chars) unless explicitly typed otherwise.
+- Analytics logs follow least-privilege access and environment-level enablement.
+
+#### 0.5 Weekly Review Cadence and Owner Responsibilities
+
+Cadence:
+
+- Weekly analytics review every Monday, 30 minutes, covering the prior complete
+  Monday-Sunday UTC window.
+- Backup run each Thursday if Monday data quality checks fail.
+
+Roles:
+
+- Product Owner: owns KPI interpretation and prioritization decisions.
+- Engineering Owner: owns instrumentation integrity and data quality fixes.
+- Analytics DRI (initially Engineering Owner): owns dashboard definitions and
+  contract updates.
+- Optional attendees: Support lead (for anomaly context), billing owner.
+
+Meeting outputs (required each week):
+
+- KPI snapshot with week-over-week deltas.
+- Open anomaly list with owner and due date.
+- Decision log entry in sprint or ops artifact with follow-up actions.
+
+#### 0.6 Event Versioning and Change-Control Policy
+
+Version model:
+
+- `schemaVersion` is integer-major per event contract family.
+- Additive non-breaking fields keep the current major version.
+- Breaking changes (field removal/type change/semantic change) require major
+  increment and dual-read support for one sprint minimum.
+
+Change classes:
+
+- Class A (non-breaking): add optional enum/value/field -> docs + tests update.
+- Class B (behavioral): redefine event meaning/formula -> version bump + KPI
+  changelog update.
+- Class C (breaking): rename/remove required fields -> new major + migration
+  note + rollback plan.
+
+Approval workflow:
+
+1. PR updates sprint/ops contract docs.
+2. PR updates TypeScript contracts, validators, and tests in same change.
+3. Product + Engineering approval required before merge.
+4. Release notes include effective date and affected KPIs/events.
 
 ---
 

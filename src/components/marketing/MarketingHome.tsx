@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 
+import { buildLandingAuthTrackHref } from '../../lib/analytics/funnel';
 import { buildLandingWalkthroughTrackHref } from '../../lib/analytics/landingWalkthrough';
 import { LegalSupportLinks } from '../legal/LegalSupportLinks';
 import { ThemeToggle } from '../ui/ThemeToggle';
@@ -567,6 +568,22 @@ type MarketingHomeProps = {
 
 export function MarketingHome({ isAuthenticated = false }: MarketingHomeProps) {
   const atlasProLink = '/pro?source=hero';
+  const landingAuthHeaderSignInHref = buildLandingAuthTrackHref({
+    source: 'header_sign_in',
+    target: '/sign-in',
+  });
+  const landingAuthHeroPrimaryHref = buildLandingAuthTrackHref({
+    source: 'hero_primary',
+    target: '/sign-up',
+  });
+  const landingAuthHeroSecondaryHref = buildLandingAuthTrackHref({
+    source: 'hero_secondary',
+    target: '/sign-in',
+  });
+  const landingAuthFinalPrimaryHref = buildLandingAuthTrackHref({
+    source: 'final_primary',
+    target: '/sign-up',
+  });
   const walkthroughPrimaryHref = buildLandingWalkthroughTrackHref({
     source: 'walkthrough_primary',
     target: isAuthenticated ? '/today' : '/sign-up',
@@ -621,7 +638,7 @@ export function MarketingHome({ isAuthenticated = false }: MarketingHomeProps) {
                   Support
                 </Link>
                 <Link
-                  href="/sign-in"
+                  href={landingAuthHeaderSignInHref}
                   className={`text-xs font-medium uppercase tracking-[0.25em] text-black/70 transition hover:text-black dark:text-white/70 dark:hover:text-white ${focusRingClasses}`}
                 >
                   Sign in
@@ -663,13 +680,13 @@ export function MarketingHome({ isAuthenticated = false }: MarketingHomeProps) {
               ) : (
                 <>
                   <Link
-                    href="/sign-up"
+                    href={landingAuthHeroPrimaryHref}
                     className={`inline-flex h-12 items-center justify-center rounded-full border border-black bg-black px-6 text-sm font-medium text-white transition hover:bg-black/90 dark:border-white dark:bg-white dark:text-black dark:hover:bg-white/90 ${focusRingClasses}`}
                   >
                     Create your account
                   </Link>
                   <Link
-                    href="/sign-in"
+                    href={landingAuthHeroSecondaryHref}
                     className={`inline-flex h-12 items-center justify-center rounded-full border border-black/20 bg-white px-6 text-sm font-medium text-black transition hover:bg-black/5 dark:border-white/20 dark:bg-black dark:text-white dark:hover:bg-white/10 ${focusRingClasses}`}
                   >
                     Sign in
@@ -1008,7 +1025,7 @@ export function MarketingHome({ isAuthenticated = false }: MarketingHomeProps) {
               See Atlas Pro
             </Link>
             <Link
-              href={isAuthenticated ? '/today' : '/sign-up'}
+              href={isAuthenticated ? '/today' : landingAuthFinalPrimaryHref}
               className={`inline-flex h-11 items-center justify-center rounded-full border border-black/20 bg-white px-5 text-xs font-medium uppercase tracking-[0.2em] text-black transition hover:bg-black/5 dark:border-white/20 dark:bg-black dark:text-white dark:hover:bg-white/10 ${focusRingClasses}`}
             >
               {isAuthenticated ? 'Go to dashboard' : 'Start free'}

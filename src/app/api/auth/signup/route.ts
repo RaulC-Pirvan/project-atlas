@@ -1,3 +1,4 @@
+import { logFunnelEvent } from '../../../../lib/analytics/funnel';
 import { signupUser } from '../../../../lib/api/auth/signup';
 import { signupSchema } from '../../../../lib/api/auth/validation';
 import { ApiError, asApiError } from '../../../../lib/api/errors';
@@ -9,11 +10,13 @@ import {
   consumeRateLimit,
   getRateLimitKey,
 } from '../../../../lib/http/rateLimit';
-import { withApiLogging } from '../../../../lib/observability/apiLogger';
+import { getRequestId, withApiLogging } from '../../../../lib/observability/apiLogger';
 
 export const runtime = 'nodejs';
 
 export async function POST(request: Request) {
+  const requestId = getRequestId(request);
+
   return withApiLogging(
     request,
     { route: '/api/auth/signup' },
@@ -40,6 +43,15 @@ export async function POST(request: Request) {
         email: parsed.data.email,
         password: parsed.data.password,
         displayName: parsed.data.displayName,
+      });
+
+      logFunnelEvent({
+        event: 'auth_sign_up_completed',
+        surface: '/api/auth/signup',
+        authenticated: false,
+        userId: result.userId,
+        provider: 'credentials',
+        requestId,
       });
 
       return jsonOk(result, 201);

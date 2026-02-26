@@ -101,19 +101,19 @@ Phase 0 governance contract is locked in this sprint document.
 
 All event names use `snake_case` and include `schemaVersion` in payload.
 
-| Funnel Stage | Event | Description | Primary Surface |
-| --- | --- | --- | --- |
-| Awareness | `landing_page_view` | Landing route rendered for a session. | `/landing` |
-| Education | `landing_walkthrough_view` | Walkthrough section viewed. | `/landing` |
-| Intent | `landing_walkthrough_cta_click` | Walkthrough CTA click before redirect. | `/landing/walkthrough/track` |
-| Acquisition | `auth_sign_up_completed` | Account successfully created and persisted. | `/api/auth/sign-up` |
-| Activation | `habit_first_created` | User created first non-archived habit. | `/api/habits` |
-| Activation | `habit_first_completion_recorded` | First valid completion persisted. | `/api/completions` |
-| Monetization Intent | `pro_page_view` | Pro page render tracked. | `/pro` |
-| Monetization Intent | `pro_cta_click` | Upgrade CTA clicked. | `/pro`, `/account`, `/landing` |
-| Monetization | `pro_checkout_initiated` | Checkout session created. | `/api/billing/stripe/checkout` |
-| Monetization | `pro_checkout_return` | User returned from checkout success/cancel. | `/account` |
-| Monetization Truth | `pro_entitlement_active` | Entitlement projection became active. | `/api/billing/stripe/webhook` |
+| Funnel Stage        | Event                             | Description                                 | Primary Surface                |
+| ------------------- | --------------------------------- | ------------------------------------------- | ------------------------------ |
+| Awareness           | `landing_page_view`               | Landing route rendered for a session.       | `/landing`                     |
+| Education           | `landing_walkthrough_view`        | Walkthrough section viewed.                 | `/landing`                     |
+| Intent              | `landing_walkthrough_cta_click`   | Walkthrough CTA click before redirect.      | `/landing/walkthrough/track`   |
+| Acquisition         | `auth_sign_up_completed`          | Account successfully created and persisted. | `/api/auth/sign-up`            |
+| Activation          | `habit_first_created`             | User created first non-archived habit.      | `/api/habits`                  |
+| Activation          | `habit_first_completion_recorded` | First valid completion persisted.           | `/api/completions`             |
+| Monetization Intent | `pro_page_view`                   | Pro page render tracked.                    | `/pro`                         |
+| Monetization Intent | `pro_cta_click`                   | Upgrade CTA clicked.                        | `/pro`, `/account`, `/landing` |
+| Monetization        | `pro_checkout_initiated`          | Checkout session created.                   | `/api/billing/stripe/checkout` |
+| Monetization        | `pro_checkout_return`             | User returned from checkout success/cancel. | `/account`                     |
+| Monetization Truth  | `pro_entitlement_active`          | Entitlement projection became active.       | `/api/billing/stripe/webhook`  |
 
 Notes:
 
@@ -123,19 +123,19 @@ Notes:
 
 #### 0.2 Client/Server Event Ownership Matrix
 
-| Event | Owner | Truth Class | Emission Rule |
-| --- | --- | --- | --- |
-| `landing_page_view` | Client | Intent | Emit on route render with dedupe guard. |
-| `landing_walkthrough_view` | Client | Intent | Emit once per view window (guardrailed). |
-| `landing_walkthrough_cta_click` | Server route | Intent | Emit in tracked redirect route before navigation. |
-| `auth_sign_up_completed` | Server | Domain truth | Emit only after user row commit succeeds. |
-| `habit_first_created` | Server | Domain truth | Emit when first active habit is persisted. |
-| `habit_first_completion_recorded` | Server | Domain truth | Emit when first completion write is committed. |
-| `pro_page_view` | Client | Intent | Emit on `/pro` render with duplicate suppression. |
-| `pro_cta_click` | Client | Intent | Emit on click with validated source. |
-| `pro_checkout_initiated` | Server | Billing truth | Emit only after checkout session creation succeeds. |
-| `pro_checkout_return` | Client | Intent | Emit once on return state handoff to account. |
-| `pro_entitlement_active` | Server | Billing truth | Emit from webhook projection success path only. |
+| Event                             | Owner        | Truth Class   | Emission Rule                                       |
+| --------------------------------- | ------------ | ------------- | --------------------------------------------------- |
+| `landing_page_view`               | Client       | Intent        | Emit on route render with dedupe guard.             |
+| `landing_walkthrough_view`        | Client       | Intent        | Emit once per view window (guardrailed).            |
+| `landing_walkthrough_cta_click`   | Server route | Intent        | Emit in tracked redirect route before navigation.   |
+| `auth_sign_up_completed`          | Server       | Domain truth  | Emit only after user row commit succeeds.           |
+| `habit_first_created`             | Server       | Domain truth  | Emit when first active habit is persisted.          |
+| `habit_first_completion_recorded` | Server       | Domain truth  | Emit when first completion write is committed.      |
+| `pro_page_view`                   | Client       | Intent        | Emit on `/pro` render with duplicate suppression.   |
+| `pro_cta_click`                   | Client       | Intent        | Emit on click with validated source.                |
+| `pro_checkout_initiated`          | Server       | Billing truth | Emit only after checkout session creation succeeds. |
+| `pro_checkout_return`             | Client       | Intent        | Emit once on return state handoff to account.       |
+| `pro_entitlement_active`          | Server       | Billing truth | Emit from webhook projection success path only.     |
 
 Decision rule: KPI numerators and funnel "completion" stages must use server
 truth events when an equivalent server event exists.
@@ -145,14 +145,14 @@ truth events when an equivalent server event exists.
 Default reporting window is trailing 7 complete UTC days unless explicitly
 overridden in dashboard filters.
 
-| KPI | Formula | Notes |
-| --- | --- | --- |
-| Landing -> First Completion Rate | `unique_users(habit_first_completion_recorded) / unique_users(landing_page_view)` | North-star activation metric. |
-| Pro Page -> Checkout Start Rate | `unique_users(pro_checkout_initiated) / unique_users(pro_page_view)` | North-star monetization intent metric. |
-| Checkout Start -> Entitlement Active Rate | `unique_users(pro_entitlement_active) / unique_users(pro_checkout_initiated)` | North-star billing success metric. |
-| Signup -> First Habit Rate | `unique_users(habit_first_created) / unique_users(auth_sign_up_completed)` | Activation diagnostic metric. |
-| First Habit -> First Completion Rate | `unique_users(habit_first_completion_recorded) / unique_users(habit_first_created)` | Habit quality diagnostic metric. |
-| Event Validity Rate | `valid_events / total_received_events` | Pipeline health metric. |
+| KPI                                       | Formula                                                                             | Notes                                  |
+| ----------------------------------------- | ----------------------------------------------------------------------------------- | -------------------------------------- |
+| Landing -> First Completion Rate          | `unique_users(habit_first_completion_recorded) / unique_users(landing_page_view)`   | North-star activation metric.          |
+| Pro Page -> Checkout Start Rate           | `unique_users(pro_checkout_initiated) / unique_users(pro_page_view)`                | North-star monetization intent metric. |
+| Checkout Start -> Entitlement Active Rate | `unique_users(pro_entitlement_active) / unique_users(pro_checkout_initiated)`       | North-star billing success metric.     |
+| Signup -> First Habit Rate                | `unique_users(habit_first_created) / unique_users(auth_sign_up_completed)`          | Activation diagnostic metric.          |
+| First Habit -> First Completion Rate      | `unique_users(habit_first_completion_recorded) / unique_users(habit_first_created)` | Habit quality diagnostic metric.       |
+| Event Validity Rate                       | `valid_events / total_received_events`                                              | Pipeline health metric.                |
 
 Formula rules:
 
@@ -249,13 +249,70 @@ Approval workflow:
 
 ### Tasks (7)
 
-- [ ] **Task 1.1**: Instrument landing view + auth CTA events
-- [ ] **Task 1.2**: Instrument sign-up/sign-in completion events
-- [ ] **Task 1.3**: Instrument first habit creation milestone event
-- [ ] **Task 1.4**: Instrument first completion milestone event
-- [ ] **Task 1.5**: Instrument Pro conversion events (checkout start/return/entitlement active)
-- [ ] **Task 1.6**: Add dedupe and schema validation guardrails for event ingestion
-- [ ] **Task 1.7**: Add observability for dropped/invalid events
+- [x] **Task 1.1**: Instrument landing view + auth CTA events
+- [x] **Task 1.2**: Instrument sign-up/sign-in completion events
+- [x] **Task 1.3**: Instrument first habit creation milestone event
+- [x] **Task 1.4**: Instrument first completion milestone event
+- [x] **Task 1.5**: Instrument Pro conversion events (checkout start/return/entitlement active)
+- [x] **Task 1.6**: Add dedupe and schema validation guardrails for event ingestion
+- [x] **Task 1.7**: Add observability for dropped/invalid events
+
+### Phase 1 Implementation Notes (Current)
+
+#### 1.1 Landing view + auth CTA events
+
+- Added `landing_page_view` event emission in `src/app/landing/page.tsx`.
+- Added tracked landing auth CTA route `GET /landing/auth/track`.
+- Signed-out landing auth links now route through tracked hrefs with validated
+  `source`/`target` enums before redirect.
+
+#### 1.2 Sign-up/sign-in completion events
+
+- Added `auth_sign_up_completed` in `POST /api/auth/signup` (server truth after
+  successful user creation).
+- Added `auth_sign_in_completed` in:
+  - `POST /api/auth/sign-in` (credentials success paths)
+  - `POST /api/auth/sign-in/2fa/verify` (2FA completion path)
+  - Google OAuth success callback in `src/lib/auth/nextauth.ts`
+
+#### 1.3 First habit creation milestone event
+
+- Added `habit_first_created` emission in `POST /api/habits` when total habit
+  count for user resolves to `1` immediately after create.
+- Milestone probe failures are non-blocking and logged via analytics guardrails.
+
+#### 1.4 First completion milestone event
+
+- Added `habit_first_completion_recorded` emission in `POST /api/completions`
+  when a completion is newly created and user total completion count resolves to
+  `1`.
+- Milestone probe failures are non-blocking and logged via analytics guardrails.
+
+#### 1.5 Pro conversion events
+
+- Existing Sprint 16.1 conversion instrumentation remains active and reused:
+  `pro_checkout_initiated`, `pro_checkout_return`, `pro_entitlement_active`
+  (plus `pro_page_view` and `pro_cta_click`).
+
+#### 1.6 Dedupe + schema validation guardrails
+
+- Added shared funnel analytics runtime module:
+  - `src/lib/analytics/funnel.ts`
+- Module includes:
+  - explicit event/surface contract typing
+  - source/target parsing helpers with safe fallbacks
+  - payload validation guardrail (`invalid_payload_dropped`)
+  - duplicate suppression guardrail (`duplicate_event_suppressed`)
+
+#### 1.7 Observability for dropped/invalid events
+
+- Guardrail logs now emit on:
+  - invalid source fallback
+  - invalid target fallback
+  - invalid payload dropped
+  - duplicate suppression
+  - milestone probe failure
+- Added test coverage for funnel guardrails and tracked auth CTA route behavior.
 
 ---
 

@@ -14,11 +14,27 @@ describe('MarketingHome', () => {
     ).toBeInTheDocument();
 
     const cta = screen.getByRole('link', { name: /create your account/i });
-    expect(cta).toHaveAttribute('href', '/sign-up');
+    expect(cta).toHaveAttribute(
+      'href',
+      '/landing/auth/track?target=%2Fsign-up&source=hero_primary',
+    );
 
     const signInLinks = screen.getAllByRole('link', { name: /sign in/i });
     expect(signInLinks.length).toBeGreaterThan(0);
-    expect(signInLinks.some((link) => link.getAttribute('href') === '/sign-in')).toBeTruthy();
+    expect(
+      signInLinks.some(
+        (link) =>
+          link.getAttribute('href') ===
+          '/landing/auth/track?target=%2Fsign-in&source=header_sign_in',
+      ),
+    ).toBeTruthy();
+    expect(
+      signInLinks.some(
+        (link) =>
+          link.getAttribute('href') ===
+          '/landing/auth/track?target=%2Fsign-in&source=hero_secondary',
+      ),
+    ).toBeTruthy();
     expect(
       signInLinks.some(
         (link) =>
@@ -124,7 +140,13 @@ describe('MarketingHome', () => {
     );
     const freeLinks = screen.getAllByRole('link', { name: /start free/i });
     expect(freeLinks.length).toBeGreaterThan(0);
-    expect(freeLinks.some((link) => link.getAttribute('href') === '/sign-up')).toBeTruthy();
+    expect(
+      freeLinks.some(
+        (link) =>
+          link.getAttribute('href') ===
+          '/landing/auth/track?target=%2Fsign-up&source=final_primary',
+      ),
+    ).toBeTruthy();
     expect(
       freeLinks.some(
         (link) =>

@@ -1,5 +1,6 @@
 import { getServerSession } from 'next-auth/next';
 
+import { logFunnelEvent, logFunnelGuardrail } from '../../../lib/analytics/funnel';
 import { ApiError, asApiError } from '../../../lib/api/errors';
 import { listCompletionsForDate, toggleCompletion } from '../../../lib/api/habits/completions';
 import { toggleCompletionSchema } from '../../../lib/api/habits/validation';
@@ -7,7 +8,7 @@ import { jsonError, jsonOk } from '../../../lib/api/response';
 import { authOptions } from '../../../lib/auth/nextauth';
 import { prisma } from '../../../lib/db/prisma';
 import { parseUtcDateKey } from '../../../lib/habits/dates';
-import { withApiLogging } from '../../../lib/observability/apiLogger';
+import { getRequestId, withApiLogging } from '../../../lib/observability/apiLogger';
 
 export const runtime = 'nodejs';
 
@@ -68,6 +69,8 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  const requestId = getRequestId(request);
+
   return withApiLogging(
     request,
     { route: '/api/completions' },
@@ -106,6 +109,38 @@ export async function POST(request: Request) {
         timeZone: user.timezone ?? 'UTC',
         now: resolveTestNowOverride(request),
       });
+
+      if (result.status === 'created') {
+        let isFirstCompletion = false;
+        try {
+          const totalCompletions = await prisma.habitCompletion.count({
+            where: {
+              habit: { userId: session.user.id },
+            },
+          });
+          isFirstCompletion = totalCompletions === 1;
+        } catch (error) {
+          logFunnelGuardrail({
+            reason: 'milestone_probe_failed',
+            event: 'habit_first_completion_recorded',
+            surface: '/api/completions',
+            authenticated: true,
+            userId: session.user.id,
+            requestId,
+            details: error instanceof Error ? error.message : 'count_failed',
+          });
+        }
+
+        if (isFirstCompletion) {
+          logFunnelEvent({
+            event: 'habit_first_completion_recorded',
+            surface: '/api/completions',
+            authenticated: true,
+            userId: session.user.id,
+            requestId,
+          });
+        }
+      }
 
       return jsonOk({ result });
     },

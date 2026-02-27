@@ -86,7 +86,7 @@ describe('CalendarMonth', () => {
       name: /open daily view for February 6, 2026/i,
     });
 
-    expect(completedDay.className).toContain('bg-[#FAB95B]');
+    expect(completedDay).toHaveAttribute('data-complete', 'true');
     expect(completedDay.className).not.toMatch(/(^|\s)text-white(\s|$)/);
     expect(partialDay.className).not.toMatch(/(^|\s)text-white(\s|$)/);
     expect(screen.getByText(/2 of 2 habits completed/i)).toBeInTheDocument();

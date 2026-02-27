@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 
 import { LEGAL_ROUTE_LINKS } from '../../lib/legal/policies';
 import type { LegalPolicyMetadata } from '../../lib/legal/types';
-import { ThemeToggle } from '../ui/ThemeToggle';
+import { ThemeControls } from '../ui/ThemeControls';
 
 type LegalPageLayoutProps = {
   title: string;
@@ -17,10 +17,10 @@ const focusRingClasses =
 
 export function LegalPageLayout({ title, description, metadata, children }: LegalPageLayoutProps) {
   return (
-    <main className="min-h-screen bg-white text-black dark:bg-black dark:text-white">
+    <main className="min-h-screen bg-[var(--color-bg-canvas)] text-[var(--color-text-primary)]">
       <div className="mx-auto w-full max-w-5xl px-6 py-10 sm:py-14">
         <header className="flex items-center justify-between opacity-0 translate-y-2 motion-reduce:translate-y-0 motion-reduce:opacity-100 motion-safe:animate-[rise-in_0.5s_ease-out_forwards]">
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-black/60 dark:text-white/60">
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[var(--color-text-muted)]">
             Project Atlas
           </p>
           <div className="flex items-center gap-3">
@@ -36,7 +36,7 @@ export function LegalPageLayout({ title, description, metadata, children }: Lega
             >
               Home
             </Link>
-            <ThemeToggle />
+            <ThemeControls />
           </div>
         </header>
 

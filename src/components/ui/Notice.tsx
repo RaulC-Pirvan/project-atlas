@@ -9,9 +9,11 @@ type NoticeProps = {
 
 const toneClasses: Record<NoticeTone, string> = {
   neutral:
-    'border-black/10 bg-black/5 text-black/80 dark:border-white/10 dark:bg-white/10 dark:text-white/80',
-  error: 'border-black bg-white text-black dark:border-white dark:bg-black dark:text-white',
-  success: 'border-black/40 bg-white text-black dark:border-white/40 dark:bg-black dark:text-white',
+    'border-[color:var(--color-border-subtle)] bg-[var(--color-bg-muted)] text-[color:var(--color-text-secondary)]',
+  error:
+    'border-[color:var(--color-state-error)] bg-[var(--color-state-error-soft)] text-[color:var(--color-state-error)]',
+  success:
+    'border-[color:var(--color-state-success)] bg-[var(--color-state-success-soft)] text-[color:var(--color-state-success)]',
 };
 
 export function Notice({ tone = 'neutral', children }: NoticeProps) {

@@ -3,37 +3,124 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --background: #ffffff;
-  --foreground: #0a0a0a;
-  --surface: #ffffff;
-  --surface-muted: rgba(255, 255, 255, 0.85);
-  --border: rgba(0, 0, 0, 0.12);
-  --muted: rgba(0, 0, 0, 0.6);
-  --muted-strong: rgba(0, 0, 0, 0.75);
+  --color-bg-canvas: #ffffff;
+  --color-bg-surface: #ffffff;
+  --color-bg-surface-elevated: #ffffff;
+  --color-bg-muted: #f5f5f5;
+
+  --color-text-primary: #0a0a0a;
+  --color-text-secondary: rgba(0, 0, 0, 0.75);
+  --color-text-muted: rgba(0, 0, 0, 0.62);
+  --color-text-on-accent: #111111;
+
+  --color-border-subtle: rgba(0, 0, 0, 0.12);
+  --color-border-strong: rgba(0, 0, 0, 0.22);
+
+  --color-accent-solid: #fab95b;
+  --color-accent-strong: #e9a543;
+  --color-accent-soft: rgba(250, 185, 91, 0.18);
+  --color-accent-ring: rgba(233, 165, 67, 0.35);
+
+  --color-state-error: #dc2626;
+  --color-state-warning: #d97706;
+  --color-state-success: #16a34a;
+  --color-state-info: #2563eb;
+  --color-state-error-soft: rgba(220, 38, 38, 0.12);
+  --color-state-warning-soft: rgba(217, 119, 6, 0.14);
+  --color-state-success-soft: rgba(22, 163, 74, 0.12);
+  --color-state-info-soft: rgba(37, 99, 235, 0.12);
+
+  --background: var(--color-bg-canvas);
+  --foreground: var(--color-text-primary);
+  --surface: var(--color-bg-surface);
+  --surface-elevated: var(--color-bg-surface-elevated);
+  --surface-muted: var(--color-bg-muted);
+  --border: var(--color-border-subtle);
+  --border-strong: var(--color-border-strong);
+  --muted: var(--color-text-muted);
+  --muted-strong: var(--color-text-secondary);
   color-scheme: light;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-background: var(--color-bg-canvas);
+  --color-foreground: var(--color-text-primary);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
 .dark {
-  --background: #0a0a0a;
-  --foreground: #f5f5f5;
-  --surface: #0d0d0d;
-  --surface-muted: rgba(13, 13, 13, 0.8);
-  --border: rgba(255, 255, 255, 0.12);
-  --muted: rgba(255, 255, 255, 0.6);
-  --muted-strong: rgba(255, 255, 255, 0.75);
+  --color-bg-canvas: #101214;
+  --color-bg-surface: #161a1d;
+  --color-bg-surface-elevated: #1e2328;
+  --color-bg-muted: #21272d;
+
+  --color-text-primary: #f5f7fa;
+  --color-text-secondary: rgba(245, 247, 250, 0.78);
+  --color-text-muted: rgba(245, 247, 250, 0.62);
+
+  --color-border-subtle: rgba(255, 255, 255, 0.12);
+  --color-border-strong: rgba(255, 255, 255, 0.22);
+  --color-state-error-soft: rgba(220, 38, 38, 0.2);
+  --color-state-warning-soft: rgba(217, 119, 6, 0.22);
+  --color-state-success-soft: rgba(22, 163, 74, 0.2);
+  --color-state-info-soft: rgba(37, 99, 235, 0.2);
+
+  --background: var(--color-bg-canvas);
+  --foreground: var(--color-text-primary);
+  --surface: var(--color-bg-surface);
+  --surface-elevated: var(--color-bg-surface-elevated);
+  --surface-muted: var(--color-bg-muted);
+  --border: var(--color-border-subtle);
+  --border-strong: var(--color-border-strong);
+  --muted: var(--color-text-muted);
+  --muted-strong: var(--color-text-secondary);
   color-scheme: dark;
 }
 
+:root[data-atlas-accent='gold'] {
+  --color-accent-solid: #fab95b;
+  --color-accent-strong: #e9a543;
+  --color-accent-soft: rgba(250, 185, 91, 0.18);
+  --color-accent-ring: rgba(233, 165, 67, 0.35);
+  --color-text-on-accent: #111111;
+}
+
+:root[data-atlas-accent='green'] {
+  --color-accent-solid: #34c759;
+  --color-accent-strong: #28b24a;
+  --color-accent-soft: rgba(52, 199, 89, 0.2);
+  --color-accent-ring: rgba(40, 178, 74, 0.35);
+  --color-text-on-accent: #111111;
+}
+
+:root[data-atlas-accent='blue'] {
+  --color-accent-solid: #3b82f6;
+  --color-accent-strong: #2563eb;
+  --color-accent-soft: rgba(59, 130, 246, 0.2);
+  --color-accent-ring: rgba(37, 99, 235, 0.38);
+  --color-text-on-accent: #ffffff;
+}
+
+:root[data-atlas-accent='pink'] {
+  --color-accent-solid: #ec4899;
+  --color-accent-strong: #db2777;
+  --color-accent-soft: rgba(236, 72, 153, 0.2);
+  --color-accent-ring: rgba(219, 39, 119, 0.35);
+  --color-text-on-accent: #111111;
+}
+
+:root[data-atlas-accent='red'] {
+  --color-accent-solid: #ef4444;
+  --color-accent-strong: #dc2626;
+  --color-accent-soft: rgba(239, 68, 68, 0.2);
+  --color-accent-ring: rgba(220, 38, 38, 0.38);
+  --color-text-on-accent: #ffffff;
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--color-bg-canvas);
+  color: var(--color-text-primary);
   font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
 }
 

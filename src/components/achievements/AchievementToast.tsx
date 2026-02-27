@@ -84,7 +84,8 @@ function AchievementToastCard({
   }, [toast.current, toast.fromCurrent, toast.fromRatio, toast.kind, toast.ratio]);
 
   const statusLabel = toast.kind === 'unlock' ? 'Unlocked' : 'Progress';
-  const barTone = toast.kind === 'unlock' ? 'bg-[#FAB95B]' : 'bg-black/60 dark:bg-white/70';
+  const barTone =
+    toast.kind === 'unlock' ? 'bg-[var(--color-accent-solid)]' : 'bg-black/60 dark:bg-white/70';
   const barWidth = `${Math.round(Math.min(1, displayRatio) * 100)}%`;
 
   return (

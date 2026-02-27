@@ -4,7 +4,7 @@ import type { ReactNode } from 'react';
 import { buildLandingAuthTrackHref } from '../../lib/analytics/funnel';
 import { buildLandingWalkthroughTrackHref } from '../../lib/analytics/landingWalkthrough';
 import { LegalSupportLinks } from '../legal/LegalSupportLinks';
-import { ThemeToggle } from '../ui/ThemeToggle';
+import { ThemeControls } from '../ui/ThemeControls';
 
 const corePillars = [
   {
@@ -460,9 +460,11 @@ function WalkthroughReviewPreview() {
                 key={day}
                 className={`group flex min-h-[42px] flex-col justify-between px-1 py-1 text-left text-[9px] sm:min-h-[86px] sm:px-3 sm:py-2 sm:text-sm ${
                   isOutsideMonth ? 'text-black/30 dark:text-white/30' : 'text-black dark:text-white'
-                } ${isComplete ? 'bg-[#FAB95B] text-black' : 'bg-white dark:bg-black'} ${
-                  isToday ? 'ring-1 ring-black ring-inset dark:ring-white/60' : ''
-                }`}
+                } ${
+                  isComplete
+                    ? 'bg-[var(--color-accent-solid)] text-[color:var(--color-text-on-accent)]'
+                    : 'bg-white dark:bg-black'
+                } ${isToday ? 'ring-1 ring-black ring-inset dark:ring-white/60' : ''}`}
               >
                 <span className="text-[11px] font-semibold sm:text-lg">
                   {isOutsideMonth ? '' : day}
@@ -594,7 +596,7 @@ export function MarketingHome({ isAuthenticated = false }: MarketingHomeProps) {
   });
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-white text-black dark:bg-black dark:text-white">
+    <main className="relative min-h-screen overflow-hidden bg-[var(--color-bg-canvas)] text-[var(--color-text-primary)]">
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 opacity-60 dark:opacity-40"
@@ -645,7 +647,7 @@ export function MarketingHome({ isAuthenticated = false }: MarketingHomeProps) {
                 </Link>
               </>
             )}
-            <ThemeToggle className="h-8 w-8" />
+            <ThemeControls compact />
           </div>
         </header>
 

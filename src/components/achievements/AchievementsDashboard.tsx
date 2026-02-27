@@ -59,7 +59,9 @@ function AchievementCard({
         </div>
         <div className="h-1.5 w-full rounded-full bg-black/10 dark:bg-white/10">
           <div
-            className={`h-1.5 rounded-full ${isUnlocked ? 'bg-[#FAB95B]' : 'bg-black/40 dark:bg-white/60'}`}
+            className={`h-1.5 rounded-full ${
+              isUnlocked ? 'bg-[var(--color-accent-solid)]' : 'bg-black/40 dark:bg-white/60'
+            }`}
             style={{ width: `${Math.round(ratio * 100)}%` }}
             aria-hidden="true"
           />
@@ -95,7 +97,9 @@ function MilestoneCard({ milestone, isPro }: { milestone: HabitMilestone; isPro:
       </div>
       <div className="mt-3 h-1.5 w-full rounded-full bg-black/10 dark:bg-white/10">
         <div
-          className={`h-1.5 rounded-full ${isUnlocked ? 'bg-[#FAB95B]' : 'bg-black/40 dark:bg-white/60'}`}
+          className={`h-1.5 rounded-full ${
+            isUnlocked ? 'bg-[var(--color-accent-solid)]' : 'bg-black/40 dark:bg-white/60'
+          }`}
           style={{ width: `${Math.round(ratio * 100)}%` }}
           aria-hidden="true"
         />

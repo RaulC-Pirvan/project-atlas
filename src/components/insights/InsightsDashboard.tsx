@@ -20,7 +20,7 @@ function formatDelta(value: number): string {
 
 function heatmapCellClass(rate: number): string {
   if (rate >= 1) {
-    return 'bg-[#FAB95B] border-[#FAB95B]';
+    return 'bg-[var(--color-accent-solid)] border-[color:var(--color-accent-solid)]';
   }
   if (rate >= 0.67) {
     return 'bg-black/40 dark:bg-white/40';
@@ -230,7 +230,7 @@ export function InsightsDashboard({
               High
             </span>
             <span className="inline-flex items-center gap-1">
-              <span className="h-3 w-3 rounded-sm border border-[#FAB95B] bg-[#FAB95B]" />
+              <span className="h-3 w-3 rounded-sm border border-[color:var(--color-accent-solid)] bg-[var(--color-accent-solid)]" />
               Full
             </span>
           </div>

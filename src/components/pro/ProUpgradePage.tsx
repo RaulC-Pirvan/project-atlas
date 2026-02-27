@@ -2,7 +2,7 @@ import Link from 'next/link';
 
 import { buildProUpgradeHref } from '../../lib/analytics/proConversion';
 import { LegalSupportLinks } from '../legal/LegalSupportLinks';
-import { ThemeToggle } from '../ui/ThemeToggle';
+import { ThemeControls } from '../ui/ThemeControls';
 
 type ProUpgradePageProps = {
   isAuthenticated: boolean;
@@ -70,7 +70,7 @@ export function ProUpgradePage({ isAuthenticated, isPro }: ProUpgradePageProps) 
   const faqCta = buildProUpgradeHref('faq');
 
   return (
-    <main className="min-h-screen bg-white text-black dark:bg-black dark:text-white">
+    <main className="min-h-screen bg-[var(--color-bg-canvas)] text-[var(--color-text-primary)]">
       <div className="mx-auto w-full max-w-6xl px-6 py-12 lg:px-10">
         <header className={`flex items-center justify-between ${revealBaseClasses}`}>
           <div className="flex items-center gap-3">
@@ -89,7 +89,7 @@ export function ProUpgradePage({ isAuthenticated, isPro }: ProUpgradePageProps) 
             >
               {isAuthenticated ? 'Dashboard' : 'Home'}
             </Link>
-            <ThemeToggle className="h-8 w-8" />
+            <ThemeControls compact />
           </div>
         </header>
 

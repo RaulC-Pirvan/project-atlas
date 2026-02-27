@@ -65,13 +65,14 @@ const mobileUtilityItems: NavItem[] = [
 
 const desktopBaseClasses =
   'inline-flex items-center justify-center rounded-none border-0 px-4 py-3 text-sm font-medium';
-const desktopActiveClasses = 'bg-black text-white dark:bg-white dark:text-black dark:!text-black';
-const desktopInactiveClasses = 'text-black/70 dark:text-white/70';
+const desktopActiveClasses =
+  'bg-[var(--color-accent-solid)] text-[color:var(--color-text-on-accent)]';
+const desktopInactiveClasses = 'text-[color:var(--color-text-secondary)]';
 
 const mobileBaseClasses =
-  'inline-flex flex-1 items-center justify-center rounded-full border border-black/15 px-3 py-2 text-xs font-medium text-black/70 dark:border-white/20 dark:text-white/80';
+  'inline-flex flex-1 items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] px-3 py-2 text-xs font-medium text-[color:var(--color-text-secondary)]';
 const mobileActiveClasses =
-  'rounded-2xl border-black/20 bg-black text-white shadow-[0_10px_24px_rgba(0,0,0,0.18)] dark:border-white/20 dark:bg-white dark:text-black dark:!text-black dark:shadow-[0_10px_24px_rgba(0,0,0,0.4)]';
+  'rounded-2xl border-[color:var(--color-accent-solid)] bg-[var(--color-accent-solid)] text-[color:var(--color-text-on-accent)] shadow-[0_10px_24px_rgba(0,0,0,0.18)] dark:shadow-[0_10px_24px_rgba(0,0,0,0.4)]';
 
 function NavIcon({ icon }: { icon: string }) {
   if (icon === 'home') {
@@ -325,7 +326,7 @@ export function AppSidebar() {
   );
 
   return (
-    <aside className="fixed inset-x-0 bottom-0 z-40 border-t border-black/10 bg-white dark:border-white/10 dark:bg-black md:fixed md:inset-y-14 md:left-0 md:h-[calc(100vh-56px)] md:w-64 md:border-t-0 md:border-r md:border-black/10 md:dark:border-white/10">
+    <aside className="fixed inset-x-0 bottom-0 z-40 border-t border-[color:var(--color-border-subtle)] bg-[var(--color-bg-surface)] md:fixed md:inset-y-14 md:left-0 md:h-[calc(100vh-56px)] md:w-64 md:border-t-0 md:border-r md:border-[color:var(--color-border-subtle)]">
       <div className="hidden h-full md:flex md:flex-col md:items-stretch md:gap-0 md:px-0 md:py-0">
         <nav className="flex-1">
           <div className="flex w-full flex-col">
@@ -365,7 +366,7 @@ export function AppSidebar() {
       <div className="relative px-3 py-2 md:hidden">
         <div
           aria-hidden={!isMoreOpen}
-          className={`absolute inset-x-3 bottom-full mb-2 origin-bottom rounded-2xl border border-black/10 bg-white p-2 shadow-[0_16px_34px_rgba(0,0,0,0.16)] transition duration-200 ease-out motion-reduce:transition-none dark:border-white/10 dark:bg-black dark:shadow-[0_16px_34px_rgba(0,0,0,0.5)] ${
+          className={`absolute inset-x-3 bottom-full mb-2 origin-bottom rounded-2xl border border-[color:var(--color-border-subtle)] bg-[var(--color-bg-surface-elevated)] p-2 shadow-[0_16px_34px_rgba(0,0,0,0.16)] transition duration-200 ease-out motion-reduce:transition-none dark:shadow-[0_16px_34px_rgba(0,0,0,0.5)] ${
             isMoreOpen
               ? 'pointer-events-auto translate-y-0 scale-100 opacity-100'
               : 'pointer-events-none translate-y-2 scale-95 opacity-0'
@@ -376,10 +377,10 @@ export function AppSidebar() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`inline-flex h-10 items-center justify-center rounded-xl border border-black/15 px-2 text-xs font-medium uppercase tracking-[0.16em] dark:border-white/20 ${
+                className={`inline-flex h-10 items-center justify-center rounded-xl border border-[color:var(--color-border-strong)] px-2 text-xs font-medium uppercase tracking-[0.16em] ${
                   isNavItemActive(pathname, item)
-                    ? 'bg-black text-white dark:bg-white dark:text-black'
-                    : 'text-black/75 dark:text-white/75'
+                    ? 'border-[color:var(--color-accent-solid)] bg-[var(--color-accent-solid)] text-[color:var(--color-text-on-accent)]'
+                    : 'text-[color:var(--color-text-secondary)]'
                 }`}
                 onClick={() => setIsMoreOpen(false)}
               >
@@ -392,10 +393,10 @@ export function AppSidebar() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`inline-flex h-10 items-center justify-center rounded-xl border border-black/15 px-2 text-xs font-medium uppercase tracking-[0.16em] dark:border-white/20 ${
+                className={`inline-flex h-10 items-center justify-center rounded-xl border border-[color:var(--color-border-strong)] px-2 text-xs font-medium uppercase tracking-[0.16em] ${
                   isNavItemActive(pathname, item)
-                    ? 'bg-black text-white dark:bg-white dark:text-black'
-                    : 'text-black/75 dark:text-white/75'
+                    ? 'border-[color:var(--color-accent-solid)] bg-[var(--color-accent-solid)] text-[color:var(--color-text-on-accent)]'
+                    : 'text-[color:var(--color-text-secondary)]'
                 }`}
                 onClick={() => setIsMoreOpen(false)}
               >
@@ -403,7 +404,7 @@ export function AppSidebar() {
               </Link>
             ))}
           </div>
-          <div className="mt-2 border-t border-black/10 pt-2 dark:border-white/10">
+          <div className="mt-2 border-t border-[color:var(--color-border-subtle)] pt-2">
             <SignOutButton
               variant="danger"
               size="sm"

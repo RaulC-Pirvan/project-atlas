@@ -112,13 +112,49 @@ supports user accent preference and refined dark theme ergonomics.
 
 ### Tasks (7)
 
-- [ ] **Task 1.1**: Implement semantic token plumbing and remove direct accent hex usage from key surfaces
-- [ ] **Task 1.2**: Add theme preset selector UI with five approved presets
-- [ ] **Task 1.3**: Persist user accent preference and ensure stable bootstrap behavior
-- [ ] **Task 1.4**: Apply preset-aware accent tokens across app shell and shared primitives
-- [ ] **Task 1.5**: Enforce fixed semantic state colors independent from preset selection
-- [ ] **Task 1.6**: Implement dark theme tonal near-black layering for base/elevated surfaces
-- [ ] **Task 1.7**: Add guardrails/tests for invalid preset values and fallback behavior
+- [x] **Task 1.1**: Implement semantic token plumbing and remove direct accent hex usage from key surfaces
+- [x] **Task 1.2**: Add theme preset selector UI with five approved presets
+- [x] **Task 1.3**: Persist user accent preference and ensure stable bootstrap behavior
+- [x] **Task 1.4**: Apply preset-aware accent tokens across app shell and shared primitives
+- [x] **Task 1.5**: Enforce fixed semantic state colors independent from preset selection
+- [x] **Task 1.6**: Implement dark theme tonal near-black layering for base/elevated surfaces
+- [x] **Task 1.7**: Add guardrails/tests for invalid preset values and fallback behavior
+
+### Phase 1 Implementation Notes (Current)
+
+- Added shared theme runtime helpers:
+  - `src/lib/theme/theme.ts`
+- Added accent preset selector + combined theme controls:
+  - `src/components/ui/AccentPresetSelect.tsx`
+  - `src/components/ui/ThemeControls.tsx`
+- Added bootstrap-safe root initialization for theme + accent preset:
+  - `src/app/layout.tsx`
+- Expanded global token system and dark tonal layering:
+  - `src/app/globals.css`
+- Wired controls into authenticated and public shell headers:
+  - `src/components/layout/AppShell.tsx`
+  - `src/components/auth/AuthShell.tsx`
+  - `src/components/admin/AdminShell.tsx`
+  - `src/components/legal/LegalPageLayout.tsx`
+  - `src/components/support/SupportCenter.tsx`
+  - `src/components/pro/ProUpgradePage.tsx`
+  - `src/components/marketing/MarketingHome.tsx`
+- Updated key accent-driven UI surfaces and shared primitives to token-driven accent usage:
+  - `src/components/calendar/CalendarMonth.tsx`
+  - `src/components/insights/InsightsDashboard.tsx`
+  - `src/components/achievements/AchievementsDashboard.tsx`
+  - `src/components/achievements/AchievementToast.tsx`
+  - `src/components/layout/AppSidebar.tsx`
+  - `src/components/admin/AdminSidebar.tsx`
+  - `src/components/ui/Card.tsx`
+  - `src/components/ui/Button.tsx`
+  - `src/components/ui/Input.tsx`
+  - `src/components/ui/Notice.tsx`
+  - `src/components/ui/Toast.tsx`
+- Added/updated guardrail tests for preset fallback behavior and completion accent behavior:
+  - `src/lib/theme/__tests__/theme.test.ts`
+  - `src/components/ui/__tests__/AccentPresetSelect.test.tsx`
+  - `src/components/calendar/__tests__/CalendarMonth.test.tsx`
 
 ---
 

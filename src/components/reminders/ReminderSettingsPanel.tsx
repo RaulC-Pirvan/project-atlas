@@ -145,7 +145,7 @@ export function ReminderSettingsPanel({
 
   return (
     <form
-      className="space-y-6 rounded-3xl border border-black/10 px-6 py-6 dark:border-white/10"
+      className="space-y-6 border-t border-black/10 pt-6 dark:border-white/10 sm:rounded-3xl sm:border sm:px-6 sm:py-6"
       onSubmit={handleSubmit}
     >
       <div className="space-y-1">

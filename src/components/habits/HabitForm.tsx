@@ -141,7 +141,7 @@ export function HabitForm({
   };
 
   return (
-    <form className="space-y-6" onSubmit={handleSubmit}>
+    <form className="space-y-5 sm:space-y-6" onSubmit={handleSubmit}>
       <div className="space-y-1">
         <p className="text-xs font-semibold uppercase tracking-[0.3em] text-black/80 dark:text-white/80">
           {mode === 'create' ? 'Create habit' : 'Edit habit'}
@@ -190,7 +190,10 @@ export function HabitForm({
             <p className="text-sm text-black/60 dark:text-white/60">No reminder times set yet.</p>
           ) : null}
           {reminderTimes.map((timeValue, index) => (
-            <div key={`${mode}-reminder-${index}`} className="flex items-center gap-2">
+            <div
+              key={`${mode}-reminder-${index}`}
+              className="flex flex-col gap-2 sm:flex-row sm:items-center"
+            >
               <Input
                 type="text"
                 inputMode="numeric"
@@ -202,13 +205,14 @@ export function HabitForm({
                   next[index] = event.target.value;
                   setReminderTimes(next);
                 }}
-                className="max-w-[160px]"
+                className="w-full sm:max-w-[160px]"
                 aria-label={`Reminder time ${index + 1}`}
               />
               <Button
                 type="button"
                 variant="ghost"
                 size="sm"
+                className="w-full sm:w-auto"
                 onClick={() => {
                   setReminderTimes((prev) => prev.filter((_, i) => i !== index));
                 }}
@@ -221,6 +225,7 @@ export function HabitForm({
             type="button"
             variant="outline"
             size="sm"
+            className="w-full sm:w-auto"
             onClick={() => {
               if (reminderTimes.length >= MAX_REMINDERS_PER_HABIT) {
                 pushToast(`Up to ${MAX_REMINDERS_PER_HABIT} reminders per habit.`, 'error');

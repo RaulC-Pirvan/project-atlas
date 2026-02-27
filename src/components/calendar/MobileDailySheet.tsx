@@ -123,7 +123,7 @@ export function MobileDailySheet({
           aria-labelledby={titleId}
           aria-hidden={!open}
           id={sheetId}
-          className={`relative rounded-t-3xl border border-black/10 bg-white px-4 pb-6 pt-4 shadow-[0_-20px_40px_rgba(0,0,0,0.2)] motion-safe:transition-transform motion-safe:duration-300 motion-safe:ease-out motion-reduce:transition-none dark:border-white/10 dark:bg-black dark:shadow-[0_-20px_40px_rgba(0,0,0,0.5)] ${
+          className={`relative rounded-t-3xl border-x-0 border-t border-black/10 bg-white px-4 pb-6 pt-4 shadow-[0_-20px_40px_rgba(0,0,0,0.2)] motion-safe:transition-transform motion-safe:duration-300 motion-safe:ease-out motion-reduce:transition-none dark:border-white/10 dark:bg-black dark:shadow-[0_-20px_40px_rgba(0,0,0,0.5)] ${
             open ? 'translate-y-0' : 'pointer-events-none translate-y-full'
           }`}
         >
@@ -147,7 +147,7 @@ export function MobileDailySheet({
             </button>
           </div>
 
-          <div className="mt-4 max-h-[70vh] overflow-y-auto pr-1">
+          <div className="mt-4 max-h-[70vh] overflow-y-auto">
             <DailyCompletionPanel
               selectedDateKey={selectedDateKey}
               selectedLabel={selectedLabel}

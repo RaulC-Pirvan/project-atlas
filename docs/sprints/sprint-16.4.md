@@ -162,12 +162,31 @@ supports user accent preference and refined dark theme ergonomics.
 
 ### Tasks (6)
 
-- [ ] **Task 2.1**: Refactor `/today` mobile composition to compact single-layer grouping
-- [ ] **Task 2.2**: Refactor calendar daily panel mobile layout to reduce nested cards
-- [ ] **Task 2.3**: Refactor `/habits` mobile interactions/layout to compact patterns
-- [ ] **Task 2.4**: Refactor `/account` mobile settings surfaces to compact grouping
-- [ ] **Task 2.5**: Validate mobile spacing, tap targets, and overflow safety across breakpoints
-- [ ] **Task 2.6**: Preserve desktop readability and existing information hierarchy
+- [x] **Task 2.1**: Refactor `/today` mobile composition to compact single-layer grouping
+- [x] **Task 2.2**: Refactor calendar daily panel mobile layout to reduce nested cards
+- [x] **Task 2.3**: Refactor `/habits` mobile interactions/layout to compact patterns
+- [x] **Task 2.4**: Refactor `/account` mobile settings surfaces to compact grouping
+- [x] **Task 2.5**: Validate mobile spacing, tap targets, and overflow safety across breakpoints
+- [x] **Task 2.6**: Preserve desktop readability and existing information hierarchy
+
+### Phase 2 Implementation Notes (Current)
+
+- Introduced compact mobile shell behavior while preserving desktop floating-card hierarchy:
+  - `src/components/layout/AppShell.tsx`
+- Refined `/today` and calendar daily interaction surfaces to reduce nested card density:
+  - `src/components/calendar/DailyCompletionPanel.tsx`
+  - `src/components/calendar/MobileDailySheet.tsx`
+- Applied compact grouping and action ergonomics on `/habits`:
+  - `src/components/habits/HabitsPanel.tsx`
+  - `src/components/habits/HabitForm.tsx`
+- Applied compact grouping and overflow-safe content handling on `/account`:
+  - `src/components/auth/AccountPanel.tsx`
+  - `src/components/reminders/ReminderSettingsPanel.tsx`
+  - `src/components/pro/ProAccountCard.tsx`
+- Validation executed for Phase 2 touches:
+  - `npm run lint`
+  - `npm run typecheck`
+  - `npm run test -- src/components/calendar/__tests__/DailyCompletionPanel.test.tsx src/components/auth/__tests__/AccountPanel.test.tsx src/components/habits/__tests__/HabitForm.test.tsx`
 
 ---
 

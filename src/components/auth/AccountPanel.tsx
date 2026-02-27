@@ -979,12 +979,12 @@ export function AccountPanel({
   };
 
   return (
-    <div className="space-y-10">
-      <div className="flex items-center justify-between gap-4">
+    <div className="space-y-8 sm:space-y-10">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
         <div className="flex items-center gap-4">
           <div>
-            <p className="text-sm font-semibold">{baselineDisplayName}</p>
-            <p className="text-xs text-black/50 dark:text-white/50">{email}</p>
+            <p className="break-words text-sm font-semibold">{baselineDisplayName}</p>
+            <p className="break-all text-xs text-black/50 dark:text-white/50">{email}</p>
           </div>
         </div>
         <SignOutButton />
@@ -1204,7 +1204,7 @@ export function AccountPanel({
 
             {setupData ? (
               <form
-                className="space-y-4 rounded-2xl border border-black/10 p-4 dark:border-white/15"
+                className="space-y-4 border-t border-black/10 pt-4 dark:border-white/15 sm:rounded-2xl sm:border sm:p-4"
                 onSubmit={handleEnableTwoFactor}
               >
                 <p className="text-sm font-medium">Scan QR code with your authenticator app</p>
@@ -1240,13 +1240,13 @@ export function AccountPanel({
             ) : null}
           </div>
         ) : (
-          <div className="space-y-8">
+          <div className="space-y-6 sm:space-y-8">
             <Notice tone="neutral">
               2FA is enabled. Active recovery codes: {recoveryCodesRemainingState}.
             </Notice>
 
             <form
-              className="space-y-4 rounded-2xl border border-black/10 p-4 dark:border-white/15"
+              className="space-y-4 border-t border-black/10 pt-4 dark:border-white/15 sm:rounded-2xl sm:border sm:p-4"
               onSubmit={handleRotateRecoveryCodes}
             >
               <p className="text-sm font-medium">Regenerate recovery codes</p>
@@ -1290,7 +1290,7 @@ export function AccountPanel({
             </form>
 
             <form
-              className="space-y-4 rounded-2xl border border-rose-300/60 p-4 dark:border-rose-400/40"
+              className="space-y-4 border-t border-rose-300/60 pt-4 dark:border-rose-400/40 sm:rounded-2xl sm:border sm:p-4"
               onSubmit={handleDisableTwoFactor}
             >
               <p className="text-sm font-medium text-rose-700 dark:text-rose-200">Disable 2FA</p>
@@ -1407,9 +1407,9 @@ export function AccountPanel({
             {sessions.map((sessionRecord) => (
               <div
                 key={sessionRecord.id}
-                className="space-y-3 rounded-2xl border border-black/10 p-4 dark:border-white/15"
+                className="space-y-3 border-t border-black/10 pt-4 dark:border-white/15 sm:rounded-2xl sm:border sm:p-4"
               >
-                <div className="flex items-start justify-between gap-4">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
                   <div className="space-y-1">
                     <p className="text-sm font-medium">
                       {sessionRecord.isCurrent ? 'Current device' : 'Signed-in device'}
@@ -1421,12 +1421,12 @@ export function AccountPanel({
                       Expires: {formatSessionTimestamp(sessionRecord.expiresAt)}
                     </p>
                     {sessionRecord.ipAddress ? (
-                      <p className="text-xs text-black/60 dark:text-white/60">
+                      <p className="break-all text-xs text-black/60 dark:text-white/60">
                         IP: {sessionRecord.ipAddress}
                       </p>
                     ) : null}
                     {sessionRecord.userAgent ? (
-                      <p className="text-xs text-black/60 dark:text-white/60">
+                      <p className="break-words text-xs text-black/60 dark:text-white/60">
                         Device: {sessionRecord.userAgent}
                       </p>
                     ) : null}
@@ -1437,6 +1437,7 @@ export function AccountPanel({
                     variant={sessionRecord.isCurrent ? 'danger' : 'outline'}
                     onClick={() => void handleRevokeSession(sessionRecord.id)}
                     disabled={sessionRowLoadingId === sessionRecord.id}
+                    className="w-full sm:w-auto"
                   >
                     {sessionRowLoadingId === sessionRecord.id
                       ? 'Signing out...'
@@ -1452,12 +1453,13 @@ export function AccountPanel({
           <Notice tone="neutral">No active sessions found.</Notice>
         )}
 
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
           <Button
             type="button"
             variant="outline"
             onClick={() => void handleRevokeOtherSessions()}
             disabled={sessionsLoading || revokeOthersLoading}
+            className="w-full sm:w-auto"
           >
             {revokeOthersLoading ? 'Signing out others...' : 'Sign out other devices'}
           </Button>
@@ -1466,6 +1468,7 @@ export function AccountPanel({
             variant="danger"
             onClick={() => void handleSignOutAllDevices()}
             disabled={sessionsLoading || signOutAllLoading}
+            className="w-full sm:w-auto"
           >
             {signOutAllLoading ? 'Signing out all...' : 'Sign out all devices'}
           </Button>

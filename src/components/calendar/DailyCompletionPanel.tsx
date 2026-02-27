@@ -156,7 +156,7 @@ const HabitRow = memo(function HabitRow({
         disabled={isDisabled}
         onClick={() => onToggle(habit.id, isCompleted)}
         onKeyDown={onKeyDown}
-        className={`flex min-h-[44px] w-full items-start justify-between gap-4 rounded-xl border px-4 py-3 text-left touch-manipulation motion-safe:transition-colors motion-safe:duration-150 motion-safe:ease-out motion-reduce:transition-none ${focusClasses} ${
+        className={`flex min-h-[44px] w-full items-start justify-between gap-3 rounded-lg border px-3 py-3 text-left touch-manipulation motion-safe:transition-colors motion-safe:duration-150 motion-safe:ease-out motion-reduce:transition-none sm:gap-4 sm:rounded-xl sm:px-4 ${focusClasses} ${
           isCompleted
             ? 'border-black bg-black text-white dark:border-white dark:bg-white dark:text-black'
             : 'border-black/10 text-black dark:border-white/10 dark:text-white'
@@ -760,7 +760,7 @@ export function DailyCompletionPanel({
 
     return (
       <ul
-        className="space-y-3"
+        className="space-y-2 sm:space-y-3"
         aria-busy={syncingIds.length > 0}
         aria-label="Daily habits"
         data-habit-list
@@ -785,7 +785,7 @@ export function DailyCompletionPanel({
   };
 
   return (
-    <div className="rounded-2xl border border-black/10 px-6 py-6 dark:border-white/10">
+    <div className="space-y-4 sm:rounded-2xl sm:border sm:border-black/10 sm:px-6 sm:py-6 sm:dark:border-white/10">
       <div className="flex items-center justify-between gap-4">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.3em] text-black/60 dark:text-white/60">
@@ -795,7 +795,7 @@ export function DailyCompletionPanel({
         </div>
       </div>
 
-      <div className="mt-5 space-y-3 text-sm text-black/70 dark:text-white/70">
+      <div className="space-y-3 text-sm text-black/70 dark:text-white/70 sm:pt-1">
         {selectedDateKey ? (
           <p className="text-xs text-black/60 dark:text-white/60">{GRACE_WINDOW_COPY}</p>
         ) : null}

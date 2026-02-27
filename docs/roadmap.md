@@ -7,6 +7,7 @@
 - No-cash constraint: defer paid mobile/store prerequisites (Apple/Google accounts, APNs/FCM setup).
 - Web-first launch: all work before launch must be web-only or mobile-friendly but not require paid accounts.
 - Mobile wrapper, native push, and store release happen after web launch and funding.
+- Before mobile/store launch, complete a web-first UI system refresh (accent personalization, dark-theme tonal refinement, mobile viewport simplification).
 
 ---
 
@@ -112,7 +113,7 @@
 ### Sprint 2.3: Visual Feedback & Delight
 
 - [x] Day tile progress indicator
-- [x] Fully completed day -> golden state
+- [x] Fully completed day -> accent state (default gold in current theme)
 - [x] Completion sound (configurable / subtle)
 - [x] Smooth UI transitions
 - [x] Accessibility considerations
@@ -436,6 +437,20 @@ Launch non-goal (explicit):
 - [x] Add lightweight conversion dashboard
 - [x] Define baseline KPIs and weekly review cadence
 - [x] Ensure privacy-safe defaults and clear user-facing controls
+
+---
+
+### Sprint 16.4: UI System Refresh (Theme + Mobile UX)
+
+- [ ] Add semantic theme tokens for accent/surface/text/border states (no hardcoded feature-level accent colors)
+- [ ] Add user-selectable accent presets: Gold, Green, Blue, Pink, Red (default: Gold)
+- [ ] Persist accent preference and apply consistently across app shell and product surfaces
+- [ ] Keep semantic state colors (`error`, `warning`, `success`, `info`) non-user-configurable
+- [ ] Refine dark theme from flat pure black usage to tonal near-black layers (base + elevated surfaces)
+- [ ] Define compact mobile layout rules: reduce nested cards, prioritize single-layer list/group patterns
+- [ ] Refactor high-traffic mobile screens (Today, Calendar daily panel, Habits, Account) to follow compact rules
+- [ ] Add accessibility gates for contrast across all accent presets and both themes
+- [ ] Add responsive visual regression + E2E coverage for theme switching and mobile interaction flows
 
 ---
 

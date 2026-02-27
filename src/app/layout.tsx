@@ -4,6 +4,13 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import Script from 'next/script';
 
+import {
+  ACCENT_PRESET_STORAGE_KEY,
+  ACCENT_PRESETS,
+  DEFAULT_ACCENT_PRESET,
+  THEME_STORAGE_KEY,
+} from '../lib/theme/theme';
+
 const geistSans = Geist({
   variable: '--font-geist-sans',
   subsets: ['latin'],
@@ -22,17 +29,25 @@ export const metadata: Metadata = {
 const themeScript = `
 (() => {
   try {
-    const storageKey = 'atlas-theme';
+    const themeStorageKey = ${JSON.stringify(THEME_STORAGE_KEY)};
+    const accentStorageKey = ${JSON.stringify(ACCENT_PRESET_STORAGE_KEY)};
+    const defaultAccent = ${JSON.stringify(DEFAULT_ACCENT_PRESET)};
+    const allowedAccents = ${JSON.stringify(ACCENT_PRESETS)};
     const root = document.documentElement;
-    const stored = localStorage.getItem(storageKey);
+    const storedTheme = localStorage.getItem(themeStorageKey);
     const theme =
-      stored === 'light' || stored === 'dark'
-        ? stored
+      storedTheme === 'light' || storedTheme === 'dark'
+        ? storedTheme
         : window.matchMedia('(prefers-color-scheme: dark)').matches
           ? 'dark'
           : 'light';
+
+    const storedAccent = localStorage.getItem(accentStorageKey);
+    const accent = allowedAccents.includes(storedAccent) ? storedAccent : defaultAccent;
+
     root.classList.toggle('dark', theme === 'dark');
     root.style.colorScheme = theme;
+    root.dataset.atlasAccent = accent;
   } catch {
     // Ignore theme init errors (e.g. blocked storage).
   }

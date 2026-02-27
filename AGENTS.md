@@ -86,7 +86,7 @@ A habit is defined independently of dates.
 - Legal publish-readiness guard is implemented with placeholder detection and optional production enforcement via `ENFORCE_LEGAL_PUBLISH_READY=true`.
 - Legal/support discoverability is implemented on landing, account, and Pro surfaces.
 - Today view implemented at `/today` for fast daily entry of today's due habits.
-- Calendar view implemented with monthly grid, month navigation, selected-day side panel (`?date=YYYY-MM-DD`), daily completion toggles via `/api/completions`, per-day progress indicators, and golden completed-day tiles (black text for contrast).
+- Calendar view implemented with monthly grid, month navigation, selected-day side panel (`?date=YYYY-MM-DD`), daily completion toggles via `/api/completions`, per-day progress indicators, and golden completed-day tiles (black text for contrast); pre-mobile UI refresh will expand completion accenting to a user-selected preset palette.
 - Calendar defaults to selecting today on `/calendar` (current month); mobile daily sheet only auto-opens when a `date` param is present.
 - Daily completion supports check/uncheck with server-side schedule validation, grace-window enforcement (today + yesterday until 02:00 local), blocked older history/future dates, toast feedback, optimistic updates with rollback, per-row pending indicators, and motion-safe reorder animation.
 - Completion-window rules are centralized in `src/lib/habits/completionWindow.ts` and reused by API and offline queue validation.
@@ -132,17 +132,21 @@ A habit is defined independently of dates.
 
 - Sprint 15.2 Stripe web billing execution is complete (webhook reliability, billing history links, restore/re-sync).
 - Sprint 15.3 mobile billing compliance strategy artifacts are complete and in review; next step is cross-functional approvals and launch-gate execution before store launch.
+- Sprint 16.4 UI system refresh (theme personalization + dark-theme tonal refinement + mobile viewport UX simplification) is planned before mobile/store launch.
 - Continue post-launch UX polish and reliability hardening (navigation ergonomics, responsive QA, E2E stability).
 - Smart reminders and push notifications (Pro).
 - Store launch readiness (privacy, metadata, compliance assets).
 
 ## UI Direction (authoritative)
 
-- Visual style: clean, minimalist, black and white foundation with a single golden accent (`#FAB95B`) for fully completed days.
+- Visual style: clean, minimalist, black and white foundation with a configurable accent system (default `#FAB95B` gold).
 - Layout: generous whitespace, clear typographic hierarchy.
-- Components: build reusable primitives so styling changes are centralized.
-- Avoid heavy decoration, gradients, or bright accent colors beyond the gold accent.
-- Support light/dark themes while preserving the black/white system and gold-only completion accent.
+- Accent presets: `gold`, `green`, `blue`, `pink`, `red`; users can select one preset and the choice should persist.
+- Completion/progress accent states should use the active preset; semantic status colors (`error`, `warning`, `success`, `info`) remain fixed and non-user-configurable.
+- Components: build reusable primitives and semantic design tokens so styling changes are centralized.
+- Avoid heavy decoration, gradients, or multi-accent palettes; keep the neutral foundation with one active accent at a time.
+- Support light/dark themes with contrast-safe tokens; dark theme should use tonal near-black layering (base + elevated surfaces), not flat pure black everywhere.
+- Mobile viewport UX should favor compact, simpler grouping (reduced nested floating cards); desktop can keep richer floating-card composition where it improves scanability.
 
 ## Codebase Map
 

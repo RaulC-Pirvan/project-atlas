@@ -50,7 +50,7 @@ export default defineConfig({
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
-      testIgnore: /calendar-visual\.spec\.ts/,
+      testIgnore: /-visual\.spec\.ts/,
     },
     {
       name: 'firefox',
@@ -66,11 +66,11 @@ export default defineConfig({
       // Keep Firefox single-worker to avoid intermittent Browser.removeBrowserContext teardown
       // failures observed on Windows in parallel execution.
       workers: 1,
-      testIgnore: /calendar-visual\.spec\.ts/,
+      testIgnore: /-visual\.spec\.ts/,
     },
     {
       name: 'visual',
-      testMatch: /calendar-visual\.spec\.ts/,
+      testMatch: /-visual\.spec\.ts/,
       use: { ...devices['Desktop Chrome'] },
       workers: 1,
     },

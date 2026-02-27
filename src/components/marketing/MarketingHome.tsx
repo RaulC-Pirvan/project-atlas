@@ -4,7 +4,7 @@ import type { ReactNode } from 'react';
 import { buildLandingAuthTrackHref } from '../../lib/analytics/funnel';
 import { buildLandingWalkthroughTrackHref } from '../../lib/analytics/landingWalkthrough';
 import { LegalSupportLinks } from '../legal/LegalSupportLinks';
-import { ThemeToggle } from '../ui/ThemeToggle';
+import { ThemeControls } from '../ui/ThemeControls';
 
 const corePillars = [
   {
@@ -188,30 +188,26 @@ function WalkthroughPreviewFrame({
   return (
     <figure
       data-testid={`landing-walkthrough-preview-${stepId}`}
-      className="overflow-hidden rounded-xl border border-black/10 bg-white dark:border-white/10 dark:bg-black sm:rounded-2xl"
+      className="sm:overflow-hidden sm:rounded-2xl sm:border sm:border-black/10 sm:bg-white sm:dark:border-white/10 sm:dark:bg-black"
     >
-      <div
-        role="img"
-        aria-label={`Live ${stepId} walkthrough preview`}
-        className="space-y-3 sm:space-y-4"
-      >
-        <div className="flex h-10 items-center border-b border-black/10 px-3 dark:border-white/10 sm:h-11 sm:px-4">
+      <div role="img" aria-label={`Live ${stepId} walkthrough preview`} className="sm:space-y-4">
+        <div className="hidden h-11 items-center border-b border-black/10 px-4 dark:border-white/10 sm:flex">
           <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-black/60 dark:text-white/60 sm:text-xs sm:tracking-[0.32em]">
             Project Atlas
           </span>
         </div>
 
-        <div className="space-y-3 px-3 pb-3 sm:space-y-4 sm:px-5 sm:pb-5">
-          <div className="space-y-1">
+        <div className="space-y-3 sm:space-y-4 sm:px-5 sm:pb-5">
+          <div className="hidden space-y-1 sm:block">
             <p className="text-base font-semibold tracking-tight sm:text-2xl">{title}</p>
             <p className="text-xs text-black/60 dark:text-white/60 sm:text-sm">{subtitle}</p>
           </div>
-          <div className="rounded-2xl border border-black/10 bg-white p-3 shadow-[0_8px_18px_rgba(0,0,0,0.08)] dark:border-white/10 dark:bg-black/70 dark:shadow-[0_12px_28px_rgba(0,0,0,0.42)] sm:rounded-3xl sm:p-6 sm:shadow-[0_12px_30px_rgba(0,0,0,0.08)] sm:dark:shadow-[0_18px_40px_rgba(0,0,0,0.45)]">
+          <div className="rounded-2xl border border-black/10 bg-white/90 p-3 shadow-[0_8px_18px_rgba(0,0,0,0.08)] dark:border-white/10 dark:bg-black/70 dark:shadow-[0_12px_28px_rgba(0,0,0,0.42)] sm:rounded-3xl sm:p-6 sm:shadow-[0_12px_30px_rgba(0,0,0,0.08)] sm:dark:shadow-[0_18px_40px_rgba(0,0,0,0.45)]">
             {children}
           </div>
         </div>
       </div>
-      <figcaption className="border-t border-black/10 px-3 py-1.5 text-[9px] font-medium uppercase tracking-[0.1em] text-black/50 dark:border-white/10 dark:text-white/50 sm:py-2 sm:text-[10px] sm:tracking-[0.12em]">
+      <figcaption className="hidden border-t border-black/10 px-3 py-1.5 text-[9px] font-medium uppercase tracking-[0.1em] text-black/50 dark:border-white/10 dark:text-white/50 sm:block sm:py-2 sm:text-[10px] sm:tracking-[0.12em]">
         Live component preview
       </figcaption>
     </figure>
@@ -365,7 +361,7 @@ function WalkthroughCompletePreview() {
   ];
 
   return (
-    <div className="rounded-xl border border-black/10 px-3 py-3 dark:border-white/10 sm:rounded-2xl sm:px-6 sm:py-6">
+    <div className="sm:rounded-2xl sm:border sm:border-black/10 sm:px-6 sm:py-6 sm:dark:border-white/10">
       <div className="space-y-1.5 text-sm text-black/70 dark:text-white/70 sm:space-y-2.5">
         <h4 className="text-base font-semibold sm:text-lg">February 25, 2026</h4>
         <p className="text-[11px] leading-relaxed text-black/60 dark:text-white/60 sm:text-xs">
@@ -421,6 +417,46 @@ function WalkthroughCompletePreview() {
 
 function WalkthroughReviewPreview() {
   const weekdayHeaders = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] as const;
+  const monthCells: Array<number | null> = [
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    null,
+  ];
+  const activeDays = new Set([2, 3, 5, 8, 12, 16, 20, 25, 27]);
+  const completeDays = new Set([3, 8, 12, 16, 20, 27]);
+  const todayDay = 25;
 
   return (
     <div className="space-y-4 sm:space-y-6">
@@ -449,24 +485,23 @@ function WalkthroughReviewPreview() {
             </div>
           ))}
 
-          {Array.from({ length: 35 }, (_, index) => {
-            const day = index + 1;
-            const isActive = [2, 3, 5, 8, 12, 16, 20, 25, 27, 30, 34].includes(day);
-            const isToday = day === 25;
-            const isOutsideMonth = day === 1 || day === 33 || day === 34 || day === 35;
-            const isComplete = [3, 8, 12, 16, 20, 27].includes(day);
+          {monthCells.map((dayNumber, index) => {
+            const isOutsideMonth = dayNumber === null;
+            const isActive = !isOutsideMonth && activeDays.has(dayNumber);
+            const isToday = !isOutsideMonth && dayNumber === todayDay;
+            const isComplete = !isOutsideMonth && completeDays.has(dayNumber);
             return (
               <span
-                key={day}
+                key={`cell-${index}`}
                 className={`group flex min-h-[42px] flex-col justify-between px-1 py-1 text-left text-[9px] sm:min-h-[86px] sm:px-3 sm:py-2 sm:text-sm ${
                   isOutsideMonth ? 'text-black/30 dark:text-white/30' : 'text-black dark:text-white'
-                } ${isComplete ? 'bg-[#FAB95B] text-black' : 'bg-white dark:bg-black'} ${
-                  isToday ? 'ring-1 ring-black ring-inset dark:ring-white/60' : ''
-                }`}
+                } ${
+                  isComplete
+                    ? 'bg-[var(--color-accent-solid)] text-[color:var(--color-text-on-accent)]'
+                    : 'bg-white dark:bg-black'
+                } ${isToday ? 'ring-1 ring-black ring-inset dark:ring-white/60' : ''}`}
               >
-                <span className="text-[11px] font-semibold sm:text-lg">
-                  {isOutsideMonth ? '' : day}
-                </span>
+                <span className="text-[11px] font-semibold sm:text-lg">{dayNumber ?? ''}</span>
                 <span className="space-y-1 sm:space-y-2">
                   <span
                     className={`relative block h-0.5 w-full rounded-full sm:h-1 ${
@@ -594,7 +629,7 @@ export function MarketingHome({ isAuthenticated = false }: MarketingHomeProps) {
   });
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-white text-black dark:bg-black dark:text-white">
+    <main className="relative min-h-screen overflow-hidden bg-[var(--color-bg-canvas)] text-[var(--color-text-primary)]">
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 opacity-60 dark:opacity-40"
@@ -618,7 +653,7 @@ export function MarketingHome({ isAuthenticated = false }: MarketingHomeProps) {
               <>
                 <Link
                   href="/support"
-                  className={`text-xs font-medium uppercase tracking-[0.25em] text-black/70 transition hover:text-black dark:text-white/70 dark:hover:text-white ${focusRingClasses}`}
+                  className={`hidden text-xs font-medium uppercase tracking-[0.25em] text-black/70 transition hover:text-black dark:text-white/70 dark:hover:text-white sm:inline-flex ${focusRingClasses}`}
                 >
                   Support
                 </Link>
@@ -633,7 +668,7 @@ export function MarketingHome({ isAuthenticated = false }: MarketingHomeProps) {
               <>
                 <Link
                   href="/support"
-                  className={`text-xs font-medium uppercase tracking-[0.25em] text-black/70 transition hover:text-black dark:text-white/70 dark:hover:text-white ${focusRingClasses}`}
+                  className={`hidden text-xs font-medium uppercase tracking-[0.25em] text-black/70 transition hover:text-black dark:text-white/70 dark:hover:text-white sm:inline-flex ${focusRingClasses}`}
                 >
                   Support
                 </Link>
@@ -645,7 +680,7 @@ export function MarketingHome({ isAuthenticated = false }: MarketingHomeProps) {
                 </Link>
               </>
             )}
-            <ThemeToggle className="h-8 w-8" />
+            <ThemeControls compact />
           </div>
         </header>
 
@@ -661,18 +696,18 @@ export function MarketingHome({ isAuthenticated = false }: MarketingHomeProps) {
               Atlas brings daily check-ins, monthly progress, insights, milestones, and reminders
               into one simple habit app built for real routines.
             </p>
-            <div className="flex flex-wrap items-center gap-3">
+            <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
               {isAuthenticated ? (
                 <>
                   <Link
                     href="/today"
-                    className={`inline-flex h-12 items-center justify-center rounded-full border border-black bg-black px-6 text-sm font-medium text-white transition hover:bg-black/90 dark:border-white dark:bg-white dark:text-black dark:hover:bg-white/90 ${focusRingClasses}`}
+                    className={`inline-flex h-12 w-full items-center justify-center rounded-full border border-black bg-black px-6 text-sm font-medium text-white transition hover:bg-black/90 sm:w-auto sm:min-w-[11.5rem] dark:border-white dark:bg-white dark:text-black dark:hover:bg-white/90 ${focusRingClasses}`}
                   >
                     Go to dashboard
                   </Link>
                   <Link
                     href="/calendar"
-                    className={`inline-flex h-12 items-center justify-center rounded-full border border-black/20 bg-white px-6 text-sm font-medium text-black transition hover:bg-black/5 dark:border-white/20 dark:bg-black dark:text-white dark:hover:bg-white/10 ${focusRingClasses}`}
+                    className={`inline-flex h-12 w-full items-center justify-center rounded-full border border-black/20 bg-white px-6 text-sm font-medium text-black transition hover:bg-black/5 sm:w-auto sm:min-w-[11.5rem] dark:border-white/20 dark:bg-black dark:text-white dark:hover:bg-white/10 ${focusRingClasses}`}
                   >
                     Open calendar
                   </Link>
@@ -681,13 +716,13 @@ export function MarketingHome({ isAuthenticated = false }: MarketingHomeProps) {
                 <>
                   <Link
                     href={landingAuthHeroPrimaryHref}
-                    className={`inline-flex h-12 items-center justify-center rounded-full border border-black bg-black px-6 text-sm font-medium text-white transition hover:bg-black/90 dark:border-white dark:bg-white dark:text-black dark:hover:bg-white/90 ${focusRingClasses}`}
+                    className={`inline-flex h-12 w-full items-center justify-center rounded-full border border-black bg-black px-6 text-sm font-medium text-white transition hover:bg-black/90 sm:w-auto sm:min-w-[11.5rem] dark:border-white dark:bg-white dark:text-black dark:hover:bg-white/90 ${focusRingClasses}`}
                   >
                     Create your account
                   </Link>
                   <Link
                     href={landingAuthHeroSecondaryHref}
-                    className={`inline-flex h-12 items-center justify-center rounded-full border border-black/20 bg-white px-6 text-sm font-medium text-black transition hover:bg-black/5 dark:border-white/20 dark:bg-black dark:text-white dark:hover:bg-white/10 ${focusRingClasses}`}
+                    className={`inline-flex h-12 w-full items-center justify-center rounded-full border border-black/20 bg-white px-6 text-sm font-medium text-black transition hover:bg-black/5 sm:w-auto sm:min-w-[11.5rem] dark:border-white/20 dark:bg-black dark:text-white dark:hover:bg-white/10 ${focusRingClasses}`}
                   >
                     Sign in
                   </Link>
@@ -865,18 +900,18 @@ export function MarketingHome({ isAuthenticated = false }: MarketingHomeProps) {
             <p className="text-sm leading-relaxed text-black/70 dark:text-white/70">
               Start your first cycle now, then use the same flow every day.
             </p>
-            <div className="mt-4 flex flex-wrap items-center gap-3">
+            <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
               <Link
                 href={walkthroughPrimaryHref}
                 data-testid="landing-walkthrough-primary-cta"
-                className={`inline-flex h-11 items-center justify-center rounded-full border border-black bg-black px-5 text-xs font-medium uppercase tracking-[0.2em] text-white transition hover:bg-black/90 dark:border-white dark:bg-white dark:text-black dark:hover:bg-white/90 ${focusRingClasses}`}
+                className={`inline-flex h-11 w-full items-center justify-center rounded-full border border-black bg-black px-5 text-xs font-medium uppercase tracking-[0.2em] text-white transition hover:bg-black/90 sm:w-auto sm:min-w-[11.5rem] dark:border-white dark:bg-white dark:text-black dark:hover:bg-white/90 ${focusRingClasses}`}
               >
                 {isAuthenticated ? 'Go to dashboard' : 'Start free'}
               </Link>
               <Link
                 href={walkthroughSecondaryHref}
                 data-testid="landing-walkthrough-secondary-cta"
-                className={`inline-flex h-11 items-center justify-center rounded-full border border-black/20 bg-white px-5 text-xs font-medium uppercase tracking-[0.2em] text-black transition hover:bg-black/5 dark:border-white/20 dark:bg-black dark:text-white dark:hover:bg-white/10 ${focusRingClasses}`}
+                className={`inline-flex h-11 w-full items-center justify-center rounded-full border border-black/20 bg-white px-5 text-xs font-medium uppercase tracking-[0.2em] text-black transition hover:bg-black/5 sm:w-auto sm:min-w-[11.5rem] dark:border-white/20 dark:bg-black dark:text-white dark:hover:bg-white/10 ${focusRingClasses}`}
               >
                 {isAuthenticated ? 'Open calendar' : 'Sign in'}
               </Link>
@@ -975,7 +1010,7 @@ export function MarketingHome({ isAuthenticated = false }: MarketingHomeProps) {
           </p>
         </section>
 
-        <section className="space-y-8 border-t border-black/10 pt-12 pb-10 opacity-0 translate-y-3 motion-reduce:translate-y-0 motion-reduce:opacity-100 motion-safe:animate-[rise-in_0.6s_ease-out_forwards] motion-safe:[animation-delay:680ms] dark:border-white/10">
+        <section className="space-y-8 border-t border-black/10 pt-12 pb-6 opacity-0 translate-y-3 motion-reduce:translate-y-0 motion-reduce:opacity-100 motion-safe:animate-[rise-in_0.6s_ease-out_forwards] motion-safe:[animation-delay:680ms] dark:border-white/10 sm:pb-8">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
               Pro adds depth when you want it.
@@ -1010,33 +1045,37 @@ export function MarketingHome({ isAuthenticated = false }: MarketingHomeProps) {
             <div className="mt-3">
               <Link
                 href="/support"
-                className={`inline-flex h-10 items-center justify-center rounded-full border border-black/20 bg-white px-4 text-xs font-medium uppercase tracking-[0.2em] text-black transition hover:bg-black/5 dark:border-white/20 dark:bg-black dark:text-white dark:hover:bg-white/10 ${focusRingClasses}`}
+                className={`inline-flex h-10 w-full items-center justify-center rounded-full border border-black/20 bg-white px-4 text-xs font-medium uppercase tracking-[0.2em] text-black transition hover:bg-black/5 dark:border-white/20 dark:bg-black dark:text-white dark:hover:bg-white/10 ${focusRingClasses}`}
               >
                 Open support center
               </Link>
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
             <Link
               href={atlasProLink}
-              className={`inline-flex h-11 items-center justify-center rounded-full border border-black bg-black px-5 text-xs font-medium uppercase tracking-[0.2em] text-white transition hover:bg-black/90 dark:border-white dark:bg-white dark:text-black dark:hover:bg-white/90 ${focusRingClasses}`}
+              className={`inline-flex h-11 w-full items-center justify-center rounded-full border border-black bg-black px-5 text-xs font-medium uppercase tracking-[0.2em] text-white transition hover:bg-black/90 sm:w-auto sm:min-w-[11.5rem] dark:border-white dark:bg-white dark:text-black dark:hover:bg-white/90 ${focusRingClasses}`}
             >
               See Atlas Pro
             </Link>
             <Link
               href={isAuthenticated ? '/today' : landingAuthFinalPrimaryHref}
-              className={`inline-flex h-11 items-center justify-center rounded-full border border-black/20 bg-white px-5 text-xs font-medium uppercase tracking-[0.2em] text-black transition hover:bg-black/5 dark:border-white/20 dark:bg-black dark:text-white dark:hover:bg-white/10 ${focusRingClasses}`}
+              className={`inline-flex h-11 w-full items-center justify-center rounded-full border border-black/20 bg-white px-5 text-xs font-medium uppercase tracking-[0.2em] text-black transition hover:bg-black/5 sm:w-auto sm:min-w-[11.5rem] dark:border-white/20 dark:bg-black dark:text-white dark:hover:bg-white/10 ${focusRingClasses}`}
             >
               {isAuthenticated ? 'Go to dashboard' : 'Start free'}
             </Link>
           </div>
         </section>
 
-        <footer className="border-t border-black/10 pt-8 text-sm text-black/65 dark:border-white/10 dark:text-white/65">
+        <footer className="border-t border-black/10 pt-5 text-sm text-black/65 dark:border-white/10 dark:text-white/65 sm:pt-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <p>Policy and support resources</p>
-            <LegalSupportLinks ariaLabel="Landing legal and support links" />
+            <LegalSupportLinks
+              ariaLabel="Landing legal and support links"
+              listClassName="grid grid-cols-1 gap-2 sm:grid-cols-2"
+              linkClassName="w-full"
+            />
           </div>
         </footer>
       </div>

@@ -13,7 +13,7 @@ export function ProAccountCard({ isPro }: ProAccountCardProps) {
   return (
     <div
       id="pro"
-      className="rounded-2xl border border-black/10 px-6 py-6 dark:border-white/10"
+      className="border-y border-black/10 px-0 py-4 dark:border-white/10 sm:rounded-2xl sm:border sm:px-6 sm:py-6"
       data-testid="pro-account-card"
     >
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -30,7 +30,7 @@ export function ProAccountCard({ isPro }: ProAccountCardProps) {
         </span>
       </div>
 
-      <div className="mt-4 space-y-4 text-sm text-black/70 dark:text-white/70">
+      <div className="mt-3 space-y-4 text-sm text-black/70 dark:text-white/70 sm:mt-4">
         {isPro ? (
           <>
             <p>Thanks for supporting Atlas. Your Pro access is active.</p>

@@ -53,6 +53,18 @@ describe('ThemeToggle', () => {
     expect(localStorage.getItem('atlas-theme')).toBe('dark');
   });
 
+  it('falls back to light when stored theme value is invalid', async () => {
+    localStorage.setItem('atlas-theme', 'invalid');
+
+    render(<ThemeToggle />);
+
+    await waitFor(() => {
+      expect(document.documentElement.classList.contains('dark')).toBe(false);
+    });
+
+    expect(screen.getByRole('button', { name: /switch to dark theme/i })).toBeInTheDocument();
+  });
+
   it('adds and removes transition class on toggle', async () => {
     const mediaQuery = createMediaQueryList(false);
     vi.stubGlobal(

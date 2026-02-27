@@ -187,7 +187,7 @@ export function HabitsPanel({ initialHabits, weekStart, timezoneLabel }: HabitsP
   };
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-8 sm:space-y-10">
       <HabitForm
         mode="create"
         weekStart={weekStart}
@@ -196,7 +196,7 @@ export function HabitsPanel({ initialHabits, weekStart, timezoneLabel }: HabitsP
         resetOnSubmit
       />
 
-      <div className="space-y-4">
+      <div className="space-y-3 sm:space-y-4">
         <div className="flex items-center justify-between gap-4">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.3em] text-black/80 dark:text-white/80">
@@ -218,16 +218,16 @@ export function HabitsPanel({ initialHabits, weekStart, timezoneLabel }: HabitsP
         </div>
 
         {habits.length === 0 && !loading ? (
-          <div className="rounded-2xl border border-black/10 px-6 py-8 text-sm text-black/60 dark:border-white/10 dark:text-white/60">
+          <div className="border-y border-black/10 py-6 text-sm text-black/60 dark:border-white/10 dark:text-white/60 sm:rounded-2xl sm:border sm:px-6 sm:py-8">
             No habits yet. Create your first habit above.
           </div>
         ) : null}
 
-        <div className="space-y-4">
+        <div className="space-y-2 sm:space-y-4">
           {habits.map((habit, index) => (
             <div
               key={habit.id}
-              className="rounded-2xl border border-black/10 px-6 py-6 dark:border-white/10"
+              className="border-y border-black/10 px-0 py-4 dark:border-white/10 sm:rounded-2xl sm:border sm:px-6 sm:py-6"
               data-habit-id={habit.id}
               data-habit-title={habit.title}
             >
@@ -246,7 +246,7 @@ export function HabitsPanel({ initialHabits, weekStart, timezoneLabel }: HabitsP
                   onCancel={() => setEditingId(null)}
                 />
               ) : (
-                <div className="space-y-4">
+                <div className="space-y-3 sm:space-y-4">
                   <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                     <div className="space-y-1">
                       <p className="text-lg font-semibold">{habit.title}</p>

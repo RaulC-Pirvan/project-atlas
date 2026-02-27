@@ -159,11 +159,11 @@ export function CalendarMonth({
                 ? 'text-black dark:text-white'
                 : 'text-black/30 dark:text-white/30';
               const backgroundClasses = isComplete
-                ? 'bg-[#FAB95B] text-black'
-                : 'bg-white dark:bg-black';
+                ? 'bg-[var(--color-accent-solid)] text-[color:var(--color-text-on-accent)]'
+                : 'bg-[var(--color-bg-surface)]';
               const hoverClasses = day.inMonth
                 ? isComplete
-                  ? 'hover:bg-[#E9A543] focus-visible:bg-[#E9A543] active:bg-[#D99638] active:scale-[0.98]'
+                  ? 'hover:bg-[var(--color-accent-strong)] focus-visible:bg-[var(--color-accent-strong)] active:bg-[var(--color-accent-strong)] active:scale-[0.98]'
                   : 'hover:bg-black/5 focus-visible:bg-black/5 active:bg-black/10 active:scale-[0.98] dark:hover:bg-white/10 dark:focus-visible:bg-white/10 dark:active:bg-white/20'
                 : '';
               const todayClasses = day.isToday
@@ -274,6 +274,7 @@ export function CalendarMonth({
                   data-grid-index={gridIndex}
                   data-focusable="true"
                   data-pending={hasPending ? 'true' : undefined}
+                  data-complete={isComplete ? 'true' : undefined}
                   scroll={false}
                   className={cellClasses}
                   aria-label={`Open daily view for ${day.label}`}

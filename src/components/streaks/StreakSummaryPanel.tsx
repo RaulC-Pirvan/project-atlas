@@ -20,6 +20,7 @@ export function StreakSummaryPanel({
 }: StreakSummaryPanelProps) {
   return (
     <div
+      id="streaks-panel"
       className="rounded-2xl border border-black/10 px-6 py-6 dark:border-white/10"
       data-testid="streaks-panel"
     >

@@ -66,6 +66,7 @@ export default async function TodayPage() {
         completionWindowLockReason={null}
         timeZone={timeZone}
         keepCompletedAtBottom={user.keepCompletedAtBottom}
+        todayMode
       />
     </AppShell>
   );

@@ -48,14 +48,15 @@ hardcode accent hex values.
 | --------- | ----- | ------------ | ------------- | -------------- |
 | `gold`    | Gold  | `#FAB95B`    | `#E9A543`     | `#111111`      |
 | `green`   | Green | `#34C759`    | `#28B24A`     | `#111111`      |
-| `blue`    | Blue  | `#3B82F6`    | `#2563EB`     | `#FFFFFF`      |
+| `blue`    | Blue  | `#3B82F6`    | `#2563EB`     | `#111111`      |
 | `pink`    | Pink  | `#EC4899`    | `#DB2777`     | `#111111`      |
-| `red`     | Red   | `#EF4444`    | `#DC2626`     | `#FFFFFF`      |
+| `red`     | Red   | `#EF4444`    | `#DC2626`     | `#111111`      |
 
 Notes:
 
 - Default preset is `gold`.
 - Preset list is intentionally bounded in Sprint 16.4 (no free-form picker).
+- `blue` and `red` use dark text-on-accent to keep label contrast above WCAG AA.
 
 ### 2.2 Persistence and fallback
 

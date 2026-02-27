@@ -36,6 +36,21 @@ export function resolveAccentPreset(
   return isAccentPreset(value) ? value : fallback;
 }
 
+export type ResolvedThemePreferences = {
+  theme: Theme;
+  accentPreset: AccentPreset;
+};
+
+export function resolveThemePreferences(options: {
+  storedTheme?: string | null;
+  storedAccentPreset?: string | null;
+  systemPrefersDark?: boolean;
+}): ResolvedThemePreferences {
+  const theme = resolveTheme(options.storedTheme, options.systemPrefersDark ? 'dark' : 'light');
+  const accentPreset = resolveAccentPreset(options.storedAccentPreset, DEFAULT_ACCENT_PRESET);
+  return { theme, accentPreset };
+}
+
 export function applyThemeToRoot(theme: Theme, root: HTMLElement) {
   root.classList.toggle('dark', theme === 'dark');
   root.style.colorScheme = theme;

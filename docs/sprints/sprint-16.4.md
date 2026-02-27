@@ -1,7 +1,7 @@
 # Sprint 16.4: UI System Refresh (Theme + Mobile UX) - Project Atlas
 
 **Duration**: TBD (7-10 days)  
-**Status**: In Progress  
+**Status**: Completed  
 **Theme**: Establish a token-driven theme system and compact mobile UX profile before mobile/store launch, while preserving Atlas clarity and product invariants.
 
 ---
@@ -38,15 +38,15 @@ supports user accent preference and refined dark theme ergonomics.
 
 ### Included
 
-- [ ] Add semantic theme tokens for accent/surface/text/border states (no hardcoded feature-level accent colors)
-- [ ] Add user-selectable accent presets: Gold, Green, Blue, Pink, Red (default: Gold)
-- [ ] Persist accent preference and apply consistently across app shell and product surfaces
-- [ ] Keep semantic state colors (`error`, `warning`, `success`, `info`) non-user-configurable
-- [ ] Refine dark theme from flat pure black usage to tonal near-black layers (base + elevated surfaces)
-- [ ] Define compact mobile layout rules: reduce nested cards, prioritize single-layer list/group patterns
-- [ ] Refactor high-traffic mobile screens (Today, Calendar daily panel, Habits, Account) to follow compact rules
-- [ ] Add accessibility gates for contrast across all accent presets and both themes
-- [ ] Add responsive visual regression + E2E coverage for theme switching and mobile interaction flows
+- [x] Add semantic theme tokens for accent/surface/text/border states (no hardcoded feature-level accent colors)
+- [x] Add user-selectable accent presets: Gold, Green, Blue, Pink, Red (default: Gold)
+- [x] Persist accent preference and apply consistently across app shell and product surfaces
+- [x] Keep semantic state colors (`error`, `warning`, `success`, `info`) non-user-configurable
+- [x] Refine dark theme from flat pure black usage to tonal near-black layers (base + elevated surfaces)
+- [x] Define compact mobile layout rules: reduce nested cards, prioritize single-layer list/group patterns
+- [x] Refactor high-traffic mobile screens (Today, Calendar daily panel, Habits, Account) to follow compact rules
+- [x] Add accessibility gates for contrast across all accent presets and both themes
+- [x] Add responsive visual regression + E2E coverage for theme switching and mobile interaction flows
 
 ### Excluded (this sprint)
 
@@ -194,12 +194,47 @@ supports user accent preference and refined dark theme ergonomics.
 
 ### Tasks (6)
 
-- [ ] **Task 3.1**: Add automated contrast checks for all presets in light and dark themes
-- [ ] **Task 3.2**: Add component tests for token usage and preset propagation
-- [ ] **Task 3.3**: Add API/unit tests for preference persistence and fallback behavior
-- [ ] **Task 3.4**: Add responsive visual regression for core surfaces and completion states
-- [ ] **Task 3.5**: Add E2E flows for theme switching and compact mobile interaction paths
-- [ ] **Task 3.6**: Run final CI hardening pass and publish verification notes
+- [x] **Task 3.1**: Add automated contrast checks for all presets in light and dark themes
+- [x] **Task 3.2**: Add component tests for token usage and preset propagation
+- [x] **Task 3.3**: Add API/unit tests for preference persistence and fallback behavior
+- [x] **Task 3.4**: Add responsive visual regression for core surfaces and completion states
+- [x] **Task 3.5**: Add E2E flows for theme switching and compact mobile interaction paths
+- [x] **Task 3.6**: Run final CI hardening pass and publish verification notes
+
+### Phase 3 Implementation Notes (Current)
+
+- Added theme-token contract dictionaries and WCAG contrast utility gates:
+  - `src/lib/theme/tokens.ts`
+  - `src/lib/theme/contrast.ts`
+  - `src/lib/theme/__tests__/contrast.test.ts`
+  - `src/lib/theme/__tests__/globals-css-contract.test.ts`
+- Added unit fallback coverage for persisted theme/accent preference resolution:
+  - `src/lib/theme/theme.ts`
+  - `src/lib/theme/__tests__/theme.test.ts`
+  - `src/components/ui/__tests__/ThemeToggle.test.tsx`
+  - `src/components/ui/__tests__/AccentPresetSelect.test.tsx`
+  - `src/components/ui/__tests__/ThemeControls.test.tsx`
+- Added component token-usage and preset-propagation checks:
+  - `src/components/ui/__tests__/themeTokenUsage.test.ts`
+  - `src/components/calendar/__tests__/CalendarMonth.test.tsx`
+- Added responsive visual regression coverage for desktop and compact mobile surfaces:
+  - `e2e/ui-system-visual.spec.ts`
+  - `e2e/ui-system-visual.spec.ts-snapshots/*`
+  - `playwright.config.ts` (`-visual.spec.ts` matching in visual project)
+- Added E2E interaction coverage for theme switching + compact mobile path validation:
+  - `e2e/theme-mobile.spec.ts`
+- Updated accent text-on-accent contract for contrast compliance:
+  - `src/app/globals.css`
+  - `docs/ops/ui-system-phase-0-contract.md`
+
+### Phase 3 Verification Notes (Completed 2026-02-27)
+
+- `npm run lint`
+- `npm run typecheck`
+- `npm run test -- src/lib/theme/__tests__/theme.test.ts src/lib/theme/__tests__/contrast.test.ts src/lib/theme/__tests__/globals-css-contract.test.ts src/components/ui/__tests__/ThemeToggle.test.tsx src/components/ui/__tests__/AccentPresetSelect.test.tsx src/components/ui/__tests__/ThemeControls.test.tsx src/components/ui/__tests__/themeTokenUsage.test.ts src/components/calendar/__tests__/CalendarMonth.test.tsx`
+- `npx playwright test e2e/theme-mobile.spec.ts --project=chromium --project=firefox`
+- `npx playwright test e2e/ui-system-visual.spec.ts e2e/calendar-visual.spec.ts --project=visual`
+- `npm run ci`
 
 ---
 
@@ -245,14 +280,14 @@ Names are placeholders; final keys are locked during implementation.
 
 ## Definition of Done
 
-1. [ ] Semantic tokens are the single source for accent/surface/text/border states.
-2. [ ] Accent presets (`Gold`, `Green`, `Blue`, `Pink`, `Red`) are selectable and persistent with safe fallback.
-3. [ ] Semantic state colors remain fixed across all presets.
-4. [ ] Dark theme uses tonal near-black layering with clear readability and hierarchy.
-5. [ ] Today/Calendar/Habits/Account mobile surfaces follow compact layout rules.
-6. [ ] Contrast gates pass for every preset in both light and dark themes.
-7. [ ] Responsive visual regression and E2E coverage pass for theme + mobile flows.
-8. [ ] CI quality gates pass for all touched surfaces.
+1. [x] Semantic tokens are the single source for accent/surface/text/border states.
+2. [x] Accent presets (`Gold`, `Green`, `Blue`, `Pink`, `Red`) are selectable and persistent with safe fallback.
+3. [x] Semantic state colors remain fixed across all presets.
+4. [x] Dark theme uses tonal near-black layering with clear readability and hierarchy.
+5. [x] Today/Calendar/Habits/Account mobile surfaces follow compact layout rules.
+6. [x] Contrast gates pass for every preset in both light and dark themes.
+7. [x] Responsive visual regression and E2E coverage pass for theme + mobile flows.
+8. [x] CI quality gates pass for all touched surfaces.
 
 ---
 

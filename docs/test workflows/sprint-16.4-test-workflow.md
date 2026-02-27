@@ -1,6 +1,6 @@
 # Sprint 16.4 Test Workflow - UI System Refresh (Theme + Mobile UX)
 
-**Status**: Planned  
+**Status**: Completed  
 **Last Updated**: February 27, 2026
 
 ---
@@ -140,7 +140,7 @@ usability without domain behavior regressions.
 ### Unit / Component (targeted)
 
 ```bash
-npm test -- src/components/ui/__tests__ src/components/layout/__tests__ src/components/calendar/__tests__ src/components/habits/__tests__ src/components/auth/__tests__
+npm test -- src/lib/theme/__tests__/theme.test.ts src/lib/theme/__tests__/contrast.test.ts src/lib/theme/__tests__/globals-css-contract.test.ts src/components/ui/__tests__/ThemeToggle.test.tsx src/components/ui/__tests__/AccentPresetSelect.test.tsx src/components/ui/__tests__/ThemeControls.test.tsx src/components/ui/__tests__/themeTokenUsage.test.ts src/components/calendar/__tests__/CalendarMonth.test.tsx src/components/calendar/__tests__/DailyCompletionPanel.test.tsx src/components/habits/__tests__/HabitForm.test.tsx src/components/auth/__tests__/AccountPanel.test.tsx
 ```
 
 ### Domain / Contract (theme preference and guardrails)
@@ -152,9 +152,9 @@ npm test -- src/lib/**/__tests__
 ### E2E / Visual (targeted)
 
 ```bash
-npm run e2e -- e2e/daily-completion.spec.ts --project=chromium
-npm run e2e -- e2e/calendar-visual.spec.ts --project=chromium
-npm run e2e -- e2e/marketing-homepage.spec.ts --project=chromium
+npx playwright test e2e/theme-mobile.spec.ts --project=chromium --project=firefox
+npx playwright test e2e/ui-system-visual.spec.ts e2e/calendar-visual.spec.ts --project=visual
+npx playwright test e2e/daily-completion.spec.ts e2e/habits.spec.ts --project=chromium
 ```
 
 ---
@@ -165,14 +165,26 @@ npm run e2e -- e2e/marketing-homepage.spec.ts --project=chromium
 npm run lint
 npm run typecheck
 npm test
-npm run e2e -- e2e/daily-completion.spec.ts --project=chromium
+npx playwright test e2e/theme-mobile.spec.ts --project=chromium --project=firefox
+npx playwright test e2e/ui-system-visual.spec.ts e2e/calendar-visual.spec.ts --project=visual
 ```
 
 For full gate:
 
 ```bash
-npm run ci:full
+npm run ci
 ```
+
+### Final Verification Notes (2026-02-27)
+
+- Contrast gates pass for all 5 accent presets in light and dark themes.
+- Token/fallback propagation tests pass for theme bootstrap helpers and UI controls.
+- Mobile compact interaction flow passes in Chromium and Firefox.
+- Visual baselines pass for:
+  - `calendar-visual.spec.ts`
+  - `ui-system-visual.spec.ts` (desktop calendar + mobile daily sheet + mobile habits)
+- CI hardening gate passed:
+  - `npm run ci`
 
 ---
 

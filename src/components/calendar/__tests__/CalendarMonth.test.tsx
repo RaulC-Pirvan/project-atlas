@@ -92,6 +92,26 @@ describe('CalendarMonth', () => {
     expect(screen.getByText(/2 of 2 habits completed/i)).toBeInTheDocument();
   });
 
+  it('uses semantic accent tokens for completed-day styling', () => {
+    const week: CalendarWeekView = [makeDay(5, true, { completedCount: 1, totalCount: 1 })];
+
+    render(
+      <CalendarMonth
+        monthLabel="February 2026"
+        weekStart="mon"
+        weeks={[week]}
+        prevHref="/calendar?month=2026-01"
+        nextHref="/calendar?month=2026-03"
+      />,
+    );
+
+    const completedDay = screen.getByRole('link', {
+      name: /open daily view for February 5, 2026/i,
+    });
+    expect(completedDay.className).toContain('bg-[var(--color-accent-solid)]');
+    expect(completedDay.className).toContain('text-[color:var(--color-text-on-accent)]');
+  });
+
   it('moves focus between days with arrow keys', () => {
     const week: CalendarWeekView = [
       makeDay(1, false),

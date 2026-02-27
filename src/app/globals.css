@@ -99,7 +99,7 @@
   --color-accent-strong: #2563eb;
   --color-accent-soft: rgba(59, 130, 246, 0.2);
   --color-accent-ring: rgba(37, 99, 235, 0.38);
-  --color-text-on-accent: #ffffff;
+  --color-text-on-accent: #111111;
 }
 
 :root[data-atlas-accent='pink'] {
@@ -115,7 +115,7 @@
   --color-accent-strong: #dc2626;
   --color-accent-soft: rgba(239, 68, 68, 0.2);
   --color-accent-ring: rgba(220, 38, 38, 0.38);
-  --color-text-on-accent: #ffffff;
+  --color-text-on-accent: #111111;
 }
 
 body {

@@ -45,4 +45,17 @@ describe('AccentPresetSelect', () => {
 
     expect(localStorage.getItem('atlas-accent-preset')).toBe('blue');
   });
+
+  it('falls back to gold when an invalid value is dispatched', async () => {
+    render(<AccentPresetSelect />);
+
+    const select = screen.getByLabelText(/accent preset/i);
+    fireEvent.change(select, { target: { value: 'bad-value' } });
+
+    await waitFor(() => {
+      expect(document.documentElement.dataset.atlasAccent).toBe('gold');
+    });
+
+    expect(localStorage.getItem('atlas-accent-preset')).toBe('gold');
+  });
 });

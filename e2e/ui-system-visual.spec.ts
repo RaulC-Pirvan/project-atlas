@@ -114,6 +114,17 @@ async function applyVisualStabilityStyles(page: Page) {
   });
 }
 
+async function applyCalendarSheetVisualStabilityStyles(page: Page) {
+  await page.addStyleTag({
+    content: `
+      [data-testid="completion-window-guidance"],
+      [data-testid="completion-window-lock"] {
+        display: none !important;
+      }
+    `,
+  });
+}
+
 async function setThemePreference(page: Page, theme: 'light' | 'dark', accent: string) {
   await page.evaluate(
     ({ themeValue, accentValue }) => {
@@ -176,6 +187,7 @@ test('mobile visual regression for compact calendar sheet and habits list in lig
     waitUntil: 'domcontentloaded',
   });
   await applyVisualStabilityStyles(page);
+  await applyCalendarSheetVisualStabilityStyles(page);
 
   await expect(page.getByRole('dialog')).toBeVisible();
   await expect(page.getByRole('dialog')).toHaveScreenshot(

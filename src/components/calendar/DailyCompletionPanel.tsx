@@ -904,10 +904,18 @@ export function DailyCompletionPanel({
 
       <div className="space-y-3 text-sm text-black/70 dark:text-white/70 sm:pt-1">
         {selectedDateKey ? (
-          <p className="text-xs text-black/60 dark:text-white/60">{GRACE_WINDOW_COPY}</p>
+          <p
+            data-testid="completion-window-guidance"
+            className="text-xs text-black/60 dark:text-white/60"
+          >
+            {GRACE_WINDOW_COPY}
+          </p>
         ) : null}
         {completionWindowLockReason && selectedDateKey ? (
-          <p className="text-xs uppercase tracking-[0.25em] text-black/50 dark:text-white/50">
+          <p
+            data-testid="completion-window-lock"
+            className="text-xs uppercase tracking-[0.25em] text-black/50 dark:text-white/50"
+          >
             {getCompletionWindowLockMessage(completionWindowLockReason)}
           </p>
         ) : null}

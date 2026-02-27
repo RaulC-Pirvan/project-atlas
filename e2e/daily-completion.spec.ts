@@ -265,3 +265,25 @@ test('keeps future-date guard and blocked-history guard with deterministic test 
   expect(historyBody.error.code).toBe('invalid_request');
   expect(historyBody.error.message).toMatch(/past dates cannot be completed/i);
 });
+
+test('today view shows progress strip and all-done completion state', async ({ page, request }) => {
+  await createVerifiedUser(page, request, 'today-progress');
+  const today = new Date();
+  const targetWeekday = isoWeekday(today);
+  const habitTitle = uniqueTitle('Today Complete');
+  await createHabit(page, habitTitle, [targetWeekday]);
+
+  await page.goto('/today');
+
+  await expect(page.getByText('Done')).toBeVisible();
+  await expect(page.getByText('Progress')).toBeVisible();
+  await expect(page.getByText('0/1')).toBeVisible();
+
+  const checkbox = page.getByRole('checkbox', { name: new RegExp(habitTitle, 'i') });
+  await checkbox.click();
+  await expect(checkbox).toHaveAttribute('aria-checked', 'true');
+
+  await expect(page.getByText('Today complete', { exact: true })).toBeVisible();
+  await expect(page.getByRole('link', { name: /open calendar/i })).toBeVisible();
+  await expect(page.getByRole('link', { name: /view achievements/i })).toBeVisible();
+});

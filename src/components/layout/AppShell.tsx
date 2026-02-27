@@ -2,7 +2,6 @@ import Link from 'next/link';
 import type { ReactNode } from 'react';
 
 import { Card } from '../ui/Card';
-import { ThemeControls } from '../ui/ThemeControls';
 import { AppSidebar } from './AppSidebar';
 
 type AppShellProps = {
@@ -16,11 +15,10 @@ export function AppShell({ title, subtitle, children }: AppShellProps) {
     <div className="min-h-screen bg-[var(--color-bg-canvas)] text-[var(--color-text-primary)]">
       <header className="fixed inset-x-0 top-0 z-40 flex h-14 items-center border-b border-[color:var(--color-border-subtle)] bg-[var(--color-bg-surface)]">
         <div className="mx-auto w-full max-w-6xl px-4 sm:px-6">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center">
             <p className="text-xs font-semibold uppercase tracking-[0.4em] text-[var(--color-text-muted)]">
               Project Atlas
             </p>
-            <ThemeControls />
           </div>
         </div>
       </header>
@@ -37,7 +35,7 @@ export function AppShell({ title, subtitle, children }: AppShellProps) {
                     <p className="text-sm text-[var(--color-text-muted)]">{subtitle}</p>
                   ) : null}
                 </div>
-                <Card className="rounded-none border-x-0 border-y border-black/10 bg-transparent p-0 shadow-none dark:border-white/10 sm:rounded-3xl sm:border sm:border-[color:var(--color-border-subtle)] sm:bg-[var(--color-bg-surface-elevated)] sm:p-8 sm:shadow-[0_12px_30px_rgba(0,0,0,0.08)] sm:dark:shadow-[0_18px_40px_rgba(0,0,0,0.45)]">
+                <Card className="rounded-2xl border border-[color:var(--color-border-subtle)] bg-[var(--color-bg-surface-elevated)] p-4 shadow-[0_8px_22px_rgba(0,0,0,0.08)] dark:shadow-[0_14px_30px_rgba(0,0,0,0.42)] sm:rounded-3xl sm:p-8 sm:shadow-[0_12px_30px_rgba(0,0,0,0.08)] sm:dark:shadow-[0_18px_40px_rgba(0,0,0,0.45)]">
                   {children}
                 </Card>
               </div>

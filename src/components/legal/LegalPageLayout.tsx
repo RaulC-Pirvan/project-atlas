@@ -80,12 +80,12 @@ export function LegalPageLayout({ title, description, metadata, children }: Lega
           aria-label="Legal navigation"
           className="mt-8 opacity-0 translate-y-2 motion-reduce:translate-y-0 motion-reduce:opacity-100 motion-safe:animate-[rise-in_0.5s_ease-out_forwards] motion-safe:[animation-delay:340ms]"
         >
-          <ul className="flex flex-wrap gap-3">
+          <ul className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             {LEGAL_ROUTE_LINKS.map((item) => (
-              <li key={item.id}>
+              <li key={item.id} className="w-full">
                 <Link
                   href={item.href}
-                  className={`inline-flex items-center rounded-full border border-black/15 px-4 py-2 text-xs font-medium uppercase tracking-[0.18em] text-black/75 transition hover:bg-black/5 dark:border-white/15 dark:text-white/75 dark:hover:bg-white/10 ${focusRingClasses}`}
+                  className={`inline-flex w-full items-center justify-center rounded-full border border-black/15 px-4 py-2 text-center text-xs font-medium uppercase tracking-[0.18em] text-black/75 transition hover:bg-black/5 dark:border-white/15 dark:text-white/75 dark:hover:bg-white/10 ${focusRingClasses}`}
                 >
                   {item.label}
                 </Link>

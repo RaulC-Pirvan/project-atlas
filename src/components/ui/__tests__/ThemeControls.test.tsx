@@ -24,7 +24,7 @@ afterEach(() => {
 });
 
 describe('ThemeControls', () => {
-  it('propagates accent selection and preserves it across theme switching', async () => {
+  it('hides accent selector by default', async () => {
     vi.stubGlobal(
       'matchMedia',
       vi.fn(() => createMediaQueryList(false)),
@@ -32,8 +32,23 @@ describe('ThemeControls', () => {
 
     render(<ThemeControls />);
 
-    const accentSelect = screen.getByLabelText(/accent preset/i);
-    fireEvent.change(accentSelect, { target: { value: 'red' } });
+    expect(screen.queryByLabelText(/accent preset/i)).not.toBeInTheDocument();
+    expect(
+      await screen.findByRole('button', { name: /switch to dark theme/i }),
+    ).toBeInTheDocument();
+  });
+
+  it('propagates accent selection and preserves it across theme switching', async () => {
+    vi.stubGlobal(
+      'matchMedia',
+      vi.fn(() => createMediaQueryList(false)),
+    );
+
+    render(<ThemeControls showAccentPresetSelect />);
+
+    const accentSelect = screen.getByRole('button', { name: /accent preset/i });
+    fireEvent.click(accentSelect);
+    fireEvent.click(screen.getByRole('option', { name: /red/i }));
 
     await waitFor(() => {
       expect(document.documentElement.dataset.atlasAccent).toBe('red');

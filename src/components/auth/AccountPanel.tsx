@@ -21,6 +21,7 @@ import { FormField } from '../ui/FormField';
 import { Input } from '../ui/Input';
 import { Modal } from '../ui/Modal';
 import { Notice } from '../ui/Notice';
+import { ThemeControls } from '../ui/ThemeControls';
 import { type ToastItem, ToastStack } from '../ui/Toast';
 import { SignOutButton } from './SignOutButton';
 
@@ -987,7 +988,11 @@ export function AccountPanel({
             <p className="break-all text-xs text-black/50 dark:text-white/50">{email}</p>
           </div>
         </div>
-        <SignOutButton />
+        <SignOutButton
+          variant="danger"
+          size="sm"
+          className="w-full border-rose-300/70 bg-rose-50 text-rose-700 dark:border-rose-400/45 dark:bg-rose-500/18 dark:text-rose-200 sm:w-auto"
+        />
       </div>
 
       {adminEnrollmentRequired ? (
@@ -995,6 +1000,18 @@ export function AccountPanel({
           Admin access requires 2FA enrollment before you can continue to other app areas.
         </Notice>
       ) : null}
+
+      <section className="space-y-4 border-t border-black/10 pt-6 dark:border-white/10">
+        <div className="space-y-1">
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-black/80 dark:text-white/80">
+            Theme and accent
+          </p>
+          <p className="text-sm text-black/60 dark:text-white/60">
+            Accent preset is managed from Account only.
+          </p>
+        </div>
+        <ThemeControls showAccentPresetSelect />
+      </section>
 
       <form className="space-y-6" onSubmit={handleDisplayNameUpdate}>
         <div className="space-y-1">
@@ -1114,11 +1131,12 @@ export function AccountPanel({
           </p>
         </div>
         <FormField id="account-week-start" label="Week starts on" error={null}>
-          <div className="flex flex-wrap gap-2">
+          <div className="grid grid-cols-2 gap-2">
             <Button
               type="button"
               size="sm"
               variant={weekStartInput === 'mon' ? 'primary' : 'outline'}
+              className="w-full"
               onClick={() => setWeekStartInput('mon')}
             >
               Monday
@@ -1127,6 +1145,7 @@ export function AccountPanel({
               type="button"
               size="sm"
               variant={weekStartInput === 'sun' ? 'primary' : 'outline'}
+              className="w-full"
               onClick={() => setWeekStartInput('sun')}
             >
               Sunday
@@ -1151,11 +1170,12 @@ export function AccountPanel({
           </p>
         </div>
         <FormField id="account-ordering" label="Completion ordering" error={null}>
-          <div className="flex flex-wrap gap-2">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             <Button
               type="button"
               size="sm"
               variant={keepCompletedAtBottomInput ? 'primary' : 'outline'}
+              className="w-full"
               onClick={() => setKeepCompletedAtBottomInput(true)}
             >
               Keep completed at bottom
@@ -1164,6 +1184,7 @@ export function AccountPanel({
               type="button"
               size="sm"
               variant={!keepCompletedAtBottomInput ? 'primary' : 'outline'}
+              className="w-full"
               onClick={() => setKeepCompletedAtBottomInput(false)}
             >
               Keep original order
@@ -1253,11 +1274,12 @@ export function AccountPanel({
               <p className="text-xs text-black/60 dark:text-white/60">
                 Verify with a TOTP or existing recovery code. Old recovery codes are revoked.
               </p>
-              <div className="flex flex-wrap gap-2">
+              <div className="grid grid-cols-2 gap-2">
                 <Button
                   type="button"
                   size="sm"
                   variant={rotateMethod === 'totp' ? 'primary' : 'outline'}
+                  className="w-full"
                   onClick={() => setRotateMethod('totp')}
                 >
                   TOTP code
@@ -1266,6 +1288,7 @@ export function AccountPanel({
                   type="button"
                   size="sm"
                   variant={rotateMethod === 'recovery_code' ? 'primary' : 'outline'}
+                  className="w-full"
                   onClick={() => setRotateMethod('recovery_code')}
                 >
                   Recovery code
@@ -1290,10 +1313,12 @@ export function AccountPanel({
             </form>
 
             <form
-              className="space-y-4 border-t border-rose-300/60 pt-4 dark:border-rose-400/40 sm:rounded-2xl sm:border sm:p-4"
+              className="space-y-4 border-t border-black/10 pt-4 dark:border-white/15 sm:rounded-2xl sm:border sm:p-4"
               onSubmit={handleDisableTwoFactor}
             >
-              <p className="text-sm font-medium text-rose-700 dark:text-rose-200">Disable 2FA</p>
+              <p className="text-sm font-semibold uppercase tracking-[0.14em] text-rose-700 dark:text-rose-200">
+                Disable 2FA
+              </p>
               {role === 'admin' && adminTwoFactorEnforced ? (
                 <Notice tone="neutral">
                   Admin 2FA is required and cannot be disabled through self-service.
@@ -1317,11 +1342,12 @@ export function AccountPanel({
                   />
                 </FormField>
               ) : null}
-              <div className="flex flex-wrap gap-2">
+              <div className="grid grid-cols-2 gap-2">
                 <Button
                   type="button"
                   size="sm"
                   variant={disableMethod === 'totp' ? 'primary' : 'outline'}
+                  className="w-full"
                   onClick={() => setDisableMethod('totp')}
                 >
                   TOTP code
@@ -1330,6 +1356,7 @@ export function AccountPanel({
                   type="button"
                   size="sm"
                   variant={disableMethod === 'recovery_code' ? 'primary' : 'outline'}
+                  className="w-full"
                   onClick={() => setDisableMethod('recovery_code')}
                 >
                   Recovery code
@@ -1346,7 +1373,7 @@ export function AccountPanel({
               <Button
                 type="submit"
                 variant="danger"
-                className="w-full"
+                className="w-full border-rose-400/70 dark:border-rose-300/45"
                 disabled={disablingTwoFactor || (role === 'admin' && adminTwoFactorEnforced)}
               >
                 {disablingTwoFactor ? 'Disabling...' : 'Disable 2FA'}
@@ -1403,11 +1430,13 @@ export function AccountPanel({
         {sessionsLoading ? (
           <p className="text-sm text-black/60 dark:text-white/60">Loading active sessions...</p>
         ) : sessions.length > 0 ? (
-          <div className="space-y-3">
-            {sessions.map((sessionRecord) => (
+          <div className="rounded-2xl border border-black/10 dark:border-white/15">
+            {sessions.map((sessionRecord, index) => (
               <div
                 key={sessionRecord.id}
-                className="space-y-3 border-t border-black/10 pt-4 dark:border-white/15 sm:rounded-2xl sm:border sm:p-4"
+                className={`space-y-3 px-4 py-4 ${
+                  index > 0 ? 'border-t border-black/10 dark:border-white/15' : ''
+                }`}
               >
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
                   <div className="space-y-1">
@@ -1544,7 +1573,11 @@ export function AccountPanel({
             Review privacy, terms, refunds, and support guidance.
           </p>
         </div>
-        <LegalSupportLinks ariaLabel="Account legal and support links" />
+        <LegalSupportLinks
+          ariaLabel="Account legal and support links"
+          listClassName="grid grid-cols-2 gap-2"
+          linkClassName="w-full text-center"
+        />
         <p className="text-xs text-black/55 dark:text-white/55">
           Need detailed support guidance?{' '}
           <Link href="/support" className="underline underline-offset-2">

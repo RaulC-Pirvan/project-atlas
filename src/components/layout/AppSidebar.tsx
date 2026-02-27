@@ -65,14 +65,13 @@ const mobileUtilityItems: NavItem[] = [
 
 const desktopBaseClasses =
   'inline-flex items-center justify-center rounded-none border-0 px-4 py-3 text-sm font-medium';
-const desktopActiveClasses =
-  'bg-[var(--color-accent-solid)] text-[color:var(--color-text-on-accent)]';
+const desktopActiveClasses = 'bg-black text-white dark:bg-white dark:text-black';
 const desktopInactiveClasses = 'text-[color:var(--color-text-secondary)]';
 
 const mobileBaseClasses =
   'inline-flex flex-1 items-center justify-center rounded-full border border-[color:var(--color-border-subtle)] px-3 py-2 text-xs font-medium text-[color:var(--color-text-secondary)]';
 const mobileActiveClasses =
-  'rounded-2xl border-[color:var(--color-accent-solid)] bg-[var(--color-accent-solid)] text-[color:var(--color-text-on-accent)] shadow-[0_10px_24px_rgba(0,0,0,0.18)] dark:shadow-[0_10px_24px_rgba(0,0,0,0.4)]';
+  'rounded-2xl border-black bg-black text-white shadow-[0_10px_24px_rgba(0,0,0,0.18)] dark:border-white dark:bg-white dark:text-black dark:shadow-[0_10px_24px_rgba(0,0,0,0.4)]';
 
 function NavIcon({ icon }: { icon: string }) {
   if (icon === 'home') {
@@ -80,7 +79,7 @@ function NavIcon({ icon }: { icon: string }) {
       <svg
         viewBox="0 0 24 24"
         aria-hidden="true"
-        className="h-5 w-5"
+        className="pointer-events-none h-5 w-5"
         fill="none"
         stroke="currentColor"
         strokeWidth="1.8"
@@ -98,7 +97,7 @@ function NavIcon({ icon }: { icon: string }) {
       <svg
         viewBox="0 0 24 24"
         aria-hidden="true"
-        className="h-5 w-5"
+        className="pointer-events-none h-5 w-5"
         fill="none"
         stroke="currentColor"
         strokeWidth="1.8"
@@ -114,7 +113,7 @@ function NavIcon({ icon }: { icon: string }) {
       <svg
         viewBox="0 0 24 24"
         aria-hidden="true"
-        className="h-5 w-5"
+        className="pointer-events-none h-5 w-5"
         fill="none"
         stroke="currentColor"
         strokeWidth="1.8"
@@ -133,7 +132,7 @@ function NavIcon({ icon }: { icon: string }) {
       <svg
         viewBox="0 0 24 24"
         aria-hidden="true"
-        className="h-5 w-5"
+        className="pointer-events-none h-5 w-5"
         fill="none"
         stroke="currentColor"
         strokeWidth="1.8"
@@ -154,7 +153,7 @@ function NavIcon({ icon }: { icon: string }) {
       <svg
         viewBox="0 0 24 24"
         aria-hidden="true"
-        className="h-5 w-5"
+        className="pointer-events-none h-5 w-5"
         fill="none"
         stroke="currentColor"
         strokeWidth="1.8"
@@ -174,7 +173,7 @@ function NavIcon({ icon }: { icon: string }) {
       <svg
         viewBox="0 0 24 24"
         aria-hidden="true"
-        className="h-5 w-5"
+        className="pointer-events-none h-5 w-5"
         fill="none"
         stroke="currentColor"
         strokeWidth="1.8"
@@ -191,7 +190,12 @@ function NavIcon({ icon }: { icon: string }) {
 
   if (icon === 'more') {
     return (
-      <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5" fill="currentColor">
+      <svg
+        viewBox="0 0 24 24"
+        aria-hidden="true"
+        className="pointer-events-none h-5 w-5"
+        fill="currentColor"
+      >
         <circle cx="6" cy="12" r="1.8" />
         <circle cx="12" cy="12" r="1.8" />
         <circle cx="18" cy="12" r="1.8" />
@@ -204,7 +208,7 @@ function NavIcon({ icon }: { icon: string }) {
       <svg
         viewBox="0 0 24 24"
         aria-hidden="true"
-        className="h-5 w-5"
+        className="pointer-events-none h-5 w-5"
         fill="none"
         stroke="currentColor"
         strokeWidth="1.8"
@@ -223,7 +227,7 @@ function NavIcon({ icon }: { icon: string }) {
       <svg
         viewBox="0 0 24 24"
         aria-hidden="true"
-        className="h-5 w-5"
+        className="pointer-events-none h-5 w-5"
         fill="none"
         stroke="currentColor"
         strokeWidth="1.8"
@@ -243,7 +247,7 @@ function NavIcon({ icon }: { icon: string }) {
     <svg
       viewBox="0 0 24 24"
       aria-hidden="true"
-      className="h-5 w-5"
+      className="pointer-events-none h-5 w-5"
       fill="none"
       stroke="currentColor"
       strokeWidth="1.8"
@@ -379,7 +383,7 @@ export function AppSidebar() {
                 href={item.href}
                 className={`inline-flex h-10 items-center justify-center rounded-xl border border-[color:var(--color-border-strong)] px-2 text-xs font-medium uppercase tracking-[0.16em] ${
                   isNavItemActive(pathname, item)
-                    ? 'border-[color:var(--color-accent-solid)] bg-[var(--color-accent-solid)] text-[color:var(--color-text-on-accent)]'
+                    ? 'border-black bg-black text-white dark:border-white dark:bg-white dark:text-black'
                     : 'text-[color:var(--color-text-secondary)]'
                 }`}
                 onClick={() => setIsMoreOpen(false)}
@@ -395,7 +399,7 @@ export function AppSidebar() {
                 href={item.href}
                 className={`inline-flex h-10 items-center justify-center rounded-xl border border-[color:var(--color-border-strong)] px-2 text-xs font-medium uppercase tracking-[0.16em] ${
                   isNavItemActive(pathname, item)
-                    ? 'border-[color:var(--color-accent-solid)] bg-[var(--color-accent-solid)] text-[color:var(--color-text-on-accent)]'
+                    ? 'border-black bg-black text-white dark:border-white dark:bg-white dark:text-black'
                     : 'text-[color:var(--color-text-secondary)]'
                 }`}
                 onClick={() => setIsMoreOpen(false)}

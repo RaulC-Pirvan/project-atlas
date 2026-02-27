@@ -90,7 +90,7 @@ export function ThemeToggle({ className = '' }: { className?: string }) {
         }
         applyTheme(nextTheme);
       }}
-      className={`inline-flex h-9 w-9 items-center justify-center rounded-full border border-[color:var(--color-border-strong)] bg-[var(--color-bg-surface-elevated)] text-[color:var(--color-text-secondary)] transition hover:bg-[var(--color-bg-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-accent-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg-canvas)] ${className}`.trim()}
+      className={`inline-flex h-9 w-9 items-center justify-center rounded-full border border-[color:var(--color-border-strong)] bg-[var(--color-bg-surface-elevated)] text-[color:var(--color-text-secondary)] transition hover:bg-[var(--color-bg-muted)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/25 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg-canvas)] dark:focus-visible:ring-white/30 ${className}`.trim()}
     >
       <span className="sr-only">{buttonLabel}</span>
       {isReady ? (
@@ -98,7 +98,7 @@ export function ThemeToggle({ className = '' }: { className?: string }) {
           <svg
             viewBox="0 0 24 24"
             aria-hidden="true"
-            className="h-4 w-4"
+            className="pointer-events-none h-4 w-4"
             fill="none"
             stroke="currentColor"
             strokeWidth="1.6"
@@ -111,7 +111,7 @@ export function ThemeToggle({ className = '' }: { className?: string }) {
           <svg
             viewBox="0 0 24 24"
             aria-hidden="true"
-            className="h-4 w-4"
+            className="pointer-events-none h-4 w-4"
             fill="none"
             stroke="currentColor"
             strokeWidth="1.6"
@@ -123,7 +123,7 @@ export function ThemeToggle({ className = '' }: { className?: string }) {
         <svg
           viewBox="0 0 24 24"
           aria-hidden="true"
-          className="h-4 w-4"
+          className="pointer-events-none h-4 w-4"
           fill="none"
           stroke="currentColor"
           strokeWidth="1.6"

@@ -104,6 +104,29 @@ test('signed-in users see prefilled support name and email', async ({ page, requ
   await expect(page.getByLabel(/email/i)).toHaveValue(email);
 });
 
+test('mobile sidebar support link opens contact hash route without runtime errors', async ({
+  page,
+  request,
+}) => {
+  const pageErrors: string[] = [];
+  page.on('pageerror', (error) => {
+    pageErrors.push(error.message);
+  });
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await createVerifiedUser(page, request, 'support-mobile-hash');
+
+  await page.getByRole('button', { name: /more/i }).click();
+  await page
+    .getByRole('complementary')
+    .getByRole('link', { name: /^support$/i })
+    .click();
+
+  await expect(page).toHaveURL(/\/support#contact-form/, { timeout: 15_000 });
+  await expect(page.locator('#contact-form')).toBeVisible();
+  expect(pageErrors).toEqual([]);
+});
+
 test('support endpoint enforces submission rate limits', async ({ request }) => {
   const email = uniqueEmail('support-rate');
   const ipAddress = uniqueClientAddress('support-rate-limit');

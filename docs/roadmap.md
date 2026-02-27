@@ -442,15 +442,15 @@ Launch non-goal (explicit):
 
 ### Sprint 16.4: UI System Refresh (Theme + Mobile UX)
 
-- [ ] Add semantic theme tokens for accent/surface/text/border states (no hardcoded feature-level accent colors)
-- [ ] Add user-selectable accent presets: Gold, Green, Blue, Pink, Red (default: Gold)
-- [ ] Persist accent preference and apply consistently across app shell and product surfaces
-- [ ] Keep semantic state colors (`error`, `warning`, `success`, `info`) non-user-configurable
-- [ ] Refine dark theme from flat pure black usage to tonal near-black layers (base + elevated surfaces)
-- [ ] Define compact mobile layout rules: reduce nested cards, prioritize single-layer list/group patterns
-- [ ] Refactor high-traffic mobile screens (Today, Calendar daily panel, Habits, Account) to follow compact rules
-- [ ] Add accessibility gates for contrast across all accent presets and both themes
-- [ ] Add responsive visual regression + E2E coverage for theme switching and mobile interaction flows
+- [x] Add semantic theme tokens for accent/surface/text/border states (no hardcoded feature-level accent colors)
+- [x] Add user-selectable accent presets: Gold, Green, Blue, Pink, Red (default: Gold)
+- [x] Persist accent preference and apply consistently across app shell and product surfaces
+- [x] Keep semantic state colors (`error`, `warning`, `success`, `info`) non-user-configurable
+- [x] Refine dark theme from flat pure black usage to tonal near-black layers (base + elevated surfaces)
+- [x] Define compact mobile layout rules: reduce nested cards, prioritize single-layer list/group patterns
+- [x] Refactor high-traffic mobile screens (Today, Calendar daily panel, Habits, Account) to follow compact rules
+- [x] Add accessibility gates for contrast across all accent presets and both themes
+- [x] Add responsive visual regression + E2E coverage for theme switching and mobile interaction flows
 
 ---
 

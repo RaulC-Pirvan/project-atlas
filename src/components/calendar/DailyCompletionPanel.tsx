@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import type { KeyboardEvent } from 'react';
 import {
@@ -111,6 +112,7 @@ type DailyCompletionPanelProps = {
   timeZone: string;
   contextLabel?: string;
   keepCompletedAtBottom?: boolean;
+  todayMode?: boolean;
 };
 
 type HabitRowProps = {
@@ -119,6 +121,7 @@ type HabitRowProps = {
   isPending: boolean;
   isSyncing: boolean;
   isLocked: boolean;
+  todayMode: boolean;
   listId: string;
   onToggle: (habitId: string, wasCompleted: boolean) => void;
   onKeyDown: (event: KeyboardEvent<HTMLButtonElement>) => void;
@@ -130,18 +133,27 @@ const HabitRow = memo(function HabitRow({
   isPending,
   isSyncing,
   isLocked,
+  todayMode,
   listId,
   onToggle,
   onKeyDown,
 }: HabitRowProps) {
   const isDisabled = isLocked || isSyncing;
   const descriptionId = habit.description ? `${listId}-${habit.id}` : undefined;
-  const focusClasses = isCompleted
-    ? 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black dark:focus-visible:ring-black/40 dark:focus-visible:ring-offset-white'
-    : 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-white/30 dark:focus-visible:ring-offset-black';
-  const hoverClasses = isCompleted
-    ? 'hover:bg-black/90 active:bg-black/80 sm:active:scale-[0.99] dark:hover:bg-white/90 dark:active:bg-white/80'
-    : 'hover:bg-black/5 active:bg-black/10 sm:active:scale-[0.99] dark:hover:bg-white/10 dark:active:bg-white/20';
+  const focusClasses = todayMode
+    ? isCompleted
+      ? 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/25 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-white/35 dark:focus-visible:ring-offset-black'
+      : 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-white/30 dark:focus-visible:ring-offset-black'
+    : isCompleted
+      ? 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-black dark:focus-visible:ring-black/40 dark:focus-visible:ring-offset-white'
+      : 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-white/30 dark:focus-visible:ring-offset-black';
+  const hoverClasses = todayMode
+    ? isCompleted
+      ? 'hover:bg-black/[0.08] active:bg-black/[0.1] sm:active:scale-[0.99] dark:hover:bg-white/[0.1] dark:active:bg-white/[0.12]'
+      : 'hover:bg-black/5 active:bg-black/10 sm:active:scale-[0.99] dark:hover:bg-white/10 dark:active:bg-white/20'
+    : isCompleted
+      ? 'hover:bg-black/90 active:bg-black/80 sm:active:scale-[0.99] dark:hover:bg-white/90 dark:active:bg-white/80'
+      : 'hover:bg-black/5 active:bg-black/10 sm:active:scale-[0.99] dark:hover:bg-white/10 dark:active:bg-white/20';
 
   return (
     <li data-habit-row data-habit-id={habit.id}>
@@ -157,15 +169,25 @@ const HabitRow = memo(function HabitRow({
         onClick={() => onToggle(habit.id, isCompleted)}
         onKeyDown={onKeyDown}
         className={`flex min-h-[44px] w-full items-start justify-between gap-3 rounded-lg border px-3 py-3 text-left touch-manipulation motion-safe:transition-colors motion-safe:duration-150 motion-safe:ease-out motion-reduce:transition-none sm:gap-4 sm:rounded-xl sm:px-4 ${focusClasses} ${
-          isCompleted
-            ? 'border-black bg-black text-white dark:border-white dark:bg-white dark:text-black'
-            : 'border-black/10 text-black dark:border-white/10 dark:text-white'
+          todayMode
+            ? isCompleted
+              ? 'border-black/10 bg-black/[0.04] text-black/70 dark:border-white/10 dark:bg-white/[0.08] dark:text-white/70'
+              : 'border-black/25 bg-white text-black shadow-[0_8px_18px_rgba(0,0,0,0.06)] dark:border-white/20 dark:bg-black dark:text-white dark:shadow-[0_8px_20px_rgba(0,0,0,0.35)]'
+            : isCompleted
+              ? 'border-black bg-black text-white dark:border-white dark:bg-white dark:text-black'
+              : 'border-black/10 text-black dark:border-white/10 dark:text-white'
         } ${isDisabled ? 'opacity-60' : hoverClasses} `.trim()}
       >
         <div>
           <p
             className={`text-sm font-semibold ${
-              isCompleted ? 'text-white dark:text-black' : 'text-black dark:text-white'
+              todayMode
+                ? isCompleted
+                  ? 'text-black/70 dark:text-white/70'
+                  : 'text-black dark:text-white'
+                : isCompleted
+                  ? 'text-white dark:text-black'
+                  : 'text-black dark:text-white'
             }`}
           >
             {habit.title}
@@ -174,9 +196,13 @@ const HabitRow = memo(function HabitRow({
             <p
               id={descriptionId}
               className={`text-xs ${
-                isCompleted
-                  ? 'text-white/80 dark:text-black/70'
-                  : 'text-black/60 dark:text-white/60'
+                todayMode
+                  ? isCompleted
+                    ? 'text-black/55 dark:text-white/55'
+                    : 'text-black/60 dark:text-white/60'
+                  : isCompleted
+                    ? 'text-white/80 dark:text-black/70'
+                    : 'text-black/60 dark:text-white/60'
               }`}
             >
               {habit.description}
@@ -186,21 +212,31 @@ const HabitRow = memo(function HabitRow({
         <span
           aria-hidden="true"
           className={`inline-flex h-5 w-5 items-center justify-center self-center rounded-full border ${
-            isCompleted
-              ? 'border-white bg-white text-black dark:border-black/30 dark:bg-black/10 dark:text-black'
-              : 'border-black/20 dark:border-white/20'
+            todayMode
+              ? isCompleted
+                ? 'border-black/25 bg-black/[0.08] text-black dark:border-white/25 dark:bg-white/[0.12] dark:text-white'
+                : 'border-black/30 dark:border-white/30'
+              : isCompleted
+                ? 'border-white bg-white text-black dark:border-black/30 dark:bg-black/10 dark:text-black'
+                : 'border-black/20 dark:border-white/20'
           }`}
         >
           {isPending ? (
             <span
               className={`h-3 w-3 rounded-full border motion-safe:animate-spin motion-reduce:animate-none ${
-                isCompleted
-                  ? 'border-black/40 border-t-transparent dark:border-black/50'
-                  : 'border-black/30 border-t-transparent dark:border-white/40'
+                todayMode
+                  ? isCompleted
+                    ? 'border-black/45 border-t-transparent dark:border-white/45'
+                    : 'border-black/30 border-t-transparent dark:border-white/40'
+                  : isCompleted
+                    ? 'border-black/40 border-t-transparent dark:border-black/50'
+                    : 'border-black/30 border-t-transparent dark:border-white/40'
               }`}
             />
           ) : isCompleted ? (
-            <span className="h-2 w-2 rounded-full bg-black" />
+            <span
+              className={`h-2 w-2 rounded-full ${todayMode ? 'bg-black dark:bg-white' : 'bg-black'}`}
+            />
           ) : null}
         </span>
         {isPending ? <span className="sr-only">Pending sync</span> : null}
@@ -220,6 +256,7 @@ export function DailyCompletionPanel({
   timeZone,
   contextLabel,
   keepCompletedAtBottom = true,
+  todayMode = false,
 }: DailyCompletionPanelProps) {
   const router = useRouter();
   const [completedIds, setCompletedIds] = useState<string[]>(initialCompletedHabitIds);
@@ -261,6 +298,17 @@ export function DailyCompletionPanel({
     () => orderHabitsByCompletion(habits, completionSet, keepCompletedAtBottom),
     [habits, completionSet, keepCompletedAtBottom],
   );
+  const completedCount = useMemo(
+    () => habits.reduce((count, habit) => (completionSet.has(habit.id) ? count + 1 : count), 0),
+    [completionSet, habits],
+  );
+  const completionPercent =
+    habits.length > 0 ? Math.round((completedCount / habits.length) * 100) : 0;
+  const allDone = habits.length > 0 && completedCount >= habits.length;
+  const calendarHref = selectedDateKey
+    ? `/calendar?month=${selectedDateKey.slice(0, 7)}&date=${selectedDateKey}`
+    : '/calendar';
+  const achievementsHref = '/achievements';
 
   useLayoutEffect(() => {
     const list = listRef.current;
@@ -444,44 +492,58 @@ export function DailyCompletionPanel({
     void ensureAchievementsSnapshot();
   }, [ensureAchievementsSnapshot]);
 
-  const playDing = useCallback((tone: 'habit' | 'day') => {
-    if (typeof window === 'undefined') return;
-    type WebkitWindow = typeof window & { webkitAudioContext?: typeof AudioContext };
-    const AudioContextCtor = window.AudioContext || (window as WebkitWindow).webkitAudioContext;
-    if (!AudioContextCtor) return;
+  const playDing = useCallback(
+    (tone: 'habit' | 'day') => {
+      if (typeof window === 'undefined') return;
+      type WebkitWindow = typeof window & { webkitAudioContext?: typeof AudioContext };
+      const AudioContextCtor = window.AudioContext || (window as WebkitWindow).webkitAudioContext;
+      if (!AudioContextCtor) return;
 
-    const context = new AudioContextCtor();
-    const now = context.currentTime;
+      const context = new AudioContextCtor();
+      const now = context.currentTime;
 
-    const createTone = (frequency: number, duration: number, gainPeak: number, start: number) => {
-      const oscillator = context.createOscillator();
-      const gain = context.createGain();
-      oscillator.type = 'sine';
-      oscillator.frequency.setValueAtTime(frequency, start);
-      gain.gain.setValueAtTime(0.0001, start);
-      gain.gain.linearRampToValueAtTime(gainPeak, start + 0.01);
-      gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
-      oscillator.connect(gain);
-      gain.connect(context.destination);
-      oscillator.start(start);
-      oscillator.stop(start + duration);
-      oscillator.onended = () => {
-        oscillator.disconnect();
-        gain.disconnect();
+      const createTone = (frequency: number, duration: number, gainPeak: number, start: number) => {
+        const oscillator = context.createOscillator();
+        const gain = context.createGain();
+        oscillator.type = 'sine';
+        oscillator.frequency.setValueAtTime(frequency, start);
+        gain.gain.setValueAtTime(0.0001, start);
+        gain.gain.linearRampToValueAtTime(gainPeak, start + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+        oscillator.connect(gain);
+        gain.connect(context.destination);
+        oscillator.start(start);
+        oscillator.stop(start + duration);
+        oscillator.onended = () => {
+          oscillator.disconnect();
+          gain.disconnect();
+        };
       };
-    };
 
-    if (tone === 'habit') {
-      createTone(760, 0.12, 0.09, now);
-    } else {
-      createTone(520, 0.18, 0.1, now);
-      createTone(780, 0.2, 0.09, now + 0.06);
-    }
+      if (tone === 'habit') {
+        if (todayMode) {
+          createTone(780, 0.14, 0.11, now);
+          createTone(960, 0.1, 0.06, now + 0.03);
+        } else {
+          createTone(760, 0.12, 0.09, now);
+        }
+      } else {
+        if (todayMode) {
+          createTone(560, 0.2, 0.12, now);
+          createTone(820, 0.22, 0.11, now + 0.06);
+          createTone(1080, 0.2, 0.07, now + 0.11);
+        } else {
+          createTone(520, 0.18, 0.1, now);
+          createTone(780, 0.2, 0.09, now + 0.06);
+        }
+      }
 
-    window.setTimeout(() => {
-      void context.close();
-    }, 350);
-  }, []);
+      window.setTimeout(() => {
+        void context.close();
+      }, 350);
+    },
+    [todayMode],
+  );
 
   const playAchievementDing = useCallback(() => {
     if (typeof window === 'undefined') return;
@@ -775,6 +837,7 @@ export function DailyCompletionPanel({
             isPending={pendingSet.has(habit.id)}
             isSyncing={syncingSet.has(habit.id)}
             isLocked={isLocked}
+            todayMode={todayMode}
             listId={listId}
             onToggle={handleToggle}
             onKeyDown={handleHabitKeyDown}
@@ -786,14 +849,58 @@ export function DailyCompletionPanel({
 
   return (
     <div className="space-y-4 sm:rounded-2xl sm:border sm:border-black/10 sm:px-6 sm:py-6 sm:dark:border-white/10">
-      <div className="flex items-center justify-between gap-4">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-black/60 dark:text-white/60">
-            {resolvedContextLabel}
-          </p>
-          <h3 className="text-lg font-semibold">{selectedLabel ?? 'Pick a day'}</h3>
+      {todayMode ? (
+        <div className="grid grid-cols-2 gap-2 rounded-xl border border-black/10 bg-white/85 p-3 text-xs dark:border-white/10 dark:bg-black/65">
+          <div className="space-y-1">
+            <p className="font-semibold uppercase tracking-[0.16em] text-black/55 dark:text-white/55">
+              Done
+            </p>
+            <p className="text-sm font-semibold text-black dark:text-white">
+              {completedCount}/{habits.length}
+            </p>
+          </div>
+          <div className="space-y-1">
+            <p className="font-semibold uppercase tracking-[0.16em] text-black/55 dark:text-white/55">
+              Progress
+            </p>
+            <p className="text-sm font-semibold text-black dark:text-white">{completionPercent}%</p>
+          </div>
         </div>
-      </div>
+      ) : null}
+
+      {todayMode && allDone ? (
+        <div className="rounded-2xl border border-[color:var(--color-accent-strong)] bg-[var(--color-accent-soft)] p-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-black/65 dark:text-white/75">
+            Today complete
+          </p>
+          <p className="mt-1 text-sm text-black/80 dark:text-white/85">
+            Nice work. You checked off every habit due today.
+          </p>
+          <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+            <Link
+              href={calendarHref}
+              className="inline-flex min-h-[44px] items-center justify-center rounded-full border border-black/20 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-black/75 transition hover:bg-black/5 dark:border-white/20 dark:bg-black dark:text-white/75 dark:hover:bg-white/10"
+            >
+              Open calendar
+            </Link>
+            <Link
+              href={achievementsHref}
+              className="inline-flex min-h-[44px] items-center justify-center rounded-full border border-black/20 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-black/75 transition hover:bg-black/5 dark:border-white/20 dark:bg-black dark:text-white/75 dark:hover:bg-white/10"
+            >
+              View achievements
+            </Link>
+          </div>
+        </div>
+      ) : (
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-black/60 dark:text-white/60">
+              {resolvedContextLabel}
+            </p>
+            <h3 className="text-lg font-semibold">{selectedLabel ?? 'Pick a day'}</h3>
+          </div>
+        </div>
+      )}
 
       <div className="space-y-3 text-sm text-black/70 dark:text-white/70 sm:pt-1">
         {selectedDateKey ? (

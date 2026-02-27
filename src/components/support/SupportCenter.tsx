@@ -233,7 +233,7 @@ export function SupportCenter({ initialName, initialEmail, isAuthenticated }: Su
           </p>
         </section>
 
-        <section className="mt-6 rounded-3xl border border-black/10 bg-white p-5 text-sm text-black/75 dark:border-white/10 dark:bg-black dark:text-white/75">
+        <section className="mt-6 rounded-3xl border border-black/10 bg-white p-5 text-sm text-black/75 opacity-0 translate-y-2 motion-reduce:translate-y-0 motion-reduce:opacity-100 motion-safe:animate-[rise-in_0.5s_ease-out_forwards] motion-safe:[animation-delay:180ms] dark:border-white/10 dark:bg-black dark:text-white/75">
           <h2 className="text-base font-semibold">Response expectations</h2>
           <p className="mt-2 leading-relaxed">
             We target first responses within 2 business days for most requests. Timing can vary with

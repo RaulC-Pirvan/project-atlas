@@ -33,6 +33,13 @@ export default function SupportLoading() {
           <Skeleton className="h-4 w-full max-w-2xl" />
         </section>
 
+        <section className="mt-6 rounded-3xl border border-black/10 bg-white p-5 dark:border-white/10 dark:bg-black">
+          <Skeleton className="h-5 w-44" />
+          <Skeleton className="mt-3 h-3 w-full max-w-3xl" />
+          <Skeleton className="mt-2 h-3 w-full max-w-2xl" />
+          <Skeleton className="mt-2 h-3 w-full max-w-3xl" />
+        </section>
+
         <div className="mt-10 grid gap-8 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
           <section className="space-y-5 rounded-3xl border border-black/10 bg-white p-6 dark:border-white/10 dark:bg-black">
             <Skeleton className="h-6 w-16" />

@@ -71,6 +71,7 @@ supports user accent preference and refined dark theme ergonomics.
 - Supported presets are fixed to five values in this sprint.
 - Invalid/missing preference falls back to `Gold`.
 - Preference persistence must survive reloads and route transitions.
+- Accent preset control is exposed only on `/account`.
 
 ### Semantic State Color Policy
 

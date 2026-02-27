@@ -148,13 +148,13 @@ export function AchievementsDashboard({ summary, isPro }: AchievementsDashboardP
 
   return (
     <div className="space-y-8" data-testid="achievements-dashboard">
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex flex-col gap-2">
         {(['achievements', 'milestones'] as const).map((option) => (
           <button
             key={option}
             type="button"
             onClick={() => setTab(option)}
-            className={`rounded-full border px-4 py-2 text-xs font-semibold uppercase tracking-[0.25em] transition ${
+            className={`w-full rounded-full border px-4 py-2 text-xs font-semibold uppercase tracking-[0.25em] transition ${
               tab === option
                 ? 'border-black bg-black text-white dark:border-white dark:bg-white dark:text-black'
                 : 'border-black/15 text-black/60 hover:bg-black/5 dark:border-white/15 dark:text-white/60 dark:hover:bg-white/10'
@@ -194,7 +194,7 @@ export function AchievementsDashboard({ summary, isPro }: AchievementsDashboardP
                 className="w-full rounded-full border border-black/15 bg-white px-4 py-2 text-sm text-black/80 placeholder:text-black/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20 dark:border-white/15 dark:bg-black dark:text-white/80 dark:placeholder:text-white/40 dark:focus-visible:ring-white/30"
               />
             </div>
-            <div className="flex flex-wrap gap-2">
+            <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
               {(
                 [
                   { id: 'all', label: 'All' },
@@ -207,7 +207,7 @@ export function AchievementsDashboard({ summary, isPro }: AchievementsDashboardP
                   key={item.id}
                   type="button"
                   onClick={() => setFilter(item.id)}
-                  className={`rounded-full border px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.25em] transition ${
+                  className={`w-full rounded-full border px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.25em] transition sm:w-auto ${
                     filter === item.id
                       ? 'border-black bg-black text-white dark:border-white dark:bg-white dark:text-black'
                       : 'border-black/15 text-black/50 hover:bg-black/5 dark:border-white/15 dark:text-white/50 dark:hover:bg-white/10'
@@ -219,23 +219,21 @@ export function AchievementsDashboard({ summary, isPro }: AchievementsDashboardP
             </div>
           </div>
 
-          <div className="rounded-2xl border border-black/10 px-5 py-4 dark:border-white/10">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-black/60 dark:text-white/60">
-                  Next Up
-                </p>
-                <p className="text-sm text-black/60 dark:text-white/60">
-                  Closest achievements to unlock.
-                </p>
-              </div>
+          <div className="space-y-3">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-black/60 dark:text-white/60">
+                Next Up
+              </p>
+              <p className="text-sm text-black/60 dark:text-white/60">
+                Closest achievements to unlock.
+              </p>
             </div>
             {nextUp.length === 0 ? (
-              <p className="mt-3 text-sm text-black/60 dark:text-white/60">
+              <p className="text-sm text-black/60 dark:text-white/60">
                 You have unlocked everything in view.
               </p>
             ) : (
-              <div className="mt-4 grid items-stretch gap-3 md:grid-cols-3">
+              <div className="grid items-stretch gap-3 md:grid-cols-3">
                 {nextUp.map((achievement) => (
                   <AchievementCard
                     key={`next-${achievement.id}`}
@@ -247,15 +245,25 @@ export function AchievementsDashboard({ summary, isPro }: AchievementsDashboardP
             )}
           </div>
 
-          {filteredAchievements.length === 0 ? (
-            <Notice>No achievements match this view.</Notice>
-          ) : (
-            <div className="grid gap-4 md:grid-cols-2">
-              {filteredAchievements.map((achievement) => (
-                <AchievementCard key={achievement.id} achievement={achievement} isPro={isPro} />
-              ))}
+          <div className="space-y-4">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-black/60 dark:text-white/60">
+                All Achievements
+              </p>
+              <p className="text-sm text-black/60 dark:text-white/60">
+                Browse your full achievements catalogue.
+              </p>
             </div>
-          )}
+            {filteredAchievements.length === 0 ? (
+              <Notice>No achievements match this view.</Notice>
+            ) : (
+              <div className="grid gap-4 md:grid-cols-2">
+                {filteredAchievements.map((achievement) => (
+                  <AchievementCard key={achievement.id} achievement={achievement} isPro={isPro} />
+                ))}
+              </div>
+            )}
+          </div>
         </section>
       ) : (
         <section className="space-y-4">
@@ -270,12 +278,9 @@ export function AchievementsDashboard({ summary, isPro }: AchievementsDashboardP
           {summary.milestones.length === 0 ? (
             <Notice>Create your first habit to start tracking milestones.</Notice>
           ) : (
-            <div className="space-y-4">
+            <div className="divide-y divide-black/10 dark:divide-white/10">
               {summary.milestones.map((timeline) => (
-                <div
-                  key={timeline.habitId}
-                  className="rounded-2xl border border-black/10 px-5 py-4 dark:border-white/10"
-                >
+                <div key={timeline.habitId} className="py-4 first:pt-0 last:pb-0">
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <p className="text-sm font-semibold text-black dark:text-white">
                       {timeline.title}

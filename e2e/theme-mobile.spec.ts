@@ -100,33 +100,46 @@ test.describe('theme + mobile compact flows', () => {
   }) => {
     await createVerifiedUser(page, request, 'theme-mobile-persistence');
 
-    await page.goto('/today');
-
-    const accentSelect = page.getByLabel('Accent preset').first();
-    await accentSelect.selectOption('pink');
-    await page.getByRole('button', { name: /switch to dark theme/i }).click();
+    await page.goto('/account');
+    const accentSelect = page.getByRole('button', { name: /accent preset/i }).first();
+    await accentSelect.click();
+    await page.getByRole('option', { name: /^pink$/i }).click();
+    await page
+      .getByRole('button', { name: /switch to dark theme/i })
+      .first()
+      .click();
 
     await expect
       .poll(() => page.evaluate(() => document.documentElement.dataset.atlasAccent))
       .toBe('pink');
+    await expect
+      .poll(() => page.evaluate(() => document.documentElement.classList.contains('dark')))
+      .toBe(true);
+
+    await page.goto('/today');
+    await expect(page.getByRole('button', { name: /accent preset/i })).toHaveCount(0);
     await expect
       .poll(() => page.evaluate(() => document.documentElement.classList.contains('dark')))
       .toBe(true);
 
     await page.goto('/habits');
-    await expect(page.getByLabel('Accent preset').first()).toHaveValue('pink');
+    await expect(page.getByRole('button', { name: /accent preset/i })).toHaveCount(0);
     await expect
       .poll(() => page.evaluate(() => document.documentElement.classList.contains('dark')))
       .toBe(true);
 
     await page.goto('/account');
-    await expect(page.getByLabel('Accent preset').first()).toHaveValue('pink');
+    await expect(page.getByRole('button', { name: /accent preset/i }).first()).toContainText(
+      /pink/i,
+    );
     await expect
       .poll(() => page.evaluate(() => document.documentElement.dataset.atlasAccent))
       .toBe('pink');
 
     await page.reload();
-    await expect(page.getByLabel('Accent preset').first()).toHaveValue('pink');
+    await expect(page.getByRole('button', { name: /accent preset/i }).first()).toContainText(
+      /pink/i,
+    );
     await expect
       .poll(() => page.evaluate(() => document.documentElement.classList.contains('dark')))
       .toBe(true);

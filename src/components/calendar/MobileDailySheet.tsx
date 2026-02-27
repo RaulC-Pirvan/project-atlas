@@ -81,9 +81,33 @@ export function MobileDailySheet({
 
   useEffect(() => {
     if (!selectedDateKey) return;
+
+    const resolveDateAnchor = (event: MouseEvent): HTMLElement | null => {
+      try {
+        if (typeof event.composedPath === 'function') {
+          const path = event.composedPath();
+          for (const node of path) {
+            if (node instanceof HTMLElement && node.hasAttribute('data-date-key')) {
+              return node;
+            }
+          }
+        }
+      } catch {
+        // Ignore composedPath access failures on restricted targets.
+      }
+
+      try {
+        const target = event.target;
+        if (!(target instanceof HTMLElement)) return null;
+        return target.closest('[data-date-key]') as HTMLElement | null;
+      } catch {
+        // Firefox can throw permission-denied for extension-injected SVG targets.
+        return null;
+      }
+    };
+
     const handleClick = (event: MouseEvent) => {
-      const target = event.target as HTMLElement | null;
-      const anchor = target?.closest('[data-date-key]') as HTMLElement | null;
+      const anchor = resolveDateAnchor(event);
       if (!anchor) return;
       if (anchor.getAttribute('data-date-key') === selectedDateKey) {
         setOpen(true);

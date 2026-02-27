@@ -220,4 +220,55 @@ describe('DailyCompletionPanel', () => {
     await waitFor(() => expect(checkbox).toHaveAttribute('data-pending', 'true'));
     expect(within(checkbox).getByText(/pending sync/i)).toBeInTheDocument();
   });
+
+  it('renders compact today progress strip when today mode is enabled', () => {
+    render(
+      <DailyCompletionPanel
+        selectedDateKey="2026-02-05"
+        selectedLabel="February 5, 2026"
+        habits={[
+          { id: 'h1', title: 'Read', description: null },
+          { id: 'h2', title: 'Walk', description: null },
+          { id: 'h3', title: 'Stretch', description: null },
+        ]}
+        initialCompletedHabitIds={['h1']}
+        completionWindowLockReason={null}
+        timeZone="UTC"
+        todayMode
+      />,
+    );
+
+    expect(screen.getByText('Done')).toBeInTheDocument();
+    expect(screen.getByText('1/3')).toBeInTheDocument();
+    expect(screen.getByText('Progress')).toBeInTheDocument();
+    expect(screen.getByText('33%')).toBeInTheDocument();
+    expect(screen.queryByText('Best habit')).not.toBeInTheDocument();
+  });
+
+  it('shows today complete state with quick actions when all habits are done', () => {
+    render(
+      <DailyCompletionPanel
+        selectedDateKey="2026-02-05"
+        selectedLabel="February 5, 2026"
+        habits={[
+          { id: 'h1', title: 'Read', description: null },
+          { id: 'h2', title: 'Walk', description: null },
+        ]}
+        initialCompletedHabitIds={['h1', 'h2']}
+        completionWindowLockReason={null}
+        timeZone="UTC"
+        todayMode
+      />,
+    );
+
+    expect(screen.getByText(/today complete/i)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /open calendar/i })).toHaveAttribute(
+      'href',
+      '/calendar?month=2026-02&date=2026-02-05',
+    );
+    expect(screen.getByRole('link', { name: /view achievements/i })).toHaveAttribute(
+      'href',
+      '/achievements',
+    );
+  });
 });

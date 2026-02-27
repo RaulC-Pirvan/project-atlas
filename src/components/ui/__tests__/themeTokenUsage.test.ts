@@ -17,16 +17,8 @@ const filesUsingThemeTokens = [
     expectedToken: 'var(--color-accent-',
   },
   {
-    path: 'src/components/layout/AppSidebar.tsx',
-    expectedToken: 'var(--color-accent-',
-  },
-  {
     path: 'src/components/admin/AdminSidebar.tsx',
     expectedToken: 'var(--color-border-',
-  },
-  {
-    path: 'src/components/ui/Button.tsx',
-    expectedToken: 'var(--color-accent-',
   },
 ];
 

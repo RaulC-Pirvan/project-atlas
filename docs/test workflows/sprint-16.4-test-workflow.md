@@ -52,9 +52,9 @@ usability without domain behavior regressions.
 
 ## Manual QA Checklist
 
-### Workflow 1: Accent preset selection and persistence [ ]
+### Workflow 1: Accent preset selection and persistence [x]
 
-1. Open theme controls and select each preset (`Gold`, `Green`, `Blue`, `Pink`, `Red`).
+1. Open `/account`, find the `Theme and accent` section, and select each preset (`Gold`, `Green`, `Blue`, `Pink`, `Red`).
 2. Reload and navigate across core routes.
 
 **Expected**:
@@ -62,8 +62,9 @@ usability without domain behavior regressions.
 - Active preset updates accent affordances consistently.
 - Selected preset persists after reload/navigation.
 - Invalid stored value safely falls back to `Gold`.
+- Accent preset selector is only available on `/account`.
 
-### Workflow 2: Accent propagation on completion/progress surfaces [ ]
+### Workflow 2: Accent propagation on completion/progress surfaces [x]
 
 1. Visit `/today` and `/calendar`.
 2. Complete/uncomplete habits and inspect completion progress UI.
@@ -73,7 +74,7 @@ usability without domain behavior regressions.
 - Completion/progress visuals reflect active preset.
 - No hardcoded legacy accent color remains on updated surfaces.
 
-### Workflow 3: Semantic state colors remain invariant [ ]
+### Workflow 3: Semantic state colors remain invariant [x]
 
 1. Trigger validation and error states in representative forms.
 2. Repeat across multiple accent presets.
@@ -83,7 +84,7 @@ usability without domain behavior regressions.
 - `error`, `warning`, `success`, `info` visuals remain semantic and unchanged by preset selection.
 - State meanings stay recognizable across light/dark themes.
 
-### Workflow 4: Dark theme tonal layering quality [ ]
+### Workflow 4: Dark theme tonal layering quality [x]
 
 1. Switch to dark mode.
 2. Inspect base backgrounds and elevated surfaces on major screens.
@@ -93,7 +94,7 @@ usability without domain behavior regressions.
 - Dark surfaces show tonal separation (base vs elevated) instead of flat black blocks.
 - Text/readability hierarchy remains clear and stable.
 
-### Workflow 5: Mobile compact layout - Today + Calendar daily panel [ ]
+### Workflow 5: Mobile compact layout - Today + Calendar daily panel [x]
 
 1. Use mobile viewport (`390x844` recommended).
 2. Validate `/today` and calendar daily panel interactions.
@@ -104,7 +105,7 @@ usability without domain behavior regressions.
 - Grouping is clear with compact list-oriented composition.
 - No horizontal overflow or clipped actions.
 
-### Workflow 6: Mobile compact layout - Habits + Account [ ]
+### Workflow 6: Mobile compact layout - Habits + Account [x]
 
 1. Use mobile viewport on `/habits` and `/account`.
 2. Navigate editing and settings actions.
@@ -114,7 +115,7 @@ usability without domain behavior regressions.
 - Layout remains compact and scannable on tight screens.
 - Touch targets remain usable and actions are discoverable.
 
-### Workflow 7: Accessibility contrast matrix [ ]
+### Workflow 7: Accessibility contrast matrix [x]
 
 1. Validate contrast on each preset in light and dark themes.
 2. Include representative text, icon, and UI boundary states.
@@ -124,7 +125,7 @@ usability without domain behavior regressions.
 - Text contrast meets WCAG minimum expectations.
 - Non-text UI elements maintain distinguishable contrast.
 
-### Workflow 8: Desktop regression guard [ ]
+### Workflow 8: Desktop regression guard [x]
 
 1. Re-check key desktop routes after mobile-focused changes.
 

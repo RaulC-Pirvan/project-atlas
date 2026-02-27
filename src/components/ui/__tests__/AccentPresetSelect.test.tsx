@@ -18,7 +18,7 @@ describe('AccentPresetSelect', () => {
       expect(document.documentElement.dataset.atlasAccent).toBe('green');
     });
 
-    expect(screen.getByLabelText(/accent preset/i)).toHaveValue('green');
+    expect(screen.getByRole('button', { name: /accent preset/i })).toHaveTextContent(/green/i);
   });
 
   it('falls back to gold for invalid stored values', async () => {
@@ -30,32 +30,37 @@ describe('AccentPresetSelect', () => {
       expect(document.documentElement.dataset.atlasAccent).toBe('gold');
     });
 
-    expect(screen.getByLabelText(/accent preset/i)).toHaveValue('gold');
+    expect(screen.getByRole('button', { name: /accent preset/i })).toHaveTextContent(/gold/i);
   });
 
   it('updates root dataset and persists selection', async () => {
     render(<AccentPresetSelect />);
 
-    const select = screen.getByLabelText(/accent preset/i);
-    fireEvent.change(select, { target: { value: 'blue' } });
+    const trigger = screen.getByRole('button', { name: /accent preset/i });
+    fireEvent.click(trigger);
+    fireEvent.click(screen.getByRole('option', { name: /blue/i }));
 
     await waitFor(() => {
       expect(document.documentElement.dataset.atlasAccent).toBe('blue');
     });
 
+    expect(screen.getByRole('button', { name: /accent preset/i })).toHaveTextContent(/blue/i);
     expect(localStorage.getItem('atlas-accent-preset')).toBe('blue');
   });
 
-  it('falls back to gold when an invalid value is dispatched', async () => {
+  it('supports keyboard navigation within the options list', async () => {
     render(<AccentPresetSelect />);
 
-    const select = screen.getByLabelText(/accent preset/i);
-    fireEvent.change(select, { target: { value: 'bad-value' } });
+    const trigger = screen.getByRole('button', { name: /accent preset/i });
+    fireEvent.click(trigger);
+
+    const goldOption = screen.getByRole('option', { name: /gold/i });
+    fireEvent.keyDown(goldOption, { key: 'ArrowDown' });
+    fireEvent.keyDown(screen.getByRole('option', { name: /green/i }), { key: 'ArrowDown' });
+    fireEvent.click(screen.getByRole('option', { name: /blue/i }));
 
     await waitFor(() => {
-      expect(document.documentElement.dataset.atlasAccent).toBe('gold');
+      expect(document.documentElement.dataset.atlasAccent).toBe('blue');
     });
-
-    expect(localStorage.getItem('atlas-accent-preset')).toBe('gold');
   });
 });
